@@ -1,0 +1,473 @@
+[Info] Target Game is ZZZ
+[Info] Loading zzz_live...
+[Info] Loaded zzz_live !!
+[Info] Loading AssetMap...
+[Info] Parsing....
+[Info] Loaded !!
+[Info] Resolving Dependencies...
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\4012448492.blk
+[Info] Loading Block 00000000
+[Info] Loading Block 00001014
+[Info] Loading Block 00005098
+[Info] Loading Block 00005D8D
+[Info] Loading Block 00005FB0
+[Info] Loading Block 001A06EE
+[Info] Loading Block 001BAF6F
+[Info] Loading Block 001BBCB4
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\1958850302.blk
+[Info] Loading Block 0002474D
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\530726018.blk
+[Info] Loading Block 0003603A
+[Info] Read assets...
+[Info] Process Assets...
+[Info] Found 0 SeparateMeshes
+[Info] Found 0 Avatars
+[Info] [0/2] Exporting Shader: miHoYo/Character/NapAvatarStandardEye
+[Info] [1/2] Exporting Shader: miHoYo/Character/NapAvatarStandardFace
+[Info] Finished exporting 2 assets.
+[Info] Resolving Dependencies...
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\340538275.blk
+[Info] Loading Block 00000000
+[Info] Loading Block 0000D420
+[Info] Loading Block 0006223E
+[Info] Loading Block 0006DD2F
+[Info] Loading Block 000ACD99
+[Info] Read assets...
+[Info] Process Assets...
+[Info] Found 0 SeparateMeshes
+[Info] Found 0 Avatars
+[Info] [0/3] Exporting Shader: miHoYo/Character/NapAvatarStandardEnergy
+[Info] [1/3] Exporting Shader: miHoYo/Character/NapAvatarStandardEnergyFlow
+[Info] [2/3] Exporting Shader: miHoYo/Character/NapAvatarStandardEnergyHead
+[Info] Finished exporting 3 assets.
+[Info] Resolving Dependencies...
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\319383174.blk
+[Info] Loading Block 00000000
+[Info] Loading Block 00002424
+[Info] Loading Block 00002EBF
+[Info] Loading Block 00003243
+[Info] Loading Block 000035FE
+[Info] Loading Block 00004F9C
+[Info] Loading Block 000054E6
+[Info] Loading Block 00006CD1
+[Info] Loading Block 00007E7A
+[Info] Loading Block 0000984C
+[Info] Loading Block 0000AFEC
+[Info] Loading Block 0000C32E
+[Info] Loading Block 0000C78D
+[Info] Loading Block 0000CDAA
+[Info] Loading Block 0000D45A
+[Info] Loading Block 0000DEC7
+[Info] Loading Block 0000E7BE
+[Info] Loading Block 0000EE1E
+[Info] Loading Block 0000F723
+[Info] Loading Block 00010269
+[Info] Loading Block 000114BC
+[Info] Loading Block 00011D0C
+[Info] Loading Block 00012554
+[Info] Loading Block 00012A24
+[Info] Loading Block 0001316F
+[Info] Loading Block 00013BE7
+[Info] Loading Block 0001471E
+[Info] Loading Block 00015433
+[Info] Loading Block 00016187
+[Info] Loading Block 00017240
+[Info] Loading Block 000182A9
+[Info] Loading Block 000189F8
+[Info] Loading Block 00019572
+[Info] Loading Block 00019A0E
+[Info] Loading Block 0001A155
+[Info] Loading Block 0001A672
+[Info] Loading Block 0001ACA7
+[Info] Loading Block 000270D0
+[Info] Loading Block 00027456
+[Info] Loading Block 00027DA3
+[Info] Loading Block 00028B37
+[Info] Loading Block 0002BED1
+[Info] Loading Block 0002C7E8
+[Info] Loading Block 0002CD08
+[Info] Loading Block 0002D341
+[Info] Loading Block 000398BA
+[Info] Loading Block 0003A20D
+[Info] Loading Block 0003B19D
+[Info] Loading Block 0003CD9A
+[Info] Loading Block 0003D537
+[Info] Loading Block 0003D908
+[Info] Loading Block 0003DD11
+[Info] Loading Block 0003EDD1
+[Info] Loading Block 0003F1B0
+[Info] Loading Block 0003F5B3
+[Info] Loading Block 00040364
+[Info] Loading Block 00040747
+[Info] Loading Block 00040B5D
+[Info] Loading Block 00041DE9
+[Info] Loading Block 000422F8
+[Info] Loading Block 000429AB
+[Info] Loading Block 000497C2
+[Info] Loading Block 0004ABB0
+[Info] Loading Block 0004B94A
+[Info] Loading Block 0004C0D6
+[Info] Loading Block 0004C418
+[Info] Loading Block 0004C738
+[Info] Loading Block 0004D560
+[Info] Loading Block 0004E356
+[Info] Loading Block 0004E68C
+[Info] Loading Block 0004E8C4
+[Info] Loading Block 0004EB09
+[Info] Loading Block 0004ED25
+[Info] Loading Block 0004EFAB
+[Info] Loading Block 0004F216
+[Info] Loading Block 0004F457
+[Info] Loading Block 0004F6AE
+[Info] Loading Block 0004F8F3
+[Info] Loading Block 0004FB45
+[Info] Loading Block 0004FF4E
+[Info] Loading Block 000506A3
+[Info] Loading Block 00050B82
+[Info] Loading Block 00050DA0
+[Info] Loading Block 0005105F
+[Info] Loading Block 000512AA
+[Info] Loading Block 00051590
+[Info] Loading Block 00051E4C
+[Info] Loading Block 000520EC
+[Info] Loading Block 00052336
+[Info] Loading Block 0005260E
+[Info] Loading Block 00052D30
+[Info] Loading Block 00052F7D
+[Info] Loading Block 0005319B
+[Info] Loading Block 00053589
+[Info] Loading Block 0005385E
+[Info] Loading Block 00053AE5
+[Info] Loading Block 00053DCF
+[Info] Loading Block 000545A6
+[Info] Loading Block 00054B83
+[Info] Loading Block 00054E52
+[Info] Loading Block 00055268
+[Info] Loading Block 00055EAC
+[Info] Loading Block 00056193
+[Info] Loading Block 00056485
+[Info] Loading Block 00056723
+[Info] Loading Block 00056996
+[Info] Loading Block 00056D7A
+[Info] Loading Block 000571DB
+[Info] Loading Block 000574AD
+[Info] Loading Block 000577FE
+[Info] Loading Block 00057BEA
+[Info] Loading Block 00057EE2
+[Info] Loading Block 000581B7
+[Info] Loading Block 00058723
+[Info] Loading Block 00058C93
+[Info] Loading Block 00059069
+[Info] Loading Block 00059633
+[Info] Loading Block 0005996E
+[Info] Loading Block 00059C45
+[Info] Loading Block 00059F4C
+[Info] Loading Block 0005ACD1
+[Info] Loading Block 0005AF8C
+[Info] Loading Block 0005B289
+[Info] Loading Block 0005B6CE
+[Info] Loading Block 0005B9C8
+[Info] Loading Block 0005BD11
+[Info] Loading Block 0005BFD3
+[Info] Loading Block 0005C237
+[Info] Loading Block 0005C55A
+[Info] Loading Block 0005C820
+[Info] Loading Block 0005F191
+[Info] Loading Block 000654E8
+[Info] Loading Block 0006A256
+[Info] Loading Block 00081C0A
+[Info] Loading Block 00185665
+[Info] Loading Block 00186711
+[Info] Loading Block 0020F9F9
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\530726018.blk
+[Info] Loading Block 0004B786
+[Info] Loading Block 002AE3F0
+[Info] Loading Block 00041B5B
+[Info] Loading Block 00172F31
+[Info] Loading Block 00000000
+[Info] Loading Block 0003603A
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\622229389.blk
+[Info] Loading Block 0023969A
+[Info] Loading Block 001BC96A
+[Info] Loading Block 0016F716
+[Info] Loading Block 0014EBAC
+[Info] Loading Block 0013AFE4
+[Info] Loading Block 00125E9F
+[Info] Loading Block 001586CF
+[Info] Loading Block 0000EB3D
+[Info] Loading Block 002C81B5
+[Info] Loading Block 000038B7
+[Info] Loading Block 0036554E
+[Info] Loading Block 00021B40
+[Info] Loading Block 001E0A4D
+[Info] Loading Block 00179490
+[Info] Loading Block 003E6ABA
+[Info] Loading Block 0039BBB0
+[Info] Loading Block 003C3932
+[Info] Loading Block 00338CE9
+[Info] Loading Block 0007381B
+[Info] Loading Block 00083289
+[Info] Loading Block 000E9C66
+[Info] Loading Block 0009B2A7
+[Info] Loading Block 0031127E
+[Info] Loading Block 0028A7F1
+[Info] Loading Block 0029BCFB
+[Info] Loading Block 002F61AD
+[Info] Loading Block 0010C8B4
+[Info] Loading Block 002AD0BC
+[Info] Loading Block 002DB7DD
+[Info] Loading Block 002583A6
+[Info] Loading Block 00000000
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\4187796934.blk
+[Info] Loading Block 00288945
+[Info] Loading Block 0033DA60
+[Info] Loading Block 0030827D
+[Info] Loading Block 0025CBDC
+[Info] Loading Block 002F41DE
+[Info] Loading Block 002E72BA
+[Info] Loading Block 002CFEA0
+[Info] Loading Block 001DC660
+[Info] Loading Block 001AA2FD
+[Info] Loading Block 00137FD5
+[Info] Loading Block 0015A8EC
+[Info] Loading Block 00179292
+[Info] Loading Block 0023158D
+[Info] Loading Block 00209F6A
+[Info] Loading Block 00101CA7
+[Info] Loading Block 00355716
+[Info] Loading Block 00354A14
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\1147652298.blk
+[Info] Loading Block 0008DE9F
+[Info] Loading Block 0008E035
+[Info] Loading Block 0008E2DB
+[Info] Loading Block 0008EC31
+[Info] Loading Block 0007F65C
+[Info] Loading Block 0008DCFA
+[Info] Loading Block 0007FC0D
+[Info] Loading Block 00059255
+[Info] Loading Block 00000000
+[Info] Loading Block 00058529
+[Info] Loading Block 00059C20
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\2735517596.blk
+[Info] Loading Block 002E909B
+[Info] Loading Block 00000000
+[Info] Loading Block 002FD5BD
+[Info] Loading Block 003A812C
+[Info] Loading Block 002EA062
+[Info] Loading Block 00386E8B
+[Info] Loading Block 00001044
+[Info] Loading Block 0011D16B
+[Info] Loading Block 00109927
+[Info] Loading Block 002E8E7C
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\4012448492.blk
+[Info] Loading Block 00005098
+[Info] Loading Block 001BAF6F
+[Info] Loading Block 00001014
+[Info] Loading Block 001A06EE
+[Info] Loading Block 00005D8D
+[Info] Loading Block 00005FB0
+[Info] Loading Block 001BBCB4
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\26843452.blk
+[Info] Loading Block 00000000
+[Info] Loading Block 0000101A
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\721143223.blk
+[Info] Loading Block 00364A54
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\4269885188.blk
+[Info] Loading Block 0027B6CC
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\1719437406.blk
+[Info] Loading Block 00000000
+[Info] Loading Block 0001B7F1
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\1958850302.blk
+[Info] Loading Block 0002474D
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\1256277753.blk
+[Info] Loading Block 0009F90A
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\1510051247.blk
+[Info] Loading Block 0000A751
+[Info] Read assets...
+[Warning] AnimationClip Avatar_Female_Size02_Anbi_Cam_QuestStart had no streaming data when it was expected!
+[Warning] AnimationClip Avatar_Female_Size02_Anbi_Cam_SwitchIn_Attack_Ex_Start had no streaming data when it was expected!
+[Warning] AnimationClip Avatar_Male_Size03_Billy_Cam_Queststart had no streaming data when it was expected!
+[Warning] AnimationClip Avatar_Male_Size03_Billy_Cam_SwitchIn_Attack_Ex_Start had no streaming data when it was expected!
+[Warning] AnimationClip Monster_Durahan_Cam_Born_02 had no streaming data when it was expected!
+[Warning] AnimationClip Monster_Durahan_Cam_Born_03 had no streaming data when it was expected!
+[Warning] AnimationClip Monster_Durahan_Cam_Hit_Break_NovicePerform_01 had no streaming data when it was expected!
+[Warning] AnimationClip QuestStart_Avatar_Dungeon_Cam_02 had no streaming data when it was expected!
+[Warning] AnimationClip Recorded (1) had no streaming data when it was expected!
+[Warning] AnimationClip Avatar_Female_Size02_Belle_Cam_MainPage_01 had no streaming data when it was expected!
+[Warning] AnimationClip Recorded had no streaming data when it was expected!
+[Warning] AnimationClip Avatar_Male_Size01_Wise_Cam_MainPage_01 had no streaming data when it was expected!
+[Error] Unable to load object
+Assets CAB-e1f50972e8ffc718aa10a272381732e0
+Path F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\319383174.blk
+Type AnimatorController
+PathID -9215817870530166537
+System.IO.EndOfStreamException: Unable to read beyond the end of the stream.
+   at System.IO.BinaryReader.ReadUInt32()
+   at AnimeStudio.EndianBinaryReader.ReadUInt32() in F:\AnimeStudio\AnimeStudio\AnimeStudio\EndianBinaryReader.cs:line 78
+   at AnimeStudio.ConditionConstant..ctor(ObjectReader reader) in F:\AnimeStudio\AnimeStudio\AnimeStudio\Classes\AnimatorController.cs:line 103
+   at AnimeStudio.TransitionConstant..ctor(ObjectReader reader) in F:\AnimeStudio\AnimeStudio\AnimeStudio\Classes\AnimatorController.cs:line 134
+   at AnimeStudio.StateConstant..ctor(ObjectReader reader) in F:\AnimeStudio\AnimeStudio\AnimeStudio\Classes\AnimatorController.cs:line 360
+   at AnimeStudio.StateMachineConstant..ctor(ObjectReader reader) in F:\AnimeStudio\AnimeStudio\AnimeStudio\Classes\AnimatorController.cs:line 487
+   at AnimeStudio.ControllerConstant..ctor(ObjectReader reader) in F:\AnimeStudio\AnimeStudio\AnimeStudio\Classes\AnimatorController.cs:line 577
+   at AnimeStudio.AnimatorController..ctor(ObjectReader reader) in F:\AnimeStudio\AnimeStudio\AnimeStudio\Classes\AnimatorController.cs:line 593
+   at AnimeStudio.AssetsManager.ReadAssets() in F:\AnimeStudio\AnimeStudio\AnimeStudio\AssetsManager.cs:line 647
+[Warning] AnimationClip Avatar_Female_Size02_Anbi_Ani_Hit_Shake had no streaming data when it was expected!
+[Info] Process Assets...
+[Info] Found 7 SeparateMeshes
+[Info] Found 69 Avatars
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] Attached Anbi_Face to Anbi_Face
+[Info] [0/3] Exporting Shader: miHoYo/Character/NapAvatarStandardEye
+[Info] [0/3] Exporting Shader: miHoYo/Character/NapAvatarStandardFace
+[Info] [0/3] Exporting Shader: miHoYo/Character/NapAvatarStandardTransparent
+[Info] Finished exporting 1 assets. 2 assets skipped (not extractable or files already exist)
+[Info] Resolving Dependencies...
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\2918503738.blk
+[Info] Loading Block 00000000
+[Info] Loading Block 001D6B98
+[Info] Loading Block 001D9290
+[Info] Loading Block 001DB99C
+[Info] Loading Block 001FB209
+[Info] Loading Block 0024A885
+[Info] Loading Block 00255E58
+[Info] Loading Block 00294F61
+[Info] Loading Block 00295D2A
+[Info] Loading Block 0029C5ED
+[Info] Loading Block 003794AD
+[Info] Loading Block 0038A9DA
+[Info] Read assets...
+[Info] Process Assets...
+[Info] Found 0 SeparateMeshes
+[Info] Found 0 Avatars
+[Info] [0/4] Exporting Shader: miHoYo/Character/NapAvatarStandardEnergy
+[Info] [0/4] Exporting Shader: miHoYo/Character/NapAvatarStandardEnergyFlow
+[Info] [0/4] Exporting Shader: miHoYo/Character/NapAvatarStandardEnergyHead
+[Info] [0/4] Exporting Shader: miHoYo/Character/NapAvatarStandardEnergyOpaque
+[Info] Finished exporting 1 assets. 3 assets skipped (not extractable or files already exist)
+[Info] Resolving Dependencies...
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\26843452.blk
+[Info] Loading Block 00000000
+[Info] Loading Block 0000101A
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\530726018.blk
+[Info] Loading Block 0004B786
+[Info] Loading Block 002AE3F0
+[Info] Loading Block 00172F31
+[Info] Loading Block 00000000
+[Info] Loading Block 0003603A
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\319383174.blk
+[Info] Loading Block 00186711
+[Info] Read assets...
+[Info] Process Assets...
+[Info] Found 0 SeparateMeshes
+[Info] Found 0 Avatars
+[Info] [0/1] Exporting Shader: miHoYo/Character/NapAvatarStandardTransparent
+[Info] Nothing exported. 1 assets skipped (not extractable or files already exist)
+[Info] Resolving Dependencies...
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\1699442119.blk
+[Info] Loading Block 00000000
+[Info] Loading Block 0019BEE5
+[Info] Loading Block 001AA5DC
+[Info] Loading Block 001AA7F1
+[Info] Loading Block 001ADB8A
+[Info] Loading Block 001AF29D
+[Info] Loading Block 001B283E
+[Info] Loading Block 001B512C
+[Info] Loading Block 001BFFEE
+[Info] Loading Block 001C4071
+[Info] Loading Block 001C668C
+[Info] Loading Block 001C9BCF
+[Info] Loading Block 001D149B
+[Info] Loading Block 001EDA93
+[Info] Loading Block 001F8A66
+[Info] Loading Block 001FEF0C
+[Info] Loading Block 0020065B
+[Info] Loading Block 00203017
+[Info] Loading Block 002051E8
+[Info] Loading Block 00206A7E
+[Info] Loading Block 00207FBD
+[Info] Loading Block 0020C61C
+[Info] Loading Block 0020F612
+[Info] Loading Block 0021CC97
+[Info] Loading Block 0021FC6F
+[Info] Loading Block 00223241
+[Info] Loading Block 00224C8D
+[Info] Loading Block 00237827
+[Info] Loading Block 002389DC
+[Info] Loading Block 0023A5A2
+[Info] Loading Block 0023C62B
+[Info] Loading Block 00241E6B
+[Info] Loading Block 00244885
+[Info] Loading Block 00246439
+[Info] Loading Block 00248427
+[Info] Loading Block 0024A452
+[Info] Loading Block 0024CA00
+[Info] Loading Block 00251926
+[Info] Loading Block 0026B733
+[Info] Loading Block 0026D62B
+[Info] Loading Block 002755AC
+[Info] Loading Block 00278679
+[Info] Loading Block 0027D472
+[Info] Loading Block 00283854
+[Info] Loading Block 0029E76A
+[Info] Loading Block 00322B35
+[Info] Loading Block 003271E0
+[Info] Loading Block 003546D3
+[Info] Loading Block 003562F9
+[Info] Loading Block 0035AC73
+[Info] Loading Block 003B55FE
+[Info] Loading Block 003EC776
+[Info] Loading Block 003FEDFE
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\1510051247.blk
+[Info] Loading Block 0000A751
+[Info] Loading F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\319383174.blk
+[Info] Loading Block 000054E6
+[Info] Read assets...
+[Info] Process Assets...
+[Info] Found 0 SeparateMeshes
+[Info] Found 0 Avatars
+[Info] [0/1] Exporting Shader: miHoYo/Character/NapAvatarStandardGunEye
+[Info] Finished exporting 1 assets.

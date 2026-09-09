@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Sync GGYGO README after source delete",
+      "trigger": "PostFileDelete",
+      "description": "当 Source/GGYGO 下删除文件后，提醒清理架构 README 中的过期路径和符号。",
+      "matcher": "Source[/\\\\]GGYGO[/\\\\](?!README\\.md$)",
+      "action": {
+        "type": "agent",
+        "prompt": "A file under Source/GGYGO/ was just deleted. Follow the workspace skill sync-ggygo-readme: inspect the final tree and remove stale paths, symbols, ownership claims, and architecture notes from Source/GGYGO/README.md in the same task."
+      }
+    }
+  ]
+}

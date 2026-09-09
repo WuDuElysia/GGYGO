@@ -1,0 +1,563 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 新建 `Public/Animation/zzzAnim/Data/ZZZAnimEnums.h` 并迁入两个枚举": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665142710
+      },
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665152681
+      },
+      {
+        "executionId": "b552872e-d765-4be4-ac9c-1ceff94d7c30",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785668931741
+      }
+    ],
+    "1.2 把 `CombatConfig.h` 拆成 `Data/ZZZAnimSet.h` 与 `Data/ZZZAnimTuning.h`": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143061
+      },
+      {
+        "executionId": "2357eecf-31d4-4b64-a6e4-cbdf90693892",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785670161013
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673062968
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673077173
+      },
+      {
+        "executionId": "42cf86f8-a203-46ad-9552-29022abd095d",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785674484773
+      }
+    ],
+    "1.3 移动 `ZZZAnimKeys.h` 到 `Data/`": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143166
+      },
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665156377
+      },
+      {
+        "executionId": "b552872e-d765-4be4-ac9c-1ceff94d7c30",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785668935668
+      }
+    ],
+    "1.4 移动 `ZZZAnimSnapshot.h` 到 `Data/` 并修正过期注释": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143241
+      },
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665159937
+      },
+      {
+        "executionId": "b552872e-d765-4be4-ac9c-1ceff94d7c30",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785668939652
+      },
+      {
+        "executionId": "2357eecf-31d4-4b64-a6e4-cbdf90693892",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785670155088
+      }
+    ],
+    "1.5 移动 `ZZZAnimStateMemory.h` 到 `Data/` 并改为引用枚举头": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143350
+      },
+      {
+        "executionId": "2357eecf-31d4-4b64-a6e4-cbdf90693892",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785670162272
+      },
+      {
+        "executionId": "5ff25dc8-bf50-44f3-a1dc-44dd7947bf59",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785671990133
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673063191
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673078071
+      },
+      {
+        "executionId": "42cf86f8-a203-46ad-9552-29022abd095d",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785674490475
+      },
+      {
+        "executionId": "42cf86f8-a203-46ad-9552-29022abd095d",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785674611090
+      }
+    ],
+    "2.1 把快照抓取器移入 `Capture/`": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143413
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673063814
+      },
+      {
+        "executionId": "42cf86f8-a203-46ad-9552-29022abd095d",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785674623672
+      },
+      {
+        "executionId": "42cf86f8-a203-46ad-9552-29022abd095d",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785674921211
+      }
+    ],
+    "3.1 把 `ZZZLocomotionDecisions` 移入 `Locomotion/`": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143473
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673063984
+      },
+      {
+        "executionId": "42cf86f8-a203-46ad-9552-29022abd095d",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785674624485
+      },
+      {
+        "executionId": "42cf86f8-a203-46ad-9552-29022abd095d",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785674921859
+      }
+    ],
+    "3.2 把 `ZZZLocomotionEvents` 移入 `Locomotion/`": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143522
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673064149
+      },
+      {
+        "executionId": "42cf86f8-a203-46ad-9552-29022abd095d",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785674937009
+      },
+      {
+        "executionId": "684069ac-68b4-4af4-aead-c444a9065024",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785676671652
+      }
+    ],
+    "4.1 新增 `ZZZAnimLog.h` / `ZZZAnimLog.cpp` 并替换两处静态定义": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143577
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673064279
+      },
+      {
+        "executionId": "42cf86f8-a203-46ad-9552-29022abd095d",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785674937574
+      },
+      {
+        "executionId": "684069ac-68b4-4af4-aead-c444a9065024",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785679483356
+      }
+    ],
+    "5.1 更新 `ZZZAnimInstance.h` / `.cpp` 的 include 路径": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143655
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673064355
+      },
+      {
+        "executionId": "684069ac-68b4-4af4-aead-c444a9065024",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785679490840
+      },
+      {
+        "executionId": "e2bbf3e5-0c68-4174-8b49-078658180801",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785681393446
+      },
+      {
+        "executionId": "8a03ccfc-83e9-474b-ac39-3c280f6ac6e3",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785682222268
+      }
+    ],
+    "5.2 核对外部调用点与模块配置": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143707
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673064492
+      },
+      {
+        "executionId": "8a03ccfc-83e9-474b-ac39-3c280f6ac6e3",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785682227888
+      },
+      {
+        "executionId": "8a03ccfc-83e9-474b-ac39-3c280f6ac6e3",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785682360048
+      }
+    ],
+    "5.3 删除 NTE 残留空目录": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143765
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673064665
+      },
+      {
+        "executionId": "8a03ccfc-83e9-474b-ac39-3c280f6ac6e3",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785682227832
+      },
+      {
+        "executionId": "8a03ccfc-83e9-474b-ac39-3c280f6ac6e3",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785682360275
+      }
+    ],
+    "6.1 执行阶段一的静态检查项": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143824
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673064762
+      },
+      {
+        "executionId": "8a03ccfc-83e9-474b-ac39-3c280f6ac6e3",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785682365552
+      },
+      {
+        "executionId": "ac8d33ec-db69-4898-a4bf-41b5154f6b9e",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785682689494
+      }
+    ],
+    "7. Checkpoint - 阶段一本地编译": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143870
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673064851
+      },
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685703117
+      }
+    ],
+    "8.1 新增 `Data/ZZZAnimContext.h`": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143925
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673064970
+      },
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685725862
+      }
+    ],
+    "8.2 `FZZZLocomotionDecisions` 改用只读上下文": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665143978
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673065070
+      },
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685730487
+      }
+    ],
+    "8.3 `FZZZLocomotionEvents` 改用可写上下文": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665144035
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673065252
+      },
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685735038
+      }
+    ],
+    "8.4 `UZZZAnimInstance` 构造并分发上下文": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665144079
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673065511
+      },
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685739850
+      }
+    ],
+    "9.1 新增 `Locomotion/ZZZLocomotionRules.h` / `.cpp`": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665144142
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673065612
+      },
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685745366
+      }
+    ],
+    "9.2 `FZZZLocomotionDecisions` 改调规则层": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665144212
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673065709
+      },
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685750036
+      }
+    ],
+    "9.3 `FZZZLocomotionEvents` 改调规则层并解除反向依赖": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665144272
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673065771
+      },
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685754760
+      }
+    ],
+    "10.1 清理过期引用并同步 steering": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665144332
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673065895
+      },
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685759135
+      }
+    ],
+    "11.1 执行阶段二的静态检查项": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665144396
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673065954
+      },
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685764308
+      }
+    ],
+    "12. Final checkpoint - 阶段二本地编译与交付说明": [
+      {
+        "executionId": "0b9679c6-5d57-439c-9881-29a59ee8cc46",
+        "chatSessionId": "sess_69423fb1-a24d-4559-8a59-466957a2a4aa",
+        "timestamp": 1785665144462
+      },
+      {
+        "executionId": "4ab6ecc2-7743-4266-ba14-4bbf07263131",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785673066033
+      },
+      {
+        "executionId": "8281cac6-e8a7-4518-8b64-8b0a66605c50",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685834401
+      }
+    ],
+    "1. 阶段一：Data 层文件拆分与移动": [
+      {
+        "executionId": "42cf86f8-a203-46ad-9552-29022abd095d",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785674611215
+      }
+    ],
+    "2. 阶段一：Capture 层移动": [
+      {
+        "executionId": "42cf86f8-a203-46ad-9552-29022abd095d",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785674921307
+      }
+    ],
+    "3. 阶段一：Locomotion 层移动": [
+      {
+        "executionId": "684069ac-68b4-4af4-aead-c444a9065024",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785676671738
+      }
+    ],
+    "4. 阶段一：日志类别统一": [
+      {
+        "executionId": "684069ac-68b4-4af4-aead-c444a9065024",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785679483472
+      }
+    ],
+    "5. 阶段一：include 修正与外围核对": [
+      {
+        "executionId": "8a03ccfc-83e9-474b-ac39-3c280f6ac6e3",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785682360367
+      }
+    ],
+    "6. 阶段一静态验证": [
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685720923
+      }
+    ],
+    "8. 阶段二：上下文聚合": [
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685739890
+      }
+    ],
+    "9. 阶段二：抽出无状态规则层": [
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685754827
+      }
+    ],
+    "10. 阶段二：文档与注释收尾": [
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685759220
+      }
+    ],
+    "11. 阶段二静态验证": [
+      {
+        "executionId": "0f3933b9-dea5-4c3d-ab20-8c8644fdc8d9",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785685764360
+      }
+    ]
+  }
+}

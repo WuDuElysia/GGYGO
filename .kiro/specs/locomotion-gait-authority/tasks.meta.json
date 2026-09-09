@@ -1,0 +1,306 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 新增 `LogGait` 日志类别（映射表 N3、N4）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694197309
+      },
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694207711
+      },
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694300081
+      }
+    ],
+    "1.2 新增两个数据契约字段（映射表 M2、M3 的新增部分）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694197835
+      },
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694210970
+      },
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694303552
+      }
+    ],
+    "1.3 新增 `FGaitAuthorityProcessor` 头文件（映射表 N1）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694197889
+      },
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694310080
+      },
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694389954
+      }
+    ],
+    "1.4 实现 `FGaitAuthorityProcessor` 的帧内七步（映射表 N2）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694198312
+      },
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694396501
+      },
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694507495
+      }
+    ],
+    "1.5 `FIntentPipeline` 增设步态阶段与 Gait 阶段看门狗（映射表 M5、M6）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694198375
+      },
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694514288
+      }
+    ],
+    "1.6 `ABaseCharacter::Tick` 接入第 3.5 步（映射表 M9）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694198436
+      },
+      {
+        "executionId": "84937cfc-8afb-49ab-b3e0-05d28803929b",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785695529385
+      },
+      {
+        "executionId": "84937cfc-8afb-49ab-b3e0-05d28803929b",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785695596568
+      }
+    ],
+    "2.1 `FLocomotionIntentProcessor` 收缩为方向处理器（映射表 M7、M8）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694198519
+      },
+      {
+        "executionId": "84937cfc-8afb-49ab-b3e0-05d28803929b",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785695605087
+      },
+      {
+        "executionId": "84937cfc-8afb-49ab-b3e0-05d28803929b",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785695702912
+      }
+    ],
+    "2.2 修正 `FRuntimeData` 的步态相关注释（映射表 M3 的注释部分）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694198638
+      },
+      {
+        "executionId": "84937cfc-8afb-49ab-b3e0-05d28803929b",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785695711455
+      },
+      {
+        "executionId": "84937cfc-8afb-49ab-b3e0-05d28803929b",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785695784903
+      }
+    ],
+    "3. Checkpoint - 阶段一与阶段二本地编译": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694198685
+      },
+      {
+        "executionId": "84937cfc-8afb-49ab-b3e0-05d28803929b",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785695795207
+      }
+    ],
+    "4.1 解除 ZZZ AnimBP 对将被移除符号的全部引用": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694198729
+      },
+      {
+        "executionId": "25eeddef-239a-4b75-9f34-d3f67c03e5a4",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785696491462
+      }
+    ],
+    "5.1 移除 `Sprint` 枚举值与阈值字段，`FMotionDriver` 收缩为两档（映射表 M1、M3 删除部分、M10、M11）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694198790
+      }
+    ],
+    "5.2 移除 `bSprintTrigger` 数据链路（映射表 M4、M12、M13）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694198842
+      }
+    ],
+    "5.3 移除 `bSprintTriggerPending` 锁存与消费链路（映射表 M14 的 Sprint 部分、M19 的 Sprint 部分、M20 的 Sprint 部分）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694198901
+      }
+    ],
+    "5.4 Conduit 分流改依据 `Snapshot_Gait`（映射表 M18 的 Conduit 部分、M20 的 Conduit 部分）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694198963
+      }
+    ],
+    "6.1 `FZZZAnimStateMemory` 收缩为两个字段（映射表 M14 的剩余部分）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694199003
+      }
+    ],
+    "6.2 `FZZZAnimTuning` 移除阈值字段（映射表 M15）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694199051
+      }
+    ],
+    "6.3 `ZZZLocomotionRules` 收缩（映射表 M16、M17）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694199105
+      }
+    ],
+    "6.4 `FZZZLocomotionDecisions` 移除 Walk 升 Run 判定（映射表 M18 的剩余部分）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694199152
+      }
+    ],
+    "6.5 `FZZZLocomotionEvents` 改造为 `GaitBlendY` 推进器（映射表 M19）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694199217
+      }
+    ],
+    "6.6 `UZZZAnimInstance` 收尾（映射表 M20 的剩余部分）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694199260
+      }
+    ],
+    "7. Checkpoint - 阶段三与阶段四本地编译": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694199304
+      }
+    ],
+    "8.1 重新绑定新增函数并复核语义变更项": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694199343
+      },
+      {
+        "executionId": "f948e254-34ec-4669-bd15-eb2583895d19",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785724976408
+      }
+    ],
+    "8.2 拓扑复核与数据资产配置": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694199378
+      },
+      {
+        "executionId": "f948e254-34ec-4669-bd15-eb2583895d19",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785724981703
+      }
+    ],
+    "9.1 执行设计「静态检查项清单」A 至 F 六组（约 40 项）": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694199414
+      },
+      {
+        "executionId": "c75694d7-c6bb-4611-ba09-645987c02196",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785733470605
+      },
+      {
+        "executionId": "c75694d7-c6bb-4611-ba09-645987c02196",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785735932683
+      }
+    ],
+    "10. Final checkpoint - 交付说明": [
+      {
+        "executionId": "6dec3154-47a5-4611-a914-1ca4251e2d21",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785694199453
+      }
+    ],
+    "1. 阶段一：逻辑侧步态决策者新增（只新增，不删除）": [
+      {
+        "executionId": "84937cfc-8afb-49ab-b3e0-05d28803929b",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785695596645
+      }
+    ],
+    "2. 阶段二：逻辑侧旧步态规则移除": [
+      {
+        "executionId": "84937cfc-8afb-49ab-b3e0-05d28803929b",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785695785004
+      }
+    ],
+    "9. 阶段五：静态验证": [
+      {
+        "executionId": "c75694d7-c6bb-4611-ba09-645987c02196",
+        "chatSessionId": "sess_3bc25b9b-2d0d-4b27-8640-0e5f0a63750a",
+        "timestamp": 1785735932762
+      }
+    ]
+  }
+}
