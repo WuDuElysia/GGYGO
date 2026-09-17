@@ -66,3 +66,21 @@ __pycache__/
 !/Content/Input/
 !/Content/Map/
 !/Content/Collections/
+
+# Boss AI 自研测试资产（含 World Partition 外部 Actor/Object 包）
+!/Content/AI/
+!/Content/AI/Boss/
+!/Content/AI/Boss/Test/
+!/Content/AI/Boss/Test/**
+!/Content/__ExternalActors__/
+/Content/__ExternalActors__/*
+!/Content/__ExternalActors__/AI/
+!/Content/__ExternalActors__/AI/Boss/
+!/Content/__ExternalActors__/AI/Boss/Test/
+!/Content/__ExternalActors__/AI/Boss/Test/**
+!/Content/__ExternalObjects__/
+/Content/__ExternalObjects__/*
+!/Content/__ExternalObjects__/AI/
+!/Content/__ExternalObjects__/AI/Boss/
+!/Content/__ExternalObjects__/AI/Boss/Test/
+!/Content/__ExternalObjects__/AI/Boss/Test/**
