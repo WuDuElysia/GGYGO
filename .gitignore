@@ -72,6 +72,13 @@ __pycache__/
 !/Content/AI/Boss/
 !/Content/AI/Boss/Test/
 !/Content/AI/Boss/Test/**
+
+# GameplayCueManager 只扫描 /Game/GameplayCues；跟踪 Boss AI 阶段 C 的最小命中 Cue
+!/Content/GameplayCues/
+/Content/GameplayCues/*
+!/Content/GameplayCues/Test/
+/Content/GameplayCues/Test/*
+!/Content/GameplayCues/Test/GCN_BossHit_Flesh_Test.uasset
 !/Content/__ExternalActors__/
 /Content/__ExternalActors__/*
 !/Content/__ExternalActors__/AI/

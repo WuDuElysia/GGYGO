@@ -17,10 +17,13 @@ public class GGYGOEditor : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
+			"AIModule",
 			"AnimationModifiers",        // UAnimationModifier
 			"AnimationBlueprintLibrary", // UAnimationBlueprintLibrary（曲线读写）
 			"AnimationDataController",   // IAnimationDataController
 			"AssetRegistry",              // 注册新建的测试 AnimSequence
+			"GGYGO",
+			"GameplayTags",
 			"UnrealEd"
 		});
 	}
