@@ -1,5 +1,3 @@
 [submodule "Source/GGYGO"]
 	path = Source/GGYGO
-	# 临时占位 URL：Source/GGYGO 目前只有本地提交、没有远程仓库。
-	# 给它配好远程后，把 url 改成真实地址并执行 git submodule sync。
-	url = ./Source/GGYGO
+	url = https://github.com/WuDuElysia/GGYGO_Source.git
