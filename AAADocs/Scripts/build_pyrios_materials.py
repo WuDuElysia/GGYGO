@@ -1,8 +1,9 @@
 """Run with UnrealEditor-Cmd -run=pythonscript -script=<this file>.
 
-Builds editable UE assets from the already imported Pyrios textures and the
-AnimeStudio material JSON. Safe to rerun: it updates Generated assets and
-binds their instances to the Pyrios skeletal mesh for editor previews.
+Builds an editable partial reconstruction from the imported Pyrios textures
+and AnimeStudio JSON. The diffuse ramp, specular and scene lighting are still
+approximations. Safe to rerun: updates Generated assets and binds their
+instances to the Pyrios skeletal mesh for editor previews.
 """
 import json
 from pathlib import Path
@@ -95,10 +96,14 @@ def build_main():
                   transform_source_type=unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_TANGENT,
                   transform_type=unreal.MaterialVectorCoordTransform.TRANSFORM_WORLD)
     connect(decode, normal, "")
+    view_normal = node(m, unreal.MaterialExpressionTransform, -50, 150,
+                       transform_source_type=unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_WORLD,
+                       transform_type=unreal.MaterialVectorCoordTransform.TRANSFORM_VIEW)
+    connect(normal, view_normal, "")
     camera = node(m, unreal.MaterialExpressionCameraVectorWS, -850, 250)
     inputs = {
         "Albedo": d, "LightTex": n, "Packed": (packed, "RGBA"), "Aux": aux,
-        "NormalWS": normal, "CameraWS": camera,
+        "NormalWS": normal, "ViewNormal": view_normal, "CameraWS": camera,
         "LightDirection": vector_param(m, "KeyLightDirectionWS", 350, (0.35, 0.25, 0.9, 0)),
         "LightColor": vector_param(m, "KeyLightColor", 500),
         "Visibility": scalar_param(m, "KeyLightVisibility", 650, 1.0),
@@ -107,21 +112,21 @@ def build_main():
         "RimStrength": scalar_param(m, "RimStrength", 1100, 0.15),
         "SpecStrength": scalar_param(m, "SpecStrength", 1250, 0.1),
         "SpecPower": scalar_param(m, "SpecPower", 1400, 40),
-        "MatCapStrength": scalar_param(m, "MatCapStrength", 1550, 0),
-        "MatCapStrength2": scalar_param(m, "MatCapStrength2", 1625, 0),
-        "CameraRight": vector_param(m, "CameraRightWS", 1700, (0, 1, 0, 0)),
-        "CameraUp": vector_param(m, "CameraUpWS", 1850, (0, 0, 1, 0)),
+        "UseMatCapMask": scalar_param(m, "UseMatCapMask", 1550, 1),
     }
-    matcap = node(m, unreal.MaterialExpressionTextureObjectParameter, -950, 2000,
-                  parameter_name="MatCapTex")
-    matcap.set_editor_property("texture", EAL.load_asset(ROOT + "/Texture/Eff_Matcap_125"))
-    inputs["MatCapTex"] = matcap
-    matcap2 = node(m, unreal.MaterialExpressionTextureObjectParameter, -950, 2100,
-                   parameter_name="MatCapTex2")
-    matcap2.set_editor_property("texture", EAL.load_asset(ROOT + "/Texture/Eff_MatCap_075"))
-    inputs["MatCapTex2"] = matcap2
-    inputs["MatCapTint"] = vector_param(m, "MatCapTint", 1900)
-    inputs["MatCapTint2"] = vector_param(m, "MatCapTint2", 2000)
+    # The five JSON MatCap slots track material-ID groups, not five full-body
+    # additive coats. Empty slots stay disabled in their material instance.
+    for i in range(1, 6):
+        base_y = 1800 + i * 550
+        matcap = node(m, unreal.MaterialExpressionTextureObjectParameter, -1150, base_y,
+                      parameter_name="MatCapTex%d" % i)
+        matcap.set_editor_property("texture", EAL.load_asset(ROOT + "/Texture/Eff_Matcap_125"))
+        inputs["MatCapTex%d" % i] = matcap
+        inputs["MatCapTint%d" % i] = vector_param(m, "MatCapTint%d" % i, base_y + 75)
+        for name, default, offset in (("ColorBurst", 1, 150), ("AlphaBurst", 1, 225),
+                                      ("BlendMode", 0, 300), ("Enabled", 0, 375)):
+            key = "MatCap%s%d" % (name, i)
+            inputs[key] = scalar_param(m, key, base_y + offset, default)
     for i in range(1, 6):
         inputs["Shallow%d" % i] = vector_param(m, "ShallowColor%d" % i, 2150 + i * 135, (0.95, 0.95, 0.95, 1))
         inputs["Shadow%d" % i] = vector_param(m, "ShadowColor%d" % i, 3000 + i * 135, (0.65, 0.65, 0.7, 1))
@@ -133,18 +138,38 @@ float bias = (LightTex.b * 2.0 - 1.0) * 0.22;
 float ramp = saturate(dot(N, L) * 0.5 + 0.5 + bias);
 float band = smoothstep(0.32, 0.48, ramp);
 float id = saturate(Packed.r);
-float3 shallow = id < 0.2 ? Shallow1.rgb : (id < 0.4 ? Shallow2.rgb : (id < 0.6 ? Shallow3.rgb : (id < 0.8 ? Shallow4.rgb : Shallow5.rgb)));
-float3 shadow = id < 0.2 ? Shadow1.rgb : (id < 0.4 ? Shadow2.rgb : (id < 0.6 ? Shadow3.rgb : (id < 0.8 ? Shadow4.rgb : Shadow5.rgb)));
+// The exported shader reverses floor(id * 5): 1.0 => group 1, 0.7 => group 2.
+int tier = clamp(4 - (int)floor(id * 5.0), 0, 4);
+float3 shallow = tier == 0 ? Shallow1.rgb : (tier == 1 ? Shallow2.rgb : (tier == 2 ? Shallow3.rgb : (tier == 3 ? Shallow4.rgb : Shallow5.rgb)));
+float3 shadow = tier == 0 ? Shadow1.rgb : (tier == 1 ? Shadow2.rgb : (tier == 2 ? Shadow3.rgb : (tier == 3 ? Shadow4.rgb : Shadow5.rgb)));
 float3 diffuse = lerp(shadow, shallow, band * saturate(Visibility));
 float3 H = normalize(L + V);
 float spec = pow(saturate(dot(N, H)), max(2.0, SpecPower)) * Packed.b * SpecStrength;
 float rim = pow(1.0 - saturate(dot(N, V)), 3.0) * RimStrength;
-float2 mcUV = float2(dot(N, CameraRight.rgb), dot(N, CameraUp.rgb)) * 0.5 + 0.5;
-float3 mc = Texture2DSample(MatCapTex, MatCapTexSampler, mcUV).rgb * Packed.a * MatCapStrength * MatCapTint.rgb;
-mc += Texture2DSample(MatCapTex2, MatCapTex2Sampler, mcUV).rgb * Packed.a * MatCapStrength2 * MatCapTint2.rgb;
+float2 mcUV = normalize(ViewNormal).xy * 0.5 + 0.5;
+float3 result = Albedo.rgb * diffuse * LightColor.rgb + spec * LightColor.rgb + rim * LightColor.rgb;
 float3 glow = EmissionColor.rgb * Aux.b * EmissionStrength;
-return Albedo.rgb * diffuse * LightColor.rgb + spec * LightColor.rgb + rim * LightColor.rgb + mc + glow;
 '''
+    for i in range(1, 6):
+        code += '''
+if (MatCapEnabled%(i)d > 0.5 && tier == %(tier)d) {
+    float4 cap = Texture2DSample(MatCapTex%(i)d, MatCapTex%(i)dSampler, mcUV);
+    float mask = UseMatCapMask > 0.5 ? Packed.a : 1.0;
+    float weight = saturate(cap.a * MatCapAlphaBurst%(i)d * mask);
+    float3 tint = cap.rgb * MatCapTint%(i)d.rgb * MatCapColorBurst%(i)d;
+    if (MatCapBlendMode%(i)d < 0.5) {
+        result = lerp(result, tint, weight);
+    } else if (MatCapBlendMode%(i)d < 1.5) {
+        result += tint * weight;
+    } else {
+        float3 overlay = lerp(2.0 * result * tint,
+                              1.0 - 2.0 * (1.0 - result) * (1.0 - tint),
+                              step(0.5, result));
+        result = lerp(result, overlay, weight);
+    }
+}
+''' % {"i": i, "tier": i - 1}
+    code += "return result + glow;"
     custom = add_custom(m, 100, 0, code, inputs, "Pyrios toon ramp, specular, rim, MatCap and emission")
     if not MEL.connect_material_property(custom, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR):
         raise RuntimeError("Could not connect emissive output")
@@ -207,20 +232,27 @@ def set_instance(main, suffix):
     for source, target in (("_Emission", "EmissionStrength"), ("_SpecIntensity", "SpecStrength"),
                            ("_RimGlow", "RimStrength")):
         MEL.set_material_instance_scalar_parameter_value(mi, target, float(floats.get(source, 0)))
-    matcap_settings = {
-        "Body_1": ("Eff_Matcap_125", 0.3, "Eff_MatCap_075", 0.12),
-        "Body_2": ("Eff_Matcap_125", 0.18, "Eff_MatCap_070", 0.05),
-        "Weapon01": ("Eff_Matcap_125", 0.4, "Eff_MatCap_019", 0.15),
-    }
-    first, strength, second, strength2 = matcap_settings[suffix]
-    for param, texname in (("MatCapTex", first), ("MatCapTex2", second)):
-        MEL.set_material_instance_texture_parameter_value(mi, param, EAL.load_asset(ROOT + "/Texture/" + texname))
-    enabled = 1 if floats.get("_MatCap", 0) else 0
-    MEL.set_material_instance_scalar_parameter_value(mi, "MatCapStrength", strength * enabled)
-    MEL.set_material_instance_scalar_parameter_value(mi, "MatCapStrength2", strength2 * enabled)
-    for source, target in (("_MatCapColorTint", "MatCapTint"), ("_MatCapColorTint2", "MatCapTint2")):
-        c = colors.get(source, {"r": 1, "g": 1, "b": 1, "a": 1})
-        MEL.set_material_instance_vector_parameter_value(mi, target, unreal.LinearColor(c["r"], c["g"], c["b"], c["a"]))
+    MEL.set_material_instance_scalar_parameter_value(mi, "UseMatCapMask", float(floats.get("_UseMatCapMask", 0)))
+    for i in range(1, 6):
+        end = "" if i == 1 else str(i)
+        source_texture = p["m_TexEnvs"].get("_MatCapTex" + end, {}).get("m_Texture", {})
+        texture_name = source_texture.get("Name", "")
+        has_texture = bool(texture_name) and not source_texture.get("IsNull", True)
+        if has_texture:
+            texture = EAL.load_asset(ROOT + "/Texture/" + texture_name)
+            if texture is None:
+                raise RuntimeError("Missing JSON MatCap texture " + texture_name)
+            MEL.set_material_instance_texture_parameter_value(mi, "MatCapTex%d" % i, texture)
+        MEL.set_material_instance_scalar_parameter_value(
+            mi, "MatCapEnabled%d" % i, float(bool(floats.get("_MatCap", 0)) and has_texture))
+        for source, target, default in (("_MatCapColorBurst", "MatCapColorBurst", 1),
+                                        ("_MatCapAlphaBurst", "MatCapAlphaBurst", 1),
+                                        ("_MatCapBlendMode", "MatCapBlendMode", 0)):
+            MEL.set_material_instance_scalar_parameter_value(
+                mi, target + str(i), float(floats.get(source + end, default)))
+        c = colors.get("_MatCapColorTint" + end, {"r": 1, "g": 1, "b": 1, "a": 1})
+        MEL.set_material_instance_vector_parameter_value(
+            mi, "MatCapTint%d" % i, unreal.LinearColor(c["r"], c["g"], c["b"], c["a"]))
     MEL.set_material_instance_scalar_parameter_value(mi, "RimStrength", 0.15 * float(floats.get("_RimGlow", 0)))
     MEL.set_material_instance_scalar_parameter_value(mi, "BumpScale", float(floats.get("_BumpScale", 1.0)))
     EAL.save_loaded_asset(mi)

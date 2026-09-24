@@ -1,7 +1,10 @@
-"""Read-only sanity check for the Pyrios render assets and character blueprint."""
+"""Read-only sanity check for the Pyrios render assets and JSON parameter wiring."""
+import json
+from pathlib import Path
 import unreal
 
 root = "/Game/Characters/Player/Pyrios/Materials"
+json_dir = Path(__file__).resolve().parents[2] / "Content/Characters/Player/Pyrios/Materials"
 for name in ("M_Pyrois_Toon", "M_Pyrois_Outline", "MI_Pyrois_Body_1", "MI_Pyrois_Body_2", "MI_Pyrois_Weapon01"):
     path = root + "/Generated/" + name
     assert unreal.EditorAssetLibrary.does_asset_exist(path), path
@@ -45,5 +48,17 @@ for name, expected in (("Body_1", "Pyrois_Body_Map1_D"),
     mi = unreal.EditorAssetLibrary.load_asset(root + "/Generated/MI_Pyrois_" + name)
     actual = unreal.MaterialEditingLibrary.get_material_instance_texture_parameter_value(mi, "MainTex")
     assert actual is not None and actual.get_name() == expected, (name, actual)
+    data = json.loads((json_dir / ("MAT_Pyrois_" + name + ".json")).read_text(encoding="utf-8"))
+    properties = data["m_SavedProperties"]
+    for i in range(1, 6):
+        end = "" if i == 1 else str(i)
+        source_texture = properties["m_TexEnvs"].get("_MatCapTex" + end, {}).get("m_Texture", {})
+        expected_texture = source_texture.get("Name", "") if not source_texture.get("IsNull", True) else ""
+        enabled = unreal.MaterialEditingLibrary.get_material_instance_scalar_parameter_value(mi, "MatCapEnabled%d" % i)
+        assert enabled == float(bool(expected_texture) and bool(properties["m_Floats"].get("_MatCap", 0))), (name, i, enabled)
+        if expected_texture:
+            actual_texture = unreal.MaterialEditingLibrary.get_material_instance_texture_parameter_value(mi, "MatCapTex%d" % i)
+            assert actual_texture and actual_texture.get_name() == expected_texture, (name, i, actual_texture)
+    unreal.log("PYRIOS_VERIFY_JSON_MATCAP " + name)
 
 unreal.log("PYRIOS_VERIFY_OK")
