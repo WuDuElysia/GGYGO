@@ -12,7 +12,7 @@ BlendSpace 的默认轴范围不是这个区间，不改的话两个样本会挤
 
 import unreal
 
-ASSET = "/Game/Characters/Player/Pyrios/Animation/BS_Pyrios_WalkRun"
+ASSET = "/Game/Characters/Player/Pyrios/Animation/Movement/BS_Pyrios_WalkRun"
 
 
 def dump(bs, label):
@@ -53,7 +53,7 @@ def run():
     try:
         params = bs.get_editor_property("blend_parameters")
         p = params[0]
-        p.set_editor_property("display_name", "GaitBlendY")
+        p.set_editor_property("display_name", "WalkRunBlendAlpha")
         p.set_editor_property("min", 0.0)
         p.set_editor_property("max", 1.0)
         # grid_num=1 表示轴上只有两个格点（0 与 1），正好对应 Walk / Run 两个样本。
