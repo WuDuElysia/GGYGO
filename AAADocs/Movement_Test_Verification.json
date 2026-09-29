@@ -1,0 +1,64 @@
+{
+  "date": "2026-09-29",
+  "engine": "UE 5.8.1",
+  "configuration": {
+    "map": "/Game/Map/L_Movement_Test",
+    "size_cm": [
+      100000,
+      100000,
+      100
+    ],
+    "ground_top_z_cm": 0,
+    "player_start_cm": [
+      0,
+      0,
+      150
+    ],
+    "collision_profile": "BlockAll",
+    "collision_enabled": "<CollisionEnabled.QUERY_AND_PHYSICS: 3>",
+    "pawn_response": "<CollisionResponseType.ECR_BLOCK: 2>",
+    "object_type": "<CollisionChannel.ECC_WORLD_STATIC: 0>",
+    "mesh": "/Engine/BasicShapes/Cube.Cube",
+    "material": "/Game/Map/Materials/M_MovementGrid.M_MovementGrid",
+    "game_mode": "/Game/BP/GamePlay/BP_GameMode.BP_GameMode_C",
+    "experience": "/Game/System/Experiences/DA_Experience_Default.DA_Experience_Default",
+    "roster": [
+      {
+        "pawn_data": "/Game/Characters/Player/Pyrios/DA/DA_Pawn_Pyrios.DA_Pawn_Pyrios",
+        "pawn_class": "/Game/BP/Character/Player/BP_PC_Pyrios.BP_PC_Pyrios_C",
+        "movement_set": "/Game/System/DA_Movement_Default.DA_Movement_Default",
+        "input_config": "/Game/Characters/Player/Pyrios/DA/DA_InputConfig_Default.DA_InputConfig_Default"
+      }
+    ]
+  },
+  "method": "PIE InViewPort; EnhancedInputLocalPlayerSubsystem.inject_input_vector_for_action(IA_Move); 1s settle, 31s forward, 3s reverse, 3s release",
+  "samples": 4513,
+  "duration_seconds": 38.0018,
+  "all_grounded": true,
+  "z_range_cm": [
+    90.15000279925202,
+    90.15000279925202
+  ],
+  "first_walk_seconds": 1.0123,
+  "first_run_seconds": 2.5183,
+  "turn_phases": {
+    "<GGYGOTurnBackPhase.NONE: 0>": 0.0083,
+    "<GGYGOTurnBackPhase.TURNING: 1>": 32.0113,
+    "<GGYGOTurnBackPhase.BRAKING: 2>": 32.3363,
+    "<GGYGOTurnBackPhase.RUN_OUT: 3>": 33.053
+  },
+  "steady_run_speed_m_s": 10.498883056640626,
+  "peak_speed_m_s": 15.434901123046876,
+  "furthest_x_m": 325.9550430627585,
+  "final_yaw": 180.0,
+  "final_location_cm": [
+    30286.814577336594,
+    1.9319060854207775,
+    90.15000279925202
+  ],
+  "limits": [
+    "Action injection verifies Enhanced Input -> HeroComponent -> CMC, not physical keyboard hardware.",
+    "Single local PIE; networking, map-edge fall, navigation and streaming not tested.",
+    "Ground grid, sun and editor camera polished after motion capture; final saved map reopened and PIE spawn/visibility verified."
+  ]
+}
