@@ -12,21 +12,21 @@
 
 历史交回（2026-10-03，不代表当前编译状态）：Input Hero身份订阅准备和Character Host接口定义当时已冻结并有限接受，当时尚未编译；后续编译与生产迁移以当前进度入口和实际门禁记录为准。原证据：`Saved/ValidationRecords/InputHeroIdentityPreparation_Result.json`、`CharacterHostInterfaceDefinition_Result.json`。历史严格失败及资产／网络未验仍留账。
 
-当前收束（2026-10-04）：Gate68 Editor编译8actions/93.90秒及既有碰撞叶必要冒烟Success（0Error/0Warning）；旧Legacy和新增最小Owned断言均保留，355源码未变、保护只有runtime DLL，UE/build0。Task N0与Trace/T1五份源码已中文提交6fad9c1并push。Task新native回调/Combo-Boss生产迁移未动态证明；下一调用方预检仅只读。AS六图文、Teams四图文与Camera四父图文冻结接受，Camera两个子图也已冻结静态接受；Task/Trace新增接口局部图文待后继同步。首次同步等待仍held决定保留，M2/M3/Hero1尚未实施，原Run/TurnBack保持。整体未完，不扩严格矩阵。
+当前推进（2026-10-04）：六源dce7836已中文提交push；Gate70原移动停止Success0E0W、连段Fail6E0W保持。M2四图文已统筹有限静态接受冻结，四文件0failed／57链接；GA两源薄hook已编码并有限静态接受，尚未新编译。现授权两条互斥生产线：Movement M3a两源首次同步Waiting／一次准入；AS仅GA.cpp OnSpawn改接既有受控Try。M3b/Hero1及GA派生共同启用未完。
 
 前序交接摘要（仅历史；下方有效租约才决定当前写权）：
 
-Gate68只运行既有GGYGO.Combat.MeleeTrace.SafetyAndCoverage叶，Success、0Error/0Warning，实际覆盖原Legacy和最小Owned A→B→C接缝；不是新Task native回调/捕获析构重入或GA/Combo/Boss生产验证。编译8actions93.90秒成功，旧ASC.cpp832 C4996保留；完整启动13条Condition failed及DDC/Python2警告仍留账。Gate67的Camera Component两叶/Admission一叶为此前普通成功证据，不扩展为新Manager H1/L1联合首帧、原Completed、Teams实景或联机通过。
+不重复已完成的预检。M3a只扩同一CMC的准入阶段，M3b运输／服务端消费与Hero1随后接力；AS OnSpawn仅迁原请求入口，不代表raw/RPC/final生命周期或派生清理完成。两源码线冻结后统一编译＋必要冒烟，不运行半迁移GA生产，不新增严格矩阵。Parent／Notes尚未新提交，批外修改保护。
 
 - Input B2三文件actual completed且冻结，root h8C1DFEBD…／cppB4926513…／Contract8E2959B1…匹配，原薄通知／Begin-Bind-保存-Attach／事实直交原CMC／原Source GetRequest／失效清理有限接受。Source/CMC/Extension/默认输入配置及网络/Profile/Run/Cold-Rearm业务未改；B1/A保护34方法与整源逆向仅作者证据。源码写权关闭，未新编译/UE，正式重建／首真实移动／释放重按／暂停Flush恢复及局部图文仍开放。
 - Combatants Refresh query三文件写权关闭，实际回合completed并明确冻结；统筹独立逆向恢复E36A2495…写前整文件hash，当前cpp57D5279E…及两记录hash吻合。仅Refresh OriginalScope检查原Host／端点／opaque本地槽，ASC唯一认证快照、原生权限与Commit；Release／H1/H2/H3保持。新修正版未编译／冒烟，Obsidian局部同步另接力，不自动续写。
 - Teams创建者A两源、两记录B及四Obsidian图文均actual completed／冻结并有限接受；root四图文hash、源／两记录保护、受影响内容、两Canvas JSON／ID／边／无重叠及51链接目标通过。锚点、原图几何／拓扑与全文非目标保持仅作者证据。A随Gate59统一编译成功，未动态；C13、非法保存回落、默认容量、出生点、Logout／完整切换保持开放。下一源码范围未授权。
 当前唯一有效范围（2026-10-04）：
 
-- 全源码写入者0。Task N0两源及Combat T0两核心/T1既有叶已冻结、Gate68编译和碰撞必要冒烟通过，源码6fad9c1中文提交push；新Task回调动态及生产迁移未验，无续写权。
-- Camera父4＋子2均冻结静态接受，统筹只作父4旧待同步标记桥；AS父4/子2、Teams四图文也冻结，当前无局部图文或资产写权。Task/Trace新增接口模块图文另授。
-- Boss B1与PlayerCombo下一迁移仅只读预检，未授源码。Movement M2/M3/Hero1首次同步尚未实现，原增量撤回；正常首次等待仍真实held开始政策保留，失败/重绑/占有換代仍松开重按。
-- 统筹独占全局/UE/build/Git，当前Gate68已关闭；后继源写权另登记。gpt-6.1-sol/xhigh、Fast关闭，无子代理/新严格矩阵，保留所有无关改动。
+- Movement M3a仅GGYGOCharacterMovementComponent.h/.cpp：同一CMC正常首次Owner Waiting／原Observer＋Binding＋SourceRequest＋Ready一次准入；真实释放/失效只撤原请求，保留FAILED，地方authority/AI路径保持。无M3b/Hero/Source/math/RMS/资产/文档/build/UE/Git写权。
+- AS GAOnSpawnControlledEntry仅GGYGOGameplayAbility.cpp的TryActivateAbilityOnSpawn：原侧选择与原位置一次调用既有TryActivateAbilityWithTerminationBoundary，非法非项目ASC显式拒绝；GA.h/ASC/其他方法/派生/测试保持冻结，无文档/build/UE/Git写权。
+- M2四图文与GA薄hook两源已交回冻结，有限静态接受；后继共享启用/final生命周期、Combo/Boss原资源迁移、M3b/Hero1尚未实施。只做统一编译＋必要冒烟，无子代理或新矩阵。
+- 统筹独占全局/build/UE/assets/Git。六源检查点dce7836已push；Parent/Notes等待本批交接排队，只纳入明确范围，排除BP_PC_Pyrios及渲染等批外修改。gpt-6.1-sol/xhigh Fast关闭，不边写边编译，不LiveCoding/热重载/SaveAll。
 - Audio原组长R1四图文actual completed/明确冻结且写权关闭；root全文/hash及独立JSON、28链接/3锚点、8节点7边/9节点6边和无重叠核对有限接受。旧Contract保护hash082ED165…不保持是root合法手动组件证据同步至A7994A2C…，原检查不标通过。root已完成Audio/结构.md及计划_音效接入.md两文件过时状态更正并保存hash/相关全文段读回，两文件窗口关闭，不改Canvas/资产/接口/行为。GF/Teams/H3前图文保持冻结；Input两IMC图文窗口已关闭，B1/B2局部图文待源码冻结后另授。
 - 两IMC仅RegistrationTrackingMode已迁CountRegistrations、逐包保存，原映射／过滤回读保持，精确原文件备份保留，资产写权关闭。18:29:51～18:30:15必要PIE启动及停止，旧注册拒绝消失；Host Refresh／Release仍失败、输入EndPlay保留原Subsystem失效诊断，不声称输入／Run全链通过。Audio脚本冻结且R1实际只读通过，原失败／原始差异保留，未重接线／保存。
 - UE／构建／资产／Git由统筹独占，不Live Coding／热重载／SaveAll、不新增子代理。正式资产／网络、后继笔记及中文提交push未完成。
@@ -285,7 +285,7 @@ B0来源架构预检已交回且零写入；用户2026-10-01现已批准项目GA
 - [x] D8 Render 原材质恢复校验 mesh/slot/已安装 MID 所有权。
 - [x] D9 KeyLight 配置与自动缓存分离，处理销毁/隐藏/禁用与重新选择。
 - [x] E1 Trace请求PhysicalMaterial：原Sweep开启bReturnPhysicalMaterial并传播原Hit，既有实际材质指针专项通过；2026-10-04源码有限复核，未新跑严格矩阵。
-- [x] E2 Trace EndPlay/Unregister/Deactivate统一EndTraceWindow关闭并清基线／去重／端点：三源码入口已核对；既有Deactivate／Unregister冒烟通过，真实BeginPlay→EndPlay动态未验，不冒称该专项通过。
+- [x] E2 Trace EndPlay/Unregister/Deactivate统一私有CloseCurrentTraceWindow关闭并清基线／去重／端点：Gate68 Owned原窗口与Legacy共用唯一清理，公共EndTraceWindow只能关Legacy，原CloseOwnedTraceWindow只关精确Owned；生命周期关闭期间拒绝新开。既有叶Legacy＋最小Owned冒烟Success0/0；真实BeginPlay→EndPlay动态未验，不冒称该专项通过。原EndTraceWindow唯一清理是此前Legacy阶段的历史接口，不作为当前事实。
 - [x] E3 Trace与AssetManager均使用本地日志分类，不通过AbilitySystem日志头／符号反向依赖；2026-10-04实际h/cpp有限复核。合法GE类型依赖不在本日志解耦范围。
 - [ ] E4 Player/Boss Hit Spec 和 Cue 统一填入上下文/物理表面 tags，职责只一处。
 - [x] E5 HitImpact已有HitResult直接保留ImpactPoint，包括世界原点；2026-10-04有限源码核对。既有原点夹具为合成载荷，未证明真实碰撞有效性；无Hit的位置模式及表面默认项的隐式替代另留开放，不冒称全部Cue完成。
@@ -297,7 +297,7 @@ B0来源架构预检已交回且零写入；用户2026-10-01现已批准项目GA
 - [x] E11 ActionSet唯一标签／类CDO标签／数值校验及重复Find拒绝；消费原选择先清claim，再复核原set／phase／ASC／class／avatar／spec。2026-10-04有限接受，不保证任意运行中资产内容变更。
 - [x] E12 TryGet只读取引擎持有的实际项目AssetManager或明确失败，不创建伪单例；2026-10-04有限源码核对。共享依赖失效后消费者契约仍归E14开放。
 - [x] E13 Manager唯一预载／四项UPROPERTY强持有／只读可用状态已有限源码核对，System结构MD/Canvas已同步保存并冻结接受；正式预载失败／GC／覆盖选择／Cook／BP／网络未验，不以接口与笔记一致冒称动态通过。
-- [ ] E14 原覆盖／共享／显式无GE选择由GameData统一解析；但PlayerCombo共享GE失效仍改走无伤害Cue已在当前源确认，必须拒绝必需依赖，不以纯表现冒成功；Combat有限预检，未授修复租约。
+- [ ] E14 原覆盖／共享／显式无GE选择由GameData统一解析。E14-A Combo必需GE准入已实施并Gate65编译；E14-B共享Builder非空必需GE失败false/清Out、显式空GE正常Cue模式已Gate66编译。运行中Combo依赖失效/Builder失败的原动作中止传播E14-C仍未实施，须先冻结原GA/WaitInput/Task/Trace生产生命周期，不能以Cue冒伤害成功；已有普通冒烟不验证该完整运行失败链，整体仍开放。
 - [x] E15 当前AbilitySet编辑配置及实际ASC既有存储的同类／继承／共享字段冲突校验已核对；不借用或回收基础属性集，仅记录本批实际新增对象。四个Gate54原专项Success0E0W、相关四源hash与现状一致；有限原核查闭合，不等于整个授予／终止链或联机完成。
 - [ ] Boss必需BT启动失败传播：四源已实现原初始Possess结果与原生Started/Running核对，并随Gate64R1编译；原SafeLatentAbort冒烟只证明清理，不证明新初始树启动链。正式有效／失败树装配仍未验，原E9不能代替本项完成。
 - [x] HitImpact显式位置/表面策略的有限源码与原解析叶：用户已选严格HitResult默认、无Tag显式通用/有Tag漏配默认拒绝；两个反馈前门禁已落盘，原测试迁移后Gate64R1编译/ContextAndCueLocation Success0E0W。原点及Overlap合法；不把有限解析叶当真实播放证明。
