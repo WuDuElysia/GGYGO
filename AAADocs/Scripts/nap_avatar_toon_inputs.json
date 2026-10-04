@@ -1,0 +1,646 @@
+{
+ "inputs": [
+  {
+   "name": "MainTex",
+   "kind": "texture"
+  },
+  {
+   "name": "LightTex",
+   "kind": "texture"
+  },
+  {
+   "name": "OtherDataTex",
+   "kind": "texture"
+  },
+  {
+   "name": "OtherDataTex2",
+   "kind": "texture"
+  },
+  {
+   "name": "MatCapTex1",
+   "kind": "texture"
+  },
+  {
+   "name": "MatCapTex2",
+   "kind": "texture"
+  },
+  {
+   "name": "MatCapTex3",
+   "kind": "texture"
+  },
+  {
+   "name": "MatCapTex4",
+   "kind": "texture"
+  },
+  {
+   "name": "MatCapTex5",
+   "kind": "texture"
+  },
+  {
+   "name": "UV",
+   "kind": "builtin"
+  },
+  {
+   "name": "Time",
+   "kind": "builtin"
+  },
+  {
+   "name": "WorldPos",
+   "kind": "builtin"
+  },
+  {
+   "name": "CameraPos",
+   "kind": "builtin"
+  },
+  {
+   "name": "VCol",
+   "kind": "builtin"
+  },
+  {
+   "name": "FaceSign",
+   "kind": "builtin"
+  },
+  {
+   "name": "KeyLightDirectionWS",
+   "kind": "component_vector"
+  },
+  {
+   "name": "KeyLightColor",
+   "kind": "component_vector"
+  },
+  {
+   "name": "SceneLightStrength",
+   "kind": "component_scalar"
+  },
+  {
+   "name": "KeyLightVisibility",
+   "kind": "component_scalar"
+  },
+  {
+   "name": "EntityParams",
+   "kind": "extra"
+  },
+  {
+   "name": "EntityAmbient",
+   "kind": "extra"
+  },
+  {
+   "name": "EntitySkinAmbient",
+   "kind": "extra"
+  },
+  {
+   "name": "NormalYSign",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_Refract1",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_Refract2",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_Refract3",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_Refract4",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_Refract5",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_Tint1",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_Tint2",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_Tint3",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_Tint4",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_Tint5",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_A1",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_A2",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_A3",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_A4",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_A5",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_B1",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_B2",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_B3",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_B4",
+   "kind": "extra"
+  },
+  {
+   "name": "MC_B5",
+   "kind": "extra"
+  },
+  {
+   "name": "_AlbedoSmoothness",
+   "kind": "material"
+  },
+  {
+   "name": "_AlbedoSmoothness2",
+   "kind": "material"
+  },
+  {
+   "name": "_AlbedoSmoothness3",
+   "kind": "material"
+  },
+  {
+   "name": "_AlbedoSmoothness4",
+   "kind": "material"
+  },
+  {
+   "name": "_AlbedoSmoothness5",
+   "kind": "material"
+  },
+  {
+   "name": "_BumpScale",
+   "kind": "material"
+  },
+  {
+   "name": "_Color",
+   "kind": "material"
+  },
+  {
+   "name": "_DecolorizationContrast",
+   "kind": "material"
+  },
+  {
+   "name": "_DoubleSided",
+   "kind": "material"
+  },
+  {
+   "name": "_Emission",
+   "kind": "material"
+  },
+  {
+   "name": "_EmissionColor",
+   "kind": "material"
+  },
+  {
+   "name": "_EmissionColor2",
+   "kind": "material"
+  },
+  {
+   "name": "_EmissionColor3",
+   "kind": "material"
+  },
+  {
+   "name": "_EmissionColor4",
+   "kind": "material"
+  },
+  {
+   "name": "_EmissionColor5",
+   "kind": "material"
+  },
+  {
+   "name": "_Glossiness",
+   "kind": "material"
+  },
+  {
+   "name": "_HighlightShape",
+   "kind": "material"
+  },
+  {
+   "name": "_HighlightShape2",
+   "kind": "material"
+  },
+  {
+   "name": "_HighlightShape3",
+   "kind": "material"
+  },
+  {
+   "name": "_HighlightShape4",
+   "kind": "material"
+  },
+  {
+   "name": "_HighlightShape5",
+   "kind": "material"
+  },
+  {
+   "name": "_Metallic",
+   "kind": "material"
+  },
+  {
+   "name": "_ModelSize",
+   "kind": "material"
+  },
+  {
+   "name": "_ModelSize2",
+   "kind": "material"
+  },
+  {
+   "name": "_ModelSize3",
+   "kind": "material"
+  },
+  {
+   "name": "_ModelSize4",
+   "kind": "material"
+  },
+  {
+   "name": "_ModelSize5",
+   "kind": "material"
+  },
+  {
+   "name": "_OverlayTexScale",
+   "kind": "material"
+  },
+  {
+   "name": "_Override",
+   "kind": "material"
+  },
+  {
+   "name": "_OverrideColor",
+   "kind": "material"
+  },
+  {
+   "name": "_ReceiveShadows",
+   "kind": "material"
+  },
+  {
+   "name": "_RimGlowLightColor",
+   "kind": "material"
+  },
+  {
+   "name": "_RimGlowLightColor2",
+   "kind": "material"
+  },
+  {
+   "name": "_RimGlowLightColor3",
+   "kind": "material"
+  },
+  {
+   "name": "_RimGlowLightColor4",
+   "kind": "material"
+  },
+  {
+   "name": "_RimGlowLightColor5",
+   "kind": "material"
+  },
+  {
+   "name": "_ShadowColor",
+   "kind": "material"
+  },
+  {
+   "name": "_ShadowColor2",
+   "kind": "material"
+  },
+  {
+   "name": "_ShadowColor3",
+   "kind": "material"
+  },
+  {
+   "name": "_ShadowColor4",
+   "kind": "material"
+  },
+  {
+   "name": "_ShadowColor5",
+   "kind": "material"
+  },
+  {
+   "name": "_ShadowColorFadeByZ",
+   "kind": "material"
+  },
+  {
+   "name": "_ShallowColor",
+   "kind": "material"
+  },
+  {
+   "name": "_ShallowColor2",
+   "kind": "material"
+  },
+  {
+   "name": "_ShallowColor3",
+   "kind": "material"
+  },
+  {
+   "name": "_ShallowColor4",
+   "kind": "material"
+  },
+  {
+   "name": "_ShallowColor5",
+   "kind": "material"
+  },
+  {
+   "name": "_ShapeSoftness",
+   "kind": "material"
+  },
+  {
+   "name": "_ShapeSoftness2",
+   "kind": "material"
+  },
+  {
+   "name": "_ShapeSoftness3",
+   "kind": "material"
+  },
+  {
+   "name": "_ShapeSoftness4",
+   "kind": "material"
+  },
+  {
+   "name": "_ShapeSoftness5",
+   "kind": "material"
+  },
+  {
+   "name": "_SkinMatId",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecIntensity",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecularColor",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecularColor2",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecularColor3",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecularColor4",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecularColor5",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecularRange",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecularRange2",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecularRange3",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecularRange4",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecularRange5",
+   "kind": "material"
+  },
+  {
+   "name": "_SymmetryUV",
+   "kind": "material"
+  },
+  {
+   "name": "_ToonSpecular",
+   "kind": "material"
+  },
+  {
+   "name": "_ToonSpecular2",
+   "kind": "material"
+  },
+  {
+   "name": "_ToonSpecular3",
+   "kind": "material"
+  },
+  {
+   "name": "_ToonSpecular4",
+   "kind": "material"
+  },
+  {
+   "name": "_ToonSpecular5",
+   "kind": "material"
+  },
+  {
+   "name": "_UseMatCapMask",
+   "kind": "material"
+  },
+  {
+   "name": "_UseOverlayTex",
+   "kind": "material"
+  },
+  {
+   "name": "_AmbientGradientColor",
+   "kind": "global"
+  },
+  {
+   "name": "_AmbientGradientShape",
+   "kind": "global"
+  },
+  {
+   "name": "_CharacterAmbient",
+   "kind": "global"
+  },
+  {
+   "name": "_CharacterLightTonemapParams",
+   "kind": "global"
+  },
+  {
+   "name": "_CharacterMatCapEnable",
+   "kind": "global"
+  },
+  {
+   "name": "_EntityInfo",
+   "kind": "global"
+  },
+  {
+   "name": "_IsBlackCanvasOn",
+   "kind": "global"
+  },
+  {
+   "name": "_IsStencilReceiverPass",
+   "kind": "global"
+  },
+  {
+   "name": "_PackedParams0",
+   "kind": "global"
+  },
+  {
+   "name": "_PostFrontTint",
+   "kind": "global"
+  },
+  {
+   "name": "_PostShadowFadeTint",
+   "kind": "global"
+  },
+  {
+   "name": "_PostShadowTint",
+   "kind": "global"
+  },
+  {
+   "name": "_PostShallowFadeTint",
+   "kind": "global"
+  },
+  {
+   "name": "_PostShallowTint",
+   "kind": "global"
+  },
+  {
+   "name": "_PostSssTint",
+   "kind": "global"
+  },
+  {
+   "name": "_RimGlowColorForChara",
+   "kind": "global"
+  },
+  {
+   "name": "_RimGlowIntensityForChara",
+   "kind": "global"
+  },
+  {
+   "name": "_RimGlowStyleForChara",
+   "kind": "global"
+  },
+  {
+   "name": "_SkinFrontTint",
+   "kind": "global"
+  },
+  {
+   "name": "_SkinShadowFadeTint",
+   "kind": "global"
+  },
+  {
+   "name": "_SkinShadowTint",
+   "kind": "global"
+  },
+  {
+   "name": "_SkinShallowFadeTint",
+   "kind": "global"
+  },
+  {
+   "name": "_SkinShallowTint",
+   "kind": "global"
+  },
+  {
+   "name": "_SkinSssTint",
+   "kind": "global"
+  }
+ ],
+ "color_properties": [
+  "_AChannelColor",
+  "_AChannelColorPrecomputed",
+  "_AmbientColorCG",
+  "_BChannelColor",
+  "_BChannelColorPrecomputed",
+  "_BlockColorA",
+  "_BlockColorB",
+  "_BlockColorC",
+  "_BlockColorD",
+  "_Color",
+  "_ColorA",
+  "_ColorAForCGLighting",
+  "_ColorB",
+  "_ColorBForCGLighting",
+  "_DetailColor",
+  "_EmissionColor",
+  "_EmissionColor2",
+  "_EmissionColor3",
+  "_EmissionColor4",
+  "_EmissionColor5",
+  "_FresnelColor",
+  "_GChannelColor",
+  "_GChannelColorPrecomputed",
+  "_HardLightColor",
+  "_LayerIDColor",
+  "_LocalIndirectColor",
+  "_LocalIndirectColor2",
+  "_LocalIndirectColor3",
+  "_LocalIndirectColor4",
+  "_LocalIndirectColor5",
+  "_MatCapColorTint",
+  "_MatCapColorTint2",
+  "_MatCapColorTint3",
+  "_MatCapColorTint4",
+  "_MatCapColorTint5",
+  "_MatCapColorTintFallback",
+  "_MatCapColorTintFx",
+  "_OutlineColor",
+  "_OutlineColor2",
+  "_OutlineColor3",
+  "_OutlineColor4",
+  "_OutlineColor5",
+  "_OutlineColorFX",
+  "_OverrideColor",
+  "_OverrideMainLightColor",
+  "_OverrideMainLightColor2",
+  "_OverrideMainLightColor3",
+  "_OverrideMainLightColor4",
+  "_OverrideMainLightColor5",
+  "_OverrideOutlineColor",
+  "_OverrideRimGlowColor",
+  "_PropertyColor",
+  "_RChannelColor",
+  "_RChannelColorPrecomputed",
+  "_RimGlowLightColor",
+  "_RimGlowLightColor2",
+  "_RimGlowLightColor3",
+  "_RimGlowLightColor4",
+  "_RimGlowLightColor5",
+  "_RimGlowShadowColor",
+  "_ScreenColor",
+  "_SecondaryEmissionColor",
+  "_SecondaryEmissionColorForCGLighting",
+  "_ShadowColor",
+  "_ShadowColor2",
+  "_ShadowColor3",
+  "_ShadowColor4",
+  "_ShadowColor5",
+  "_ShallowColor",
+  "_ShallowColor2",
+  "_ShallowColor3",
+  "_ShallowColor4",
+  "_ShallowColor5",
+  "_SilkFresnelColorEdge",
+  "_SilkFresnelColorFront",
+  "_SoftLightColor",
+  "_SpecialWeaponEmissionColor",
+  "_SpecialWeaponEmissionColor2",
+  "_SpecularColor",
+  "_SpecularColor2",
+  "_SpecularColor3",
+  "_SpecularColor4",
+  "_SpecularColor5",
+  "_TransitionColor"
+ ]
+}
