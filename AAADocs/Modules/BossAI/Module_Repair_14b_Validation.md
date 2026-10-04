@@ -1,5 +1,9 @@
 # 第 14b 批 Boss Encounter 回收：验证与交接
 
+当前更新：2026-10-05，共同GAS生命周期图文收尾。B1原Completed消费者与M1原资源迁移已编译；Gate73/79普通Mesh/Cleanup/Completed A→请求和通知完整返回→受控B有限通过。本批可有限接受，不等于完整Boss生产战斗或网络验收。源码/测试/资产冻结；Gate71原严格EndReentry 4E及原8断言保留，未改绿。当前证据见下文“共同GAS生命周期：生产迁移与普通链有限验收”。 七份局部图文/记录已保存读回并完成有限自审，现停止写入冻结。
+
+下面2026-09-30门禁及旧冻结快照为原阶段历史，不能替代本批源版本或给予续写权。
+
 更新：2026-09-30。14b-E9-V1仅两记录同步统筹第25次实际门禁：完整GGYGOEditor构建Succeeded，三项真实BT结束叶均Success/entries为空，常规59/59且测试错误/警告为0，旧55保持。T1静态交回历史保留；生产/测试/资产/Obsidian继续冻结。通过限于瞬态真实BT夹具的Safe潜伏Abort对照、Encounter同步Abort及原生Forced回收；完整E9/E10/E11、真实BT→GA/GAS、生产Kevin/正式资产、PIE世界EndPlay与网络未验边界保留。
 
 前次文档收尾历史：14b-A/B统筹第13次门禁UHT、完整GGYGOEditor构建与两项Encounter自动化通过（项目47/47、succeededWithWarnings/failed/notRun均0），证据MD/Canvas已同步冻结；随后仅授权计划第806行末句与两记录一致性收尾，结构MD/Canvas/源码只读。该历史阶段不含真实BT动态验收。
@@ -238,6 +242,61 @@
 - 冻结与旧证据：新测试cpp SHA-256仍为`DA02AA1E06DFE24C883093976CB5BE9A8114BC38864BF4E9D218D25A9E2A13EF`，types.h仍为`AD51374975DCC3CDEAE34967D4B23897BEC24541CE08E8826DD2B52F8731AF0D`。旧CleanupLifecycle/ExplicitCreationOwnership本次也实际Success/entries=[]，其原第13次证据保留。报告设备instanceName为`LAPTOP-1TDTPN3G-32976`；统筹通知该UE进程exit0并已退出，组长未启动/操作进程。
 - 当前覆盖边界：三叶只关闭本次E9-T1真实瞬态BT结束的有限契约，未完整验收E9。未激活真实战斗GA，不能证明BT→GA/GAS结束、不可取消段或正式树业务；未BeginPlay，不证明PIE/世界EndPlay派发。E10/E11既有配置/权重/Spec身份专项通过事实保持，本报告未扩大为完整阶段或正式资产流程验收；生产Kevin接线、共享GE选择/命中专项矩阵、蓝图回读、网络/专用服务器/cook仍未关闭。
 - 两记录读回确认仅含获批最新状态/历史标注及新V1节，其余历史正文保持；无尾白空间/冲突标记且有末尾换行。十四生产/旧测试、新测试对及四BossAI图文共二十保护文件SHA-256均保持。两记录完成交回SHA-256即冻结并停止写入。Obsidian仍保留原冻结证据，新的三叶状态需后续单独图文租约；本步不跨文件同步或把图文旧状态改为新门禁状态。两项业务兜底候选仅已只读记录，无自动整改或额外授权。
+
+## 共同GAS生命周期：生产迁移与普通链有限验收（2026-10-05）
+
+### 当前生产契约与唯一归属
+
+- 公共GA/ASC独占final CanActivate/Activate/End/Cancel、native原身份发行和原Completed；Boss派生接 `InitializeAbilityActivation(Original)`、`ActivateAbilityBody(Original,…)`、`CleanupAbilityResourcesForTermination(Context)`。Initialize先于组/Camera最终处理及Body，Body仅一次父BP路径，外调后仅核对固定原来源。
+- M1批次 `FOriginalMeleeResources` 只持固定Original和弱原接收者/精确资源：原Mesh Tick/URO、自有prerequisite，原Task及N0 `RegisterNativeCallbacks` token，Owned原Window和 `SubscribeWindowHit` token，原World watchdog、原CMC MotionHandle。Context匹配后先从成员脱整个批次，再恢复/释放，原接收者失效不会借后继；GA/ASC权限/状态不搬到批次。
+- 正常/失败End、Interrupted/watchdog Cancel均传固定Original；Result读实际 `Outcome/Reason` 公共字段，不把CompletedNotice getters套到Result。拒绝诊断但不强制End，不恢复第二套调度。Capture仅是原准入比较，不作为清理或终止来源。
+- B1先订阅 `OnAbilityTerminationCompleted` 再 `TryActivateAbilityWithTerminationBoundary(原Spec)`；等返回Result才取得固定Original，同步读原完成历史，异步 `HandleTerminationCompleted` 仅匹配原身份，先脱订阅再原生Finish。Abort/销毁只清自身等待，`bNotifyTaskFinished=false`；LastWait只识别本资源更替，不证明原生BT执行来源。
+- 原Completed由ASC在原native/final终止及相关受控Try完整返回后发布；它是原历史而非当前Idle/重开许可。raw Try/CallActivate在实际NotifyActivated仍可签原身份/清理；缺受控Try外层返回见证最终UnsupportedEntry、无协议Completed。该边界不是任意direct End/Cancel或“raw同步Cancel无完整虚返回”的根因。
+- Boss命中GE缺失/Builder失败/缺必需Spec只拒绝当前hit的伤害与Cue，不套Combo整动作故障End；有效碰撞载荷在GE免疫/拒绝应用时仍Cue。该分支仅源码事实，尚无本轮Boss真实动态命中证明。
+
+### 实际编译、普通链与严格失败
+
+| 门禁/证据 | 实际结果 | 本模块结论 |
+| --- | --- | --- |
+| `Saved/Logs/GGYGO_Gate71_Build_20261005.log` | 原Editor构建失败；Boss消费Result误用GetOutcome/GetReason，三行改公共字段 | 作者实现错误已修正，原失败日志保留；不声称共享接口改变 |
+| `Saved/Logs/GGYGO_Gate71_R1_Build_20261005.log` | 统筹重试Editor Succeeded | 本批源/夹具编译进入新DLL，不代替动态完整验收 |
+| `Saved/AutomationReports/ModuleRepairGate_20261005_71_Smoke/index.json` | `GGYGO.BossAI.Melee.EndReentry` Fail/4E/0W | raw End广播内同Spec Try被Busy拒绝：旧立即重开成功期待及3条后继状态连带失败；首个激活、广播前Mesh恢复/清引用及最终恢复未失败 |
+| `Saved/AutomationReports/ModuleRepairGate_20261005_73_Smoke/index.json` | `GGYGO.BossAI.Melee.NormalLifecycle` Success/0E/0W，0.006899900734424591秒 | 合成原资源普通A→完整返回→受控B链有限通过 |
+| `Saved/Logs/GGYGO_Gate79_Build_20261005.log` | Editor Succeeded，4 actions/12.03秒；exit0由统筹交回 | 完整Editor目标增量构建，不声称clean rebuild或新增UHT |
+| `Saved/AutomationReports/ModuleRepairGate_20261005_79_Smoke/index.json` | 同Boss普通叶Success/0E/0W，0.009430699050426483秒，entries=[] | 该Boss有限正常链再次通过；严格raw叶本窗口未运行 |
+
+Gate79报告为7叶、5 Success/2 Fail、succeededWithWarnings=0；两Combo故障叶保留1条RequiredGE及2条Builder/Combo真实Error/Fail，不归因Boss，不消音，也不记成全批全绿。本作者只读统筹实际日志/报告，没有自行构建或运行UE。
+
+普通叶只追加于原 `GGYGOBossMeleeEndReentryTest.cpp`，复用原fixture的生产Mesh准备/Context Cleanup，不改helper或原严格函数。新增段在内存逆向移除后恢复原文件SHA256 `01F19B9998D4408F68297833DFE053EB3AC0124819959D823479133BEBA0DA1F`，原raw/native调用与8条原断言逐字保留；不使用ExpectedError、测试过滤或绕guard改绿。
+
+普通叶前置是真实World/ACharacter、项目ASC注册/native Init、Give固定Spec；受控A获取固定Original及真实Mesh/Tick/URO资源。仅记录原Completed，在结束请求返回后验证唯一匹配A的正常Completed和实际恢复；全部请求/通知回调返回后才受控B，要求不同Original，同样唯一匹配/恢复。订阅精确移除并销毁原World。它没有走正式Montage业务。
+
+### 当前六源码冻结值
+
+| 文件 | SHA256 |
+| --- | --- |
+| `Source/GGYGO/AI/Boss/Abilities/GGYGOBossMeleeAbility.h` | `9088C6EE864A4DC0FB1D23B4A8EAE2B2C14B9A012ABEC18D4016A77A58CB923D` |
+| `Source/GGYGO/AI/Boss/Abilities/GGYGOBossMeleeAbility.cpp` | `26687C2FDC70E6084FDF9341D9764D4D2F3E9C40530985F8E45FC36194AAD8C6` |
+| `Source/GGYGO/AI/Boss/BehaviorTree/BTTask_GGYGOActivateAbility.h` | `EB49901E3638BC0BDC00AEE49B84F9515419E6F02982503935B35CEF327DFF52` |
+| `Source/GGYGO/AI/Boss/BehaviorTree/BTTask_GGYGOActivateAbility.cpp` | `37D52CEEC08359573D4C50DBB4FD8952B024304D342F8823EBF52C020ACBC0C8` |
+| `Source/GGYGO/AI/Boss/Tests/GGYGOBossMeleeLifecycleTestAbility.h` | `628B31F3BA17DC5FA99F70EFFCE0006ACA51846A77109A9B1D07442BE90D6A30` |
+| `Source/GGYGO/AI/Boss/Tests/GGYGOBossMeleeEndReentryTest.cpp` | `FB3768C81CC184B8FF4D80B5097952174358AB58FAEFE2A352AB02C45FEA40E2` |
+
+以上六份在本次文档写入前实际读回与交回一致，均只读；旧表和旧报告为历史，不覆盖当前值。
+
+### 图文范围与剩余验收
+
+本次只同步Subleases列明的2份Obsidian Markdown、3份Canvas和这2份局部记录，唯一作者是BossAI长期组长。既有三图10/9、14/13、8/9的节点/边及ID/颜色保留；结构图ga节点容纳原资源契约扩高，contract下移避让，其余可用布局保持，不新增图或过程JSON。核心AbilitySystem和玩家Combo/Kevin计划由原作者维护，全局入口由统筹维护。
+
+已接受范围是生产消费者迁移/编译及合成Mesh/Cleanup/原Completed正常A-B链。正式N0 Montage/Notify、Owned Trace/hit/去重、watchdog超时/取消、原CMC动作位移、GE/Builder失败和免疫Cue、B1实际BT及强制同步原生泵重入、Kevin接线/蓝图回读、PIE/网络/专用服务器/cook仍未关闭。旧2026-09-17战斗竖切和Encounter专项不能替代本次新链的完整生产验收。本批不新增矩阵，不续写源码/测试/资产；图文保存读回与有限结构/引用核对后冻结交回。
+
+### 本次图文保存与有限自审（已冻结）
+
+七份保存全文与预期一致；在内存逆向去除本次修改后可逐字恢复原正文/历史，未将历史快照或红测覆盖成当前通过。六份Boss生产/夹具SHA256与写前冻结值保持，无尾空白/冲突标记，末尾换行存在。
+
+三张Canvas保存后JSON解析通过；合计32节点/31边，节点/边ID、颜色、端点/方向和拓扑保持，4条边标签更新为实际接口/条件，无新节点或边。结构ga高度350→480、contract y1370→1550，其余几何保持；全部矩形零重叠。按可用宽width-48、ASCII8px/CJK16px、24px行距及48px余量逐行估算正文可容纳；这不是原生Obsidian渲染证明。62处wikilink解析到16个实际目标，4处锚点链接与当前标题匹配，核心契约链接不复制GAS状态机。
+
+当前接口名称、角色归属、资源顺序、raw外层Try来源边界、Gate71/73/79实际状态与上述冻结源码/日志有限对照完成；普通Mesh通过、Boss单hit拒绝、严格raw红及正式未验边界分别记录。七文档现已明确停写冻结，没有新增过程JSON/摘要/临时会话，没有操作源码、资产或运行UE/build/Git。
 
 ## 历史短修与第13次交回时剩余门禁（当前以E9-V1为准）
 

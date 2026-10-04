@@ -1,9 +1,30 @@
 # 第10批 Movement / D5 验证记录
 
-更新：2026-10-03
-当前状态：本地 CurveRMS 实际区间四源已交回冻结并获统筹 `finite_static_accepted_uncompiled` 有限接受，四 hash 独立匹配、范围 diff 检查 exit0；尚未新 UHT/编译或动态运行。CMC 在原生实际区间求值/提交，RMS 消费原 Prepared，SavedMove 保存原输入/结果，失败只消费原当前请求；NetSerialize 原 wire 字段保持但加载清除本地 Origin/Prepared，导入身份与 authority/proxy 匹配/校正尚未关闭。E1 编码/有限静态事实和 C30/第35次历史65叶Success保留，旧门禁不覆盖本步；FAILED 历史红叶、两生产 Error及请求3标记没有复测或改为通过。正式七 Profile 仍未完成创建/引用接线，当前版本 Run/物理输入/正式 Hero、资产/联机与 Obsidian 图文未验；Gadge及既有 GA_Dodge/Gadget 保留占位，蓝图/旧命名调查单列为只读证据。本两记录已保存回读并交回冻结。
+更新：2026-10-05
 
-以下各节保留当时交回的历史结果与验证边界；“尚未构建”“生产调用尚未接入”等只描述对应历史阶段，最新状态以上文及末尾本地 CurveRMS 段为准，原历史结果不改写。
+当前检查点：Gate80 启动→配置分发根因链有限验收；M3／Hero1 既有接线已编码并通过完整 Editor 编译。正式 Run／首按／网络仍未验证，BlendSpace 轴显示名修正未保存。
+
+历史检查点（2026-10-03）：本地 CurveRMS 实际区间四源已交回冻结并获统筹 `finite_static_accepted_uncompiled` 有限接受，四 hash 独立匹配、范围 diff 检查 exit0；尚未新 UHT/编译或动态运行。CMC 在原生实际区间求值/提交，RMS 消费原 Prepared，SavedMove 保存原输入/结果，失败只消费原当前请求；NetSerialize 原 wire 字段保持但加载清除本地 Origin/Prepared，导入身份与 authority/proxy 匹配/校正尚未关闭。E1 编码/有限静态事实和 C30/第35次历史65叶Success保留，旧门禁不覆盖本步；FAILED 历史红叶、两生产 Error及请求3标记没有复测或改为通过。正式七 Profile 仍未完成创建/引用接线，当前版本 Run/物理输入/正式 Hero、资产/联机与 Obsidian 图文未验；Gadge及既有 GA_Dodge/Gadget 保留占位，蓝图/旧命名调查单列为只读证据。本两记录已保存回读并交回冻结。
+
+以下各节保留当时交回的历史结果与验证边界；“尚未构建”“生产调用尚未接入”等只描述对应历史阶段，最新状态以本页当前检查点与 Gate80 节为准，原历史结果不改写。
+
+## Gate80：正式启动与配置分发根因验收（2026-10-05）
+
+- 根因：四个 Native InitState Tag 已定义、组件已有 feature 注册与本地 StateChain，但未向同 GI 原生 `GameFrameworkComponentManager` 注册有序阶段。空顺序表不能把 Hero 的较晚状态认作已达到 DataAvailable，可能阻止 Extension 进入 DataInitialized，因而不调用既有唯一 `ApplyPawnDataToConsumers → CMC.SetMovementSet(PawnData.MovementSet)`。Gate78 实际 null／0 样本失败保留；当时未读原 feature 状态，不能倒写成实测具体卡点。
+- 修正：System 新无状态 `UGGYGOInitStateRegistrationSubsystem` 在原生 GI 初始化中通过 `InitializeDependency` 取得同 GI 原 Manager，锚点注册 Spawned→DataAvailable→DataInitialized→GameplayReady；反向冲突和无效依赖明确诊断，成功日志只在原生相邻正向 true／逆向 false 全通过后输出。顺序与 actor feature 状态仍归原生 Manager；Character 原状态机与唯一配置分发入口保持。
+- CMC 既有 `GetMovementSet() const` 新增只读反射标记，观察的是实际 accepted 配置；未绑定或拒绝时仍返回 nullptr，不以请求资产替代结果。M3／Hero1 现有生产入口已编码／编译，本轮只纠正图文中的“仅声明／待接”旧标签，不据此宣称动态来源或网络通过。
+
+| 实际门禁 | 已读回结果 | 原始证据 |
+| --- | --- | --- |
+| 完整 GGYGOEditor 构建 | Succeeded，8 actions，49.43 秒，exit0；两条既有 NonInstanced 弃用 Warning 保留 | [Gate80 Build](../../../Saved/Logs/GGYGO_Gate80_Build_20261005.log)，末尾 Result／执行时间 |
+| 同 GI 原生顺序 | RegisteredOrder 四阶段成功；该日志前已校验正向 true／逆向 false | [Gate80 正式 PIE](../../../Saved/Logs/GGYGO_Gate80_FormalPIE_20261005.log)：2529 |
+| Begin 前注册观察／原绑定及实际配置 | 原 Map／PC／Pawn／CMC／ABP 在 0.359 秒绑定；CMC 接受 `/Game/System/DA_Movement_Default.DA_Movement_Default`，hold=1.5 秒，interp=6 | 同日志：2591 |
+| 原组件状态 | Extension、Hero 都是 `InitState.GameplayReady`；原 Controller 身份一致。相等的 has_reached=true 本身不证明顺序 | 同日志：2929–2931 |
+| 被动观察及关闭 | 180 秒、1642 个内存样本；已打印 keys_down 为空、gait NONE、速度0。deadline 释放 callback；MCP StopPIE 后 false，原 UE 正常 exit0 | 同日志：2925 及原生关闭段；末尾 Normal Shutdown |
+
+本检查点有限验收启动与实际配置分发。没有 W 操作证据，普通移动既不判成功也不判失败；Run、释放重按、首按、网络及曲线运行消费继续未验，不扩回归矩阵。Input TestGI 刻意不调用 Super.Init 的边界保持，其普通夹具不证明新 GI 注册器运行。
+
+本轮没有保存资产或修改业务曲线：旧 `StateMemory.GaitBlendY` 序列化兼容保持，BlendSpace 实际 X 轴显示名改为 `WalkRunBlendAlpha` 仍待保存；GA_Dodge／Gadget 保持占位。源码、观察脚本和资产冻结；图文与源码事实配对后交统筹，不执行构建／UE／Git。
 
 ## 历史阶段 10-StrictConfig-S2：MovementSet 统一纯校验
 

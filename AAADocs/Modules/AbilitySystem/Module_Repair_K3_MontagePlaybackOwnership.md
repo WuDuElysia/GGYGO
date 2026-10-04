@@ -67,3 +67,29 @@ Check／Clear 不调用 ASC 活动资产查询，也不依赖活动实例存在�
 Task Activate实际消费ASC单一Result/原Handle/Guard，删除全局尝试表/token/新实例扫描；原实例委托携原Guard，原混出TryClear保持时机，外调中结束的原停止义务由调用栈共持，事件/取消/RootMotionScale资源只属Task。Completed仅为原实例Ended事实，不Check正常混出已退休的ASC证明，也不授结束后继GA权限；GA及Combo/Boss原生命周期认证仍另步未接。
 
 源码未UHT/编译/UE，旧nonGuard/after-Super/手工instance ID夹具未适配，历史严格失败未复测，不新增矩阵。统一GA终止的受控激活/拒绝同调用自动Retrigger可见行为仍待用户决定，未授权四源实现；正式AnimClass、资产及联机仍开放。相关AbilitySystem四份图文、Animation结构及三个总览入口已由统筹同步保存回读；两Canvas增加两个节点/两条边，原节点几何和边拓扑保持，JSON/链接/锚点核对通过，无原生视觉验收。
+
+## 2026-10-05共同生命周期与E14-C整需求有限检查点
+
+以上各首步/接力阶段记录完整保留为历史。本次共同GA/ASC、Combo/Boss/Admission迁移及Process/OnSpawn/Boss BT受控请求点已落盘、冻结并编译；Activate/End/Cancel为final，实际NotifyActivated签原身份，Initialize→原准入/相机→Body，一次Context Cleanup→native End；ASC仅关联GA同一原记录的实际退出见证并唯一发布Completed，无第二执行/调度/状态权威。GA原资源捕获与Task停止/监听分责，窗口/查询/去重归Combat、位移归CMC、姿态/窗口语义归Animation。
+
+当前精确文档租约由统筹登记于AAADocs/Coordination/Module_Repair_Parallel_Schedule.md：本作者独占AbilitySystem结构/模块计划/原请求计划、五张既有Canvas及本记录共9文件；玩家战斗5、BossAI7、Combat查询3文件各有唯一原作者。源码/资产冻结，无UE/build/Git/全局入口写权，无新过程JSON或重复摘要。局部当前事实、流程与边界已集中同步；图文校验与最终冻结证据随一次交回提供。
+
+### 真实必要验证
+
+- 构建日志：Saved/Logs/GGYGO_Gate79_Build_20261005.log，Editor Succeeded、4 actions、12.03秒、exit0。
+- 原报告：Saved/AutomationReports/ModuleRepairGate_20261005_79_Smoke/index.json；原日志：Saved/Logs/GGYGO_Gate79_Smoke_20261005.log。7叶为5 Success/2 Fail/0 Warning、exit1，总0.0760747045秒。故障叶RequiredGE保留1条、Builder/Combo保留2条真实生产Error；四RuntimeHit Case行为断言PASS，未过滤、ExpectedError或改绿。
+- 通过范围：实际Physics Query→Owned Trace订阅→生产Combo hit；显式无GE、有效GE两正常模式；运行RequiredGE失效/真实Builder扩展后Spec失效→固定Original直接End(true,true)，包括CanBeCanceled=false；故障不增加该hit的Apply/Cue。原Combo纠正、Boss Mesh/Cleanup/原Completed A→全返回→B及Input/Movement普通叶均0E0W。
+- 原参数/身份/次数/顺序和资源阶段均有真实断言：GA早数据通知携实际End复制参数；ASC NotifyAbilityEnded未接复制参数、ReplicateEnd固定false；Completed保留首次Context。事件1→2→3、回调退出与原资源还原通过。触发前两原Task Active/OwnerFinished0；GA早广播时这两原引用仍在native账本，但任务Finished/OwnerFinished1、项目资源已还原；UE随后Reset，ASC/Completed/返回账本0。
+- 两次测试契约误读已按实际UE源修正：ASC native参数不是GA End参数的镜像；GA早广播不是native Task登记最终清空时点。测试只复制只读观察，不改UE账本、生成第二事实来源或放松真实资源断言。详细玩家证据归Module_Repair_04_Validation.md。
+
+### 来源与业务边界
+
+原身份发行和受控Try外层来源分离。当前GA.cpp TryCompleteOriginalTermination核不可变bHasControlledTryBoundary；raw非虚Try/CallActivate仍可签实际Original并清自己的原资源，但缺外层返回见证时明确UnsupportedEntry、不发布协议Completed。不能继续用旧“只有raw同步Cancel自身虚返回未见证”的解释，也不能把所有direct End/Cancel笼统标为不支持。活动同实例/Busy拒绝自动重开，不按同Spec一概拒绝PerExecution不同实例。
+
+共享Builder失败输出false/空载荷；Combo本批故障直接End原动作，Boss仅拒该hit，正常有效Spec免疫/拒绝的碰撞Cue政策保持。无缺依赖后替代GE/固定资源、Cancel→End或第二生命周期兜底。
+
+### 保留的失败与未验范围
+
+Gate71首次编译/GetOutcome/GetReason消费者错误及R1原strict/raw失败、Gate72原2失败/第二teardown栈未精确定位、Gate75 C2248初次编译失败、Gate75-R1 native复制字段断言失败、Gate77 GA早资源时点断言失败及其原日志/报告均保留。既有strict/raw断言未改，Gate79普通必要验证不将历史红测标通过。
+
+未验：raw/native外层/强制立即重入及PendingRemove/锁内teardown完整边界；native捕获析构/remote回放极端场景；完整正式Combo/Boss BP/Notify/Montage/GA/ABP/Socket与战斗资产、Boss BT/Montage/Trace/watchdog/CMC/GE链、Shared预载资产失效、底层MakeOutgoingSpec创建失败、Execution数值、CueNotify表现、RPC/联机/预测/cook。有限验收E14-C必要行为，不宣称整个K3/GAS/Boss/正式连段完成。

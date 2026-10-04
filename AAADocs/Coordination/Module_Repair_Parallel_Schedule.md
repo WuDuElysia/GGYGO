@@ -2,6 +2,16 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
+## 最新协作方式（2026-10-05，覆盖冲突的历史步骤要求）
+
+统筹只负责需求理解、按模块分发、依赖/文件冲突协调及验收；模块技术方案、内部拆分、实现和自审由组长自主负责。当前分配的文件归属仍有效，同一文件唯一写入者；同一授权文件内不再因方法白名单或每个内部步骤未另审批而停工。共享接口和文件换手仍须相关组长协调并冻结，不扩大无关范围。
+
+完整模块需求开发和约定测试完成后集中更新架构Markdown/Canvas；开发期间不逐步骤改笔记。本表复用现有任务条目，不默认增加预检/交接JSON、全项目哈希快照或重复摘要。真实阻塞及失败仍保留；正在进行的优化继续，未分配新任务的会话保持待命。详见项目`AGENTS.md`的2026-10-05约定。
+
+用户已批准牵头组长与整链检查点：本批GAS原激活/结束/资源清理接线由AbilitySystem（`01a0e5b5-1b3a-7783-a667-e8e38d7a72fb`）牵头，参与Combat玩家动作、BossAI及Input夹具；移动首次同步与真实held接线由Movement（`01a0e5b5-83e6-70b3-9e67-c9e8547586a4`）牵头，参与Input/Hero。牵头在需求范围内联系参与既有会话，汇总方案、收敛接口及配对/冻结状态，不能抢写其他模块或新增子代理；统筹协调未解决冲突及公共构建/UE/Git窗口并最终验收。
+
+整链检查点：GAS共同入口与各派生/夹具配齐、Movement/真实输入消费配齐；牵头交回完整接线及冻结状态后，由统筹合并可同批验证的链路做一次Editor构建和必要冒烟。不是每个小步骤构建，也不运行未配对链路。Input Hero1在Movement牵头确认已有M3接口/接入契约稳定后可自主接续，仅原`Source/GGYGO/Character/Components/GGYGOHeroComponent.cpp`，需要改共享文件或扩大到头文件时说明真实接口缺口后协调；原已接受预检直接复用，不再重复整轮。此消费者在接口冻结后可与其余互斥实现并行，但统一构建仍等所有相关作者冻结。
+
 历史门禁：2026-10-02 Gate51。统一Editor Succeeded／7 actions／22.60秒／exit0，新运行时DLL。实际全量82 Success／2 Fail／其它0，原84条路径状态保持。D14独立Fail／1Error1Warning（1.28873秒），全量同叶Fail／1Error2Warning（含HTTP超时旁路警告）；两次均真实证明首次引擎帧CleanupGameViewport→RemoveLocalPlayer→PlayerRemoved发生于夹具清理前，Cold→Unavailable，PC失效、Source仍存活、重建计数0，未Begin／Attach／W。已定位测试窗口生命周期问题，不改生产Cold政策。FAILED红叶两生产Error／原1/1、2/2及请求3完成标记保持；日志全量56 Error6 Warning、独立15／4，不称全绿。256源／九保护构建及两次运行保持，UE退出。Character纯槽快照现已编译，无生产调用或本地动态证据。原R0／Montage／Run／资产／网络／GF／最终中文提交push继续开放。证据Saved/ValidationRecords/ModuleRepairGate_20261002_51_Result.json。
 
 历史模型设置保留：此前向原19组长发送ultra成功。本轮用户提供规则指定gpt-6.1-sol／xhigh，实际后继任务显式遵循xhigh；当前路由含新增Audio共20会话，未向闲置会话重复派设置任务。取消子代理、精确范围、唯一作者及统筹门禁不变。
@@ -20,21 +30,77 @@
 
 历史交回（2026-10-03，不代表当前编译状态）：Input Hero身份订阅准备和Character Host接口定义当时已冻结并有限接受，当时尚未编译；后续编译与生产迁移以当前进度入口和实际门禁记录为准。原证据：`Saved/ValidationRecords/InputHeroIdentityPreparation_Result.json`、`CharacterHostInterfaceDefinition_Result.json`。历史严格失败及资产／网络未验仍留账。
 
-当前推进（2026-10-04）：六源dce7836已中文提交push；Gate70原移动停止Success0E0W、连段Fail6E0W保持。M2四图文已统筹有限静态接受冻结，四文件0failed／57链接；GA两源薄hook已编码并有限静态接受，尚未新编译。现授权两条互斥生产线：Movement M3a两源首次同步Waiting／一次准入；AS仅GA.cpp OnSpawn改接既有受控Try。M3b/Hero1及GA派生共同启用未完。
+当前集成批次（2026-10-05，Gate79窗口结束）：21既有源码及原观测脚本全部冻结。Gate79完整Editor Succeeded（4 actions、12.03秒、exit0）；必要七烟5 Success/2 Fail、0Warning、exit1。RuntimeHit四Case全部behavior assertions PASS，原参数/身份/次数/顺序及分阶段资源断言通过；两Fail仅保留GE/Builder三条生产Error，不称报告全绿或正式连段/网络通过。E14-C必要中止行为可验收，源码/测试不再续改；局部图文由AbilitySystem牵头配对精确范围后集中更新，全局入口归统筹。旧失败与原始报告保留，详见唯一进度入口。
+
+Movement牵头与System、Character已核实并修正：四个InitState标签原先缺少原生Manager顺序注册，较晚Hero状态不能满足Extension的DataAvailable比较，唯一PawnData配置分发因此卡住；不是合法异步等待。System原作者独占完成`Source/GGYGO/System/GGYGOInitStateRegistrationSubsystem.h`、`.cpp`并已冻结，不再持有源码写权；在同一GI的原生Manager初始化后注册既有顺序并核对正逆比较，不持第二状态/Manager缓存/订阅/Tick，不改GI配置或引擎/Build.cs/Character/Hero/CMC/资产，不重排坏顺序或加兜底。Gate80完整Editor Succeeded（8 actions、49.43秒、exit0），正式原Map/PC/Pawn/CMC/ABP、System RegisteredOrder、原Extension/Hero GameplayReady及实际CMC配置分发均已证明。180秒观测没有W操作，Run未验；callback已释放、原生MCP StopPIE后false、UE exit0，26份源/脚本/保护核对保持。该启动根因有限验收，原Gate78 null/0样本保留；公共窗口释放，所有源码与资产继续冻结。
+
+2026-10-05当前检查点：23份源码已中文提交`7751ae7c107a01a440ee6c6cd90bf83ab7d64088`并push到GGYGO_Source/main（exit0），源码子仓干净；原观测脚本保持冻结。仅文档收尾可独立并行，由AbilitySystem牵头协调以下既有文件唯一作者；不授源码、资产、UE、构建、Git或全局入口写权，不逐内部步骤审批。Movement启动根因必要图文另由该牵头配对，Run/资产改名未验状态保留。Obsidian相对路径均以`F:/Obsidian/Doc/lyra学习笔记/GGYGO架构规划/`为根：
+
+- AbilitySystem组长`01a0e5b5-1b3a-7783-a667-e8e38d7a72fb`：`AbilitySystem/结构.md`、`计划_AbilitySystem.md`、`计划_原请求终止.md`、`GGYGO_结构_AbilitySystem.canvas`、`GGYGO_流程_AbilitySystem.canvas`、`GGYGO_流程_原请求终止.canvas`、`GGYGO_流程_能力仲裁.canvas`、`GGYGO_流程_伤害结算.canvas`，以及`AAADocs/Modules/AbilitySystem/Module_Repair_K3_MontagePlaybackOwnership.md`。
+- 玩家战斗组长`01a0ebc0-8780-7f92-86d0-2f028f08f147`：`AbilitySystem/计划_玩家普攻连段.md`、`GGYGO_结构_玩家普攻连段.canvas`、`GGYGO_流程_玩家普攻连段.canvas`、`BossAI/计划_Kevin_DemonBattle战斗接入.md`，以及`AAADocs/Modules/CombatActions/Module_Repair_04_Validation.md`。
+- BossAI组长`01a0e5b5-d01a-7210-8b91-ac4716a8b07e`：`BossAI/结构.md`、`计划_BOSSAI.md`、`GGYGO_结构_BossAI.canvas`、`GGYGO_流程_BossAI.canvas`、`GGYGO_流程_Boss选招.canvas`，以及`AAADocs/Modules/BossAI/Module_Repair_14b_Subleases.md`、`Module_Repair_14b_Validation.md`。
+- 命中查询组长`01a0e5b5-f763-78c1-86c8-fa760a9f2100`：`Combat/结构.md`、`GGYGO_结构_Combat.canvas`、`GGYGO_流程_Combat.canvas`。
+
+共24个互斥既有文件，集中同步本批已实现的受控入口、原资源归属/清理及真实验证边界。Combo必需GE/Builder故障结束原动作，Boss构造失败仅拒绝该hit，不能写成同一业务政策；旧raw/native红测、正式资产和网络未验继续保留。各作者遵循Canvas技能并读回核对，牵头汇总整批冻结和必要证据后交统筹验收；不新建过程JSON或重复摘要。
+
+GAS图文交回（2026-10-05）：上述24文件原作者全部实际停写、整包冻结，文档写权关闭。AbilitySystem牵头已配对当前源码事实、资源生命周期及有限验证边界；统筹对20份Obsidian图文独立运行既有只读校验，JSON、节点/边引用、标签、几何及链接全部通过，4份工程记录差异检查通过。原失败与正式资产/网络未验保留；不以静态校验称原生Obsidian视觉或游戏运行已验。进入本批精确Git收尾，不能据旧开放条目自行续写。
+
+Movement启动根因集中图文范围（2026-10-05，Gate80后开放）：由Movement牵头直接组织原System、Character作者，以下11个既有文件互斥，与上述GAS 24文件无重叠。System组长`01a0e5b5-eb47-7970-ba89-4b5f90919296`独占`System/结构.md`、`System/GGYGO_结构_System.canvas`及工程`AAADocs/Modules/System/Module_Repair_15_Validation.md`；Character组长`01a0e5b5-36b6-7c81-b10f-f10d5758423d`独占`Character/结构.md`、`Character/GGYGO_流程_角色初始化.canvas`、`Character/计划_角色与组件.md`（仅14.3/14.4）；Movement牵头独占`Movement/结构.md`、`Movement/计划_移动与动作位移.md`、`Movement/GGYGO_结构_移动与位移.canvas`、`Movement/GGYGO_流程_移动与位移.canvas`及工程`AAADocs/Modules/Movement/Module_Repair_10_Validation.md`。仅同步同GI原生InitState顺序注册、原Extension/Hero配置分发、CMC实际accepted配置及已实现/编译的M3/Hero接线；保留Gate78失败、真实Run/首W/网络未验及资产轴名未保存，不扩到ASC/Health或曲线业务。各作者自主保存并核对链接、JSON及源码事实后一次冻结，由牵头整包交回；不授源码、资产、UE、构建、Git或全局入口写权，不逐内部步骤审批。
+
+Movement图文交回（2026-10-05）：上述11既有文件三位原作者实际停写、整包冻结，文档写权关闭。统筹对9份启动图文及3份全局入口独立运行现有只读校验，JSON、ID/端点/标签、几何与链接全部通过；原工程记录进入精确差异与Git检查。Moving子状态机Entry→WalkRun的磁盘引脚证据不代表整体ABP入口绕过EnterMove；只读回读未改变资产。Gate80启动/配置有限验收、真实Run/首W/释放重按/网络未验、轴名未保存及Dodge占位均保持。源码、观察脚本、资产和所有本批局部图文继续冻结，公共Git交付仅由统筹处理，不自动恢复后继写权。
 
 前序交接摘要（仅历史；下方有效租约才决定当前写权）：
 
-不重复已完成的预检。M3a只扩同一CMC的准入阶段，M3b运输／服务端消费与Hero1随后接力；AS OnSpawn仅迁原请求入口，不代表raw/RPC/final生命周期或派生清理完成。两源码线冻结后统一编译＋必要冒烟，不运行半迁移GA生产，不新增严格矩阵。Parent／Notes尚未新提交，批外修改保护。
+当前生产源码均已交回冻结并编译；冒烟失败分类由两位牵头与对应既有组长直接协调。适配普通测试调用方时须保持唯一文件所有者，原raw/native严格复现、立即重入断言和失败记录不改绿。实际需要写入的既有夹具范围由牵头交回协调，不自行抢写；完整需求开发/测试完成后才集中更新架构笔记。
+
+本批后继唯一写入范围（2026-10-05，Movement/Input只读方案已交回）：Input组长`01a0e5b5-276c-7ea0-b469-4797f5059e2b`仅可修改`Source/GGYGO/Input/Tests/GGYGOInputTestTypes.h`及`.cpp`。依牵头后续收敛，本次先仅闭合A：既有LocalSessionReady适配项目CMC/原生输入初始化/唯一合法ASC Host及公开装配，原Ready/订阅/计数/Completed/清理/globalWorld/Viewport/HasBegunPlay=false断言保持。NativeBirth旧probe、数字/Cold/事实/时限/window/ownedPIE严格代码本批保持，暂不实施B/C的Source-only分支、标签变化或testGM；已知前置失败与正式Run/联机仍属后续整体需求，不标完成。共享生产接口冻结，不改Hero/Source/CMC/Camera/Host/配置/资产；不新增自动化叶或矩阵，不增加ExpectedError。组长自主实现、自审后冻结交回，完整配对批量编译/必要运行由统筹安排，不授UE/build/Git或架构笔记写权。
+
+GAS正常链路两份现有cpp（2026-10-05，AbilitySystem牵头收敛）：Combat组长`01a0ebc0-8780-7f92-86d0-2f028f08f147`唯一写入`Source/GGYGO/AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp`；BossAI组长`01a0e5b5-d01a-7210-8b91-ac4716a8b07e`唯一写入`Source/GGYGO/AI/Boss/Tests/GGYGOBossMeleeEndReentryTest.cpp`。复用各自既有夹具，正常受控A激活→原身份结束→Completed及实际已持资源恢复→原请求与通知回调返回后受控B激活/正常结束；Combat正常纠正载荷断言保持，Boss只证明Mesh/Cleanup/Completed。原raw/native立即重入helper、八条Boss断言及原严格失败不改，不加ExpectedError/过滤，不扩极端矩阵。无生产/共享头/资产/笔记写权，已有未建立资源及E14-C动态故障边界继续留账。AbilitySystem牵头直接组织原作者实施/配对，自审冻结后与Input同批统一编译和必要冒烟；不得自行开UE/build/Git。
+
+本批冻结交回：Boss正常叶单cpp已由原作者完成自审并明确停写，SHA256 `FB3768C81CC184B8FF4D80B5097952174358AB58FAEFE2A352AB02C45FEA40E2`；统筹读回完整diff/hash及范围检查，仅静态接受。该cpp写权关闭；`GGYGO.BossAI.Melee.NormalLifecycle`尚未编译/运行，不替代原严格失败或完整Boss战斗验收。Combat及Input仍须完整交回冻结后同批构建。
+
+Input A两源已完成自审并明确冻结，当前该两源写权关闭：h `03F1BC07D45E1BAA6DD0C92733065E6C3DD046A0CCC53758E5FC5F849C66A9DB`、cpp `CCB8D10B3309E4A26B3D33BF80775918806CCF9C79A0B2A2DA16E148A0FA08DF`。统筹读回完整diff/hash及范围检查，仅静态接受；普通模式已装配配置LocalPlayer/原生输入/唯一实际CombatantState Host，薄测试包装调用原公开生命周期/受保护订阅，未制造Ready或放宽生产校验。自身未用B/C准备已定向删除，原LocalSessionReady和NativeBirth严格尾部/断言保持；本批未编译/动态，正式Run/联机及NativeBirth旧前置冲突仍开放。Movement负责只读配对，等待Combat完整冻结后同批构建。
+
+Gate72整链窗口：Combat正常链单cpp已自审交回冻结，hash `4BCD3387AEE0EBC6D4A1C5E4D89593F7004E496B4C36A99C4F7D87BBD00C6CD7`，该写权关闭；统筹读回完整diff/hash并核对全部范围检查。当前20份未提交源码均停写；与Gate71-R1相比仅本批四份既有测试文件变化，其余生产源码保持，两个保护资产hash保持。统筹安排统一Editor编译与四项必要正常冒烟，尚无新结果；不跑未配对链路，不扩严格矩阵，不修改旧失败/断言，不开LiveCoding/热重载/资产保存或Git。
+
+Gate72实际结果：Editor Succeeded、7 actions、74.81秒、exit0，DLL `A9432D384005C4746F7B7018FCA4C46064FF9E2C986DD6F45F64A127391F77F7`；四叶2 Success/2 Fail、exit1，UE已退出。Boss NormalLifecycle与AuthorityAndMapping各0E0W；Input Fail1E1W因抽象GGYGOCombatantState无法Spawn，Combo Fail2E0W为纠正后watchdog断言及后续原Guard无效收尾诊断，B未执行，不标整链通过。原构建/报告分别见`Saved/Logs/GGYGO_Gate72_Build_20261005.log`和`Saved/AutomationReports/ModuleRepairGate_20261005_72_Smoke/index.json`。
+
+Gate72后继：Movement牵头直接组织原Input作者只在既有TestTypes.h/.cpp修正普通A夹具的具体合法Host类型/实际装配与清理，不能取消生产abstract、使用错误触发的类替代或修改原断言；仅该两源写权重开。AbilitySystem牵头与原Combat作者先只读分类实际watchdog与收尾顺序，生产/当前正常叶cpp暂冻结；若确需修改原夹具或生产机制，交精确根因/唯一文件所有者及范围后协调，不扩极端矩阵。Boss正常叶及所有其它源码/资产继续冻结；共享UE/build/Git由统筹安排。
+
+Input具体Host修正已由原作者交回自审并明确冻结，两源写权关闭：h `77C37898AC5FADDAA3809C40A2E28B3584A1059611CC3DD8ADF6CA5AAA2ACAF1`，cpp `BB2302FFCF9833D60ECB01B31A877275B8CA0CC131FF3DD86722E21B9D508084`。显式测试类`AGGYGOInputTestAbilitySystemHost`仅继承生产Host并调用父构造，不override业务/ASC/Attach/Detach；初次Spawn直接使用该固定具体类，没有失败后改选类或改生产abstract。统筹读回新增类/实际Spawn/hash及范围检查，仅静态接受；原断言/严格NativeBirth代码保持，尚未新编译或运行，等待Combo分类收束后同批窗口。
+
+Gate72 Combo分类后唯一续写范围：仅原Combat组长`01a0ebc0-8780-7f92-86d0-2f028f08f147`可修改`Source/GGYGO/AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp`，由AbilitySystem牵头直接组织。已核实生产watchdog按剩余Montage时长/有效速率+2秒；新增断言忽略纠正起播0.1秒，须保留检查并校正真实数学预期。正常叶早退时仍持Task/watchdog/Mesh，须在World拆卸前按受控入口返回的固定原身份结束并检查实际资源归还，不能借当前查询猜身份。第二Error日志发生在World清理阶段，具体Task回调无栈证据，不冒称已确定完整因果或已修生产。只修新增正常叶/相关只读helper与其失败清理，原严格复现/raw helper/旧断言保持；不改生产Guard/Task/GA/ASC/Combo或吞日志/增加ExpectedError，不新增极端矩阵、JSON或笔记。自审冻结后与Input具体Host同批统一编译/必要冒烟；当前其余源码/资产停写，无UE/build/Git权限。
+
+Gate73完成检查点：Combat正常cpp `D0C02A3DC9A1B4BFE4BAF9351CEEFB2CCAAE78DFBA4AE94A1171AEDE9CE57350`及Input具体Host两源保持冻结；相对Gate72仅这三份测试文件改变，生产及Boss普通叶保持。Editor Succeeded/7 actions/42.01秒/exit0，runtime DLL `98FEFFBDCC0CC3CBA735B07DD22388C28E25A2B938B7B0DE390BFA950A5A3E9E`。同四正常路径均Success：Combo实际A/B资源/Owned窗口、Boss有限Mesh/Completed、AuthorityAndMapping各0E0W；Input LocalSessionReady 0E1W，销毁binding close/metadata retirement交Movement牵头分类。20源码及两保护资产运行前后保持，UE/build退出；Rendering本次临时公共窗口已释放，原授权/冻结状态不变。两牵头只读收束E14-C故障中止、正式Run等必要剩余项；全部源码/资产/笔记写权仍关闭，不开LiveCoding/热重载/SaveAll或Git。旧失败/断言及Gate72早退回调栈未知边界保留，不拿正常烟替代完整生产/网络验收。证据`Saved/Logs/GGYGO_Gate73_Build_20261005.log`、`Saved/AutomationReports/ModuleRepairGate_20261005_73_Smoke/index.json`与`Saved/Logs/GGYGO_Gate73_Smoke_20261005.log`。
+
+Gate74正式运行已结束：正常编辑器PID37724以exit0退出，日志`Saved/Logs/GGYGO_Gate74_FormalPIE_20261005.log`。原生HTTP MCP握手、工具发现及正常Start/StopPIE实际成功；正式`/Game/Map/Untitled`的BP_GameMode/Teams原创建对及项目CameraManager已读回，截图可见原角色/取景。被动脚本实际启动后因PC的`get_pawn`未暴露Python而明确停止，0样本、callback已释放；未验证真实W或Run，不称整移动验收。UI控制台之前已出现InputFlushed→OwnerSyncInvalidated，收尾两条原输入资源失效诊断保留。20源码及两保护资产运行后保持，没有保存/导入资产、LiveCoding或输入注入。Movement仍唯一可修`AAADocs/Scripts/observe_formal_movement_pie.py`的实际反射查询并自审冻结，不改旧工具/生产/资产；Rendering本次临时窗口释放，原授权/冻结状态保持。
+
+后继整链批次（尚未新编译）：AbilitySystem牵头GAS故障烟，原Combat组长`01a0ebc0-8780-7f92-86d0-2f028f08f147`唯一可写`Source/GGYGO/AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp`及`GGYGOPlayerComboLifecycleTestTypes.h`；复用既有夹具，真实无GE/有效GE命中对照与启动后必需GE失效/Builder失败且不可取消，核固定Original End、故障hit无Apply/Cue及实际已持资源归还。原断言/诊断保留，无生产/共享GAS接口、极端矩阵或ExpectedError。Movement牵头输入收尾，原Input组长`01a0e5b5-276c-7ea0-b469-4797f5059e2b`唯一可写`Source/GGYGO/Input/Tests/GGYGOInputTestTypes.cpp`，将已Detach后的Host.Destroy置于Pawn.Destroy之前，按原PC仍活着的合法生命周期执行既有Host full Clear；不改生产校验、原断言或过滤日志。两线文件互斥且共享生产接口冻结，可直接各自实现/自审并停写交牵头，完整配对后一次统一Editor构建和必要冒烟，不逐方法审批；其余源码/资产/笔记冻结，无子代理或各自UE/build/Git权限。
+
+后继冻结交回：Input单cpp实际hash `0CF25D8217F8AC3E7210D1D4FDC4309F7709BBD5A998E78D6CC53E2740FCDD59`，原作者已明确停写；统筹只读核对Shutdown，并在内存逆向仅4句换序精确恢复Gate73完整cpp hash `BB2302FFCF9833D60ECB01B31A877275B8CA0CC131FF3DD86722E21B9D508084`，头文件仍`77C37898…`。该cpp写权关闭，warning消失尚未动态证明。Movement观测脚本最终实际hash `08C969AE64EF06A9038106ACE0A47C10011AA9C035043E1E4C061F1A54E2C5B7`已作者冻结、统筹完整读回，仅静态接受；先前`B53D47A1…`为中间版，不作为当前冻结版本。原PC GetControlledPawn、CharacterMovement/Mesh及精确UPROPERTY反射字段、集中表面检查代替错误调用，无生产/输入写入，尚未在UE验证。
+
+Gate75合批窗口及首次失败：AbilitySystem牵头完成配对后，Combat两测试文件冻结，cpp `CDF5CD342E73903B333A1A1DA1429042B80BE4BCFF908DD5F10583575D17466E`、h `1E5E3378CBEE530C3342893C801EDE00FF568BBA2DF0ED9ACD2EBABB31F10793`；仅新Builder场景启动前显式配置合法Exclusive。21份未提交源码当时全部停写，相对Gate73仅这两文件及Input单cpp改变。Editor构建实际Failed/OtherCompilationError、112.74秒、exit1，唯一C2248位于LifecycleTest.cpp:1035：外部调用项目GA的protected SetCanBeCanceled。原日志`Saved/Logs/GGYGO_Gate75_Build_20261005.log`保留。
+
+Gate75-R1实际检查点：原作者仅修正测试窄桥接后冻结，cpp `3048C1C1…`、h `E5957793…`；牵头完成配对。Editor Succeeded/4 actions/15.48秒/exit0，新DLL `A6542B34C4A04C0A2127CF9BD6591BE6C0F93057E57F409FC353EC2EDCFD25AC`。七烟5 Success0E0W、2 Fail、exit1；Input销毁Warning消失，NormalModes Case0/1均behavior PASS。RequiredGE/Builder两故障各额外有原生EndedData复合断言失败，behavior FAIL（非仅生产Error），NativeEnd/Completed各1、无新增Apply/Cue及资源检查未报失败。AbilitySystem牵头已核实新增夹具混用事件：原生ASC OnAbilityEnded复制字段固定false，GA WithData事件才携实际End参数。21源码及两保护资产运行后保持，UE/build已退出；原报告`Saved/AutomationReports/ModuleRepairGate_20261005_75_Smoke/index.json`及两日志保留，不标E14-C整链通过。
+
+Gate76正式观测窗口已关闭：新DLL、正常编辑器PID51968、原生MCP实际握手及工具发现成功；反射检查发现Pawn.Controller与CMC.MovementSet为protected，明确报错，未注册观测/进入PIE，0样本。MCP IsPIERunning=false，正常关闭日志完整且进程已消失，不冒称取得原生退出码或证明Run；日志`Saved/Logs/GGYGO_Gate76_FormalPIE_20261005.log`保留。后继唯一写入者：原Combat作者仅LifecycleTest.cpp修正两事件各自的严格观察/诊断（测试头/生产保持）；Movement仅原被动观测脚本修公开查询，若确缺公开反射接缝先交具体范围。两线可互斥自主推进，统一冻结后同批编译/必要烟；其余源码/资产/架构笔记冻结，无子代理，不扩严格矩阵。Rendering本次临时公共窗口释放，原授权边界不扩大。
+
+Gate77后继最小范围已协调：Movement独占原观测脚本及`Source/GGYGO/Character/Components/GGYGOCharacterMovementComponent.h`，仅将既有公开const GetMovementSet反射化，保留签名、方法体及未接受配置返回null的语义；脚本通过原生GetController及该getter双向核对原绑定和实际接受的配置。不读受保护字段或以请求资产冒认CMC已接受，不改cpp/业务/网络/资产。该头文件与Combat单测试cpp无写入冲突，C++调用方签名不变，两组长自主实施/自审并冻结后同批编译及必要烟；其余源/全局架构笔记保持冻结。
+
+Gate77正式冻结：AbilitySystem牵头配对完成，原Combat单cpp `2ABBDC6C…`冻结，GA/ASC两个事件按各自真实身份/参数/次数/顺序核对，Completed及资源恢复保持，测试头仍`E5957793…`。Movement原两文件冻结：CMC h `015CE78A…`仅既有getter一条反射标记；脚本`32440A5D…`通过公开查询保留双向原绑定与accepted资产身份校验。统筹实际hash/相关内容读回匹配，21源码全部停写，合批Editor/原七必要叶及后继正式观测由统筹安排；未有本批运行结果，旧失败保留，不新增矩阵、JSON或笔记写权。
 
 - Input B2三文件actual completed且冻结，root h8C1DFEBD…／cppB4926513…／Contract8E2959B1…匹配，原薄通知／Begin-Bind-保存-Attach／事实直交原CMC／原Source GetRequest／失效清理有限接受。Source/CMC/Extension/默认输入配置及网络/Profile/Run/Cold-Rearm业务未改；B1/A保护34方法与整源逆向仅作者证据。源码写权关闭，未新编译/UE，正式重建／首真实移动／释放重按／暂停Flush恢复及局部图文仍开放。
 - Combatants Refresh query三文件写权关闭，实际回合completed并明确冻结；统筹独立逆向恢复E36A2495…写前整文件hash，当前cpp57D5279E…及两记录hash吻合。仅Refresh OriginalScope检查原Host／端点／opaque本地槽，ASC唯一认证快照、原生权限与Commit；Release／H1/H2/H3保持。新修正版未编译／冒烟，Obsidian局部同步另接力，不自动续写。
 - Teams创建者A两源、两记录B及四Obsidian图文均actual completed／冻结并有限接受；root四图文hash、源／两记录保护、受影响内容、两Canvas JSON／ID／边／无重叠及51链接目标通过。锚点、原图几何／拓扑与全文非目标保持仅作者证据。A随Gate59统一编译成功，未动态；C13、非法保存回落、默认容量、出生点、Logout／完整切换保持开放。下一源码范围未授权。
-当前唯一有效范围（2026-10-04）：
+当前唯一有效范围（2026-10-05）：
 
-- Movement M3a仅GGYGOCharacterMovementComponent.h/.cpp：同一CMC正常首次Owner Waiting／原Observer＋Binding＋SourceRequest＋Ready一次准入；真实释放/失效只撤原请求，保留FAILED，地方authority/AI路径保持。无M3b/Hero/Source/math/RMS/资产/文档/build/UE/Git写权。
-- AS GAOnSpawnControlledEntry仅GGYGOGameplayAbility.cpp的TryActivateAbilityOnSpawn：原侧选择与原位置一次调用既有TryActivateAbilityWithTerminationBoundary，非法非项目ASC显式拒绝；GA.h/ASC/其他方法/派生/测试保持冻结，无文档/build/UE/Git写权。
-- M2四图文与GA薄hook两源已交回冻结，有限静态接受；后继共享启用/final生命周期、Combo/Boss原资源迁移、M3b/Hero1尚未实施。只做统一编译＋必要冒烟，无子代理或新矩阵。
-- 统筹独占全局/build/UE/assets/Git。六源检查点dce7836已push；Parent/Notes等待本批交接排队，只纳入明确范围，排除BP_PC_Pyrios及渲染等批外修改。gpt-6.1-sol/xhigh Fast关闭，不边写边编译，不LiveCoding/热重载/SaveAll。
+- Gate71首次完整构建失败保留：BossMelee.cpp误用GetOutcome/GetReason。三处消费者已改实际Result字段并冻结（cpp26687C2F）；同批Gate71-R1实际Succeeded、5 actions、12.66秒、exit0，已链接runtime DLL FD063E02。七叶冒烟1成功/6失败、exit1，UE已退出，两个保护资产hash未变。Movement AuthorityAndMapping成功；GAS旧重开期待/raw外层见证及Input夹具/OS窗口前置未通过，交牵头分类。所有生产源码继续停写；原日志/断言与C4996保留，不以旧DLL、吞日志或放宽生产guard代验。详见`AAADocs/进度总览.md`及`Saved/AutomationReports/ModuleRepairGate_20261005_71_Smoke/index.json`。
+- Movement牵头已交回M3b与Hero首次同步/重绑完整源码链，CMC两源及Hero单源全部明确冻结，当前写权关闭。原捕获/receipt/准入/回放及同步绑定清理静态配对通过，Gate71-R1已编译；CMC h EA86A94C／cpp1523973B，Hero cpp1B623765。不升级旧Waiting、不借后继、不重发Started或清FAILED。AuthorityAndMapping成功，Input前置失败不能证明Run/首次同步/重绑/联机；牵头收敛实际正常运行验证。蓝图调查只读，不授资产或新增源码范围。
+- BossAI M1与原两夹具四文件已交回并冻结，当前写权关闭：`Source/GGYGO/AI/Boss/Abilities/GGYGOBossMeleeAbility.h/.cpp`、`Source/GGYGO/AI/Boss/Tests/GGYGOBossMeleeLifecycleTestAbility.h`、`GGYGOBossMeleeEndReentryTest.cpp`。Gate71-R1已编译，Task GC后的原watchdog来源修正已包含；EndReentry实际Fail4E，原8断言保持，立即重开/新资源期待未通过，普通旧资源恢复断言本次未失败。与已确认Busy政策的配对由AbilitySystem牵头汇总，不改绿；不授权续写BT B1、GA/ASC/Task/Trace/CMC、资产或笔记。
+- Combat Combo2及E14-C两源已实现、冻结并编译Gate71-R1，当前写权关闭：`GGYGOPlayerComboAbility.h/.cpp`，最终h89B2F4EF／cpp8BCDEBBF。必需GE同次校验，依赖/Builder失败向固定Original直接End，无Cancel→End兜底，显式无GE与合法Spec免疫后的Cue政策保持。TypedCorrectionPayload实际Fail1E仅raw终止诊断；ActivationCommitAndEndReentry实际Fail17E，早退后分支未验，动态GE中止未验。原夹具/断言/失败保留，普通调用方适配由牵头协调原Combat所有者；不授共享源码、资产或笔记写权。
+- AbilitySystem牵头已汇总GAS整链交回：GA/ASC及Admission六源、Boss四源、Combo两源、Input夹具两源全部冻结并编译Gate71-R1，当前生产源码写权关闭。native原身份、Initialize/Body/Cleanup及final生命周期已落盘；GroupLifecycle实际Fail21E，raw非虚Try外层见证的UnsupportedEntry及旧立即重开期待保留。牵头直接协调Combat/Boss/Input，区分真实回归与旧测试契约并收敛最短普通完整链路验证；不运行半链、不追加严格矩阵或逐步笔记。
+- Input TestTypes两源及Hero单源已冻结并编译Gate71-R1，当前写权全部关闭。原父调用/计数/断言保持；Hero cpp1B623765、h87F2E2EA，Owner Invalidated只归还原装配并保留外层真实映射观察器，无自动重发/轮询。LocalSessionReady实际Fail3E1W、NativeBirthFirstDigitalPress实际Fail2E3W，夹具CMC/输入类型/CameraManager及OS窗口前置不合格。由Movement牵头协调Input的精确夹具适配及适当原生运行环境，不放宽生产guard，不授Source/CMC/GA/资产/笔记写权。
+- 统筹独占全局/build/UE/assets/Git。上批已push Source dce7836／Parent631654a／Notes6d31c8d，新源码全部冻结后才统一编译与必要冒烟；不运行半链、不扩严格矩阵，批外资产/渲染/其他笔记保护。gpt-6.1-sol/xhigh Fast关闭，无子代理/LiveCoding/热重载/SaveAll。
 - Audio原组长R1四图文actual completed/明确冻结且写权关闭；root全文/hash及独立JSON、28链接/3锚点、8节点7边/9节点6边和无重叠核对有限接受。旧Contract保护hash082ED165…不保持是root合法手动组件证据同步至A7994A2C…，原检查不标通过。root已完成Audio/结构.md及计划_音效接入.md两文件过时状态更正并保存hash/相关全文段读回，两文件窗口关闭，不改Canvas/资产/接口/行为。GF/Teams/H3前图文保持冻结；Input两IMC图文窗口已关闭，B1/B2局部图文待源码冻结后另授。
 - 两IMC仅RegistrationTrackingMode已迁CountRegistrations、逐包保存，原映射／过滤回读保持，精确原文件备份保留，资产写权关闭。18:29:51～18:30:15必要PIE启动及停止，旧注册拒绝消失；Host Refresh／Release仍失败、输入EndPlay保留原Subsystem失效诊断，不声称输入／Run全链通过。Audio脚本冻结且R1实际只读通过，原失败／原始差异保留，未重接线／保存。
 - UE／构建／资产／Git由统筹独占，不Live Coding／热重载／SaveAll、不新增子代理。正式资产／网络、后继笔记及中文提交push未完成。

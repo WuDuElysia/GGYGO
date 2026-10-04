@@ -1,5 +1,9 @@
 # 第 14b 批 Boss Encounter 回收：文件子租约
 
+当前更新：2026-10-05，共同GAS生命周期集中收尾。B1/M1生产消费者及普通Mesh夹具已编译，Gate73/79普通原Completed A→完整返回→B有限通过；源码/测试/资产继续冻结。本轮七文档已完成保存/有限自审并冻结，唯一作者为BossAI长期组长；该历史文档租约不授续写权限；核心GAS、玩家Combo/Kevin计划与全局入口另归原作者/统筹。
+
+以下日期对应的旧租约、子代理和门禁为历史范围，不授当前写权；E9及正式战斗/资产网络剩余边界继续保留。
+
 更新：2026-09-30。范围仅 E9；14a与14b源码继续冻结。统筹第13次门禁已完成14b UHT/完整Editor构建及两项Encounter自动化（项目47/47、succeededWithWarnings/failed/notRun均0）。E9源码/专项自动化通过，实际BT SafeStop/异步Abort、PIE世界EndPlay与联机仍未验。
 
 ## 冻结契约
@@ -117,6 +121,29 @@
 - 顺序/验收：两记录写前快照 → 实际日志/JSON及三叶state/duration/entries核对 → 第22次旧55按完整名称匹配均保持Success → 最新状态与覆盖边界更新 → 文本读回/原历史保留/白空间/保护哈希 → 两记录交回SHA-256即冻结。Forced合法回收不改称优雅Abort完整成功。
 - 非目标/停止点：不修改生产或断言，不UE/UHT/构建/自动化/Git/资产/代理，不同步Obsidian或全局入口。完成仅授两记录后停止写入；若证据不一致先交回，不猜测或扩大租约。
 - 状态：第25次完整Editor目标构建Succeeded（4 actions/13.08秒，exit0由统筹通知）、三真实BT叶Success/entries=[]、常规59/59及旧55保持已读实际日志/JSON核对。两记录读回仅含获批状态/新V1节，原历史保留、无尾白空间/冲突标记且有末尾换行；十四生产/旧测试、新测试对及四BossAI图文共二十保护文件哈希保持。Forced合法回收与Safe优雅对照分开，完整E9/E10/E11/生产Kevin/PIE网络未验边界保留。两记录交回SHA-256即冻结并停止写入，本步未UE/构建/自动化/Git/代理/资产。
+
+## 共同GAS收尾：七文件文档租约（2026-10-05）
+
+- 授权与唯一作者：统筹接受经AbilitySystem牵头汇总的精确7文件范围，BossAI长期组长（`01a0e5b5-d01a-7210-8b91-ac4716a8b07e`）本人直接实施；不创建/唤醒子代理。历史1～4文件仅内部拆分参考，本次为完整需求后的集中图文同步。
+- 唯一结果：B1受控原激活/原Completed消费者与M1原资源迁移的当前事实、普通Mesh有限动态证据及严格红测/正式未验边界，在既有局部图文和此记录对保持一致。
+- 精确文档范围（除这7份外均无本次写权）：
+
+- `F:/Obsidian/Doc/lyra学习笔记/GGYGO架构规划/BossAI/结构.md`
+- `F:/Obsidian/Doc/lyra学习笔记/GGYGO架构规划/BossAI/计划_BOSSAI.md`
+- `F:/Obsidian/Doc/lyra学习笔记/GGYGO架构规划/BossAI/GGYGO_结构_BossAI.canvas`
+- `F:/Obsidian/Doc/lyra学习笔记/GGYGO架构规划/BossAI/GGYGO_流程_BossAI.canvas`
+- `F:/Obsidian/Doc/lyra学习笔记/GGYGO架构规划/BossAI/GGYGO_流程_Boss选招.canvas`
+- `F:/ue_project/GGYGO/AAADocs/Modules/BossAI/Module_Repair_14b_Subleases.md`
+- `F:/ue_project/GGYGO/AAADocs/Modules/BossAI/Module_Repair_14b_Validation.md`
+
+- 源码来源/冻结：`AI/Boss/BehaviorTree/BTTask_GGYGOActivateAbility.h/.cpp` 的B1消费者，`AI/Boss/Abilities/GGYGOBossMeleeAbility.h/.cpp` 的M1资源批次，`AI/Boss/Tests/GGYGOBossMeleeLifecycleTestAbility.h` 与 `GGYGOBossMeleeEndReentryTest.cpp` 的原严格叶和单普通叶。共享GA/ASC/N0 Task/Owned Trace/CMC公开契约只读；不补第二套生命周期、原生BT来源或执行器。
+- 必要表达：统一final入口→Initialize→Body；固定Original的原Task/N0包、Owned Window/hit token、原Mesh/World/CMC收尾；Context匹配并先脱批次；受控Try的原同步历史或异步原Completed消费；Abort只撤本等待。原Completed历史不授新工作权限；raw可签原身份和Cleanup，但缺受控Try外层返回见证时最终UnsupportedEntry、无协议Completed，不能泛称direct End/Cancel都不支持。
+- 行为边界：Boss命中GE/Builder失败只拒绝该hit的damage/Cue；不套Combo整动作故障End。Gate71严格raw/helper/8原断言和4E证据保留；Gate73/79普通Mesh链不扩大为正式Boss战斗、B1动态、Montage/Trace/watchdog/CMC/GE、Kevin资产或PIE/网络。
+- 只读输入：项目Canvas技能、计划蓝图/模块参考及相邻结构、冻结生产/测试、Gate71失败/修正构建与Smoke、Gate73/79的Boss叶和Gate79构建日志。既有14a历史不新建可写当前副本；共同GAS后续状态复用这份14b记录对（此前已承接15F及图文收尾）。
+- 顺序/检查/停止点：按真实接口修改两Markdown→三Canvas→此记录对；保留旧报告历史、节点/边ID与颜色、可用布局，节点正文必要时容纳扩高；核对JSON/唯一ID/端点/标签/几何、wikilink目标与锚点、源码和原历史、保存读回后一次交回并冻结。不新建过程JSON/重复摘要，不自行build/UE/Git；统筹Movement Gate80窗口独立。
+- 所有权排除：`BossAI/计划_Kevin_DemonBattle战斗接入.md` 由原玩家战斗作者同步；本作者不抢写核心AbilitySystem、玩家Combo/Kevin、Combat/Movement或全局入口。源码和资产始终冻结。
+
+- 交回冻结：七份保存全文与预期一致；三图合计32节点/31边，JSON、ID/端点/标签/颜色/原拓扑、矩形零重叠和逐行文本容纳估算通过。62处wikilink解析到16目标，4处锚点链接有效；源码六hash保持，原历史仅在内存逆向比对后可逐字恢复，无尾空白/冲突标记。三图只改正文/4条边标签及结构ga高度350→480、contract y1370→1550；没有新增节点/边。七文件现已停止写入冻结；未进行原生Obsidian渲染、UE/build/Git或资产操作。
 
 ## 统筹独占范围
 

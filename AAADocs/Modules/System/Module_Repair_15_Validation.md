@@ -632,3 +632,19 @@ MD+Canvas仍17处wikilink/10唯一实际目标，顺序与目标全文保持，�
 System MD SHA256=`B70C8CBEF7482CD9AC0992240E53B897D2F420246C015372BAAD968E6E06B6BC`；Canvas SHA256=`297FEE349E83B7EDE2407C5B6F8AA6755743B7E6397C11197233457EA8B07DDD`。四文件已实际读回、差异/接口事实/JSON/矩形/容量/链接与范围校验完成，冻结并立即停止，不接新源码/专项。GC销毁/GA-GE资源、null/abstract等其它运行拒绝、构造OwnerOuter、非Authority/client、共享预载逐项失败/覆盖选择、生产蓝图值/Cook仍未验证；不关闭第15批全部缺口。独立Health诊断成功不改变本模块覆盖范围。
 
 全局入口统筹独占：实际只读模块参考仍记部分失败专项进行中，计划_实施状态仍写该叶未编译/运行及旧租约，交统筹依据22同步，不在本四文件授权范围写入；历史测试报告保持原件。生产模块职责/状态唯一归属/依赖方向/清理责任无变化，本轮只补有限实证状态，无新增循环依赖/第二执行器/泄漏内部状态。未UE/MCP/UHT/构建/自动化执行/Git/代理，无新授权后续动作。
+
+
+## 2026-10-05 GI InitState 注册与 Gate80 有限验收
+
+本节仅记录本次启动根因需求；前文是对应日期的历史证据与租约，不据历史记录推导当前写权。
+
+- 原问题：Gate78 实际 `CMC.GetMovementSet()==null`、观测0样本。项目四个 InitState Native Tag 已完成语义键注册，但没有向各 GI 的原生 `UGameFrameworkComponentManager` 注册阶段顺序。空 `InitStateOrder` 只允许相等比较，较晚 feature 不能满足较早阶段查询，因此可阻断 Extension 的 `HaveAllFeaturesReachedInitState(DataAvailable)` 和配置分发。这是源码机制定位；当时具体 feature 状态未读回，不写成历史实测。
+- 实际产物：仅新增 `Source/GGYGO/System/GGYGOInitStateRegistrationSubsystem.h/.cpp`。原生 GI 子系统初始化中，通过 `InitializeDependency<UGameFrameworkComponentManager>()` 取得同 GI 原 Manager；四个既有 Tag 作为调用局部输入，锚点注册 Spawned→DataAvailable→DataInitialized→GameplayReady。
+- 唯一归属：原生 Manager 持阶段顺序和 Actor feature 状态。注册器没有成员状态、Manager 缓存、Ready、订阅、Tick 或额外清理资源。无效线程/GI/Manager/Tag、已有逆序、注册后正逆比较失败均诊断并结束本次初始化；不重排、不重试、不创建业务替代。异常分支已有限源码自审，本次没有运行故障注入。
+- 注册前拒绝已有逆序；注册后三组相邻正向 true、逆向 false 全通过才输出 `RegisteredOrder`。Tag 符号仍归 `UGameplayTagsManager`，有序 feature 状态归原生 ComponentManager；没有修改 GI 配置、Build.cs、引擎或 Character/Hero/CMC。
+- Character 接缝保持：Extension/Hero 经原生相对资格查询和 feature 通知推进；Extension 进入 DataInitialized 时唯一 `ApplyPawnDataToConsumers` 调用 `CMC.SetMovementSet(PawnData->MovementSet)`。ASC Host/Health 绑定属于独立生命周期，不把绑定成功当作配置分发前提。更早的 ReceiveInit 及不调用 Super.Init 的 Input 测试 GI 不属于已完成此注册前置的时段，本次未改其生命周期。
+- 编译实证：[Gate80 编译日志](../../../Saved/Logs/GGYGO_Gate80_Build_20261005.log) 第178–179行为 `Succeeded`、49.43秒；统筹记录8 actions、exit0。
+- 运行实证：[Gate80 正式 PIE 原日志](../../../Saved/Logs/GGYGO_Gate80_FormalPIE_20261005.log) 第2529行为同原 GI/Manager 的 `RegisteredOrder`；第2591行为原 Map/PC/Pawn/CMC/ABP 的真实绑定，MovementSet 为 `/Game/System/DA_Movement_Default.DA_Movement_Default`；第2929–2931行读回原 Extension/Hero 均 `InitState.GameplayReady`。相等的 has_reached 查询本身不证明顺序；顺序依据注册校验成功日志。
+- 观测与清理：同日志第2925行记录 `observation_deadline`、1642 samples、`callback_released=true`。180秒观测没有W操作，只观察到 NONE gait；统筹确认原生停止PIE后 false、UE exit0。原 Gate78 null/0样本及历史失败原件保留。
+- 验收边界：启动顺序注册和真实配置分发有限验收；首W/真实输入/Walk→Run/联机未验，轴名未保存，Dodge占位与曲线业务未改。不扩大共享预载/GC/Cook、生产蓝图开关或其它生命周期验证结论。
+- 本次集中笔记仅 System/结构.md、既有 GGYGO_结构_System.canvas 和本验证记录；Character 与 Movement 由原作者维护各自互斥范围，全局入口归统筹。不改原 AtomicSteps，不新建摘要、JSON 或流程图。

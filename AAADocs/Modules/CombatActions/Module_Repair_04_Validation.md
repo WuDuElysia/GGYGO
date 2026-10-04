@@ -1,5 +1,74 @@
 # 第04批验证与交接
 
+## E14 玩家连段：Gate79 有限验收检查点（2026-10-05）
+
+本检查点由 Combat 玩家动作/GA 集成组长在整条原生需求实现及必要合批后集中记录；源码继续冻结，本文记录当前局部实施与实际验证。下文第04批/Started/P1内容属于历史证据，不作为当前所有职责/租约或严格测试通过的声明。稳定接口、配置和清理机制见 Obsidian `AbilitySystem/计划_玩家普攻连段.md` 及连段结构/流程图；原终止证明归 AbilitySystem 核心文档。
+
+### 实施与状态归属
+
+- Combo 消费基类签发的 `FGGYGOAbilityActivationHandle Original`，经 InitializeAbilityActivation / ActivateAbilityBody 开始业务；ResourceActivation仅保存资源来源，段 token只保护本段任务/窗口。Task、Combat、CMC分别执行原播放、判定、位移，Combo不另建激活/终止或帧调度器。
+- 玩家 Owned 窗口由正式 Montage Task事件建立，保存确切 Window和hit订阅token；命中回调核对Original、段、Task与Window，结束只关闭原窗口，不使用Legacy OnMeleeHit或无身份关闭补偿。
+- 正常命中支持显式无GE和有效必需GE：前者跳过Apply仍走合法Cue；后者构造Spec→SetByCaller→ASC Apply→Cue。非法Override不换Shared/无GE；已选Shared缺失明确失败。
+- 命中期间必需GE校验失败或BuildHitEffectPayload失败：保留真实诊断，直接RequestAbilityEnd(Original,true,true)，该hit立即返回不再Apply/Cue；Exclusive且不可用户取消的原能力也使用这条End。已接受/延期结果不等于已完成，不发第二请求替代。
+- Combo Cleanup先摘原成员/身份/句柄/订阅，使用捕获原资源恢复Mesh/Tick/URO/prerequisite、清Timer、退Owned窗口/回调、TaskOwnerEnded。Task负责自身OnDestroy；原生ActiveTasks退休归UE。Boss要求解析出的必需GE与有效Spec；同类生命周期/动作资源失败走原终止，命中GE/Builder失败只拒绝该hit，不套Combo无GE正常模式或整动作End策略。正式Boss命中未动态验。
+- raw激活也可由真实NotifyActivated取得原身份并清理资源；原激活缺少外层受控Try见证时，最终UnsupportedEntry且不发布协议Completed。不能把所有direct End/Cancel或其自身调用跨度笼统当作Unsupported原因。后继从原受控请求及回调真实返回后的调用方继续启动，raw/native严格重入保持独立红测。
+
+### 实际构建与七叶结果
+
+| 证据 | 实际结果 |
+| --- | --- |
+| [Gate79 Editor构建](../../../Saved/Logs/GGYGO_Gate79_Build_20261005.log) | Succeeded，4 actions，12.03秒，exit0；编译/链接为当前夹具新增只读访问和分阶段断言提供门禁 |
+| [Gate79原报告](../../../Saved/AutomationReports/ModuleRepairGate_20261005_79_Smoke/index.json) / [原日志](../../../Saved/Logs/GGYGO_Gate79_Smoke_20261005.log) | 5 Success / 2 Fail / 0 Warning，进程exit1；无过滤、ExpectedError或skip，原Fail保留 |
+| RuntimeHit.NormalModes | Success / 0E0W；Case0无GE与Case1有效GE的行为均PASS |
+| RuntimeHit.RequiredGEFailure | Fail / 1E0W；Case2行为PASS；唯一Error为实际Combo必需GE依赖失败诊断 |
+| RuntimeHit.BuilderFailureUncancelable | Fail / 2E0W；Case3行为PASS；Error为实际Builder RequiredSpecInvalidAfterApplyAbilityTags及Combo故障诊断 |
+| 原四叶 | TypedCorrectionPayload、BossAI.Melee.NormalLifecycle、Input.Fixture.LocalSessionReady、Movement.Locomotion.AuthorityAndMapping均Success / 0E0W；不替代各模块完整验收 |
+
+上述“行为PASS”和故障叶真实“Fail”是两个同时保留的事实。统筹有限接受本需求既定故障响应和原生清理链，未宣称全套自动化绿色。
+
+### RuntimeHit 四个Case的真实进入与结果
+
+每Case使用独立真实PhysicsScene、已注册碰撞目标ASC、引擎SkeletalCube/Montage/Guard夹具。第一Trace Tick建基线，实际Mesh移动后第二Tick做Sweep；正式ASC Montage事件建立Owned Window，公开目标ASC Apply委托及CueManager路由计数。没有直接调用私有命中函数、手造广播或修改正式资产。
+
+| Case | 正向hit累计 Apply/Cue/SpecExtension | 故障构造与故障hit增量 | 原End/Completed |
+| --- | --- | --- | --- |
+| 0 显式无GE | 0 / 1 / 0 | 正常模式；原能力继续，随后固定Original手动正常End(false,false) | GA1 / ASC1 / Completed1，行为PASS |
+| 1 有效GE | 1 / 1 / 1 | 显式有效UGameplayEffect，随后同一原请求正常End(false,false) | GA1 / ASC1 / Completed1，行为PASS |
+| 2 必需GE运行失效 | 1 / 1 / 1 | 正向对照后关闭并开新Owned窗口，选入抽象Override；故障Apply/Cue增量0，未进入新的Spec扩展 | 原End(true,true)，GA1 / ASC1 / Completed1，行为PASS；叶Fail/1E |
+| 3 Builder失败、不可取消 | 1 / 1 / 1；终态SpecExtension2、InvalidSpec1 | 启动前明确Exclusive，真实SetCanBeCanceled(false)；正向对照后新窗口的实际已构造Spec在原生ApplyAbilityTags扩展中Def失效；故障Apply/Cue增量0 | 原End(true,true)，GA1 / ASC1 / Completed1，行为PASS；叶Fail/2E |
+
+正常EndResult与Notice的同一OriginalTermination、固定Original/End Kind/取消与复制参数均严格检查；生产Montage正常完成仍按Authority选择复制参数，夹具手动(false,false)不替代该业务配置。
+
+### 五阶段资源与实际事件契约
+
+| 捕获时点 | 实际任务/原生账本 | 资源与门禁 |
+| --- | --- | --- |
+| BeforeTrigger | 两不同原Task Valid1、State3(Active)、OwnerFinished0；NativeCount2且含确切两原身份 | 必需来源有效；触发前门禁实际成立 |
+| GA OnGameplayAbilityEndedWithData | 两原Task State4(Finished)、Active0、OwnerFinished1、Valid0为native正常垃圾标记；NativeCount2且含两原身份 | 原成员/身份/World/订阅和恢复责任标记脱开；step/token复位；原Window Inactive、Trace/Tick关闭、原Timer不存在/成员handle清空、Mesh/prerequisite恢复、Montage停止、所检查Task公开委托解绑，全部分项1 |
+| ASC OnAbilityEnded | NativeCount0；两保存原Task仍Finished/OwnerFinished | 同样全部业务分项1，旧严格终态helper通过；GA观察回调已退出 |
+| Completed | NativeCount0，保存原Task仍Finished/OwnerFinished | 资源分项/旧helper通过；固定Original Notice一次，两个原生观察回调已退出 |
+| Returned | NativeCount0、资源分项/旧helper通过 | 原能力inactive、当前受控激活空；不得仅凭资源已结束或Notice就替代真实返回门禁 |
+
+四Case均有五阶段实际诊断；所有终止后资源检查分项为1。BeforeTrigger的“已恢复”分项通常为0是活跃基线，不作为终态成功。快照只记录同步观察，缺失来源/Task/Window和未结束状态明确失败；不直接修改UE数组，不因Task垃圾标记跳过实际状态检查。
+
+本机UE5.8源时序：GameplayTask.cpp144–156 OwnerEnded置OwnerFinished并OnDestroy(true)，206–220完成任务/TasksComponent通知/垃圾标记；GameplayTasksComponent.cpp154–157在OwnerFinished时不向GA调用OnGameplayTaskDeactivated，因此GA.cpp1583的Remove不发生。GA.cpp842数据早广播后，852–860才遍历并Reset ActiveTasks，894/ASC.cpp1254才发ASC本地通知。这解释Finished原Task仍登记的合法阶段，并非第二任务执行事实。
+
+实际通知顺序GA1→ASC2→Completed3；普通夹具GA复制/取消false/false，故障true/true；ASC复制字段始终false，取消分别false/true。GA实际数据校验未用Completed Context替代；参数观察不证明真实网络送达。
+
+### 已修正的夹具契约与保留失败
+
+- Gate75-R1：新增复合断言把ASC本地replicate=false错误要求为故障true；修正为独立读取GA实际数据与ASC本地数据，保留字段/身份/次数/顺序严格检查。原两故障Fail及行为FAIL保留。
+- Gate77：新增GA早资源检查错误复用“ActiveTasks必须0”的终态谓词；原三RuntimeHit叶Fail、四Case行为FAIL保留。修正为GA业务/Task终止与尚待native退休登记分别严格检查；ASC/Completed/返回后仍要求空账本。Gate79读回了原来未打印的Count/成员/各分项，没有用后续聚合通过覆盖早期失败。
+- Gate75首次编译C2248及R1、Gate77原日志与报告不改写；Gate78独立Movement正式PIE历史诊断属于其原作者证据，本需求不改其Fail或行为记录。
+- [Gate71原严格报告](../../../Saved/AutomationReports/ModuleRepairGate_20261005_71_Smoke/index.json) / [日志](../../../Saved/Logs/GGYGO_Gate71_Smoke_20261005.log)：PlayerCombo.ActivationCommitAndEndReentry为Fail/17E0W，BossAI.Melee.EndReentry为Fail/4E0W；Gate79没有选择这两个严格叶，没有降低旧断言或改变raw/helper，普通叶PASS不关闭严格重入边界。历史原生P1诊断也独立保留在下方。
+
+### 有限验收与剩余范围
+
+本轮只证明受控本机Original消费、实际Owned Sweep/Apply/Cue及选定故障中止、原通知字段/顺序和资源阶段。Shared预载GE实际缺失、native MakeOutgoingSpec创建失败、正式Pyrios/Kevin GA/ABP/Montage/Socket/伤害GE配置、真实Cue Notify表现、Execution数值、完整动作与移动PIE、Avatar变化/预测拒绝/双端网络和复制送达未由这四Case验证；OwnerFinished路径的Count2不能外推到所有结束路径。
+
+当前测试CPP冻结SHA256：`C5B23166B57D1BDF95E831FDFF0B85199AD243B94794FCCD2B0B56BE0ECB7F3C`；Types.h：`E595779378EE2D82577CC81D485AF5AFF195B35FD699983F33F5AEFDB6443D0D`。这里只引用实际源码交接身份，不生成新过程JSON或扩大验证矩阵。
+
+## 历史检查点（以下保留当时记录）
 ## 04B4-StartedPositive 真实受保护 Started（2026-09-30，第19次实际通过、源码冻结）
 
 本步最初由 `gpt-6.1-sol / xhigh` 组长直接实施，无代理；当时授权为两测试源码及 04 两记录。静态交回后源码持续冻结，统筹完成第19次完整构建与实际运行。本次仅授权两份 04 记录同步真实证据和已接受的只读 Task 候选；没有任何源码、测试、资产、Obsidian 或全局文件写入授权。下列第17次是前置历史门禁，当前正向用例验收以第19次实际报告为准。
