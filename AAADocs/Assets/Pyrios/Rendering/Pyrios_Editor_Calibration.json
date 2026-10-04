@@ -1,0 +1,27 @@
+{
+  "shared": {
+    "LightingTint": [0.86, 0.92, 1.0, 1.0],
+    "AmbientFloor": 0.08,
+    "SceneLightStrength": 0.65,
+    "DiffuseBiasScale": 0.5,
+    "RampLow": 0.38,
+    "RampHigh": 0.7,
+    "RoughnessFloor": 0.18,
+    "RimGain": 0.15
+  },
+  "Body_1": {
+    "DiffuseGain": 0.44,
+    "SpecularGain": 0.3,
+    "MatCapGain": 0.11
+  },
+  "Body_2": {
+    "DiffuseGain": 0.46,
+    "SpecularGain": 0.26,
+    "MatCapGain": 0.11
+  },
+  "Weapon01": {
+    "DiffuseGain": 0.52,
+    "SpecularGain": 0.38,
+    "MatCapGain": 0.18
+  }
+}

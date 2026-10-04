@@ -1,20 +1,73 @@
 """Run with UnrealEditor-Cmd -run=pythonscript -script=<this file>.
 
-Builds an editable partial reconstruction from the imported Pyrios textures
-and AnimeStudio JSON. The diffuse ramp, specular and scene lighting are still
-approximations. Safe to rerun: updates Generated assets and binds their
-instances to the Pyrios skeletal mesh for editor previews.
+Builds an editable reconstruction from the imported Pyrios textures, material
+JSON and the extracted NapAvatarStandard shader. The game lighting pipeline
+and active shader variants still need a frame comparison. Safe to rerun:
+updates Generated assets and binds their instances to the skeletal mesh.
 """
 import json
+import sys
 from pathlib import Path
 import unreal
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+from pyrios_material_plan import BuildJournal, SLOT_INSTANCES, SUFFIXES, load_plan
 
 
 ROOT = "/Game/Characters/Player/Pyrios/Materials"
 OUT = ROOT + "/Generated"
 JSON_DIR = Path(__file__).resolve().parents[2] / "Content/Characters/Player/Pyrios/Materials"
+CALIBRATION_PATH = Path(__file__).resolve().parents[1] / "Assets/Pyrios/Rendering/Pyrios_Editor_Calibration.json"
 MEL = unreal.MaterialEditingLibrary
 EAL = unreal.EditorAssetLibrary
+MESH_PATH = "/Game/Characters/Player/Pyrios/Avatar_Male_Size03_Pyrois_Model"
+JOURNAL = None
+
+
+def touch(obj):
+    if JOURNAL is not None:
+        JOURNAL.touch(obj.get_path_name().split(".")[0])
+
+
+def save(obj):
+    path = obj.get_path_name().split(".")[0]
+    if JOURNAL is None:
+        if not EAL.save_loaded_asset(obj):
+            raise RuntimeError("Asset save failed: " + path)
+    else:
+        JOURNAL.save(path, lambda: EAL.save_loaded_asset(obj))
+
+
+def check_targets_clean(paths):
+    dirty = {p.get_path_name() for p in unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages()}
+    conflicts = sorted(dirty.intersection(paths))
+    if conflicts:
+        raise RuntimeError("Refusing to overwrite/save dirty target packages: " + str(conflicts))
+
+
+def preflight():
+    plan = load_plan(JSON_DIR, CALIBRATION_PATH)
+    packed = {ROOT + "/Texture/Pyrois_" + body + "_" + suffix
+              for body in ("Body_Map1", "Body_Map2", "Weapon") for suffix in ("N", "M", "A")}
+    required = {ROOT + "/Texture/" + name for name in plan["textures"]} | packed
+    required.add(ROOT + "/Texture/Pyrois_Body_Map1_D")  # Master graph's color default.
+    for path in sorted(required):
+        if not isinstance(EAL.load_asset(path), unreal.Texture2D):
+            raise RuntimeError("Missing/wrong texture type: " + path)
+    outputs = {OUT + "/M_Pyrois_Toon": unreal.Material, OUT + "/M_Pyrois_Outline": unreal.Material}
+    outputs.update({OUT + "/MI_Pyrois_" + s: unreal.MaterialInstanceConstant for s in SUFFIXES})
+    for path, cls in outputs.items():
+        if EAL.does_asset_exist(path) and not isinstance(EAL.load_asset(path), cls):
+            raise RuntimeError("Wrong output asset type: " + path)
+    mesh = EAL.load_asset(MESH_PATH)
+    if not isinstance(mesh, unreal.SkeletalMesh):
+        raise RuntimeError("Missing/wrong mesh type: " + MESH_PATH)
+    slots = [str(s.get_editor_property("material_slot_name")) for s in mesh.get_editor_property("materials")]
+    if any(slots.count(name) != 1 for name in SLOT_INSTANCES):
+        raise RuntimeError("Expected each target mesh slot exactly once: " + str(slots))
+    check_targets_clean(packed | set(outputs) | {MESH_PATH})
+    return plan
 
 
 def node(material, cls, x, y, **props):
@@ -31,6 +84,8 @@ def connect(a, b, name, output=""):
 
 def asset(name, factory, asset_class):
     path = OUT + "/" + name
+    if JOURNAL is not None:
+        JOURNAL.touch(path)
     result = EAL.load_asset(path) if EAL.does_asset_exist(path) else None
     if result is None:
         result = unreal.AssetToolsHelpers.get_asset_tools().create_asset(name, OUT, asset_class, factory)
@@ -107,12 +162,25 @@ def build_main():
         "LightDirection": vector_param(m, "KeyLightDirectionWS", 350, (0.35, 0.25, 0.9, 0)),
         "LightColor": vector_param(m, "KeyLightColor", 500),
         "Visibility": scalar_param(m, "KeyLightVisibility", 650, 1.0),
+        "SceneLightStrength": scalar_param(m, "SceneLightStrength", 725, 0.65),
         "EmissionColor": vector_param(m, "EmissionColor", 800, (0, 1, 2, 1)),
         "EmissionStrength": scalar_param(m, "EmissionStrength", 950, 0),
-        "RimStrength": scalar_param(m, "RimStrength", 1100, 0.15),
+        "RimStrength": scalar_param(m, "RimStrength", 1100, 1),
         "SpecStrength": scalar_param(m, "SpecStrength", 1250, 0.1),
-        "SpecPower": scalar_param(m, "SpecPower", 1400, 40),
         "UseMatCapMask": scalar_param(m, "UseMatCapMask", 1550, 1),
+        "Glossiness": scalar_param(m, "Glossiness", 1650, 1),
+        "MetallicScale": scalar_param(m, "MetallicScale", 1750, 1),
+        "DiffuseGain": scalar_param(m, "DiffuseGain", 1850, 0.6),
+        "SpecularGain": scalar_param(m, "SpecularGain", 1950, 0.4),
+        "RimGain": scalar_param(m, "RimGain", 2050, 0.15),
+        "MatCapGain": scalar_param(m, "MatCapGain", 2150, 0.35),
+        "AmbientFloor": scalar_param(m, "AmbientFloor", 2250, 0.08),
+        "DiffuseBiasScale": scalar_param(m, "DiffuseBiasScale", 2350, 0.5),
+        "RampLow": scalar_param(m, "RampLow", 2450, 0.38),
+        "RampHigh": scalar_param(m, "RampHigh", 2550, 0.7),
+        "RoughnessFloor": scalar_param(m, "RoughnessFloor", 2650, 0.18),
+        "LightingTint": vector_param(m, "LightingTint", 2750, (0.86, 0.92, 1, 1)),
+        "RimShadow": vector_param(m, "RimGlowShadowColor", 2850, (0.5, 0.5, 0.5, 1)),
     }
     # The five JSON MatCap slots track material-ID groups, not five full-body
     # additive coats. Empty slots stay disabled in their material instance.
@@ -130,24 +198,56 @@ def build_main():
     for i in range(1, 6):
         inputs["Shallow%d" % i] = vector_param(m, "ShallowColor%d" % i, 2150 + i * 135, (0.95, 0.95, 0.95, 1))
         inputs["Shadow%d" % i] = vector_param(m, "ShadowColor%d" % i, 3000 + i * 135, (0.65, 0.65, 0.7, 1))
+        inputs["SpecColor%d" % i] = vector_param(m, "SpecularColor%d" % i, 3800 + i * 135)
+        inputs["RimLight%d" % i] = vector_param(m, "RimGlowLightColor%d" % i, 4600 + i * 135, (0.55, 0.55, 0.55, 1))
+        inputs["ShadowIntensity%d" % i] = scalar_param(m, "ShadowIntensity%d" % i, 5400 + i * 135, 1)
     code = r'''
 float3 N = normalize(NormalWS);
 float3 L = normalize(LightDirection.rgb);
 float3 V = normalize(CameraWS);
-float bias = (LightTex.b * 2.0 - 1.0) * 0.22;
-float ramp = saturate(dot(N, L) * 0.5 + 0.5 + bias);
-float band = smoothstep(0.32, 0.48, ramp);
 float id = saturate(Packed.r);
 // The exported shader reverses floor(id * 5): 1.0 => group 1, 0.7 => group 2.
 int tier = clamp(4 - (int)floor(id * 5.0), 0, 4);
 float3 shallow = tier == 0 ? Shallow1.rgb : (tier == 1 ? Shallow2.rgb : (tier == 2 ? Shallow3.rgb : (tier == 3 ? Shallow4.rgb : Shallow5.rgb)));
 float3 shadow = tier == 0 ? Shadow1.rgb : (tier == 1 ? Shadow2.rgb : (tier == 2 ? Shadow3.rgb : (tier == 3 ? Shadow4.rgb : Shadow5.rgb)));
-float3 diffuse = lerp(shadow, shallow, band * saturate(Visibility));
+float3 specColor = tier == 0 ? SpecColor1.rgb : (tier == 1 ? SpecColor2.rgb : (tier == 2 ? SpecColor3.rgb : (tier == 3 ? SpecColor4.rgb : SpecColor5.rgb)));
+float3 rimLight = tier == 0 ? RimLight1.rgb : (tier == 1 ? RimLight2.rgb : (tier == 2 ? RimLight3.rgb : (tier == 3 ? RimLight4.rgb : RimLight5.rgb)));
+float shadowIntensity = tier == 0 ? ShadowIntensity1 : (tier == 1 ? ShadowIntensity2 : (tier == 2 ? ShadowIntensity3 : (tier == 3 ? ShadowIntensity4 : ShadowIntensity5)));
+float ndl = dot(N, L);
+// The exported pass applies a height compensation before adding _LightTex.B.
+// The exact runtime ramp coefficients are supplied by game globals, so these
+// two thresholds remain editor calibration parameters.
+float height = saturate(1.5 + N.z - 0.5 * L.z);
+float halfLambert = (ndl + 1.0) * height - 1.0;
+float ramp = saturate(0.5 * (halfLambert + 1.0) + (LightTex.b * 2.0 - 1.0) * DiffuseBiasScale);
+float lowBand = smoothstep(RampLow - 0.08, RampLow + 0.08, ramp);
+float highBand = smoothstep(RampHigh - 0.08, RampHigh + 0.08, ramp);
+float3 mid = lerp(shadow, shallow, 0.5);
+float3 diffuse = lerp(lerp(shadow, mid, lowBand), shallow, highBand);
+diffuse = lerp(shadow, diffuse, saturate(Visibility * shadowIntensity));
 float3 H = normalize(L + V);
-float spec = pow(saturate(dot(N, H)), max(2.0, SpecPower)) * Packed.b * SpecStrength;
-float rim = pow(1.0 - saturate(dot(N, V)), 3.0) * RimStrength;
+float metallic = saturate(Packed.g * MetallicScale);
+float roughness = max(RoughnessFloor, 1.0 - saturate(Aux.g * Glossiness));
+float alpha = roughness * roughness;
+float alpha2 = alpha * alpha;
+float ndh = saturate(dot(N, H));
+float ndv = max(0.001, saturate(dot(N, V)));
+float vdh = saturate(dot(V, H));
+float direct = saturate(ndl) * saturate(Visibility);
+float denom = ndh * ndh * (alpha2 - 1.0) + 1.0;
+float D = alpha2 / max(0.001, 3.14159265 * denom * denom);
+float k = (roughness + 1.0) * (roughness + 1.0) * 0.125;
+float Gv = ndv / (ndv * (1.0 - k) + k);
+float Gl = direct / (direct * (1.0 - k) + k);
+float3 F0 = lerp(float3(0.04, 0.04, 0.04), Albedo.rgb, metallic);
+float3 F = F0 + (float3(1.0, 1.0, 1.0) - F0) * pow(1.0 - vdh, 5.0);
+float3 spec = min(float3(2.0, 2.0, 2.0), D * Gv * Gl * F / max(0.01, 4.0 * ndv * direct)) * specColor * Packed.b * SpecStrength * SpecularGain;
+float rim = pow(1.0 - ndv, 3.0) * RimStrength * RimGain;
 float2 mcUV = normalize(ViewNormal).xy * 0.5 + 0.5;
-float3 result = Albedo.rgb * diffuse * LightColor.rgb + spec * LightColor.rgb + rim * LightColor.rgb;
+float3 directColor = LightColor.rgb * max(0.0, SceneLightStrength);
+float3 result = Albedo.rgb * (AmbientFloor + diffuse * DiffuseGain * directColor) * LightingTint.rgb;
+result += spec * directColor * LightingTint.rgb;
+result += rim * lerp(RimShadow.rgb, rimLight, highBand) * directColor;
 float3 glow = EmissionColor.rgb * Aux.b * EmissionStrength;
 '''
     for i in range(1, 6):
@@ -155,7 +255,7 @@ float3 glow = EmissionColor.rgb * Aux.b * EmissionStrength;
 if (MatCapEnabled%(i)d > 0.5 && tier == %(tier)d) {
     float4 cap = Texture2DSample(MatCapTex%(i)d, MatCapTex%(i)dSampler, mcUV);
     float mask = UseMatCapMask > 0.5 ? Packed.a : 1.0;
-    float weight = saturate(cap.a * MatCapAlphaBurst%(i)d * mask);
+    float weight = saturate(cap.a * MatCapAlphaBurst%(i)d * mask * MatCapGain);
     float3 tint = cap.rgb * MatCapTint%(i)d.rgb * MatCapColorBurst%(i)d;
     if (MatCapBlendMode%(i)d < 0.5) {
         result = lerp(result, tint, weight);
@@ -170,13 +270,13 @@ if (MatCapEnabled%(i)d > 0.5 && tier == %(tier)d) {
 }
 ''' % {"i": i, "tier": i - 1}
     code += "return result + glow;"
-    custom = add_custom(m, 100, 0, code, inputs, "Pyrios toon ramp, specular, rim, MatCap and emission")
+    custom = add_custom(m, 100, 0, code, inputs, "NapAvatar-inspired ramp, GGX, tier rim and MatCap")
     if not MEL.connect_material_property(custom, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR):
         raise RuntimeError("Could not connect emissive output")
     errors = MEL.recompile_material(m)
     if errors:
         raise RuntimeError("Toon material failed to compile: " + "; ".join(errors))
-    EAL.save_loaded_asset(m)
+    save(m)
     return m
 
 
@@ -204,13 +304,12 @@ def build_outline():
     errors = MEL.recompile_material(m)
     if errors:
         raise RuntimeError("Outline material failed to compile: " + "; ".join(errors))
-    EAL.save_loaded_asset(m)
+    save(m)
 
 
-def set_instance(main, suffix):
+def set_instance(main, suffix, data, calibration):
     mi = asset("MI_Pyrois_" + suffix, unreal.MaterialInstanceConstantFactoryNew(), unreal.MaterialInstanceConstant)
     MEL.set_material_instance_parent(mi, main)
-    data = json.loads((JSON_DIR / ("MAT_Pyrois_" + suffix + ".json")).read_text(encoding="utf-8"))
     p = data["m_SavedProperties"]
     for source, target in (("_MainTex", "MainTex"), ("_LightTex", "LightTex"),
                            ("_OtherDataTex", "OtherDataTex"), ("_OtherDataTex2", "OtherDataTex2")):
@@ -222,15 +321,22 @@ def set_instance(main, suffix):
     colors = p["m_Colors"]
     for i in range(1, 6):
         end = "" if i == 1 else str(i)
-        for source, target in (("_ShallowColor", "ShallowColor"), ("_ShadowColor", "ShadowColor")):
+        for source, target in (("_ShallowColor", "ShallowColor"), ("_ShadowColor", "ShadowColor"),
+                               ("_SpecularColor", "SpecularColor"), ("_RimGlowLightColor", "RimGlowLightColor")):
             c = colors[source + end]
             MEL.set_material_instance_vector_parameter_value(mi, target + str(i),
                 unreal.LinearColor(c["r"], c["g"], c["b"], c["a"]))
+        MEL.set_material_instance_scalar_parameter_value(
+            mi, "ShadowIntensity%d" % i, float(p["m_Floats"].get("_PerObjectShadowIntensity" + end, 1)))
+    c = colors["_RimGlowShadowColor"]
+    MEL.set_material_instance_vector_parameter_value(mi, "RimGlowShadowColor",
+        unreal.LinearColor(c["r"], c["g"], c["b"], c["a"]))
     c = colors["_EmissionColor"]
     MEL.set_material_instance_vector_parameter_value(mi, "EmissionColor", unreal.LinearColor(c["r"], c["g"], c["b"], 1))
     floats = p["m_Floats"]
     for source, target in (("_Emission", "EmissionStrength"), ("_SpecIntensity", "SpecStrength"),
-                           ("_RimGlow", "RimStrength")):
+                           ("_RimGlow", "RimStrength"), ("_Glossiness", "Glossiness"),
+                           ("_Metallic", "MetallicScale")):
         MEL.set_material_instance_scalar_parameter_value(mi, target, float(floats.get(source, 0)))
     MEL.set_material_instance_scalar_parameter_value(mi, "UseMatCapMask", float(floats.get("_UseMatCapMask", 0)))
     for i in range(1, 6):
@@ -253,9 +359,13 @@ def set_instance(main, suffix):
         c = colors.get("_MatCapColorTint" + end, {"r": 1, "g": 1, "b": 1, "a": 1})
         MEL.set_material_instance_vector_parameter_value(
             mi, "MatCapTint%d" % i, unreal.LinearColor(c["r"], c["g"], c["b"], c["a"]))
-    MEL.set_material_instance_scalar_parameter_value(mi, "RimStrength", 0.15 * float(floats.get("_RimGlow", 0)))
     MEL.set_material_instance_scalar_parameter_value(mi, "BumpScale", float(floats.get("_BumpScale", 1.0)))
-    EAL.save_loaded_asset(mi)
+    for name, value in calibration.items():
+        if isinstance(value, list):
+            MEL.set_material_instance_vector_parameter_value(mi, name, unreal.LinearColor(*value))
+        else:
+            MEL.set_material_instance_scalar_parameter_value(mi, name, float(value))
+    save(mi)
 
 
 def configure_packed_textures():
@@ -266,22 +376,21 @@ def configure_packed_textures():
             tex = EAL.load_asset(ROOT + "/Texture/Pyrois_" + body + "_" + suffix)
             if tex is None:
                 raise RuntimeError("Missing packed texture for " + body + suffix)
+            touch(tex)
             tex.set_editor_property("srgb", False)
             tex.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_BC7)
-            EAL.save_loaded_asset(tex)
+            save(tex)
 
 
-def bind_editor_preview_materials():
-    mesh_path = "/Game/Characters/Player/Pyrios/Avatar_Male_Size03_Pyrois_Model"
+def bind_editor_preview_materials(prechecked=False):
+    mesh_path = MESH_PATH
     mesh = EAL.load_asset(mesh_path)
     if not isinstance(mesh, unreal.SkeletalMesh):
         raise RuntimeError("Missing Pyrios skeletal mesh: " + mesh_path)
     materials = list(mesh.get_editor_property("materials"))
-    names = {
-        "MAT_Pyrois_Body_1": "MI_Pyrois_Body_1",
-        "MAT_Pyrois_Body_2": "MI_Pyrois_Body_2",
-        "MAT_Pyrois_Weapon01": "MI_Pyrois_Weapon01",
-    }
+    names = SLOT_INSTANCES
+    if not prechecked:
+        check_targets_clean({mesh_path})
     bound = set()
     for index, slot in enumerate(materials):
         slot_name = str(slot.get_editor_property("material_slot_name"))
@@ -296,21 +405,30 @@ def bind_editor_preview_materials():
         bound.add(slot_name)
     if bound != set(names):
         raise RuntimeError("Pyrios material slots differ from expected: " + str(bound))
+    touch(mesh)
     mesh.set_editor_property("materials", materials)
-    if not EAL.save_loaded_asset(mesh):
-        raise RuntimeError("Could not save Pyrios skeletal mesh material slots")
+    save(mesh)
     unreal.log("PYRIOS_EDITOR_PREVIEW_MATERIALS " + str(sorted(bound)))
 
 
 def main():
-    EAL.make_directory(OUT)
-    configure_packed_textures()
-    m = build_main()
-    build_outline()
-    for suffix in ("Body_1", "Body_2", "Weapon01"):
-        set_instance(m, suffix)
-    bind_editor_preview_materials()
-    unreal.log("PYRIOS_MATERIAL_BUILD_OK")
+    global JOURNAL
+    JOURNAL = BuildJournal()
+    try:
+        plan = preflight()  # No writes before the complete source/asset/dirty check.
+        EAL.make_directory(OUT)
+        configure_packed_textures()
+        m = build_main()
+        build_outline()
+        for suffix in SUFFIXES:
+            set_instance(m, suffix, plan["materials"][suffix], plan["calibration"][suffix])
+        bind_editor_preview_materials(prechecked=True)
+        unreal.log("PYRIOS_MATERIAL_BUILD_OK " + json.dumps(JOURNAL.report("complete")))
+    except Exception as error:
+        unreal.log_error("PYRIOS_MATERIAL_BUILD_FAILED " + json.dumps(JOURNAL.report("failed", str(error))))
+        raise
+    finally:
+        JOURNAL = None
 
 
 if __name__ == "__main__":

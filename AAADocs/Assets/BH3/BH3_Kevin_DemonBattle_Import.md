@@ -54,7 +54,7 @@ py "F:/ue_project/GGYGO/AAADocs/Scripts/import_bh3_kevin_demonbattle.py" --stage
 py "F:/ue_project/GGYGO/AAADocs/Scripts/import_bh3_kevin_demonbattle.py" --stage all
 ```
 
-后两条在独占编辑器时段、底部Cmd执行；先核对smoke预览再all。脚本使用FbxFactory，临时关闭Interchange FBX并在finally恢复原值。已有资产必须匹配BH3.ImportOwner与来源SHA256（动画同时匹配Skeleton）才只读跳过，未知资产停止，不覆盖。整批重复执行尚未另跑一轮；StandBy在all阶段已通过已有资产分支。
+后两条在独占编辑器时段、底部Cmd执行；先核对smoke预览再all。脚本使用FbxFactory，临时关闭Interchange FBX并在finally恢复原值。已有资产必须匹配BH3.ImportOwner与来源SHA256（动画同时匹配Skeleton）、没有未保存修改且有磁盘包才只读跳过，未知资产停止，不覆盖。保存返回值和磁盘包存在性都通过才标 imported；保存失败不能计为完成。整批重复执行尚未另跑一轮；StandBy在原 all 阶段已通过旧版已有资产分支。A5 新保护只做离线测试，尚未重跑 UE 导入；见 `AAADocs/Modules/Animation/Animation_Asset_Production_Safety.md`。
 
 运行报告位于项目`Saved/Codex/`：
 

@@ -6,7 +6,7 @@
     那 14 条曲线（MotionT/MotionQ/RootT/RootQ）共 33 万个 key 全为 0.0，四元数 w 也没有
     任何一帧接近 ±1，是未填充的占位数据。逐帧 root motion 只能从 FBX 取。
 
-FBX 侧的 Root 节点语义（见 AAADocs/Pyrios_FBX_动画解读.md）：
+FBX 侧的 Root 节点语义（见 AAADocs/Assets/Pyrios/Animation/Pyrios_FBX_动画解读.md）：
     Root 是与骨架根 Bone_Root 同级的外部 Null，专门承载 gameplay root motion；
     位移已按 scaleFactorBakedIntoFbx=100 烤成厘米，旋转是度。
 

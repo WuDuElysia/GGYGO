@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "blueprint": "/Game/BP/Character/Player/BP_PC_Pyrios",
+  "component_name": "StylizedRenderComponent",
+  "material_slots": {
+    "MAT_Pyrois_Body_1": "/Game/Characters/Player/Pyrios/Materials/Generated/MI_Pyrois_Body_1",
+    "MAT_Pyrois_Body_2": "/Game/Characters/Player/Pyrios/Materials/Generated/MI_Pyrois_Body_2",
+    "MAT_Pyrois_Weapon01": "/Game/Characters/Player/Pyrios/Materials/Generated/MI_Pyrois_Weapon01"
+  },
+  "outline_material": "/Game/Characters/Player/Pyrios/Materials/Generated/M_Pyrois_Outline"
+}

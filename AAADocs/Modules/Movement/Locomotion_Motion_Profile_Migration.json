@@ -1,0 +1,1403 @@
+{
+  "animBlueprintWiringAudit": {
+    "assetWriteNote": "This batch did not write ABP AnimSet references or graph pins. AnimBP CDO values and graph pins remain unverified until UE readback.",
+    "assetWriteStatus": "PendingUEAssetWindow",
+    "evidenceLimit": "State/variable names come from current C++ documentation and source scripts; they are not claimed as independently verified ABP CDO or graph contents.",
+    "knownBlendSpaceAnimSetKey": "walkRun",
+    "migrationConnections": [
+      {
+        "from": "Movement-authoritative FGGYGOAnimationStateFrame.WalkRunBlendAlpha",
+        "semantic": "0=Walk, 1=Run",
+        "status": "PendingUEAssetWindow",
+        "to": "AnimBP WalkRun BlendSpace1D X input"
+      },
+      {
+        "from": "Movement EGGYGOStopMotionType",
+        "semantic": "0=StartStop, 1=WalkStop, 2=RunStop",
+        "status": "source mapping exists; asset graph readback pending",
+        "to": "AnimBP StateMemory.StopValue"
+      },
+      {
+        "from": "GGYGOMovementSet seven profile reference properties",
+        "status": "PendingUEAssetWindow",
+        "to": "seven suggested UGGYGOLocomotionMotionProfile assets"
+      }
+    ],
+    "objectPath": "/Game/BP/Anim/ABP_Pyrios",
+    "sourceDocumentedConduits": [
+      "Conduit"
+    ],
+    "sourceDocumentedFunctions": [
+      "IsAnimationRunGait",
+      "IsTurnBackCurveDriven",
+      "GetSeqByKey",
+      "GetBlendSpaceByKey"
+    ],
+    "sourceDocumentedStateMachines": [
+      "MainStateMachine",
+      "MainGroundState",
+      "LocomotionState"
+    ],
+    "sourceDocumentedStates": [
+      "NotMoving",
+      "EnterMove",
+      "Moving",
+      "Stop",
+      "TurnBack",
+      "WalkRun"
+    ],
+    "sourceDocumentedVariables": [
+      "AnimationState.bHasMoveInput",
+      "StateMemory.GaitBlendY (serialized compatibility field only)",
+      "StateMemory.StopValue"
+    ]
+  },
+  "assetMigrationWritesMadeByThisBatch": false,
+  "auditMode": "read-only",
+  "auditStatus": "PendingUEAssetWindow",
+  "currentAssets": {
+    "core": [
+      {
+        "diskPath": "Content/BP/Anim/ABP_Pyrios.uasset",
+        "exists": true,
+        "fileBytes": 442208,
+        "fileSha256": "48ee112c9e9bda3ec22317f0d3a55c9545d19e36b17193afd7859c0657e26359",
+        "objectPath": "/Game/BP/Anim/ABP_Pyrios",
+        "role": "animationBlueprint"
+      },
+      {
+        "diskPath": "Content/Characters/Player/Pyrios/Animation/Movement/BS_Pyrios_WalkRun.uasset",
+        "exists": true,
+        "fileBytes": 7898,
+        "fileSha256": "7b76721ad1bcc79b5ff03473c5098478369b3b901408cb55d69b87ac1294922e",
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/BS_Pyrios_WalkRun",
+        "role": "walkRunBlendSpace"
+      },
+      {
+        "diskPath": "Content/System/DA_Movement_Default.uasset",
+        "exists": true,
+        "fileBytes": 1361,
+        "fileSha256": "7943cdc3a9f761386eeb08e4d9785e4b98121cab5d5fa45c4ae7a5ed8a01f678",
+        "objectPath": "/Game/System/DA_Movement_Default",
+        "role": "candidateDefaultMovementSet"
+      }
+    ],
+    "profileSourceAnimations": [
+      {
+        "diskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start.uasset",
+        "exists": true,
+        "fileBytes": 2129221,
+        "fileSha256": "a0f957803207e8bb53db0cd2333f19e183b60befb4e3da747b432cfa5952818d",
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start"
+      },
+      {
+        "diskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Loop.uasset",
+        "exists": true,
+        "fileBytes": 1229594,
+        "fileSha256": "ca56c5df7f1f1b7282780610e5f9bcb0c28e203086a603d9f3ac02fe80d936ba",
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Loop"
+      },
+      {
+        "diskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_Loop.uasset",
+        "exists": true,
+        "fileBytes": 1027674,
+        "fileSha256": "922d51c476d9c93a4f5733faf5e3e977f5b37d934de85a007622ac3730ca3e88",
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_Loop"
+      },
+      {
+        "diskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End.uasset",
+        "exists": true,
+        "fileBytes": 4685133,
+        "fileSha256": "4059b9a4615c9e4e4d4a3ce4e610d32b1754dd0eaf25fbba730e9d395fb91976",
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End"
+      },
+      {
+        "diskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_End.uasset",
+        "exists": true,
+        "fileBytes": 6118196,
+        "fileSha256": "1de5b73b22b0553e18823f9012beeb4011ca730614032da9dcdf3ec3a0b99227",
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_End"
+      },
+      {
+        "diskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_End.uasset",
+        "exists": true,
+        "fileBytes": 6492993,
+        "fileSha256": "48076290557f12e8a849c061beafdf5b93fd178a93263c744c30b8cee66bb93a",
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_End"
+      },
+      {
+        "diskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_TurnBack.uasset",
+        "exists": true,
+        "fileBytes": 3298942,
+        "fileSha256": "71c3b14549cd17fa337b61aeed0b8311d600c7e4592a66101839bd5d0186fd41",
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_TurnBack"
+      }
+    ],
+    "rootMotionManifest": {
+      "assetToManifestIdentityVerified": false,
+      "clipCount": 119,
+      "clipNameMatchOnly": true,
+      "exists": true,
+      "fileSha256": "6415c49bda668599e84b493a5fa88799bce658462b1d206c68a8d70d6496f0d9",
+      "identityLimit": "The export manifest has no .uasset content digest; clip-name matching does not prove that this curve export and the current binary asset are the same revision.",
+      "model": "Avatar_Male_Size03_Pyrois_Model",
+      "path": "Saved/AnimRootMotion/Pyrios_RootMotion.json"
+    }
+  },
+  "curveFingerprintDefinition": {
+    "crossSourceIdentity": "Not proven by offline hashes: the export manifest carries no source .uasset digest. Compare UE curve readback fingerprint against the exported source during the UE asset window.",
+    "manifestCurveFingerprint": "SHA-256 of clip name/timing/sample arrays and the four required RootMotion_* profile curves.",
+    "profileFieldMapping": {
+      "DirectionXCurve": "RootMotion_DirX",
+      "DirectionYCurve": "RootMotion_DirY",
+      "SpeedCurve": "RootMotion_Speed",
+      "YawCurve": "RootMotion_Yaw"
+    },
+    "requiredCurves": [
+      "RootMotion_Speed",
+      "RootMotion_DirX",
+      "RootMotion_DirY",
+      "RootMotion_Yaw"
+    ],
+    "sourceAssetFingerprint": "SHA-256 of each current source .uasset file on disk."
+  },
+  "generatedBy": "AAADocs/Scripts/audit_locomotion_motion_profiles.py",
+  "missingItems": [
+    {
+      "kind": "profile_asset_not_created_pending_ue_window",
+      "movementSetProperty": "WalkStartProfile",
+      "suggestedObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_WalkStart"
+    },
+    {
+      "kind": "profile_asset_not_created_pending_ue_window",
+      "movementSetProperty": "WalkLoopProfile",
+      "suggestedObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_WalkLoop"
+    },
+    {
+      "kind": "profile_asset_not_created_pending_ue_window",
+      "movementSetProperty": "RunLoopProfile",
+      "suggestedObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_RunLoop"
+    },
+    {
+      "kind": "profile_asset_not_created_pending_ue_window",
+      "movementSetProperty": "StartStopProfile",
+      "suggestedObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_StartStop"
+    },
+    {
+      "kind": "profile_asset_not_created_pending_ue_window",
+      "movementSetProperty": "WalkStopProfile",
+      "suggestedObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_WalkStop"
+    },
+    {
+      "kind": "profile_asset_not_created_pending_ue_window",
+      "movementSetProperty": "RunStopProfile",
+      "suggestedObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_RunStop"
+    },
+    {
+      "kind": "profile_asset_not_created_pending_ue_window",
+      "movementSetProperty": "TurnBackProfile",
+      "suggestedObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_TurnBack"
+    }
+  ],
+  "movementSet": {
+    "candidateAssetExists": true,
+    "diskPath": "Content/System/DA_Movement_Default.uasset",
+    "objectPath": "/Game/System/DA_Movement_Default",
+    "profileReferenceProperties": [
+      "WalkStartProfile",
+      "WalkLoopProfile",
+      "RunLoopProfile",
+      "StartStopProfile",
+      "WalkStopProfile",
+      "RunStopProfile",
+      "TurnBackProfile"
+    ],
+    "referenceWriteNote": "The C++ properties exist; this batch did not author profile asset references into the MovementSet package. Existing CDO values are not inferred offline.",
+    "referenceWriteStatus": "PendingUEAssetWindow"
+  },
+  "packageWritesMade": false,
+  "profileSuggestions": [
+    {
+      "curveDigestError": null,
+      "curveSampleCounts": {
+        "RootMotion_DirX": 86,
+        "RootMotion_DirY": 86,
+        "RootMotion_Speed": 86,
+        "RootMotion_Yaw": 86,
+        "times": 86
+      },
+      "curveSampleLengthsMatchTimes": true,
+      "loop": false,
+      "manifestClipLengthSeconds": 1.4000001,
+      "manifestClipMatches": 1,
+      "manifestClipName": "Avatar_Male_Size03_Pyrois_Ani_Walk_Start",
+      "manifestCurveNames": [
+        "RootMotion_DirX",
+        "RootMotion_DirY",
+        "RootMotion_Dist",
+        "RootMotion_Pitch",
+        "RootMotion_PosX",
+        "RootMotion_PosY",
+        "RootMotion_PosZ",
+        "RootMotion_Roll",
+        "RootMotion_Speed",
+        "RootMotion_Yaw"
+      ],
+      "manifestCurvePayloadSha256": "43dd9d7773060cec094a5472f84d0911b62aa6a88b9afa9faf62897942238075",
+      "manifestDurationSeconds": 1.4166667446120977,
+      "manifestFrameCount": 86,
+      "manifestSampleRateHz": 60.0,
+      "motionType": "WalkStart",
+      "movementSetProperty": "WalkStartProfile",
+      "profileAssetName": "DA_LocomotionMotionProfile_Pyrios_WalkStart",
+      "profileCurveSources": {
+        "DirectionXCurve": "RootMotion_DirX",
+        "DirectionYCurve": "RootMotion_DirY",
+        "SpeedCurve": "RootMotion_Speed",
+        "YawCurve": "RootMotion_Yaw"
+      },
+      "sourceAnimationName": "Avatar_Male_Size03_Pyrois_Ani_Walk_Start",
+      "sourceAssetBytes": 2129221,
+      "sourceAssetExists": true,
+      "sourceAssetSha256": "a0f957803207e8bb53db0cd2333f19e183b60befb4e3da747b432cfa5952818d",
+      "sourceDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start.uasset",
+      "sourceObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start",
+      "suggestedProfileDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_WalkStart.uasset",
+      "suggestedProfileExists": false,
+      "suggestedProfileObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_WalkStart"
+    },
+    {
+      "curveDigestError": null,
+      "curveSampleCounts": {
+        "RootMotion_DirX": 40,
+        "RootMotion_DirY": 40,
+        "RootMotion_Speed": 40,
+        "RootMotion_Yaw": 40,
+        "times": 40
+      },
+      "curveSampleLengthsMatchTimes": true,
+      "loop": true,
+      "manifestClipLengthSeconds": 0.6333334,
+      "manifestClipMatches": 1,
+      "manifestClipName": "Avatar_Male_Size03_Pyrois_Ani_Walk_Loop",
+      "manifestCurveNames": [
+        "RootMotion_DirX",
+        "RootMotion_DirY",
+        "RootMotion_Dist",
+        "RootMotion_Pitch",
+        "RootMotion_PosX",
+        "RootMotion_PosY",
+        "RootMotion_PosZ",
+        "RootMotion_Roll",
+        "RootMotion_Speed",
+        "RootMotion_Yaw"
+      ],
+      "manifestCurvePayloadSha256": "52052360d8853b8f0423ee4627aa00346ff2f4f3bfbde2a72613457505e08749",
+      "manifestDurationSeconds": 0.6500000354218681,
+      "manifestFrameCount": 40,
+      "manifestSampleRateHz": 60.0,
+      "motionType": "WalkRun:WalkLoop",
+      "movementSetProperty": "WalkLoopProfile",
+      "profileAssetName": "DA_LocomotionMotionProfile_Pyrios_WalkLoop",
+      "profileCurveSources": {
+        "DirectionXCurve": "RootMotion_DirX",
+        "DirectionYCurve": "RootMotion_DirY",
+        "SpeedCurve": "RootMotion_Speed",
+        "YawCurve": "RootMotion_Yaw"
+      },
+      "sourceAnimationName": "Avatar_Male_Size03_Pyrois_Ani_Walk_Loop",
+      "sourceAssetBytes": 1229594,
+      "sourceAssetExists": true,
+      "sourceAssetSha256": "ca56c5df7f1f1b7282780610e5f9bcb0c28e203086a603d9f3ac02fe80d936ba",
+      "sourceDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Loop.uasset",
+      "sourceObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Loop",
+      "suggestedProfileDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_WalkLoop.uasset",
+      "suggestedProfileExists": false,
+      "suggestedProfileObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_WalkLoop"
+    },
+    {
+      "curveDigestError": null,
+      "curveSampleCounts": {
+        "RootMotion_DirX": 26,
+        "RootMotion_DirY": 26,
+        "RootMotion_Speed": 26,
+        "RootMotion_Yaw": 26,
+        "times": 26
+      },
+      "curveSampleLengthsMatchTimes": true,
+      "loop": true,
+      "manifestClipLengthSeconds": 0.40000004,
+      "manifestClipMatches": 1,
+      "manifestClipName": "Avatar_Male_Size03_Pyrois_Ani_Run_Loop",
+      "manifestCurveNames": [
+        "RootMotion_DirX",
+        "RootMotion_DirY",
+        "RootMotion_Dist",
+        "RootMotion_Pitch",
+        "RootMotion_PosX",
+        "RootMotion_PosY",
+        "RootMotion_PosZ",
+        "RootMotion_Roll",
+        "RootMotion_Speed",
+        "RootMotion_Yaw"
+      ],
+      "manifestCurvePayloadSha256": "1b5b68248d7b75ddcfad64624044b615ffb57d3563c2f8173c2ebc75dbcfd889",
+      "manifestDurationSeconds": 0.41666668082675334,
+      "manifestFrameCount": 26,
+      "manifestSampleRateHz": 60.0,
+      "motionType": "WalkRun:RunLoop",
+      "movementSetProperty": "RunLoopProfile",
+      "profileAssetName": "DA_LocomotionMotionProfile_Pyrios_RunLoop",
+      "profileCurveSources": {
+        "DirectionXCurve": "RootMotion_DirX",
+        "DirectionYCurve": "RootMotion_DirY",
+        "SpeedCurve": "RootMotion_Speed",
+        "YawCurve": "RootMotion_Yaw"
+      },
+      "sourceAnimationName": "Avatar_Male_Size03_Pyrois_Ani_Run_Loop",
+      "sourceAssetBytes": 1027674,
+      "sourceAssetExists": true,
+      "sourceAssetSha256": "922d51c476d9c93a4f5733faf5e3e977f5b37d934de85a007622ac3730ca3e88",
+      "sourceDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_Loop.uasset",
+      "sourceObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_Loop",
+      "suggestedProfileDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_RunLoop.uasset",
+      "suggestedProfileExists": false,
+      "suggestedProfileObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_RunLoop"
+    },
+    {
+      "curveDigestError": null,
+      "curveSampleCounts": {
+        "RootMotion_DirX": 262,
+        "RootMotion_DirY": 262,
+        "RootMotion_Speed": 262,
+        "RootMotion_Yaw": 262,
+        "times": 262
+      },
+      "curveSampleLengthsMatchTimes": true,
+      "loop": false,
+      "manifestClipLengthSeconds": 4.3333335,
+      "manifestClipMatches": 1,
+      "manifestClipName": "Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End",
+      "manifestCurveNames": [
+        "RootMotion_DirX",
+        "RootMotion_DirY",
+        "RootMotion_Dist",
+        "RootMotion_Pitch",
+        "RootMotion_PosX",
+        "RootMotion_PosY",
+        "RootMotion_PosZ",
+        "RootMotion_Roll",
+        "RootMotion_Speed",
+        "RootMotion_Yaw"
+      ],
+      "manifestCurvePayloadSha256": "414abea0b297449f43796997e366bcd35a6b70f80c67b33c824f70320541de76",
+      "manifestDurationSeconds": 4.3500003755454175,
+      "manifestFrameCount": 262,
+      "manifestSampleRateHz": 60.0,
+      "motionType": "StartStop",
+      "movementSetProperty": "StartStopProfile",
+      "profileAssetName": "DA_LocomotionMotionProfile_Pyrios_StartStop",
+      "profileCurveSources": {
+        "DirectionXCurve": "RootMotion_DirX",
+        "DirectionYCurve": "RootMotion_DirY",
+        "SpeedCurve": "RootMotion_Speed",
+        "YawCurve": "RootMotion_Yaw"
+      },
+      "sourceAnimationName": "Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End",
+      "sourceAssetBytes": 4685133,
+      "sourceAssetExists": true,
+      "sourceAssetSha256": "4059b9a4615c9e4e4d4a3ce4e610d32b1754dd0eaf25fbba730e9d395fb91976",
+      "sourceDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End.uasset",
+      "sourceObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End",
+      "suggestedProfileDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_StartStop.uasset",
+      "suggestedProfileExists": false,
+      "suggestedProfileObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_StartStop"
+    },
+    {
+      "curveDigestError": null,
+      "curveSampleCounts": {
+        "RootMotion_DirX": 338,
+        "RootMotion_DirY": 338,
+        "RootMotion_Speed": 338,
+        "RootMotion_Yaw": 338,
+        "times": 338
+      },
+      "curveSampleLengthsMatchTimes": true,
+      "loop": false,
+      "manifestClipLengthSeconds": 5.6000004,
+      "manifestClipMatches": 1,
+      "manifestClipName": "Avatar_Male_Size03_Pyrois_Ani_Walk_End",
+      "manifestCurveNames": [
+        "RootMotion_DirX",
+        "RootMotion_DirY",
+        "RootMotion_Dist",
+        "RootMotion_Pitch",
+        "RootMotion_PosX",
+        "RootMotion_PosY",
+        "RootMotion_PosZ",
+        "RootMotion_Roll",
+        "RootMotion_Speed",
+        "RootMotion_Yaw"
+      ],
+      "manifestCurvePayloadSha256": "7c0bdfcbe6f70fe4d7a3f8ca6af403fc6008f8601ce8609063d8f727f25ecbd1",
+      "manifestDurationSeconds": 5.616666787114009,
+      "manifestFrameCount": 338,
+      "manifestSampleRateHz": 60.0,
+      "motionType": "WalkStop",
+      "movementSetProperty": "WalkStopProfile",
+      "profileAssetName": "DA_LocomotionMotionProfile_Pyrios_WalkStop",
+      "profileCurveSources": {
+        "DirectionXCurve": "RootMotion_DirX",
+        "DirectionYCurve": "RootMotion_DirY",
+        "SpeedCurve": "RootMotion_Speed",
+        "YawCurve": "RootMotion_Yaw"
+      },
+      "sourceAnimationName": "Avatar_Male_Size03_Pyrois_Ani_Walk_End",
+      "sourceAssetBytes": 6118196,
+      "sourceAssetExists": true,
+      "sourceAssetSha256": "1de5b73b22b0553e18823f9012beeb4011ca730614032da9dcdf3ec3a0b99227",
+      "sourceDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_End.uasset",
+      "sourceObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_End",
+      "suggestedProfileDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_WalkStop.uasset",
+      "suggestedProfileExists": false,
+      "suggestedProfileObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_WalkStop"
+    },
+    {
+      "curveDigestError": null,
+      "curveSampleCounts": {
+        "RootMotion_DirX": 308,
+        "RootMotion_DirY": 308,
+        "RootMotion_Speed": 308,
+        "RootMotion_Yaw": 308,
+        "times": 308
+      },
+      "curveSampleLengthsMatchTimes": true,
+      "loop": false,
+      "manifestClipLengthSeconds": 5.1000004,
+      "manifestClipMatches": 1,
+      "manifestClipName": "Avatar_Male_Size03_Pyrois_Ani_Run_End",
+      "manifestCurveNames": [
+        "RootMotion_DirX",
+        "RootMotion_DirY",
+        "RootMotion_Dist",
+        "RootMotion_Pitch",
+        "RootMotion_PosX",
+        "RootMotion_PosY",
+        "RootMotion_PosZ",
+        "RootMotion_Roll",
+        "RootMotion_Speed",
+        "RootMotion_Yaw"
+      ],
+      "manifestCurvePayloadSha256": "f2b2223d56d44c6d87a8b866b78361a49f09fa5255ed335e5e205bf39640c561",
+      "manifestDurationSeconds": 5.116666787114009,
+      "manifestFrameCount": 308,
+      "manifestSampleRateHz": 60.0,
+      "motionType": "RunStop",
+      "movementSetProperty": "RunStopProfile",
+      "profileAssetName": "DA_LocomotionMotionProfile_Pyrios_RunStop",
+      "profileCurveSources": {
+        "DirectionXCurve": "RootMotion_DirX",
+        "DirectionYCurve": "RootMotion_DirY",
+        "SpeedCurve": "RootMotion_Speed",
+        "YawCurve": "RootMotion_Yaw"
+      },
+      "sourceAnimationName": "Avatar_Male_Size03_Pyrois_Ani_Run_End",
+      "sourceAssetBytes": 6492993,
+      "sourceAssetExists": true,
+      "sourceAssetSha256": "48076290557f12e8a849c061beafdf5b93fd178a93263c744c30b8cee66bb93a",
+      "sourceDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_End.uasset",
+      "sourceObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_End",
+      "suggestedProfileDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_RunStop.uasset",
+      "suggestedProfileExists": false,
+      "suggestedProfileObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_RunStop"
+    },
+    {
+      "curveDigestError": null,
+      "curveSampleCounts": {
+        "RootMotion_DirX": 144,
+        "RootMotion_DirY": 144,
+        "RootMotion_Speed": 144,
+        "RootMotion_Yaw": 144,
+        "times": 144
+      },
+      "curveSampleLengthsMatchTimes": true,
+      "loop": false,
+      "manifestClipLengthSeconds": 2.3666668,
+      "manifestClipMatches": 1,
+      "manifestClipName": "Avatar_Male_Size03_Pyrois_Ani_TurnBack",
+      "manifestCurveNames": [
+        "RootMotion_DirX",
+        "RootMotion_DirY",
+        "RootMotion_Dist",
+        "RootMotion_Pitch",
+        "RootMotion_PosX",
+        "RootMotion_PosY",
+        "RootMotion_PosZ",
+        "RootMotion_Roll",
+        "RootMotion_Speed",
+        "RootMotion_Yaw"
+      ],
+      "manifestCurvePayloadSha256": "8db61c3b4ff64d7badd238d91bd6dd5bfbe83ad515a5e4a4afe01510f02629b7",
+      "manifestDurationSeconds": 2.383333439620589,
+      "manifestFrameCount": 144,
+      "manifestSampleRateHz": 60.0,
+      "motionType": "TurnBack",
+      "movementSetProperty": "TurnBackProfile",
+      "profileAssetName": "DA_LocomotionMotionProfile_Pyrios_TurnBack",
+      "profileCurveSources": {
+        "DirectionXCurve": "RootMotion_DirX",
+        "DirectionYCurve": "RootMotion_DirY",
+        "SpeedCurve": "RootMotion_Speed",
+        "YawCurve": "RootMotion_Yaw"
+      },
+      "sourceAnimationName": "Avatar_Male_Size03_Pyrois_Ani_TurnBack",
+      "sourceAssetBytes": 3298942,
+      "sourceAssetExists": true,
+      "sourceAssetSha256": "71c3b14549cd17fa337b61aeed0b8311d600c7e4592a66101839bd5d0186fd41",
+      "sourceDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_TurnBack.uasset",
+      "sourceObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_TurnBack",
+      "suggestedProfileDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_TurnBack.uasset",
+      "suggestedProfileExists": false,
+      "suggestedProfileObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Profiles/DA_LocomotionMotionProfile_Pyrios_TurnBack"
+    }
+  ],
+  "schemaVersion": 1,
+  "scope": "Locomotion profile/AnimBP asset wiring audit; no UE package is modified or saved.",
+  "staticSourceEvidence": {
+    "animBlueprintStateNotes": {
+      "exists": true,
+      "path": "Source/GGYGO/Animation/zzzAnim/ZZZAnimInstance.h"
+    },
+    "animStopMapping": {
+      "exists": true,
+      "path": "Source/GGYGO/Animation/zzzAnim/Locomotion/ZZZLocomotionRules.cpp"
+    },
+    "blendSpaceAxisReader": {
+      "exists": true,
+      "path": "AAADocs/Scripts/fix_blendspace_axis.py"
+    },
+    "blendSpaceCreator": {
+      "exists": true,
+      "path": "AAADocs/Scripts/create_walkrun_blendspace.py"
+    },
+    "legacySerializedField": {
+      "exists": true,
+      "path": "Source/GGYGO/Animation/zzzAnim/Data/ZZZAnimStateMemory.h"
+    },
+    "movementAssetOrganizer": {
+      "exists": true,
+      "path": "AAADocs/Scripts/organize_movement_assets.py"
+    },
+    "movementSetProfileProperties": {
+      "exists": true,
+      "path": "Source/GGYGO/Character/Data/GGYGOMovementSet.h"
+    }
+  },
+  "stopValueMapping": [
+    {
+      "motionType": "StartStop",
+      "movementSetProperty": "StartStopProfile",
+      "sourceAnimationName": "Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End",
+      "sourceAssetExists": true,
+      "sourceAssetSha256": "4059b9a4615c9e4e4d4a3ce4e610d32b1754dd0eaf25fbba730e9d395fb91976",
+      "sourceDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End.uasset",
+      "sourceObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End",
+      "stopValue": 0
+    },
+    {
+      "motionType": "WalkStop",
+      "movementSetProperty": "WalkStopProfile",
+      "sourceAnimationName": "Avatar_Male_Size03_Pyrois_Ani_Walk_End",
+      "sourceAssetExists": true,
+      "sourceAssetSha256": "1de5b73b22b0553e18823f9012beeb4011ca730614032da9dcdf3ec3a0b99227",
+      "sourceDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_End.uasset",
+      "sourceObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_End",
+      "stopValue": 1
+    },
+    {
+      "motionType": "RunStop",
+      "movementSetProperty": "RunStopProfile",
+      "sourceAnimationName": "Avatar_Male_Size03_Pyrois_Ani_Run_End",
+      "sourceAssetExists": true,
+      "sourceAssetSha256": "48076290557f12e8a849c061beafdf5b93fd178a93263c744c30b8cee66bb93a",
+      "sourceDiskPath": "Content/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_End.uasset",
+      "sourceObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_End",
+      "stopValue": 2
+    }
+  ],
+  "unrealReadback": {
+    "animBlueprint": {
+      "actualClass": "AnimBlueprint",
+      "actualObjectPath": "/Game/BP/Anim/ABP_Pyrios.ABP_Pyrios",
+      "animSet": {
+        "blendSpaces": [
+          {
+            "key": "walkRun",
+            "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/BS_Pyrios_WalkRun.BS_Pyrios_WalkRun"
+          }
+        ],
+        "sequences": [
+          {
+            "key": "IdleLoop",
+            "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Idle_Loop.Avatar_Male_Size03_Pyrois_Ani_Idle_Loop"
+          },
+          {
+            "key": "RunEnd",
+            "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_End.Avatar_Male_Size03_Pyrois_Ani_Run_End"
+          },
+          {
+            "key": "TurnBack",
+            "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_TurnBack.Avatar_Male_Size03_Pyrois_Ani_TurnBack"
+          },
+          {
+            "key": "WalkEnd",
+            "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_End.Avatar_Male_Size03_Pyrois_Ani_Walk_End"
+          },
+          {
+            "key": "WalkStart",
+            "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start.Avatar_Male_Size03_Pyrois_Ani_Walk_Start"
+          },
+          {
+            "key": "WalkStartEnd",
+            "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End.Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End"
+          }
+        ]
+      },
+      "cdoClass": "ABP_Pyrios_C",
+      "objectPath": "/Game/BP/Anim/ABP_Pyrios",
+      "status": "loaded"
+    },
+    "animationCurveFingerprints": [
+      {
+        "actualClass": "AnimSequence",
+        "actualObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start.Avatar_Male_Size03_Pyrois_Ani_Walk_Start",
+        "curveFingerprintCoverage": {
+          "excluded": [
+            "duration",
+            "RichCurveInterpolation",
+            "tangents",
+            "tangentWeights",
+            "prePostInfinity",
+            "boneTracks",
+            "graphPins"
+          ],
+          "included": [
+            "objectPath",
+            "requiredCurveNames",
+            "keyTimes",
+            "keyValues"
+          ],
+          "migrationAuthorized": false
+        },
+        "curveKeyCounts": {
+          "RootMotion_DirX": 86,
+          "RootMotion_DirY": 2,
+          "RootMotion_Speed": 86,
+          "RootMotion_Yaw": 2
+        },
+        "curveNames": [
+          "Cfg_AvgAngularSpeed",
+          "Cfg_AvgSpeed",
+          "Cfg_ClipLength",
+          "Cfg_CycleOffset",
+          "Cfg_HeightFromFeet",
+          "Cfg_KeepOriginalOrientation",
+          "Cfg_KeepOriginalPositionXZ",
+          "Cfg_KeepOriginalPositionY",
+          "Cfg_Level",
+          "Cfg_LoopBlend",
+          "Cfg_LoopBlendOrientation",
+          "Cfg_LoopBlendPositionXZ",
+          "Cfg_LoopBlendPositionY",
+          "Cfg_LoopTime",
+          "Cfg_Mirror",
+          "Cfg_OrientationOffsetY",
+          "Cfg_StartAtOrigin",
+          "RootMotion_DirX",
+          "RootMotion_DirY",
+          "RootMotion_Dist",
+          "RootMotion_Pitch",
+          "RootMotion_PosX",
+          "RootMotion_PosY",
+          "RootMotion_PosZ",
+          "RootMotion_Roll",
+          "RootMotion_Speed",
+          "RootMotion_Yaw"
+        ],
+        "curvePayloadSha256": "229a76c9991d51bd50472c0a1dff41e82f03ac499b28abb95d306ae88bfbe470",
+        "curveReadAPI": {
+          "curveTypeSymbol": "unreal.RawCurveTrackTypes.RCT_FLOAT",
+          "librarySymbol": "unreal.AnimationLibrary",
+          "methods": [
+            "get_animation_curve_names",
+            "get_float_keys",
+            "get_sequence_length"
+          ],
+          "moduleLoadCallCompleted": true,
+          "moduleName": "AnimationBlueprintLibrary",
+          "status": "ready"
+        },
+        "curveReadStatus": "fingerprinted",
+        "durationSeconds": 1.4166666269302368,
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start",
+        "requiredCurvesPresent": true,
+        "status": "loaded"
+      },
+      {
+        "actualClass": "AnimSequence",
+        "actualObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Loop.Avatar_Male_Size03_Pyrois_Ani_Walk_Loop",
+        "curveFingerprintCoverage": {
+          "excluded": [
+            "duration",
+            "RichCurveInterpolation",
+            "tangents",
+            "tangentWeights",
+            "prePostInfinity",
+            "boneTracks",
+            "graphPins"
+          ],
+          "included": [
+            "objectPath",
+            "requiredCurveNames",
+            "keyTimes",
+            "keyValues"
+          ],
+          "migrationAuthorized": false
+        },
+        "curveKeyCounts": {
+          "RootMotion_DirX": 2,
+          "RootMotion_DirY": 2,
+          "RootMotion_Speed": 40,
+          "RootMotion_Yaw": 2
+        },
+        "curveNames": [
+          "Cfg_AvgAngularSpeed",
+          "Cfg_AvgSpeed",
+          "Cfg_ClipLength",
+          "Cfg_CycleOffset",
+          "Cfg_HeightFromFeet",
+          "Cfg_KeepOriginalOrientation",
+          "Cfg_KeepOriginalPositionXZ",
+          "Cfg_KeepOriginalPositionY",
+          "Cfg_Level",
+          "Cfg_LoopBlend",
+          "Cfg_LoopBlendOrientation",
+          "Cfg_LoopBlendPositionXZ",
+          "Cfg_LoopBlendPositionY",
+          "Cfg_LoopTime",
+          "Cfg_Mirror",
+          "Cfg_OrientationOffsetY",
+          "Cfg_StartAtOrigin",
+          "RootMotion_DirX",
+          "RootMotion_DirY",
+          "RootMotion_Dist",
+          "RootMotion_Pitch",
+          "RootMotion_PosX",
+          "RootMotion_PosY",
+          "RootMotion_PosZ",
+          "RootMotion_Roll",
+          "RootMotion_Speed",
+          "RootMotion_Yaw"
+        ],
+        "curvePayloadSha256": "9363c5a162168a074fdf5395dd7ccdc4993dc3a57a143574db1952ebb3325aee",
+        "curveReadAPI": {
+          "curveTypeSymbol": "unreal.RawCurveTrackTypes.RCT_FLOAT",
+          "librarySymbol": "unreal.AnimationLibrary",
+          "methods": [
+            "get_animation_curve_names",
+            "get_float_keys",
+            "get_sequence_length"
+          ],
+          "moduleLoadCallCompleted": true,
+          "moduleName": "AnimationBlueprintLibrary",
+          "status": "ready"
+        },
+        "curveReadStatus": "fingerprinted",
+        "durationSeconds": 0.6499999761581421,
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Loop",
+        "requiredCurvesPresent": true,
+        "status": "loaded"
+      },
+      {
+        "actualClass": "AnimSequence",
+        "actualObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_Loop.Avatar_Male_Size03_Pyrois_Ani_Run_Loop",
+        "curveFingerprintCoverage": {
+          "excluded": [
+            "duration",
+            "RichCurveInterpolation",
+            "tangents",
+            "tangentWeights",
+            "prePostInfinity",
+            "boneTracks",
+            "graphPins"
+          ],
+          "included": [
+            "objectPath",
+            "requiredCurveNames",
+            "keyTimes",
+            "keyValues"
+          ],
+          "migrationAuthorized": false
+        },
+        "curveKeyCounts": {
+          "RootMotion_DirX": 2,
+          "RootMotion_DirY": 2,
+          "RootMotion_Speed": 26,
+          "RootMotion_Yaw": 2
+        },
+        "curveNames": [
+          "Cfg_AvgAngularSpeed",
+          "Cfg_AvgSpeed",
+          "Cfg_ClipLength",
+          "Cfg_CycleOffset",
+          "Cfg_HeightFromFeet",
+          "Cfg_KeepOriginalOrientation",
+          "Cfg_KeepOriginalPositionXZ",
+          "Cfg_KeepOriginalPositionY",
+          "Cfg_Level",
+          "Cfg_LoopBlend",
+          "Cfg_LoopBlendOrientation",
+          "Cfg_LoopBlendPositionXZ",
+          "Cfg_LoopBlendPositionY",
+          "Cfg_LoopTime",
+          "Cfg_Mirror",
+          "Cfg_OrientationOffsetY",
+          "Cfg_StartAtOrigin",
+          "RootMotion_DirX",
+          "RootMotion_DirY",
+          "RootMotion_Dist",
+          "RootMotion_Pitch",
+          "RootMotion_PosX",
+          "RootMotion_PosY",
+          "RootMotion_PosZ",
+          "RootMotion_Roll",
+          "RootMotion_Speed",
+          "RootMotion_Yaw"
+        ],
+        "curvePayloadSha256": "263beab62dcff32c657144955d0ee777d06f5789242108163e7eabb31a1b6613",
+        "curveReadAPI": {
+          "curveTypeSymbol": "unreal.RawCurveTrackTypes.RCT_FLOAT",
+          "librarySymbol": "unreal.AnimationLibrary",
+          "methods": [
+            "get_animation_curve_names",
+            "get_float_keys",
+            "get_sequence_length"
+          ],
+          "moduleLoadCallCompleted": true,
+          "moduleName": "AnimationBlueprintLibrary",
+          "status": "ready"
+        },
+        "curveReadStatus": "fingerprinted",
+        "durationSeconds": 0.4166666567325592,
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_Loop",
+        "requiredCurvesPresent": true,
+        "status": "loaded"
+      },
+      {
+        "actualClass": "AnimSequence",
+        "actualObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End.Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End",
+        "curveFingerprintCoverage": {
+          "excluded": [
+            "duration",
+            "RichCurveInterpolation",
+            "tangents",
+            "tangentWeights",
+            "prePostInfinity",
+            "boneTracks",
+            "graphPins"
+          ],
+          "included": [
+            "objectPath",
+            "requiredCurveNames",
+            "keyTimes",
+            "keyValues"
+          ],
+          "migrationAuthorized": false
+        },
+        "curveKeyCounts": {
+          "RootMotion_DirX": 262,
+          "RootMotion_DirY": 2,
+          "RootMotion_Speed": 262,
+          "RootMotion_Yaw": 2
+        },
+        "curveNames": [
+          "Cfg_AvgAngularSpeed",
+          "Cfg_AvgSpeed",
+          "Cfg_ClipLength",
+          "Cfg_CycleOffset",
+          "Cfg_HeightFromFeet",
+          "Cfg_KeepOriginalOrientation",
+          "Cfg_KeepOriginalPositionXZ",
+          "Cfg_KeepOriginalPositionY",
+          "Cfg_Level",
+          "Cfg_LoopBlend",
+          "Cfg_LoopBlendOrientation",
+          "Cfg_LoopBlendPositionXZ",
+          "Cfg_LoopBlendPositionY",
+          "Cfg_LoopTime",
+          "Cfg_Mirror",
+          "Cfg_OrientationOffsetY",
+          "Cfg_StartAtOrigin",
+          "RootMotion_DirX",
+          "RootMotion_DirY",
+          "RootMotion_Dist",
+          "RootMotion_Pitch",
+          "RootMotion_PosX",
+          "RootMotion_PosY",
+          "RootMotion_PosZ",
+          "RootMotion_Roll",
+          "RootMotion_Speed",
+          "RootMotion_Yaw"
+        ],
+        "curvePayloadSha256": "7961cd12a346832840bc2773619baa81396c639690aa9591b99ee9b7ee0984db",
+        "curveReadAPI": {
+          "curveTypeSymbol": "unreal.RawCurveTrackTypes.RCT_FLOAT",
+          "librarySymbol": "unreal.AnimationLibrary",
+          "methods": [
+            "get_animation_curve_names",
+            "get_float_keys",
+            "get_sequence_length"
+          ],
+          "moduleLoadCallCompleted": true,
+          "moduleName": "AnimationBlueprintLibrary",
+          "status": "ready"
+        },
+        "curveReadStatus": "fingerprinted",
+        "durationSeconds": 4.349999904632568,
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Start_End",
+        "requiredCurvesPresent": true,
+        "status": "loaded"
+      },
+      {
+        "actualClass": "AnimSequence",
+        "actualObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_End.Avatar_Male_Size03_Pyrois_Ani_Walk_End",
+        "curveFingerprintCoverage": {
+          "excluded": [
+            "duration",
+            "RichCurveInterpolation",
+            "tangents",
+            "tangentWeights",
+            "prePostInfinity",
+            "boneTracks",
+            "graphPins"
+          ],
+          "included": [
+            "objectPath",
+            "requiredCurveNames",
+            "keyTimes",
+            "keyValues"
+          ],
+          "migrationAuthorized": false
+        },
+        "curveKeyCounts": {
+          "RootMotion_DirX": 338,
+          "RootMotion_DirY": 2,
+          "RootMotion_Speed": 338,
+          "RootMotion_Yaw": 2
+        },
+        "curveNames": [
+          "Cfg_AvgAngularSpeed",
+          "Cfg_AvgSpeed",
+          "Cfg_ClipLength",
+          "Cfg_CycleOffset",
+          "Cfg_HeightFromFeet",
+          "Cfg_KeepOriginalOrientation",
+          "Cfg_KeepOriginalPositionXZ",
+          "Cfg_KeepOriginalPositionY",
+          "Cfg_Level",
+          "Cfg_LoopBlend",
+          "Cfg_LoopBlendOrientation",
+          "Cfg_LoopBlendPositionXZ",
+          "Cfg_LoopBlendPositionY",
+          "Cfg_LoopTime",
+          "Cfg_Mirror",
+          "Cfg_OrientationOffsetY",
+          "Cfg_StartAtOrigin",
+          "RootMotion_DirX",
+          "RootMotion_DirY",
+          "RootMotion_Dist",
+          "RootMotion_Pitch",
+          "RootMotion_PosX",
+          "RootMotion_PosY",
+          "RootMotion_PosZ",
+          "RootMotion_Roll",
+          "RootMotion_Speed",
+          "RootMotion_Yaw"
+        ],
+        "curvePayloadSha256": "683dedb2d6bc718cadbdd0dc3121780e8d45ed19d0ada8a588d900251e998ef8",
+        "curveReadAPI": {
+          "curveTypeSymbol": "unreal.RawCurveTrackTypes.RCT_FLOAT",
+          "librarySymbol": "unreal.AnimationLibrary",
+          "methods": [
+            "get_animation_curve_names",
+            "get_float_keys",
+            "get_sequence_length"
+          ],
+          "moduleLoadCallCompleted": true,
+          "moduleName": "AnimationBlueprintLibrary",
+          "status": "ready"
+        },
+        "curveReadStatus": "fingerprinted",
+        "durationSeconds": 5.616666793823242,
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_End",
+        "requiredCurvesPresent": true,
+        "status": "loaded"
+      },
+      {
+        "actualClass": "AnimSequence",
+        "actualObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_End.Avatar_Male_Size03_Pyrois_Ani_Run_End",
+        "curveFingerprintCoverage": {
+          "excluded": [
+            "duration",
+            "RichCurveInterpolation",
+            "tangents",
+            "tangentWeights",
+            "prePostInfinity",
+            "boneTracks",
+            "graphPins"
+          ],
+          "included": [
+            "objectPath",
+            "requiredCurveNames",
+            "keyTimes",
+            "keyValues"
+          ],
+          "migrationAuthorized": false
+        },
+        "curveKeyCounts": {
+          "RootMotion_DirX": 308,
+          "RootMotion_DirY": 2,
+          "RootMotion_Speed": 308,
+          "RootMotion_Yaw": 2
+        },
+        "curveNames": [
+          "Cfg_AvgAngularSpeed",
+          "Cfg_AvgSpeed",
+          "Cfg_ClipLength",
+          "Cfg_CycleOffset",
+          "Cfg_HeightFromFeet",
+          "Cfg_KeepOriginalOrientation",
+          "Cfg_KeepOriginalPositionXZ",
+          "Cfg_KeepOriginalPositionY",
+          "Cfg_Level",
+          "Cfg_LoopBlend",
+          "Cfg_LoopBlendOrientation",
+          "Cfg_LoopBlendPositionXZ",
+          "Cfg_LoopBlendPositionY",
+          "Cfg_LoopTime",
+          "Cfg_Mirror",
+          "Cfg_OrientationOffsetY",
+          "Cfg_StartAtOrigin",
+          "RootMotion_DirX",
+          "RootMotion_DirY",
+          "RootMotion_Dist",
+          "RootMotion_Pitch",
+          "RootMotion_PosX",
+          "RootMotion_PosY",
+          "RootMotion_PosZ",
+          "RootMotion_Roll",
+          "RootMotion_Speed",
+          "RootMotion_Yaw"
+        ],
+        "curvePayloadSha256": "e27740d1be9580b7b0ae29b2889cc21d0337be270e20739e97c5c779ff48d5ea",
+        "curveReadAPI": {
+          "curveTypeSymbol": "unreal.RawCurveTrackTypes.RCT_FLOAT",
+          "librarySymbol": "unreal.AnimationLibrary",
+          "methods": [
+            "get_animation_curve_names",
+            "get_float_keys",
+            "get_sequence_length"
+          ],
+          "moduleLoadCallCompleted": true,
+          "moduleName": "AnimationBlueprintLibrary",
+          "status": "ready"
+        },
+        "curveReadStatus": "fingerprinted",
+        "durationSeconds": 5.116666793823242,
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_End",
+        "requiredCurvesPresent": true,
+        "status": "loaded"
+      },
+      {
+        "actualClass": "AnimSequence",
+        "actualObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_TurnBack.Avatar_Male_Size03_Pyrois_Ani_TurnBack",
+        "curveFingerprintCoverage": {
+          "excluded": [
+            "duration",
+            "RichCurveInterpolation",
+            "tangents",
+            "tangentWeights",
+            "prePostInfinity",
+            "boneTracks",
+            "graphPins"
+          ],
+          "included": [
+            "objectPath",
+            "requiredCurveNames",
+            "keyTimes",
+            "keyValues"
+          ],
+          "migrationAuthorized": false
+        },
+        "curveKeyCounts": {
+          "RootMotion_DirX": 144,
+          "RootMotion_DirY": 2,
+          "RootMotion_Speed": 144,
+          "RootMotion_Yaw": 144
+        },
+        "curveNames": [
+          "Cfg_AvgAngularSpeed",
+          "Cfg_AvgSpeed",
+          "Cfg_ClipLength",
+          "Cfg_CycleOffset",
+          "Cfg_HeightFromFeet",
+          "Cfg_KeepOriginalOrientation",
+          "Cfg_KeepOriginalPositionXZ",
+          "Cfg_KeepOriginalPositionY",
+          "Cfg_Level",
+          "Cfg_LoopBlend",
+          "Cfg_LoopBlendOrientation",
+          "Cfg_LoopBlendPositionXZ",
+          "Cfg_LoopBlendPositionY",
+          "Cfg_LoopTime",
+          "Cfg_Mirror",
+          "Cfg_OrientationOffsetY",
+          "Cfg_StartAtOrigin",
+          "RootMotion_DirX",
+          "RootMotion_DirY",
+          "RootMotion_Dist",
+          "RootMotion_Pitch",
+          "RootMotion_PosX",
+          "RootMotion_PosY",
+          "RootMotion_PosZ",
+          "RootMotion_Roll",
+          "RootMotion_Speed",
+          "RootMotion_Yaw"
+        ],
+        "curvePayloadSha256": "7edbcf41f7895accd2f0486c29fdda10a249410904d1bec49c1a18bf9385d21d",
+        "curveReadAPI": {
+          "curveTypeSymbol": "unreal.RawCurveTrackTypes.RCT_FLOAT",
+          "librarySymbol": "unreal.AnimationLibrary",
+          "methods": [
+            "get_animation_curve_names",
+            "get_float_keys",
+            "get_sequence_length"
+          ],
+          "moduleLoadCallCompleted": true,
+          "moduleName": "AnimationBlueprintLibrary",
+          "status": "ready"
+        },
+        "curveReadStatus": "fingerprinted",
+        "durationSeconds": 2.383333444595337,
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_TurnBack",
+        "requiredCurvesPresent": true,
+        "status": "loaded"
+      }
+    ],
+    "animationCurveReadbackComplete": true,
+    "animationReadAPI": {
+      "curveTypeSymbol": "unreal.RawCurveTrackTypes.RCT_FLOAT",
+      "librarySymbol": "unreal.AnimationLibrary",
+      "methods": [
+        "get_animation_curve_names",
+        "get_float_keys",
+        "get_sequence_length"
+      ],
+      "moduleLoadCallCompleted": true,
+      "moduleName": "AnimationBlueprintLibrary",
+      "status": "ready"
+    },
+    "environment": "unreal_python",
+    "movementSet": {
+      "actualClass": "GGYGOMovementSet",
+      "actualObjectPath": "/Game/System/DA_Movement_Default.DA_Movement_Default",
+      "objectPath": "/Game/System/DA_Movement_Default",
+      "profileReferences": {
+        "RunLoopProfile": {
+          "isNull": true,
+          "objectPath": null,
+          "propertyName": "run_loop_profile",
+          "readError": null,
+          "readStatus": "read"
+        },
+        "RunStopProfile": {
+          "isNull": true,
+          "objectPath": null,
+          "propertyName": "run_stop_profile",
+          "readError": null,
+          "readStatus": "read"
+        },
+        "StartStopProfile": {
+          "isNull": true,
+          "objectPath": null,
+          "propertyName": "start_stop_profile",
+          "readError": null,
+          "readStatus": "read"
+        },
+        "TurnBackProfile": {
+          "isNull": true,
+          "objectPath": null,
+          "propertyName": "turn_back_profile",
+          "readError": null,
+          "readStatus": "read"
+        },
+        "WalkLoopProfile": {
+          "isNull": true,
+          "objectPath": null,
+          "propertyName": "walk_loop_profile",
+          "readError": null,
+          "readStatus": "read"
+        },
+        "WalkStartProfile": {
+          "isNull": true,
+          "objectPath": null,
+          "propertyName": "walk_start_profile",
+          "readError": null,
+          "readStatus": "read"
+        },
+        "WalkStopProfile": {
+          "isNull": true,
+          "objectPath": null,
+          "propertyName": "walk_stop_profile",
+          "readError": null,
+          "readStatus": "read"
+        }
+      },
+      "status": "loaded"
+    },
+    "packageWriteCallsMade": false,
+    "status": "read_only_inspection_attempted",
+    "walkRunBlendSpace": {
+      "actualClass": "BlendSpace1D",
+      "actualObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/BS_Pyrios_WalkRun.BS_Pyrios_WalkRun",
+      "axes": [
+        {
+          "display_name": "GaitBlendY",
+          "grid_num": 1,
+          "index": 0,
+          "max": 1.0,
+          "min": 0.0
+        },
+        {
+          "display_name": "None",
+          "grid_num": 4,
+          "index": 1,
+          "max": 100.0,
+          "min": 0.0
+        },
+        {
+          "display_name": "None",
+          "grid_num": 4,
+          "index": 2,
+          "max": 100.0,
+          "min": 0.0
+        }
+      ],
+      "axisLabel": null,
+      "axisLabelReadError": "BlendSpace1D: Failed to find property 'axis_label' for attribute 'axis_label' on 'BlendSpace1D'",
+      "isBlendSpace1D": true,
+      "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/BS_Pyrios_WalkRun",
+      "samples": [
+        {
+          "animationObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Loop.Avatar_Male_Size03_Pyrois_Ani_Walk_Loop",
+          "rateScale": 1.0,
+          "x": 0.0,
+          "y": 0.0
+        },
+        {
+          "animationObjectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_Loop.Avatar_Male_Size03_Pyrois_Ani_Run_Loop",
+          "rateScale": 1.0,
+          "x": 1.0,
+          "y": 0.0
+        }
+      ],
+      "status": "loaded"
+    }
+  },
+  "validations": [
+    {
+      "checked": [
+        "Content/BP/Anim/ABP_Pyrios.uasset",
+        "Content/Characters/Player/Pyrios/Animation/Movement/BS_Pyrios_WalkRun.uasset",
+        "Content/System/DA_Movement_Default.uasset"
+      ],
+      "id": "core_asset_paths_exist",
+      "status": "pass"
+    },
+    {
+      "actualCount": 7,
+      "expectedCount": 7,
+      "id": "seven_profile_source_animations_exist",
+      "status": "pass"
+    },
+    {
+      "actualCount": 7,
+      "expectedCount": 7,
+      "id": "seven_manifest_clip_curve_fingerprints",
+      "status": "pass"
+    },
+    {
+      "id": "source_and_manifest_sha256_fingerprints",
+      "manifestCurveFingerprintCount": 7,
+      "manifestFileFingerprintPresent": true,
+      "sourceAssetFingerprintCount": 7,
+      "status": "pass"
+    },
+    {
+      "id": "stop_value_semantics",
+      "status": "pass"
+    },
+    {
+      "id": "blend_parameter_naming",
+      "legacySerializedCompatibilityName": "GaitBlendY",
+      "newName": "WalkRunBlendAlpha",
+      "status": "pass"
+    },
+    {
+      "id": "asset_cdo_readback",
+      "state": "UE readback details are in unrealReadback",
+      "status": "attempted"
+    }
+  ],
+  "walkRunBlendSpace": {
+    "animSetKeyFromCreatorScript": "walkRun",
+    "axis": {
+      "cdoVerification": "PendingUEAssetWindow",
+      "dimension": 1,
+      "legacyNameUse": "serialization compatibility only; do not use as a new API name",
+      "legacySerializedName": "GaitBlendY",
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "parameterName": "WalkRunBlendAlpha",
+      "sampleSemantics": [
+        {
+          "gait": "Walk",
+          "value": 0.0
+        },
+        {
+          "gait": "Run",
+          "value": 1.0
+        }
+      ],
+      "sourceEvidence": [
+        "create_walkrun_blendspace.py adds Walk_Loop at X=0 and Run_Loop at X=1",
+        "fix_blendspace_axis.py sets the axis display name to WalkRunBlendAlpha and range to 0..1"
+      ]
+    },
+    "diskAssetExists": true,
+    "diskPath": "Content/Characters/Player/Pyrios/Animation/Movement/BS_Pyrios_WalkRun.uasset",
+    "expectedClass": "BlendSpace1D",
+    "expectedClassEvidence": "AAADocs/Scripts/create_walkrun_blendspace.py constructs unreal.BlendSpaceFactory1D and creates unreal.BlendSpace1D; CDO type is pending UE readback.",
+    "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/BS_Pyrios_WalkRun",
+    "sampleAssetPaths": [
+      {
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Walk_Loop",
+        "value": 0.0
+      },
+      {
+        "objectPath": "/Game/Characters/Player/Pyrios/Animation/Movement/Avatar_Male_Size03_Pyrois_Ani_Run_Loop",
+        "value": 1.0
+      }
+    ]
+  }
+}

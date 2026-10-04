@@ -1,0 +1,3225 @@
+{
+  "status": "proposal_only_pending_root_contract",
+  "source": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle",
+  "source_clips": 79,
+  "importable_sequences": 75,
+  "all_damage_windows_unset": true,
+  "actions": [
+    {
+      "name": "BOSS_411_Ani_StandBy",
+      "source_json": "anim/BOSS_411_Ani_StandBy.json",
+      "source_fbx": "anim/BOSS_411_Ani_StandBy.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "source_empty": false,
+      "family": "StandBy",
+      "category_proposal": "state_loop",
+      "use_proposal": "sequence_state",
+      "rationale": "用于待机/移动/眩晕持续状态；默认不建攻击Montage",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        2.1666667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.183333390016983
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 0.7617168426513672,
+          "Lcl Translation.Y": 1.9933490753173828,
+          "Lcl Translation.Z": 0.34404098987579346
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Force_Kill_ThrowSkill_AS",
+      "source_json": "anim/BOSS_411_Ani_Force_Kill_ThrowSkill_AS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Force_Kill_ThrowSkill_AS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Force_Kill_ThrowSkill_AS",
+      "source_empty": false,
+      "family": "Force_Kill_ThrowSkill",
+      "category_proposal": "execution_attacker",
+      "use_proposal": "paired_montage",
+      "rationale": "抓取/处决候选；需对齐受害者与取消策略",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        3.5833335
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        3.5999999007927874
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 213.28337860107422,
+          "Lcl Rotation.Y": 130.46973037719727,
+          "Lcl Rotation.Z": 207.9673309326172,
+          "Lcl Translation.X": 29.10641050338745,
+          "Lcl Translation.Y": 30.470779418945312,
+          "Lcl Translation.Z": 55.07427978515625
+        },
+        "LeftHandThrowPoint": {
+          "Lcl Rotation.X": 210.11870574951172,
+          "Lcl Rotation.Y": 234.25966835021973,
+          "Lcl Rotation.Z": 129.57590720057487,
+          "Lcl Translation.X": 391.5715103149414,
+          "Lcl Translation.Y": 514.3296813964844,
+          "Lcl Translation.Z": 462.3549118041992
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 61.91800308227539,
+          "Lcl Translation.Y": 22.612136840820312,
+          "Lcl Translation.Z": 35.7382276058197
+        },
+        "Root": {
+          "Lcl Translation.Z": 54.88235855102539
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Force_Kill_ThrowSkill_BS",
+      "source_json": "anim/BOSS_411_Ani_Force_Kill_ThrowSkill_BS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Force_Kill_ThrowSkill_BS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Force_Kill_ThrowSkill_BS",
+      "source_empty": false,
+      "family": "Force_Kill_ThrowSkill",
+      "category_proposal": "execution_attacker",
+      "use_proposal": "paired_montage",
+      "rationale": "抓取/处决候选；需对齐受害者与取消策略",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        4.166667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        4.183333390016983
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 213.28341674804688,
+          "Lcl Rotation.Y": 134.03808212280273,
+          "Lcl Rotation.Z": 207.9673309326172,
+          "Lcl Translation.X": 29.52909517288208,
+          "Lcl Translation.Y": 33.37351989746094,
+          "Lcl Translation.Z": 87.78781795501709
+        },
+        "LeftHandThrowPoint": {
+          "Lcl Rotation.X": 339.4641342163086,
+          "Lcl Rotation.Y": 303.6643524169922,
+          "Lcl Rotation.Z": 172.70196533203125,
+          "Lcl Translation.X": 806.2936401367188,
+          "Lcl Translation.Y": 514.3043823242188,
+          "Lcl Translation.Z": 830.6111145019531
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 61.91800308227539,
+          "Lcl Translation.Y": 26.997404098510742,
+          "Lcl Translation.Z": 38.67918026447296
+        },
+        "Root": {
+          "Lcl Translation.Z": 90.2738265991211
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Be_Executed_AS",
+      "source_json": "anim/BOSS_411_Ani_Be_Executed_AS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Be_Executed_AS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Be_Executed_AS",
+      "source_empty": false,
+      "family": "Be_Executed",
+      "category_proposal": "execution_victim",
+      "use_proposal": "paired_montage",
+      "rationale": "被处决配对表现；不能当Boss主动伤害动作",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        3.5500002
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        3.5666666028813223
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 243.25131225585938,
+          "Lcl Rotation.Y": 47.40966796875,
+          "Lcl Rotation.Z": 237.57906341552734,
+          "Lcl Translation.X": 41.50025463104248,
+          "Lcl Translation.Y": 177.8697509765625,
+          "Lcl Translation.Z": 521.6060791015625
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 74.65675163269043,
+          "Lcl Rotation.Y": 31.87067413330078,
+          "Lcl Rotation.Z": 67.8867301940918,
+          "Lcl Translation.X": 988.5573844909668,
+          "Lcl Translation.Y": 645.5266418457031,
+          "Lcl Translation.Z": 955.5395355224609
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Be_Executed",
+      "source_json": "anim/BOSS_411_Ani_Be_Executed.json",
+      "source_fbx": "anim/BOSS_411_Ani_Be_Executed.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Be_Executed",
+      "source_empty": false,
+      "family": "Be_Executed",
+      "category_proposal": "execution_victim",
+      "use_proposal": "paired_montage",
+      "rationale": "被处决配对表现；不能当Boss主动伤害动作",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        8.0
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        8.01666641154694
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 331.70965576171875,
+          "Lcl Rotation.Y": 204.70335388183594,
+          "Lcl Rotation.Z": 327.7745532989502,
+          "Lcl Translation.Y": 177.86972427368164
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 281.8162384033203,
+          "Lcl Rotation.Y": 153.00076293945312,
+          "Lcl Rotation.Z": 295.14732360839844,
+          "Lcl Translation.X": 1348.889404296875,
+          "Lcl Translation.Y": 660.8218078613281,
+          "Lcl Translation.Z": 1027.5992279052734
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fly_Loop",
+      "source_json": "anim/BOSS_411_Ani_Fly_Loop.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fly_Loop.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Loop",
+      "source_empty": false,
+      "family": "Fly_Loop",
+      "category_proposal": "state_loop",
+      "use_proposal": "sequence_state",
+      "rationale": "用于待机/移动/眩晕持续状态；默认不建攻击Montage",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        0.01666671
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.03333333333333333
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 5.242495059967041,
+          "Lcl Rotation.Y": 0.9058074951171875,
+          "Lcl Rotation.Z": 8.024551391601562,
+          "Lcl Translation.X": 0.25590717792510986,
+          "Lcl Translation.Y": 14.31695556640625,
+          "Lcl Translation.Z": 185.90029907226562
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 0.43059539794921875,
+          "Lcl Rotation.Y": 3.824941635131836,
+          "Lcl Rotation.Z": 2.1408042907714844,
+          "Lcl Translation.X": 3.8769688606262207,
+          "Lcl Translation.Y": 3.4800796508789062,
+          "Lcl Translation.Z": 2.846923828125
+        },
+        "Root": {
+          "Lcl Translation.Z": 185.90029907226562
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Execute_Wing_Defence_BS",
+      "source_json": "anim/BOSS_411_Ani_Fire_Execute_Wing_Defence_BS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Execute_Wing_Defence_BS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Execute_Wing_Defence_BS",
+      "source_empty": false,
+      "family": "Fire_Execute_Wing_Defence",
+      "category_proposal": "defence_phase",
+      "use_proposal": "section_family",
+      "rationale": "防御阶段候选，循环显式退出；无默认伤害",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.5
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.5166666454048852
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 35.04487609863281,
+          "Lcl Rotation.Y": 34.507957458496094,
+          "Lcl Rotation.Z": 25.152557373046875,
+          "Lcl Translation.X": 5.742857933044434,
+          "Lcl Translation.Y": 16.975204467773438,
+          "Lcl Translation.Z": 37.331565856933594
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 13.661413192749023,
+          "Lcl Translation.Y": 13.564224243164062,
+          "Lcl Translation.Z": 31.14049541950226
+        },
+        "Root": {
+          "Lcl Translation.Z": 35.7022910118103
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Execute_Wing_Defence_Loop",
+      "source_json": "anim/BOSS_411_Ani_Fire_Execute_Wing_Defence_Loop.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Execute_Wing_Defence_Loop.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Execute_Wing_Defence_Loop",
+      "source_empty": false,
+      "family": "Fire_Execute_Wing_Defence",
+      "category_proposal": "defence_phase",
+      "use_proposal": "section_family",
+      "rationale": "防御阶段候选，循环显式退出；无默认伤害",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        2.0000002
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.016666645404885
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Translation.X": 0.43744611740112305,
+          "Lcl Translation.Y": 1.6823654174804688,
+          "Lcl Translation.Z": 2.1847190856933594
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 2.035308837890625,
+          "Lcl Translation.Y": 3.773561477661133,
+          "Lcl Translation.Z": 1.3767375946044922
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Execute_Wing_Defence_AS",
+      "source_json": "anim/BOSS_411_Ani_Fire_Execute_Wing_Defence_AS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Execute_Wing_Defence_AS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Execute_Wing_Defence_AS",
+      "source_empty": false,
+      "family": "Fire_Execute_Wing_Defence",
+      "category_proposal": "defence_phase",
+      "use_proposal": "section_family",
+      "rationale": "防御阶段候选，循环显式退出；无默认伤害",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        2.0
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.016666645404885
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 191.86837005615234,
+          "Lcl Rotation.Y": 152.06609916687012,
+          "Lcl Rotation.Z": 191.06341552734375,
+          "Lcl Translation.X": 27.27766466140747,
+          "Lcl Translation.Y": 32.31336212158203,
+          "Lcl Translation.Z": 127.26986694335938
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 46.07208061218262,
+          "Lcl Translation.Y": 30.98906707763672,
+          "Lcl Translation.Z": 39.063449919223785
+        },
+        "Root": {
+          "Lcl Translation.Z": 126.91336822509766
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOS_411_Ani_Counter",
+      "source_json": "anim/BOS_411_Ani_Counter.json",
+      "source_fbx": "anim/BOS_411_Ani_Counter.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOS_411_Ani_Counter",
+      "source_empty": false,
+      "family": "Counter",
+      "category_proposal": "counter_attack",
+      "use_proposal": "single_montage",
+      "rationale": "反击候选；判定窗口待预览/人工标定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.1666669
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.1833332766280322
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 143.66421508789062,
+          "Lcl Rotation.Y": 25.149566650390625,
+          "Lcl Rotation.Z": 134.6785888671875,
+          "Lcl Translation.X": 14.107086181640625,
+          "Lcl Translation.Y": 2.8757553100585938,
+          "Lcl Translation.Z": 12.5408935546875
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 177.4934058189392,
+          "Lcl Rotation.Y": 124.02668380737305,
+          "Lcl Rotation.Z": 300.8836441040039,
+          "Lcl Translation.X": 128.75672912597656,
+          "Lcl Translation.Y": 93.76634407043457,
+          "Lcl Translation.Z": 75.20283508300781
+        },
+        "Root": {
+          "Lcl Translation.Z": 12.59014892578125
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Wing_Defence_Break(80-200)",
+      "source_json": "anim/BOSS_411_Ani_Wing_Defence_Break(80-200).json",
+      "source_fbx": "anim/BOSS_411_Ani_Wing_Defence_Break(80-200).fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Wing_Defence_Break_80_200_",
+      "source_empty": false,
+      "family": "Wing_Defence",
+      "category_proposal": "defence_phase",
+      "use_proposal": "single_montage",
+      "rationale": "防御/破防表现候选；CounterHitBox运动不等于有效判定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        4.916667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        4.933333390016983
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 467.60337829589844,
+          "Lcl Rotation.Y": 47.965049743652344,
+          "Lcl Rotation.Z": 475.7078857421875,
+          "Lcl Translation.X": 30.451390266418457,
+          "Lcl Translation.Y": 77.91202926635742,
+          "Lcl Translation.Z": 149.4033203125
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 169.68710327148438,
+          "Lcl Rotation.Y": 84.33485412597656,
+          "Lcl Rotation.Z": 254.67340087890625,
+          "Lcl Translation.X": 146.18201065063477,
+          "Lcl Translation.Y": 84.72846603393555,
+          "Lcl Translation.Z": 111.28759765625
+        },
+        "Root": {
+          "Lcl Translation.Z": 149.98921585083008
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Move_L_BS",
+      "source_json": "anim/BOSS_411_Ani_Move_L_BS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Move_L_BS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Move_L_BS",
+      "source_empty": false,
+      "family": "Move_L",
+      "category_proposal": "locomotion_transition",
+      "use_proposal": "sequence_state",
+      "rationale": "移动起止素材；BS/AS先后需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.5666667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.5833333120715518
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 154.73758697509766,
+          "Lcl Rotation.Y": 78.2584228515625,
+          "Lcl Rotation.Z": 148.9190673828125,
+          "Lcl Translation.X": 70.06835079193115,
+          "Lcl Translation.Y": 1.55340576171875,
+          "Lcl Translation.Z": 8.016708135604858
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 27.709238059818745,
+          "Lcl Translation.Y": 6.628841400146484,
+          "Lcl Translation.Z": 0.6439709663391113
+        },
+        "Root": {
+          "Lcl Translation.X": 62.74812960624695
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Move_L_Loop",
+      "source_json": "anim/BOSS_411_Ani_Move_L_Loop.json",
+      "source_fbx": "anim/BOSS_411_Ani_Move_L_Loop.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Move_L_Loop",
+      "source_empty": false,
+      "family": "Move_L",
+      "category_proposal": "state_loop",
+      "use_proposal": "sequence_state",
+      "rationale": "用于待机/移动/眩晕持续状态；默认不建攻击Montage",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        1.0666668
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.0833333687552016
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 10.018211364746094,
+          "Lcl Rotation.Y": 33.603248596191406,
+          "Lcl Rotation.Z": 5.972979873418808,
+          "Lcl Translation.X": 219.10025787353516,
+          "Lcl Translation.Y": 3.707122802734375,
+          "Lcl Translation.Z": 3.7671570777893066
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 56.14254379272461,
+          "Lcl Translation.Y": 9.61678695678711,
+          "Lcl Translation.Z": 10.206525783985853
+        },
+        "Root": {
+          "Lcl Translation.X": 219.39329528808594
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Move_L_AS",
+      "source_json": "anim/BOSS_411_Ani_Move_L_AS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Move_L_AS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Move_L_AS",
+      "source_empty": false,
+      "family": "Move_L",
+      "category_proposal": "locomotion_transition",
+      "use_proposal": "sequence_state",
+      "rationale": "移动起止素材；BS/AS先后需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.66666687
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.6833333333333333
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 154.56527709960938,
+          "Lcl Rotation.Y": 77.1172866821289,
+          "Lcl Rotation.Z": 149.96359252929688,
+          "Lcl Translation.X": 85.80795288085938,
+          "Lcl Translation.Y": 4.133514404296875,
+          "Lcl Translation.Z": 7.750267505645752
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 24.958993911743164,
+          "Lcl Translation.Y": 14.800043106079102,
+          "Lcl Translation.Z": 4.1701899617910385
+        },
+        "Root": {
+          "Lcl Translation.X": 92.083740234375
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Move_R_BS",
+      "source_json": "anim/BOSS_411_Ani_Move_R_BS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Move_R_BS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Move_R_BS",
+      "source_empty": false,
+      "family": "Move_R",
+      "category_proposal": "locomotion_transition",
+      "use_proposal": "sequence_state",
+      "rationale": "移动起止素材；BS/AS先后需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.5666667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.5833333120715518
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 21.22968292236328,
+          "Lcl Rotation.Y": 65.94046020507812,
+          "Lcl Rotation.Z": 24.339752197265625,
+          "Lcl Translation.X": 51.51276874542236,
+          "Lcl Translation.Y": 2.0601882934570312,
+          "Lcl Translation.Z": 4.931706547737122
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 46.296918869018555,
+          "Lcl Translation.Y": 11.10777473449707,
+          "Lcl Translation.Z": 2.5974981784820557
+        },
+        "Root": {
+          "Lcl Translation.X": 59.93266296386719
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Move_R_Loop",
+      "source_json": "anim/BOSS_411_Ani_Move_R_Loop.json",
+      "source_fbx": "anim/BOSS_411_Ani_Move_R_Loop.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Move_R_Loop",
+      "source_empty": false,
+      "family": "Move_R",
+      "category_proposal": "state_loop",
+      "use_proposal": "sequence_state",
+      "rationale": "用于待机/移动/眩晕持续状态；默认不建攻击Montage",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        1.0666668
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.0833333687552016
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 10.010795593261719,
+          "Lcl Rotation.Y": 33.606597900390625,
+          "Lcl Rotation.Z": 5.9441680908203125,
+          "Lcl Translation.X": 219.10028457641602,
+          "Lcl Translation.Y": 3.6799087524414062,
+          "Lcl Translation.Z": 3.5925531685352325
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 52.53927040100098,
+          "Lcl Translation.Y": 11.659927368164062,
+          "Lcl Translation.Z": 6.813235769048333
+        },
+        "Root": {
+          "Lcl Translation.X": 217.5736083984375
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Move_R_AS",
+      "source_json": "anim/BOSS_411_Ani_Move_R_AS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Move_R_AS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Move_R_AS",
+      "source_empty": false,
+      "family": "Move_R",
+      "category_proposal": "locomotion_transition",
+      "use_proposal": "sequence_state",
+      "rationale": "移动起止素材；BS/AS先后需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.66666687
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.6833333333333333
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 20.53949737548828,
+          "Lcl Rotation.Y": 65.97300720214844,
+          "Lcl Rotation.Z": 24.365951538085938,
+          "Lcl Translation.X": 83.90988159179688,
+          "Lcl Translation.Y": 2.5229263305664062,
+          "Lcl Translation.Z": 1.8786462715615926
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 47.38675308227539,
+          "Lcl Translation.Y": 7.798454284667969,
+          "Lcl Translation.Z": 2.952581524848938
+        },
+        "Root": {
+          "Lcl Translation.X": 76.68008422851562
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_01",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_01.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_01.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_01",
+      "source_empty": false,
+      "family": "Fire_Attack_01",
+      "category_proposal": "attack",
+      "use_proposal": "single_montage",
+      "rationale": "主动攻击候选；仅建立待标定窗口，不捏造源判定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        2.8333335
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.8499999007927874
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 289.87469482421875,
+          "Lcl Rotation.Y": 127.62470245361328,
+          "Lcl Rotation.Z": 246.45582580566406,
+          "Lcl Translation.X": 18.111214637756348,
+          "Lcl Translation.Y": 84.23522186279297,
+          "Lcl Translation.Z": 1008.1170654296875
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 367.3397979736328,
+          "Lcl Rotation.Y": 140.78015518188477,
+          "Lcl Rotation.Z": 389.4948332309723,
+          "Lcl Translation.X": 149.07765197753906,
+          "Lcl Translation.Y": 142.11300659179688,
+          "Lcl Translation.Z": 143.34107971191406
+        },
+        "Root": {
+          "Lcl Translation.Z": 1007.5524291992188
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Ice_Attack_02",
+      "source_json": "anim/BOSS_411_Ani_Ice_Attack_02.json",
+      "source_fbx": "anim/BOSS_411_Ani_Ice_Attack_02.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_02",
+      "source_empty": false,
+      "family": "Ice_Attack_02",
+      "category_proposal": "attack",
+      "use_proposal": "single_montage",
+      "rationale": "主动攻击候选；仅建立待标定窗口，不捏造源判定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.8333334
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.85000002124013
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 145.61432647705078,
+          "Lcl Rotation.Y": 150.16319274902344,
+          "Lcl Rotation.Z": 117.98006820678711,
+          "Lcl Translation.X": 32.20401573181152,
+          "Lcl Translation.Y": 57.76213836669922,
+          "Lcl Translation.Z": 129.43218994140625
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 166.33570098876953,
+          "Lcl Rotation.Y": 237.31015968322754,
+          "Lcl Rotation.Z": 140.1426010131836,
+          "Lcl Translation.X": 465.2457275390625,
+          "Lcl Translation.Y": 356.5811080932617,
+          "Lcl Translation.Z": 165.18006896972656
+        },
+        "Root": {
+          "Lcl Translation.Z": 128.8096160888672
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_02",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_02.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_02.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_02",
+      "source_empty": false,
+      "family": "Fire_Attack_02",
+      "category_proposal": "attack",
+      "use_proposal": "single_montage",
+      "rationale": "主动攻击候选；仅建立待标定窗口，不捏造源判定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        4.2000003
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        4.216666695008492
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 249.44268798828125,
+          "Lcl Rotation.Y": 167.39827728271484,
+          "Lcl Rotation.Z": 523.0812072753906,
+          "Lcl Translation.X": 488.83421897888184,
+          "Lcl Translation.Y": 306.9431266784668,
+          "Lcl Translation.Z": 1876.12842130661
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 293.12062072753906,
+          "Lcl Rotation.Y": 326.99141693115234,
+          "Lcl Rotation.Z": 448.9959297180176,
+          "Lcl Translation.X": 151.19572067260742,
+          "Lcl Translation.Y": 123.12433624267578,
+          "Lcl Translation.Z": 173.67027282714844
+        },
+        "Root": {
+          "Lcl Translation.X": 489.01976585388184,
+          "Lcl Translation.Z": 1876.128665447235
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Ice_Attack_01",
+      "source_json": "anim/BOSS_411_Ani_Ice_Attack_01.json",
+      "source_fbx": "anim/BOSS_411_Ani_Ice_Attack_01.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_01",
+      "source_empty": false,
+      "family": "Ice_Attack_01",
+      "category_proposal": "attack",
+      "use_proposal": "single_montage",
+      "rationale": "主动攻击候选；仅建立待标定窗口，不捏造源判定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        2.0
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.016666645404885
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 162.05968475341797,
+          "Lcl Rotation.Y": 89.01920413970947,
+          "Lcl Rotation.Z": 186.47044563293457,
+          "Lcl Translation.X": 28.672800064086914,
+          "Lcl Translation.Y": 55.30204772949219,
+          "Lcl Translation.Z": 142.04861450195312
+        },
+        "LeftHandThrowPoint": {
+          "Lcl Rotation.X": 436.58116149902344,
+          "Lcl Rotation.Y": 230.97671508789062,
+          "Lcl Rotation.Z": 385.53047943115234,
+          "Lcl Translation.X": 496.25592041015625,
+          "Lcl Translation.Y": 372.5438766479492,
+          "Lcl Translation.Z": 422.9286193847656
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 84.47198867797852,
+          "Lcl Rotation.Y": 72.76838731765747,
+          "Lcl Rotation.Z": 167.66262817382812,
+          "Lcl Translation.X": 120.21671676635742,
+          "Lcl Translation.Y": 40.81063461303711,
+          "Lcl Translation.Z": 60.916507720947266
+        },
+        "Root": {
+          "Lcl Translation.Z": 142.04861450195312
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Wing_Defence_BS",
+      "source_json": "anim/BOSS_411_Ani_Wing_Defence_BS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Wing_Defence_BS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Wing_Defence_BS",
+      "source_empty": false,
+      "family": "Wing_Defence",
+      "category_proposal": "defence_phase",
+      "use_proposal": "section_family",
+      "rationale": "防御/破防表现候选；CounterHitBox运动不等于有效判定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.5
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.5166666454048852
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 35.04487609863281,
+          "Lcl Rotation.Y": 34.507957458496094,
+          "Lcl Rotation.Z": 25.152557373046875,
+          "Lcl Translation.X": 5.742857933044434,
+          "Lcl Translation.Y": 16.975204467773438,
+          "Lcl Translation.Z": 37.331565856933594
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 13.661413192749023,
+          "Lcl Translation.Y": 13.564224243164062,
+          "Lcl Translation.Z": 31.14049541950226
+        },
+        "Root": {
+          "Lcl Translation.Z": 35.7022910118103
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Wing_Defence_Loop",
+      "source_json": "anim/BOSS_411_Ani_Wing_Defence_Loop.json",
+      "source_fbx": "anim/BOSS_411_Ani_Wing_Defence_Loop.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Wing_Defence_Loop",
+      "source_empty": false,
+      "family": "Wing_Defence",
+      "category_proposal": "defence_phase",
+      "use_proposal": "section_family",
+      "rationale": "防御/破防表现候选；CounterHitBox运动不等于有效判定",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        2.0000002
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.016666645404885
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Translation.X": 0.43744611740112305,
+          "Lcl Translation.Y": 1.6823654174804688,
+          "Lcl Translation.Z": 2.1847190856933594
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 2.035308837890625,
+          "Lcl Translation.Y": 3.773561477661133,
+          "Lcl Translation.Z": 1.3767375946044922
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Wing_Defence_ThrowSkill",
+      "source_json": "anim/BOSS_411_Ani_Wing_Defence_ThrowSkill.json",
+      "source_fbx": "anim/BOSS_411_Ani_Wing_Defence_ThrowSkill.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Wing_Defence_ThrowSkill",
+      "source_empty": false,
+      "family": "Wing_ThrowSkill",
+      "category_proposal": "grab_attack",
+      "use_proposal": "paired_montage",
+      "rationale": "抓取候选；动作与受害者配对未确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.55
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.5666667162486214
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 53.33460998535156,
+          "Lcl Rotation.Y": 131.8087615966797,
+          "Lcl Rotation.Z": 55.159603118896484,
+          "Lcl Translation.X": 26.646770477294922,
+          "Lcl Translation.Y": 32.019493103027344,
+          "Lcl Translation.Z": 83.27081966400146
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 46.386152267456055,
+          "Lcl Translation.Y": 25.191020965576172,
+          "Lcl Translation.Z": 39.063449919223785
+        },
+        "Root": {
+          "Lcl Translation.Z": 82.09243297576904
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Wing_Defence_ThrowSkill_BS",
+      "source_json": "anim/BOSS_411_Ani_Wing_Defence_ThrowSkill_BS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Wing_Defence_ThrowSkill_BS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Wing_Defence_ThrowSkill_BS",
+      "source_empty": false,
+      "family": "Wing_ThrowSkill",
+      "category_proposal": "grab_attack",
+      "use_proposal": "paired_montage",
+      "rationale": "抓取候选；动作与受害者配对未确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        2.0
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.016666645404885
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 191.86837005615234,
+          "Lcl Rotation.Y": 152.06609916687012,
+          "Lcl Rotation.Z": 191.06341552734375,
+          "Lcl Translation.X": 27.27766466140747,
+          "Lcl Translation.Y": 32.31336212158203,
+          "Lcl Translation.Z": 127.26986694335938
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 46.07208061218262,
+          "Lcl Translation.Y": 30.98906707763672,
+          "Lcl Translation.Z": 39.063449919223785
+        },
+        "Root": {
+          "Lcl Translation.Z": 126.91336822509766
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Wing_ThrowSkill_AS",
+      "source_json": "anim/BOSS_411_Ani_Wing_ThrowSkill_AS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Wing_ThrowSkill_AS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Wing_ThrowSkill_AS",
+      "source_empty": false,
+      "family": "Wing_ThrowSkill",
+      "category_proposal": "grab_attack",
+      "use_proposal": "paired_montage",
+      "rationale": "抓取候选；动作与受害者配对未确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        3.4500003
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        3.4666666950084917
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 213.28337860107422,
+          "Lcl Rotation.Y": 130.46973037719727,
+          "Lcl Rotation.Z": 207.9673309326172,
+          "Lcl Translation.X": 29.106407165527344,
+          "Lcl Translation.Y": 30.470779418945312,
+          "Lcl Translation.Z": 55.07427978515625
+        },
+        "LeftHandThrowPoint": {
+          "Lcl Rotation.X": 210.11486053466797,
+          "Lcl Rotation.Y": 234.24674034118652,
+          "Lcl Rotation.Z": 103.98670226335526,
+          "Lcl Translation.X": 391.8013153076172,
+          "Lcl Translation.Y": 514.3211364746094,
+          "Lcl Translation.Z": 462.3587112426758
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 61.79118347167969,
+          "Lcl Translation.Y": 22.612136840820312,
+          "Lcl Translation.Z": 35.60318350791931
+        },
+        "Root": {
+          "Lcl Translation.Z": 54.88235855102539
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Dash_B",
+      "source_json": "anim/BOSS_411_Ani_Dash_B.json",
+      "source_fbx": "anim/BOSS_411_Ani_Dash_B.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Dash_B",
+      "source_empty": false,
+      "family": "Dash_B",
+      "category_proposal": "evade",
+      "use_proposal": "single_montage",
+      "rationale": "无伤害通知；位移由玩法另定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.2500001
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.2666666454048852
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 133.81521606445312,
+          "Lcl Rotation.Y": 79.7640151977539,
+          "Lcl Rotation.Z": 125.03407287597656,
+          "Lcl Translation.X": 12.431296348571777,
+          "Lcl Translation.Y": 50.42790222167969,
+          "Lcl Translation.Z": 689.1626586914062
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 63.27105712890625,
+          "Lcl Rotation.Y": 138.8117561340332,
+          "Lcl Rotation.Z": 87.4428768157959,
+          "Lcl Translation.X": 52.566104888916016,
+          "Lcl Translation.Y": 26.036497116088867,
+          "Lcl Translation.Z": 59.133445739746094
+        },
+        "Root": {
+          "Lcl Translation.Z": 689.2209281921387
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Dash_F",
+      "source_json": "anim/BOSS_411_Ani_Dash_F.json",
+      "source_fbx": "anim/BOSS_411_Ani_Dash_F.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Dash_F",
+      "source_empty": false,
+      "family": "Dash_F",
+      "category_proposal": "evade",
+      "use_proposal": "single_montage",
+      "rationale": "无伤害通知；位移由玩法另定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.0500001
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.0666667162486214
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 180.24583435058594,
+          "Lcl Rotation.Y": 45.20048522949219,
+          "Lcl Rotation.Z": 182.66668701171875,
+          "Lcl Translation.X": 21.63588285446167,
+          "Lcl Translation.Y": 45.149436950683594,
+          "Lcl Translation.Z": 712.0112915039062
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 60.937469482421875,
+          "Lcl Translation.Y": 18.685667037963867,
+          "Lcl Translation.Z": 45.27849197387695
+        },
+        "Root": {
+          "Lcl Translation.Z": 711.6124877929688
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_03_Loop",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_03_Loop.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_03_Loop.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_03_Loop",
+      "source_empty": false,
+      "family": "Fire_Attack_03",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.1000001
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.11666667374671
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 185.05162811279297,
+          "Lcl Rotation.Y": 152.17982482910156,
+          "Lcl Rotation.Z": 276.5362243652344,
+          "Lcl Translation.X": 32.74810791015625,
+          "Lcl Translation.Y": 72.12389755249023,
+          "Lcl Translation.Z": 286.38037109375
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 177.6704864501953,
+          "Lcl Rotation.Y": 281.43029594421387,
+          "Lcl Rotation.Z": 373.250892162323,
+          "Lcl Translation.X": 112.81819343566895,
+          "Lcl Translation.Y": 108.3765754699707,
+          "Lcl Translation.Z": 173.62738037109375
+        },
+        "Root": {
+          "Lcl Translation.X": 32.87401008605957,
+          "Lcl Translation.Z": 286.65673828125
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_03",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_03.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_03.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_03",
+      "source_empty": false,
+      "family": "Fire_Attack_03",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        3.216667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        3.23333334749342
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 234.33531188964844,
+          "Lcl Rotation.Y": 167.38884735107422,
+          "Lcl Rotation.Z": 423.8416748046875,
+          "Lcl Translation.X": 43.79720497131348,
+          "Lcl Translation.Y": 72.12389755249023,
+          "Lcl Translation.Z": 410.9490966796875
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 293.12017822265625,
+          "Lcl Rotation.Y": 281.4322261810303,
+          "Lcl Rotation.Z": 448.98984813690186,
+          "Lcl Translation.X": 151.1407012939453,
+          "Lcl Translation.Y": 114.02871704101562,
+          "Lcl Translation.Z": 173.62738037109375
+        },
+        "Root": {
+          "Lcl Translation.X": 43.76393699645996,
+          "Lcl Translation.Z": 411.1795654296875
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_04_BS",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_04_BS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_04_BS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04_BS",
+      "source_empty": false,
+      "family": "Fire_Attack_04",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.6166668
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.633333319151595
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 92.30646514892578,
+          "Lcl Rotation.Y": 15.942466735839844,
+          "Lcl Rotation.Z": 91.08380889892578,
+          "Lcl Translation.X": 6.241143822669983,
+          "Lcl Translation.Y": 1661.320671081543,
+          "Lcl Translation.Z": 12.051877498626709
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 114.06007385253906,
+          "Lcl Rotation.Y": 60.43987464904785,
+          "Lcl Rotation.Z": 203.99656677246094,
+          "Lcl Translation.X": 71.2069263458252,
+          "Lcl Translation.Y": 33.01811218261719,
+          "Lcl Translation.Z": 44.785743832588196
+        },
+        "Root": {
+          "Lcl Translation.Z": 12.099140167236328
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_04_Air_Wait",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_04_Air_Wait.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_04_Air_Wait.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04_Air_Wait",
+      "source_empty": false,
+      "family": "Fire_Attack_04",
+      "category_proposal": "attack_hold",
+      "use_proposal": "section_family",
+      "rationale": "空中/下落/蓄力保持阶段；不得默认全段伤害",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        0.01666677
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.03333333333333333
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 1.5228729248046875,
+          "Lcl Rotation.Y": 0.04595184326171875,
+          "Lcl Rotation.Z": 0.9754714965820312
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 2.7598724365234375,
+          "Lcl Rotation.Y": 4.563016891479492,
+          "Lcl Rotation.Z": 5.177253723144531,
+          "Lcl Translation.X": 0.383087158203125,
+          "Lcl Translation.Y": 1.469705581665039,
+          "Lcl Translation.Z": 2.796518325805664
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_04_Down_Loop",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_04_Down_Loop.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_04_Down_Loop.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04_Down_Loop",
+      "source_empty": false,
+      "family": "Fire_Attack_04",
+      "category_proposal": "attack_hold",
+      "use_proposal": "section_family",
+      "rationale": "空中/下落/蓄力保持阶段；不得默认全段伤害",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        0.01666689
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.03333333333333333
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 1.2299880981445312,
+          "Lcl Rotation.Y": 4.4588165283203125,
+          "Lcl Rotation.Z": 0.11535453796386719,
+          "Lcl Translation.X": 1.2030467987060547,
+          "Lcl Translation.Y": 226.09588623046875,
+          "Lcl Translation.Z": 0.45778846740722656
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_04_Down_AS",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_04_Down_AS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_04_Down_AS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04_Down_AS",
+      "source_empty": false,
+      "family": "Fire_Attack_04",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        2.4333336
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.4500000425019115
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 423.59033966064453,
+          "Lcl Rotation.Y": 107.26885986328125,
+          "Lcl Rotation.Z": 422.07298851013184,
+          "Lcl Translation.X": 37.3099250793457,
+          "Lcl Translation.Y": 78.02654647827148,
+          "Lcl Translation.Z": 79.93626022338867
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 329.89454650878906,
+          "Lcl Rotation.Y": 129.47084426879883,
+          "Lcl Rotation.Z": 315.01683044433594,
+          "Lcl Translation.X": 136.7309799194336,
+          "Lcl Translation.Y": 84.63303756713867,
+          "Lcl Translation.Z": 119.24774932861328
+        },
+        "Root": {
+          "Lcl Translation.Z": 79.8914909362793
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_04_Down_Loop_Spline",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_04_Down_Loop_Spline.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_04_Down_Loop_Spline.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04_Down_Loop_Spline",
+      "source_empty": false,
+      "family": "Fire_Attack_04",
+      "category_proposal": "attack_hold",
+      "use_proposal": "section_family",
+      "rationale": "空中/下落/蓄力保持阶段；不得默认全段伤害",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.01666689
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.03333333333333333
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 1.2299880981445312,
+          "Lcl Rotation.Y": 4.4588165283203125,
+          "Lcl Rotation.Z": 0.11535453796386719,
+          "Lcl Translation.X": 1.2030467987060547,
+          "Lcl Translation.Y": 226.09588623046875,
+          "Lcl Translation.Z": 0.45778846740722656
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_ThrowUp_02_Y",
+      "source_json": "anim/BOSS_411_Ani_ThrowUp_02_Y.json",
+      "source_fbx": "anim/BOSS_411_Ani_ThrowUp_02_Y.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_ThrowUp_02_Y",
+      "source_empty": false,
+      "family": "ThrowUp_02_Y",
+      "category_proposal": "reaction",
+      "use_proposal": "sequence_state",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.43333337
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.44999998581826184
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 92.3947525024414,
+          "Lcl Rotation.Y": 105.16829681396484,
+          "Lcl Rotation.Z": 90.75386047363281,
+          "Lcl Translation.X": 9.510169625282288,
+          "Lcl Translation.Y": 123.77120971679688,
+          "Lcl Translation.Z": 134.53500366210938
+        },
+        "Root": {
+          "Lcl Translation.Z": 134.3700714111328
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_ThrowFall_Y",
+      "source_json": "anim/BOSS_411_Ani_ThrowFall_Y.json",
+      "source_fbx": "anim/BOSS_411_Ani_ThrowFall_Y.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_ThrowFall_Y",
+      "source_empty": false,
+      "family": "ThrowFall_Y",
+      "category_proposal": "reaction",
+      "use_proposal": "sequence_state",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        0.0
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.0
+      ],
+      "moving_candidate_local_tracks": {},
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_StandUp",
+      "source_json": "anim/BOSS_411_Ani_StandUp.json",
+      "source_fbx": "anim/BOSS_411_Ani_StandUp.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandUp",
+      "source_empty": false,
+      "family": "StandUp",
+      "category_proposal": "reaction",
+      "use_proposal": "single_montage",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        2.6833334
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.7000000425019115
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 140.61610984802246,
+          "Lcl Rotation.Y": 240.34030151367188,
+          "Lcl Rotation.Z": 159.4534454345703,
+          "Lcl Translation.X": 32.90123748779297,
+          "Lcl Translation.Y": 106.9920883178711,
+          "Lcl Translation.Z": 267.0209197998047
+        },
+        "Root": {
+          "Lcl Translation.Z": 266.07106018066406
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_04",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_04.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_04.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04",
+      "source_empty": false,
+      "family": "Fire_Attack_04",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        5.166667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        5.183333390016983
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 579.4090118408203,
+          "Lcl Rotation.Y": 131.9621982574463,
+          "Lcl Rotation.Z": 578.3063507080078,
+          "Lcl Translation.X": 37.310486793518066,
+          "Lcl Translation.Y": 1730.0761947631836,
+          "Lcl Translation.Z": 79.93626022338867
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 476.2398567199707,
+          "Lcl Rotation.Y": 138.09783172607422,
+          "Lcl Rotation.Z": 643.5837020874023,
+          "Lcl Translation.X": 136.74827575683594,
+          "Lcl Translation.Y": 108.71782302856445,
+          "Lcl Translation.Z": 137.9984130859375
+        },
+        "Root": {
+          "Lcl Translation.Z": 80.2497444152832
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_03_Loop_End",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_03_Loop_End.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_03_Loop_End.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_03_Loop_End",
+      "source_empty": false,
+      "family": "Fire_Attack_03",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        2.266667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.2833332978898135
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 168.71222305297852,
+          "Lcl Rotation.Y": 66.88433265686035,
+          "Lcl Rotation.Z": 195.33026885986328,
+          "Lcl Translation.X": 34.648226261138916,
+          "Lcl Translation.Y": 56.305206298828125,
+          "Lcl Translation.Z": 125.6103515625
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 293.0999298095703,
+          "Lcl Rotation.Y": 137.26060485839844,
+          "Lcl Rotation.Z": 333.3685302734375,
+          "Lcl Translation.X": 125.49810791015625,
+          "Lcl Translation.Y": 86.9058837890625,
+          "Lcl Translation.Z": 97.54690551757812
+        },
+        "Root": {
+          "Lcl Translation.X": 34.78404474258423,
+          "Lcl Translation.Z": 125.6519775390625
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Ice_Attack_03_BS",
+      "source_json": "anim/BOSS_411_Ani_Ice_Attack_03_BS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Ice_Attack_03_BS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_03_BS",
+      "source_empty": false,
+      "family": "Ice_Attack_03",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.9166667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.9333333333333333
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 327.77821350097656,
+          "Lcl Rotation.Y": 107.14816284179688,
+          "Lcl Rotation.Z": 371.4309387207031,
+          "Lcl Translation.X": 18.39151430130005,
+          "Lcl Translation.Y": 44.41722106933594,
+          "Lcl Translation.Z": 77.52201843261719
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 127.41204833984375,
+          "Lcl Translation.Y": 55.7110116481781,
+          "Lcl Translation.Z": 48.9875031709671
+        },
+        "Root": {
+          "Lcl Translation.Z": 77.7671127319336
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Ice_Attack_03_Loop",
+      "source_json": "anim/BOSS_411_Ani_Ice_Attack_03_Loop.json",
+      "source_fbx": "anim/BOSS_411_Ani_Ice_Attack_03_Loop.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_03_Loop",
+      "source_empty": false,
+      "family": "Ice_Attack_03",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        0.25000006
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.26666667374671
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 0.2038726806640625,
+          "Lcl Rotation.Y": 6.430421829223633,
+          "Lcl Rotation.Z": 3.647216796875,
+          "Lcl Translation.X": 1.296295166015625,
+          "Lcl Translation.Y": 1.3925552368164062,
+          "Lcl Translation.Z": 1.0457267761230469
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 7.171913146972656,
+          "Lcl Translation.Y": 14.438150405883789,
+          "Lcl Translation.Z": 4.003459930419922
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Ice_Attack_03_AS",
+      "source_json": "anim/BOSS_411_Ani_Ice_Attack_03_AS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Ice_Attack_03_AS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_03_AS",
+      "source_empty": false,
+      "family": "Ice_Attack_03",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.8333334
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.85000002124013
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 41.50426483154297,
+          "Lcl Rotation.Y": 97.26493835449219,
+          "Lcl Rotation.Z": 25.224105834960938,
+          "Lcl Translation.X": 25.518027782440186,
+          "Lcl Translation.Y": 18.761253356933594,
+          "Lcl Translation.Z": 42.1273193359375
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 29.515342235565186,
+          "Lcl Translation.Y": 17.07206916809082,
+          "Lcl Translation.Z": 27.359001100063324
+        },
+        "Root": {
+          "Lcl Translation.Z": 42.29031753540039
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Wing_Defence_Simple",
+      "source_json": "anim/BOSS_411_Ani_Wing_Defence_Simple.json",
+      "source_fbx": "anim/BOSS_411_Ani_Wing_Defence_Simple.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Wing_Defence_Simple",
+      "source_empty": false,
+      "family": "Wing_Defence",
+      "category_proposal": "defence_phase",
+      "use_proposal": "single_montage",
+      "rationale": "防御/破防表现候选；CounterHitBox运动不等于有效判定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        3.1666667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        3.183333390016983
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 190.6369171142578,
+          "Lcl Rotation.Y": 81.38268661499023,
+          "Lcl Rotation.Z": 184.78233337402344,
+          "Lcl Translation.X": 20.883799076080322,
+          "Lcl Translation.Y": 32.31336212158203,
+          "Lcl Translation.Z": 70.36469268798828
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 48.75762367248535,
+          "Lcl Translation.Y": 34.20222473144531,
+          "Lcl Translation.Z": 33.425384640693665
+        },
+        "Root": {
+          "Lcl Translation.Z": 68.81301498413086
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Ice_Attack_04",
+      "source_json": "anim/BOSS_411_Ani_Ice_Attack_04.json",
+      "source_fbx": "anim/BOSS_411_Ani_Ice_Attack_04.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_04",
+      "source_empty": false,
+      "family": "Ice_Attack_04",
+      "category_proposal": "attack",
+      "use_proposal": "single_montage",
+      "rationale": "主动攻击候选；仅建立待标定窗口，不捏造源判定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        2.1666667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.183333390016983
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 359.99998474121094,
+          "Lcl Rotation.Y": 89.45941925048828,
+          "Lcl Rotation.Z": 360.0000305175781,
+          "Lcl Translation.X": 29.163543701171875,
+          "Lcl Translation.Y": 50.28631591796875,
+          "Lcl Translation.Z": 142.04861450195312
+        },
+        "LeftHandThrowPoint": {
+          "Lcl Rotation.X": 408.9286804199219,
+          "Lcl Rotation.Y": 167.48954010009766,
+          "Lcl Rotation.Z": 385.53263092041016,
+          "Lcl Translation.X": 510.90492248535156,
+          "Lcl Translation.Y": 416.1057891845703,
+          "Lcl Translation.Z": 391.2831726074219
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 141.12606048583984,
+          "Lcl Rotation.Y": 93.70067596435547,
+          "Lcl Rotation.Z": 271.1332560777664,
+          "Lcl Translation.X": 73.50201225280762,
+          "Lcl Translation.Y": 35.05924606323242,
+          "Lcl Translation.Z": 31.399845123291016
+        },
+        "Root": {
+          "Lcl Translation.Z": 141.9690399169922
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Ice_Attack_05",
+      "source_json": "anim/BOSS_411_Ani_Ice_Attack_05.json",
+      "source_fbx": "anim/BOSS_411_Ani_Ice_Attack_05.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_05",
+      "source_empty": false,
+      "family": "Ice_Attack_05",
+      "category_proposal": "attack",
+      "use_proposal": "single_montage",
+      "rationale": "主动攻击候选；仅建立待标定窗口，不捏造源判定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        2.0
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.016666645404885
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 362.7474822998047,
+          "Lcl Rotation.Y": 161.5777587890625,
+          "Lcl Rotation.Z": 178.7224884033203,
+          "Lcl Translation.X": 32.20401382446289,
+          "Lcl Translation.Y": 53.957000732421875,
+          "Lcl Translation.Z": 176.7371826171875
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 134.99777221679688,
+          "Lcl Rotation.Y": 224.11679458618164,
+          "Lcl Rotation.Z": 279.58882904052734,
+          "Lcl Translation.X": 506.70705795288086,
+          "Lcl Translation.Y": 594.9761810302734,
+          "Lcl Translation.Z": 168.82998657226562
+        },
+        "Root": {
+          "Lcl Translation.Z": 128.66537475585938
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fly_Attack_01",
+      "source_json": "anim/BOSS_411_Ani_Fly_Attack_01.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fly_Attack_01.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_01",
+      "source_empty": false,
+      "family": "Fly_Attack_01",
+      "category_proposal": "attack",
+      "use_proposal": "single_montage",
+      "rationale": "主动攻击候选；仅建立待标定窗口，不捏造源判定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        3.916667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        3.933333390016983
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 510.28133392333984,
+          "Lcl Rotation.Y": 122.58549499511719,
+          "Lcl Rotation.Z": 137.02146911621094,
+          "Lcl Translation.X": 41.04902458190918,
+          "Lcl Translation.Y": 243.79525756835938,
+          "Lcl Translation.Z": 34.43515491485596
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 410.55767822265625,
+          "Lcl Rotation.Y": 141.5830078125,
+          "Lcl Rotation.Z": 469.32533264160156,
+          "Lcl Translation.X": 152.16905212402344,
+          "Lcl Translation.Y": 131.9848175048828,
+          "Lcl Translation.Z": 140.93089866638184
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fly_Attack_02",
+      "source_json": "anim/BOSS_411_Ani_Fly_Attack_02.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fly_Attack_02.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_02",
+      "source_empty": false,
+      "family": "Fly_Attack_02",
+      "category_proposal": "attack",
+      "use_proposal": "single_montage",
+      "rationale": "主动攻击候选；仅建立待标定窗口，不捏造源判定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        3.4166667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        3.433333390016983
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 551.2471389770508,
+          "Lcl Rotation.Y": 77.68826293945312,
+          "Lcl Rotation.Z": 496.2515869140625,
+          "Lcl Translation.X": 45.0758056640625,
+          "Lcl Translation.Y": 224.12969207763672,
+          "Lcl Translation.Z": 27.705363273620605
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 495.40740966796875,
+          "Lcl Rotation.Y": 282.3662796020508,
+          "Lcl Rotation.Z": 509.33018493652344,
+          "Lcl Translation.X": 181.85691833496094,
+          "Lcl Translation.Y": 165.03880310058594,
+          "Lcl Translation.Z": 153.10013389587402
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fly_Attack_03_AS",
+      "source_json": "anim/BOSS_411_Ani_Fly_Attack_03_AS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fly_Attack_03_AS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_AS",
+      "source_empty": false,
+      "family": "Fly_Attack_03",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 30.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.0000002
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.0333332978898138
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 35.66802978515625,
+          "Lcl Rotation.Y": 51.2839298248291,
+          "Lcl Rotation.Z": 27.343017578125,
+          "Lcl Translation.X": 7.662496566772461,
+          "Lcl Translation.Y": 11.33319091796875,
+          "Lcl Translation.Z": 11.502583980560303
+        },
+        "LeftHandThrowPoint": {
+          "Lcl Rotation.Z": 5.593514526975923
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 21.346698760986328,
+          "Lcl Translation.Y": 37.99742317199707,
+          "Lcl Translation.Z": 37.64601516723633
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fly_Attack_03_Summon",
+      "source_json": "anim/BOSS_411_Ani_Fly_Attack_03_Summon.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fly_Attack_03_Summon.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Summon",
+      "source_empty": false,
+      "family": "Fly_Attack_03",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 30.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        1.0000001
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.0333332978898138
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 2.3499984741210938,
+          "Lcl Rotation.Y": 4.6335906982421875,
+          "Lcl Rotation.Z": 2.708892822265625,
+          "Lcl Translation.Y": 2.1083984375
+        },
+        "LeftHandThrowPoint": {
+          "Lcl Rotation.Z": 1.0179401636123657
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 3.928600311279297,
+          "Lcl Translation.Y": 2.379772186279297,
+          "Lcl Translation.Z": 0.5050244182348251
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fly_Attack_03_Between",
+      "source_json": "anim/BOSS_411_Ani_Fly_Attack_03_Between.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fly_Attack_03_Between.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Between",
+      "source_empty": false,
+      "family": "Fly_Attack_03",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 30.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.0833335
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.10000002124013
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 20.913230895996094,
+          "Lcl Rotation.Y": 33.69403076171875,
+          "Lcl Rotation.Z": 13.584259033203125,
+          "Lcl Translation.X": 6.8440141677856445,
+          "Lcl Translation.Y": 12.2552490234375,
+          "Lcl Translation.Z": 4.364984512329102
+        },
+        "LeftHandThrowPoint": {
+          "Lcl Rotation.Z": 1.9018821716308594
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 58.46524000167847,
+          "Lcl Translation.Y": 28.462329864501953,
+          "Lcl Translation.Z": 35.48599249124527
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fly_Attack_03_Shoot",
+      "source_json": "anim/BOSS_411_Ani_Fly_Attack_03_Shoot.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fly_Attack_03_Shoot.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Shoot",
+      "source_empty": false,
+      "family": "Fly_Attack_03",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 30.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        1.0000002
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.0333332978898138
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 0.49437713623046875,
+          "Lcl Rotation.Y": 0.0174102783203125,
+          "Lcl Rotation.Z": 0.7064361572265625,
+          "Lcl Translation.Y": 1.39520263671875
+        },
+        "LeftHandThrowPoint": {
+          "Lcl Rotation.Z": 1.2583074569702148
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 0.7672491073608398,
+          "Lcl Translation.Y": 1.0219497680664062,
+          "Lcl Translation.Z": 0.6367635726928711
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fly_Attack_03_BS",
+      "source_json": "anim/BOSS_411_Ani_Fly_Attack_03_BS.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fly_Attack_03_BS.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_BS",
+      "source_empty": false,
+      "family": "Fly_Attack_03",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 30.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.75000006
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.7666666454048852
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 33.06555938720703,
+          "Lcl Rotation.Y": 45.843650817871094,
+          "Lcl Rotation.Z": 21.47186279296875,
+          "Lcl Translation.X": 8.256887435913086,
+          "Lcl Translation.Y": 6.25189208984375,
+          "Lcl Translation.Z": 10.662332475185394
+        },
+        "LeftHandThrowPoint": {
+          "Lcl Rotation.Z": 8.818710888517671
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 49.534624099731445,
+          "Lcl Translation.Y": 21.506637573242188,
+          "Lcl Translation.Z": 17.076416015625
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_04_Charge",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_04_Charge.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_04_Charge.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04_Charge",
+      "source_empty": false,
+      "family": "Fire_Attack_04",
+      "category_proposal": "attack_hold",
+      "use_proposal": "section_family",
+      "rationale": "空中/下落/蓄力保持阶段；不得默认全段伤害",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        0.33333373
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.34999999289830513
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 58.1496467590332,
+          "Lcl Rotation.Y": 2.925933837890625,
+          "Lcl Rotation.Z": 57.43791389465332,
+          "Lcl Translation.X": 0.26220130920410156,
+          "Lcl Translation.Y": 6.380058288574219,
+          "Lcl Translation.Z": 0.14751052856445312
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 2.5418548583984375,
+          "Lcl Rotation.Y": 6.88397216796875,
+          "Lcl Rotation.Z": 2.229248046875,
+          "Lcl Translation.X": 9.755706787109375,
+          "Lcl Translation.Y": 3.436098098754883,
+          "Lcl Translation.Z": 9.96453857421875
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Attack_04_ChargeEnd",
+      "source_json": "anim/BOSS_411_Ani_Fire_Attack_04_ChargeEnd.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Attack_04_ChargeEnd.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04_ChargeEnd",
+      "source_empty": false,
+      "family": "Fire_Attack_04",
+      "category_proposal": "attack_phase",
+      "use_proposal": "section_family",
+      "rationale": "攻击族分段候选；次序/伤害类型需预览确认",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        2.466667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.48333334749342
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 246.22785186767578,
+          "Lcl Rotation.Y": 68.61953735351562,
+          "Lcl Rotation.Z": 253.35369491577148,
+          "Lcl Translation.X": 37.3099250793457,
+          "Lcl Translation.Y": 62.04499435424805,
+          "Lcl Translation.Z": 79.93626403808594
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 328.72572326660156,
+          "Lcl Rotation.Y": 134.46259307861328,
+          "Lcl Rotation.Z": 267.5223388671875,
+          "Lcl Translation.X": 136.74828338623047,
+          "Lcl Translation.Y": 84.96492385864258,
+          "Lcl Translation.Z": 91.68639945983887
+        },
+        "Root": {
+          "Lcl Translation.Z": 80.2497444152832
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fly_Evade",
+      "source_json": "anim/BOSS_411_Ani_Fly_Evade.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fly_Evade.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Evade",
+      "source_empty": false,
+      "family": "Fly_Evade",
+      "category_proposal": "evade",
+      "use_proposal": "single_montage",
+      "rationale": "无伤害通知；位移由玩法另定",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.2500001
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.2666666454048852
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 109.7880859375,
+          "Lcl Rotation.Y": 65.19982147216797,
+          "Lcl Rotation.Z": 102.05133056640625,
+          "Lcl Translation.X": 4.662431716918945,
+          "Lcl Translation.Y": 37.39253234863281,
+          "Lcl Translation.Z": 695.491455078125
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 100.64550113677979,
+          "Lcl Rotation.Y": 45.55547332763672,
+          "Lcl Rotation.Z": 155.34808540344238,
+          "Lcl Translation.X": 61.96861267089844,
+          "Lcl Translation.Y": 21.96038818359375,
+          "Lcl Translation.Z": 16.155637741088867
+        },
+        "Root": {
+          "Lcl Translation.Z": 695.6226806640625
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_340_Ani_Stun",
+      "source_json": "anim/BOSS_340_Ani_Stun.json",
+      "source_fbx": "anim/BOSS_340_Ani_Stun.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_340_Ani_Stun",
+      "source_empty": false,
+      "family": "Stun",
+      "category_proposal": "state_loop",
+      "use_proposal": "sequence_state",
+      "rationale": "用于待机/移动/眩晕持续状态；默认不建攻击Montage",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        2.0
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        2.016666645404885
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 4.920753479003906,
+          "Lcl Translation.Y": 10.21615195274353,
+          "Lcl Translation.Z": 6.887068748474121
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Hit_L",
+      "source_json": "anim/BOSS_411_Ani_Hit_L.json",
+      "source_fbx": "anim/BOSS_411_Ani_Hit_L.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_L",
+      "source_empty": false,
+      "family": "Hit_L",
+      "category_proposal": "reaction",
+      "use_proposal": "single_montage",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.2833334
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.2999999503963937
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 45.0531005859375,
+          "Lcl Rotation.Y": 11.659332275390625,
+          "Lcl Rotation.Z": 44.70478057861328,
+          "Lcl Translation.X": 3.1367759704589844,
+          "Lcl Translation.Y": 5.88470458984375,
+          "Lcl Translation.Z": 8.59749561548233
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 17.740440368652344,
+          "Lcl Translation.Y": 12.74039077758789,
+          "Lcl Translation.Z": 12.012863159179688
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Hit_H_F",
+      "source_json": "anim/BOSS_411_Ani_Hit_H_F.json",
+      "source_fbx": "anim/BOSS_411_Ani_Hit_H_F.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_H_F",
+      "source_empty": false,
+      "family": "Hit_H_F",
+      "category_proposal": "reaction",
+      "use_proposal": "single_montage",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.4166667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.4333332766280322
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 93.80525207519531,
+          "Lcl Rotation.Y": 20.682388305664062,
+          "Lcl Rotation.Z": 83.81144714355469,
+          "Lcl Translation.X": 9.892036437988281,
+          "Lcl Translation.Y": 17.44959259033203,
+          "Lcl Translation.Z": 21.3125262260437
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 77.99550247192383,
+          "Lcl Translation.Y": 35.62228012084961,
+          "Lcl Translation.Z": 49.057838439941406
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Hit_H_B",
+      "source_json": "anim/BOSS_411_Ani_Hit_H_B.json",
+      "source_fbx": "anim/BOSS_411_Ani_Hit_H_B.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_H_B",
+      "source_empty": false,
+      "family": "Hit_H_B",
+      "category_proposal": "reaction",
+      "use_proposal": "single_montage",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.4166667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.4333332766280322
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 248.69464111328125,
+          "Lcl Rotation.Y": 42.307159423828125,
+          "Lcl Rotation.Z": 239.19679260253906,
+          "Lcl Translation.X": 14.100212574005127,
+          "Lcl Translation.Y": 14.067962646484375,
+          "Lcl Translation.Z": 29.544002532958984
+        },
+        "Bip001 Prop1": {
+          "Lcl Translation.X": 88.12116241455078,
+          "Lcl Translation.Y": 24.367263793945312,
+          "Lcl Translation.Z": 18.261765480041504
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Hit_Throw",
+      "source_json": "anim/BOSS_411_Ani_Hit_Throw.json",
+      "source_fbx": "anim/BOSS_411_Ani_Hit_Throw.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_Throw",
+      "source_empty": false,
+      "family": "Hit_Throw",
+      "category_proposal": "reaction",
+      "use_proposal": "single_montage",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.4166667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.43333333333333335
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 0.2203826904296875,
+          "Lcl Rotation.Y": 2.8704071044921875,
+          "Lcl Rotation.Z": 0.3250885009765625,
+          "Lcl Translation.Y": 22.92158031463623,
+          "Lcl Translation.Z": 4.001844897866249
+        },
+        "Root": {
+          "Lcl Translation.Z": 3.4700865745544434
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_ThrowBlowFall_Y",
+      "source_json": "anim/BOSS_411_Ani_ThrowBlowFall_Y.json",
+      "source_fbx": "anim/BOSS_411_Ani_ThrowBlowFall_Y.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_ThrowBlowFall_Y",
+      "source_empty": false,
+      "family": "ThrowBlowFall_Y",
+      "category_proposal": "reaction",
+      "use_proposal": "sequence_state",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        0.0
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.0
+      ],
+      "moving_candidate_local_tracks": {},
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_ThrowDown",
+      "source_json": "anim/BOSS_411_Ani_ThrowDown.json",
+      "source_fbx": "anim/BOSS_411_Ani_ThrowDown.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_ThrowDown",
+      "source_empty": false,
+      "family": "ThrowDown",
+      "category_proposal": "reaction",
+      "use_proposal": "single_montage",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.13333334
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.15
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 5.2081146240234375,
+          "Lcl Rotation.Y": 26.758636474609375,
+          "Lcl Rotation.Z": 5.687217712402344,
+          "Lcl Translation.X": 0.0008043050765991211,
+          "Lcl Translation.Y": 136.17237854003906,
+          "Lcl Translation.Z": 22.546630859375
+        },
+        "Root": {
+          "Lcl Translation.Z": 22.51220703125
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_ThrowUp_01_Y",
+      "source_json": "anim/BOSS_411_Ani_ThrowUp_01_Y.json",
+      "source_fbx": "anim/BOSS_411_Ani_ThrowUp_01_Y.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_ThrowUp_01_Y",
+      "source_empty": false,
+      "family": "ThrowUp_01_Y",
+      "category_proposal": "reaction",
+      "use_proposal": "sequence_state",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.43333337
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.44999998581826184
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 92.3947525024414,
+          "Lcl Rotation.Y": 105.16829681396484,
+          "Lcl Rotation.Z": 90.75386047363281,
+          "Lcl Translation.X": 9.510169625282288,
+          "Lcl Translation.Y": 123.77120971679688,
+          "Lcl Translation.Z": 134.53500366210938
+        },
+        "Root": {
+          "Lcl Translation.Z": 134.3700714111328
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_ThrowBlow_Y",
+      "source_json": "anim/BOSS_411_Ani_ThrowBlow_Y.json",
+      "source_fbx": "anim/BOSS_411_Ani_ThrowBlow_Y.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_ThrowBlow_Y",
+      "source_empty": false,
+      "family": "ThrowBlow_Y",
+      "category_proposal": "reaction",
+      "use_proposal": "sequence_state",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.6
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.61666667374671
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 111.62606811523438,
+          "Lcl Rotation.Y": 161.48110580444336,
+          "Lcl Rotation.Z": 125.1202392578125,
+          "Lcl Translation.X": 8.500554323196411,
+          "Lcl Translation.Y": 197.19829845428467,
+          "Lcl Translation.Z": 398.48687744140625
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 0.008819580078125,
+          "Lcl Rotation.Y": 0.03166245762258768,
+          "Lcl Rotation.Z": 138.9441146850586,
+          "Lcl Translation.X": 73.62538719177246,
+          "Lcl Translation.Y": 7.114068984985352,
+          "Lcl Translation.Z": 11.54658031463623
+        },
+        "Root": {
+          "Lcl Translation.Z": 398.3654022216797
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_KnockDown",
+      "source_json": "anim/BOSS_411_Ani_KnockDown.json",
+      "source_fbx": "anim/BOSS_411_Ani_KnockDown.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_KnockDown",
+      "source_empty": false,
+      "family": "KnockDown",
+      "category_proposal": "reaction",
+      "use_proposal": "single_montage",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.13333334
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.15
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 5.2081146240234375,
+          "Lcl Rotation.Y": 26.758636474609375,
+          "Lcl Rotation.Z": 5.687217712402344,
+          "Lcl Translation.X": 0.0007345676422119141,
+          "Lcl Translation.Y": 136.17237854003906,
+          "Lcl Translation.Z": 22.546630859375
+        },
+        "Root": {
+          "Lcl Translation.Z": 22.546630859375
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_ThrowBlowEnd_Y",
+      "source_json": "anim/BOSS_411_Ani_ThrowBlowEnd_Y.json",
+      "source_fbx": "anim/BOSS_411_Ani_ThrowBlowEnd_Y.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_ThrowBlowEnd_Y",
+      "source_empty": false,
+      "family": "ThrowBlowEnd_Y",
+      "category_proposal": "reaction",
+      "use_proposal": "sequence_state",
+      "rationale": "受击/抛飞/倒地恢复，不作为攻击判定源",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.01666671
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.03333333333333333
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 0.5092315673828125,
+          "Lcl Rotation.Y": 5.7089691162109375,
+          "Lcl Rotation.Z": 1.39459228515625,
+          "Lcl Translation.X": 0.058330535888671875,
+          "Lcl Translation.Y": 8.148736953735352,
+          "Lcl Translation.Z": 1.507568359375
+        },
+        "Root": {
+          "Lcl Translation.Z": 1.6065216064453125
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_ThrowSkill_DragLoop_Idle",
+      "source_json": "anim/BOSS_411_Ani_ThrowSkill_DragLoop_Idle.json",
+      "source_fbx": "anim/BOSS_411_Ani_ThrowSkill_DragLoop_Idle.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_ThrowSkill_DragLoop_Idle",
+      "source_empty": false,
+      "family": "ThrowSkill_DragLoop",
+      "category_proposal": "pose_helper",
+      "use_proposal": "sequence_pose",
+      "rationale": "极短拖拽方向姿势素材；名称Loop不等于源loopTime",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.033333335
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.05
+      ],
+      "moving_candidate_local_tracks": {},
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_ThrowSkill_DragLoop_Down",
+      "source_json": "anim/BOSS_411_Ani_ThrowSkill_DragLoop_Down.json",
+      "source_fbx": "anim/BOSS_411_Ani_ThrowSkill_DragLoop_Down.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_ThrowSkill_DragLoop_Down",
+      "source_empty": false,
+      "family": "ThrowSkill_DragLoop",
+      "category_proposal": "pose_helper",
+      "use_proposal": "sequence_pose",
+      "rationale": "极短拖拽方向姿势素材；名称Loop不等于源loopTime",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.016666668
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.03333333333333333
+      ],
+      "moving_candidate_local_tracks": {},
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_ThrowSkill_DragLoop_Mid",
+      "source_json": "anim/BOSS_411_Ani_ThrowSkill_DragLoop_Mid.json",
+      "source_fbx": "anim/BOSS_411_Ani_ThrowSkill_DragLoop_Mid.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_ThrowSkill_DragLoop_Mid",
+      "source_empty": false,
+      "family": "ThrowSkill_DragLoop",
+      "category_proposal": "pose_helper",
+      "use_proposal": "sequence_pose",
+      "rationale": "极短拖拽方向姿势素材；名称Loop不等于源loopTime",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.06666667
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.08333333333333333
+      ],
+      "moving_candidate_local_tracks": {},
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_ThrowSkill_DragLoop_Up",
+      "source_json": "anim/BOSS_411_Ani_ThrowSkill_DragLoop_Up.json",
+      "source_fbx": "anim/BOSS_411_Ani_ThrowSkill_DragLoop_Up.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_ThrowSkill_DragLoop_Up",
+      "source_empty": false,
+      "family": "ThrowSkill_DragLoop",
+      "category_proposal": "pose_helper",
+      "use_proposal": "sequence_pose",
+      "rationale": "极短拖拽方向姿势素材；名称Loop不等于源loopTime",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.10000001
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.11666666666666667
+      ],
+      "moving_candidate_local_tracks": {},
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Die",
+      "source_json": "anim/BOSS_411_Ani_Die.json",
+      "source_fbx": "anim/BOSS_411_Ani_Die.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Die",
+      "source_empty": false,
+      "family": "Die",
+      "category_proposal": "death",
+      "use_proposal": "single_montage",
+      "rationale": "单次死亡表现；末姿保持由玩法控制",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        1.3333334
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        1.35000002124013
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 316.7364044189453,
+          "Lcl Rotation.Y": 72.0984878540039,
+          "Lcl Rotation.Z": 348.7969665527344,
+          "Lcl Translation.X": 10.270821809768677,
+          "Lcl Translation.Y": 74.2084732055664,
+          "Lcl Translation.Z": 594.2703857421875
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 105.90489959716797,
+          "Lcl Rotation.Y": 115.78219604492188,
+          "Lcl Rotation.Z": 332.8478317260742,
+          "Lcl Translation.X": 112.43432998657227,
+          "Lcl Translation.Y": 108.91941833496094,
+          "Lcl Translation.Z": 152.99860382080078
+        },
+        "Root": {
+          "Lcl Translation.Z": 594.0419330596924
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Execute_Defence_01",
+      "source_json": "anim/BOSS_411_Ani_Fire_Execute_Defence_01.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Execute_Defence_01.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Execute_Defence_01",
+      "source_empty": false,
+      "family": "Fire_Execute_Defence",
+      "category_proposal": "defence_reaction",
+      "use_proposal": "single_montage",
+      "rationale": "防御/处决反应候选；无源伤害时间",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.55
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.5666666595649719
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 23.905372619628906,
+          "Lcl Rotation.Y": 100.46879577636719,
+          "Lcl Rotation.Z": 8.212265014648438,
+          "Lcl Translation.Y": 59.924949645996094
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 89.30508422851562,
+          "Lcl Rotation.Y": 64.30739212036133,
+          "Lcl Rotation.Z": 143.3275375366211,
+          "Lcl Translation.X": 24.839698791503906,
+          "Lcl Translation.Y": 58.76674938201904,
+          "Lcl Translation.Z": 70.93638610839844
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Execute_Defence_02",
+      "source_json": "anim/BOSS_411_Ani_Fire_Execute_Defence_02.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Execute_Defence_02.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Execute_Defence_02",
+      "source_empty": false,
+      "family": "Fire_Execute_Defence",
+      "category_proposal": "defence_reaction",
+      "use_proposal": "single_montage",
+      "rationale": "防御/处决反应候选；无源伤害时间",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.5500004
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.5666666595649719
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 52.36865997314453,
+          "Lcl Rotation.Y": 54.90553283691406,
+          "Lcl Rotation.Z": 37.11474609375,
+          "Lcl Translation.X": 9.119390487670898,
+          "Lcl Translation.Y": 8.44744873046875,
+          "Lcl Translation.Z": 15.676163673400879
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 325.15919494628906,
+          "Lcl Rotation.Y": 115.15597534179688,
+          "Lcl Rotation.Z": 266.25162506103516,
+          "Lcl Translation.X": 117.83853530883789,
+          "Lcl Translation.Y": 84.96491241455078,
+          "Lcl Translation.Z": 47.69245719909668
+        },
+        "Root": {
+          "Lcl Translation.Z": 15.73822021484375
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Fire_Execute_BS_Test",
+      "source_json": "anim/BOSS_411_Ani_Fire_Execute_BS_Test.json",
+      "source_fbx": "anim/BOSS_411_Ani_Fire_Execute_BS_Test.fbx",
+      "sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Execute_BS_Test",
+      "source_empty": false,
+      "family": "Fire_Execute_BS_Test",
+      "category_proposal": "test_clip",
+      "use_proposal": "defer",
+      "rationale": "源名含Test，先隔离，不默认接战斗",
+      "sample_rate": 60.0,
+      "source_loop_time": false,
+      "json_range_seconds": [
+        0.0,
+        0.65000033
+      ],
+      "fbx_key_range_seconds": [
+        0.0,
+        0.6666666808267533
+      ],
+      "moving_candidate_local_tracks": {
+        "Bip001": {
+          "Lcl Rotation.X": 52.2073974609375,
+          "Lcl Rotation.Y": 64.21833801269531,
+          "Lcl Rotation.Z": 37.11476135253906,
+          "Lcl Translation.X": 8.393358945846558,
+          "Lcl Translation.Y": 16.336570739746094,
+          "Lcl Translation.Z": 28.107254028320312
+        },
+        "Bip001 Prop1": {
+          "Lcl Rotation.X": 328.72607421875,
+          "Lcl Rotation.Y": 115.15298461914062,
+          "Lcl Rotation.Z": 259.086181640625,
+          "Lcl Translation.X": 114.61310577392578,
+          "Lcl Translation.Y": 84.63302612304688,
+          "Lcl Translation.Z": 47.692450523376465
+        },
+        "Root": {
+          "Lcl Translation.Z": 28.216907501220703
+        }
+      },
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Add_HitBox",
+      "source_json": "anim/BOSS_411_Ani_Add_HitBox.json",
+      "source_fbx": "anim/BOSS_411_Ani_Add_HitBox.fbx",
+      "sequence": null,
+      "source_empty": true,
+      "family": "Add_HitBox",
+      "category_proposal": "source_empty",
+      "use_proposal": "skip",
+      "rationale": "源FBX无曲线；不能恢复HitBox开关或武器显隐语义",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        0.016666668
+      ],
+      "fbx_key_range_seconds": null,
+      "moving_candidate_local_tracks": {},
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Normal_HitBox",
+      "source_json": "anim/BOSS_411_Ani_Normal_HitBox.json",
+      "source_fbx": "anim/BOSS_411_Ani_Normal_HitBox.fbx",
+      "sequence": null,
+      "source_empty": true,
+      "family": "Normal_HitBox",
+      "category_proposal": "source_empty",
+      "use_proposal": "skip",
+      "rationale": "源FBX无曲线；不能恢复HitBox开关或武器显隐语义",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        0.016666668
+      ],
+      "fbx_key_range_seconds": null,
+      "moving_candidate_local_tracks": {},
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_No_Weapon",
+      "source_json": "anim/BOSS_411_Ani_No_Weapon.json",
+      "source_fbx": "anim/BOSS_411_Ani_No_Weapon.fbx",
+      "sequence": null,
+      "source_empty": true,
+      "family": "No_Weapon",
+      "category_proposal": "source_empty",
+      "use_proposal": "skip",
+      "rationale": "源FBX无曲线；不能恢复HitBox开关或武器显隐语义",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        0.016666668
+      ],
+      "fbx_key_range_seconds": null,
+      "moving_candidate_local_tracks": {},
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    },
+    {
+      "name": "BOSS_411_Ani_Have_Weapon",
+      "source_json": "anim/BOSS_411_Ani_Have_Weapon.json",
+      "source_fbx": "anim/BOSS_411_Ani_Have_Weapon.fbx",
+      "sequence": null,
+      "source_empty": true,
+      "family": "Have_Weapon",
+      "category_proposal": "source_empty",
+      "use_proposal": "skip",
+      "rationale": "源FBX无曲线；不能恢复HitBox开关或武器显隐语义",
+      "sample_rate": 60.0,
+      "source_loop_time": true,
+      "json_range_seconds": [
+        0.0,
+        0.016666668
+      ],
+      "fbx_key_range_seconds": null,
+      "moving_candidate_local_tracks": {},
+      "damage_windows": [],
+      "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
+      "montage_status": "proposal_only; not created",
+      "family_order_status": "not established by source metadata"
+    }
+  ]
+}

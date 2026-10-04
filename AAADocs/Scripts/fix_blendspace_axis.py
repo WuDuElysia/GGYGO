@@ -5,7 +5,8 @@ fix_blendspace_axis.py —— 回读并修正 BS_Pyrios_WalkRun 的轴范围。
 在 UE 编辑器 Python 命令行执行：
   exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/fix_blendspace_axis.py", encoding="utf-8").read())
 
-轴必须是 0..1，因为驱动它的 FZZZAnimStateMemory::GaitBlendY 就是 0（Walk）到 1（Run）。
+轴必须是 0..1，因为公开语义 WalkRunBlendAlpha 就是 0（Walk）到 1（Run）。
+当前 AnimBP 仍通过 StateMemory.GaitBlendY 兼容字段接线，但该旧名不再作为新资产命名依据。
 BlendSpace 的默认轴范围不是这个区间，不改的话两个样本会挤在轴的最左端，
 混合权重实际上永远停在 Walk 上。
 """

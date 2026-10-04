@@ -9,14 +9,14 @@ create_walkrun_blendspace.py —— 创建走跑混合用的 BlendSpace1D 并接
 没有侧向或后退的循环，2D 的另一个轴无从填充。ZZZ 的移动是「角色转向移动方向」，
 方向靠 Actor 朝向解决，混合只需要表达速度档位。
 
-轴对应 FZZZAnimStateMemory::GaitBlendY：0 = Walk，1 = Run。
-那个值由 FZZZLocomotionEvents::AdvanceGaitBlend 用 FInterpConstantTo 平滑推进，
-所以 BlendSpace 自己不需要再做平滑（两级平滑串联会让混合明显滞后于实际步态切换）。
+轴语义统一为 WalkRunBlendAlpha：0 = Walk，1 = Run。
+该值由 Movement 权威推进，再通过 AnimationStateFrame 映射到现有 AnimBP 的
+StateMemory.GaitBlendY 序列化兼容字段。BlendSpace 不再额外平滑。
 """
 
 import unreal
 
-FOLDER = "/Game/Characters/Player/Pyrios/Animation"
+FOLDER = "/Game/Characters/Player/Pyrios/Animation/Movement"
 ASSET_NAME = "BS_Pyrios_WalkRun"
 SKELETON = "/Game/Characters/Player/Pyrios/Avatar_Male_Size03_Pyrois_Model_Skeleton"
 WALK = FOLDER + "/Avatar_Male_Size03_Pyrois_Ani_Walk_Loop"
@@ -48,7 +48,7 @@ def run():
         unreal.log_error("[BS] 创建失败")
         return
 
-    # 轴：0..1，命名与 GaitBlendY 对齐，方便在 AnimBP 里连线时不必猜含义。
+    # 轴：0..1，统一使用公开语义名 WalkRunBlendAlpha。
     try:
         axis = unreal.InterpolationParameter()
         axis.set_editor_property("interpolation_time", 0.0)
@@ -57,7 +57,7 @@ def run():
         unreal.log_warning("[BS] 轴插值参数设置跳过: %s" % exc)
 
     applied = []
-    for prop, value in (("axis_label", "GaitBlendY"),
+    for prop, value in (("axis_label", "WalkRunBlendAlpha"),
                         ("blend_parameters", None)):
         if value is None:
             continue
@@ -70,12 +70,12 @@ def run():
     # 轴范围与名称。BlendParameter 是结构体，逐字段设。
     try:
         param = bs.get_editor_property("blend_parameters")
-        param.set_editor_property("display_name", "GaitBlendY")
+        param.set_editor_property("display_name", "WalkRunBlendAlpha")
         param.set_editor_property("min", 0.0)
         param.set_editor_property("max", 1.0)
         param.set_editor_property("grid_num", 1)
         bs.set_editor_property("blend_parameters", param)
-        unreal.log("[BS] 轴设置完成: GaitBlendY 0..1 grid=1")
+        unreal.log("[BS] 轴设置完成: WalkRunBlendAlpha 0..1 grid=1")
     except Exception as exc:
         unreal.log_warning("[BS] 轴设置失败（可在编辑器里手改）: %s" % exc)
 

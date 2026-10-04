@@ -30,6 +30,9 @@ MODE 控制行为：
 
 import json
 import os
+import hashlib
+import time
+from pathlib import Path
 
 import unreal
 
@@ -38,7 +41,7 @@ MODE = "all"
 # all 模式每次执行最多处理这么多 clip，然后返回。已完成的 clip 记在 PROGRESS_JSON 里，
 # 重复执行同一条命令会接着往下做。分批是因为写曲线会占住游戏线程，
 # 一次跑完 119 个会让编辑器长时间无响应，中途中断还会丢掉进度。
-# 想整批重来时删掉 PROGRESS_JSON，否则已完成的 clip 会被跳过。
+# 成功缓存绑定源记录/本脚本/配置/磁盘资产指纹；失败和缺失下次自动重试。
 BATCH_SIZE = 15
 
 SOURCE_JSON = r"F:/ue_project/GGYGO/Saved/AnimRootMotion/Pyrios_RootMotion.json"
@@ -316,23 +319,72 @@ def load_records():
         return json.load(f)["clips"]
 
 
+PROGRESS_SCHEMA = 2
+
+
+def source_fingerprint(record):
+    payload = {'record': record, 'motion_curves': MOTION_CURVES,
+               'scalar_curves': SCALAR_CURVES, 'folder': ANIM_FOLDER,
+               'script_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, allow_nan=False).encode('utf-8')).hexdigest()
+
+
+def asset_fingerprint(asset_path):
+    """Hash persisted package bytes, including optional bulk sidecars. Missing is never cached."""
+    if not asset_path.startswith('/Game/'):
+        raise ValueError('Only /Game animation packages are supported')
+    root = Path(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_content_dir())).resolve()
+    package = (root / (asset_path[len('/Game/'):] + '.uasset')).resolve()
+    if not package.is_relative_to(root):
+        raise ValueError('Asset path escapes project content')
+    if not package.is_file():
+        return None
+    digest = hashlib.sha256()
+    for suffix in ('.uasset', '.uexp', '.ubulk'):
+        part = package.with_suffix(suffix)
+        digest.update(suffix.encode())
+        if part.is_file():
+            with part.open('rb') as stream:
+                for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+                    digest.update(chunk)
+        else:
+            digest.update(b'<absent>')
+    return digest.hexdigest()
+
+
+def cached_success(entry, source_hash, asset_hash):
+    return bool(asset_hash and entry.get('status') == 'saved'
+                and entry.get('source_fingerprint') == source_hash
+                and entry.get('asset_fingerprint') == asset_hash)
+
+
 def load_progress():
-    if not os.path.exists(PROGRESS_JSON):
-        return {"done": [], "missing": [], "failed": []}
     try:
-        with open(PROGRESS_JSON, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        for k in ("done", "missing", "failed"):
-            data.setdefault(k, [])
-        return data
-    except Exception:
-        return {"done": [], "missing": [], "failed": []}
+        with open(PROGRESS_JSON, 'r', encoding='utf-8') as stream:
+            data = json.load(stream)
+        if data.get('schema') == PROGRESS_SCHEMA and isinstance(data.get('entries'), dict):
+            return data
+    except (OSError, ValueError):
+        pass
+    # Legacy clip-name-only completion records cannot prove current asset validity.
+    return {'schema': PROGRESS_SCHEMA, 'entries': {}}
 
 
 def save_progress(progress):
-    os.makedirs(os.path.dirname(PROGRESS_JSON), exist_ok=True)
-    with open(PROGRESS_JSON, "w", encoding="utf-8") as f:
-        json.dump(progress, f, ensure_ascii=False, indent=1)
+    path = Path(PROGRESS_JSON)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix('.tmp')
+    temporary.write_text(json.dumps(progress, ensure_ascii=False, indent=1), encoding='utf-8')
+    temporary.replace(path)
+
+
+def save_verified_asset(anim, asset_path):
+    if not unreal.EditorAssetLibrary.save_loaded_asset(anim, False):
+        raise RuntimeError('save_loaded_asset returned False: ' + asset_path)
+    fingerprint = asset_fingerprint(asset_path)
+    if fingerprint is None:
+        raise RuntimeError('Save returned True but package file is missing: ' + asset_path)
+    return fingerprint
 
 
 def run():
@@ -364,78 +416,63 @@ def run():
         return
 
     progress = load_progress()
-    handled = set(progress["done"]) | {d["name"] for d in progress["missing"]} \
-        | {d["name"] for d in progress["failed"]}
-    pending = [r for r in records if r["name"] not in handled]
+    entries = progress['entries']
+    # Protect live edits; a disk fingerprint does not describe an unsaved editor package.
+    dirty = {package.get_name() for package in unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages()}
+    current = {}
+    pending = []
+    for record in records:
+        name = record['name']
+        asset_path = ANIM_FOLDER + '/' + name
+        source_hash = source_fingerprint(record)
+        disk_hash = asset_fingerprint(asset_path)
+        current[name] = (source_hash, disk_hash)
+        if asset_path in dirty or not cached_success(entries.get(name, {}), source_hash, disk_hash):
+            pending.append(record)
+    # Failed first items must not starve clips that have never been attempted.
+    pending.sort(key=lambda record: entries.get(record['name'], {}).get('last_attempt', 0))
     batch = pending[:BATCH_SIZE]
-
-    unreal.log("[Bake] 总计 %d，已处理 %d，本批 %d，剩余 %d"
-               % (len(records), len(handled), len(batch),
-                  len(pending) - len(batch)))
-
-    for rec in batch:
-        name = rec["name"]
+    for record in batch:
+        name = record['name']
+        path = ANIM_FOLDER + '/' + name
+        entry = {'source_fingerprint': current[name][0], 'last_attempt': time.time_ns()}
+        entries[name] = entry
         try:
-            status, detail = bake_clip(rec)
+            if path in dirty:
+                raise RuntimeError('Unsaved editor package preserved; save/discard deliberately before retry')
+            status, detail = bake_clip(record)
+            entry['detail'] = detail
+            if status != 'ok':
+                entry.update(status='missing', reason=detail.get('reason', status))
+            else:
+                anim = unreal.load_asset(path)
+                entry['asset_fingerprint'] = save_verified_asset(anim, path)
+                entry['status'] = 'saved'
         except Exception as exc:
-            progress["failed"].append({"name": name, "reason": str(exc)})
-            save_progress(progress)
-            unreal.log_error("[Bake] %s 失败: %s" % (name, exc))
-            continue
-
-        if status != "ok":
-            progress["missing"].append(detail)
-            save_progress(progress)
-            unreal.log_warning("[Bake] 跳过 %s: %s" % (name, detail.get("reason")))
-            continue
-
-        # 逐个保存并记录进度，这样中途被打断也不会重做已完成的部分
-        anim = unreal.load_asset("%s/%s" % (ANIM_FOLDER, name))
-        try:
-            unreal.EditorAssetLibrary.save_loaded_asset(anim, False)
-        except Exception as exc:
-            progress["failed"].append({"name": name, "reason": "保存失败: %s" % exc})
-            save_progress(progress)
-            unreal.log_error("[Bake] 保存 %s 失败: %s" % (name, exc))
-            continue
-
-        progress["done"].append(name)
-        progress.setdefault("detail", {})[name] = detail
+            entry.update(status='failed', reason=str(exc))
+            unreal.log_error('[Bake] %s failed, retryable: %s' % (name, exc))
         save_progress(progress)
-        unreal.log("[Bake] ok %-58s 曲线=%d key=%d resampled=%s"
-                   % (name, detail["curveCount"], detail["keyTotal"],
-                      detail["resampled"]))
 
-    remaining = len(pending) - len(batch)
-    if remaining > 0:
-        unreal.log("[Bake] 本批结束，还剩 %d 个。再执行同一条命令继续。" % remaining)
-        return
-
-    detail_map = progress.get("detail") or {}
-    report = {
-        "done": progress["done"],
-        "missing": progress["missing"],
-        "failed": progress["failed"],
-        "keyTotal": sum(d.get("keyTotal", 0) for d in detail_map.values()),
-        "resampled": [n for n, d in detail_map.items() if d.get("resampled")],
-    }
-    try:
-        os.makedirs(os.path.dirname(REPORT_JSON), exist_ok=True)
-        with open(REPORT_JSON, "w", encoding="utf-8") as f:
-            json.dump(report, f, ensure_ascii=False, indent=1)
-    except Exception as exc:
-        unreal.log_warning("[Bake] 写报告失败: %s" % exc)
-
-    unreal.log("[Bake] 全部完成：成功 %d，缺资产 %d，失败 %d，key 总量 %d"
-               % (len(progress["done"]), len(progress["missing"]),
-                  len(progress["failed"]), report["keyTotal"]))
-    if report["resampled"]:
-        unreal.log_warning("[Bake] 需要重采样（UE 帧数与 FBX 不一致）的 clip: %s"
-                           % ", ".join(report["resampled"]))
-    for d in progress["missing"]:
-        unreal.log_warning("  缺资产: %s" % d["name"])
-    for d in progress["failed"]:
-        unreal.log_error("  失败: %s —— %s" % (d["name"], d.get("reason")))
+    done, missing, failed, waiting = [], [], [], []
+    for record in records:
+        name = record['name']
+        entry = entries.get(name, {})
+        if cached_success(entry, current[name][0], asset_fingerprint(ANIM_FOLDER + '/' + name)) and ANIM_FOLDER + '/' + name not in dirty:
+            done.append(name)
+        elif entry.get('status') in ('missing', 'failed'):
+            row = {'name': name, 'reason': entry.get('reason', '')}
+            (missing if entry['status'] == 'missing' else failed).append(row)
+        else:
+            waiting.append(name)
+    report = {'complete': len(done) == len(records), 'done': done, 'missing': missing,
+              'failed': failed, 'pending': waiting, 'attempted_this_run': len(batch),
+              'keyTotal': sum(entries[name].get('detail', {}).get('keyTotal', 0) for name in done)}
+    Path(REPORT_JSON).parent.mkdir(parents=True, exist_ok=True)
+    Path(REPORT_JSON).write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding='utf-8')
+    unreal.log('[Bake] persisted=%d missing=%d failed=%d pending=%d complete=%s; failures/missing retry next run'
+               % (len(done), len(missing), len(failed), len(waiting), report['complete']))
+    return report
 
 
-run()
+if __name__ == '__main__':
+    run()

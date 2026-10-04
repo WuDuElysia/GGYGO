@@ -6,6 +6,7 @@
 #include "Animation/AnimData/IAnimationDataModel.h"
 #include "Animation/AnimData/IAnimationDataController.h"
 #include "Animation/AnimCurveTypes.h"
+#include "Animation/AnimTypes.h"
 #include "AnimationBlueprintLibrary.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRootMotionBake, Log, All);
@@ -35,6 +36,12 @@ void URootMotionBakeModifier::OnApply_Implementation(UAnimSequence* AnimationSeq
 		return;
 	}
 
+	SnapshotVersion = 1;
+	CurveChanges.Reset();
+	ChangedBone = NAME_None;
+	BoneBefore.Reset();
+	BoneAfter.Reset();
+
 	const IAnimationDataModel* Model = AnimationSequence->GetDataModel();
 	if (!Model)
 	{
@@ -47,7 +54,22 @@ void URootMotionBakeModifier::OnApply_Implementation(UAnimSequence* AnimationSeq
 	const float Length = AnimationSequence->GetPlayLength();
 
 	// 读取全部骨骼动画轨道（C++ 直接访问数据模型，不走 Python 读不到的 GetRawTrackData）
-	TArrayView<const FBoneAnimationTrack> Tracks = Model->GetBoneAnimationTracks();
+	TArray<FBoneAnimationTrack> Tracks;
+	TArray<FName> TrackNames;
+	Model->GetBoneTrackNames(TrackNames);
+	for (FName Name : TrackNames)
+	{
+		TArray<FTransform> Keys;
+		Model->GetBoneTrackTransforms(Name, Keys);
+		FBoneAnimationTrack& Track = Tracks.AddDefaulted_GetRef();
+		Track.Name = Name;
+		for (const FTransform& Key : Keys)
+		{
+			Track.InternalTrackData.PosKeys.Add(FVector3f(Key.GetTranslation()));
+			Track.InternalTrackData.RotKeys.Add(FQuat4f(Key.GetRotation()));
+			Track.InternalTrackData.ScaleKeys.Add(FVector3f(Key.GetScale3D()));
+		}
+	}
 	if (Tracks.Num() == 0)
 	{
 		UE_LOG(LogRootMotionBake, Error,
@@ -85,8 +107,9 @@ void URootMotionBakeModifier::OnApply_Implementation(UAnimSequence* AnimationSeq
 		CarrierIdx = Stats.IndexOfByPredicate([this](const FTrackStat& S) { return S.Name == OverrideMotionBone; });
 		if (CarrierIdx == INDEX_NONE)
 		{
-			UE_LOG(LogRootMotionBake, Warning, TEXT("[%s] 未找到指定骨骼 %s，回退自动选择。"),
+			UE_LOG(LogRootMotionBake, Warning, TEXT("[%s] 未找到指定骨骼 %s，停止以免修改错误轨道。"),
 				*AssetName, *OverrideMotionBone.ToString());
+			return;
 		}
 	}
 	if (CarrierIdx == INDEX_NONE)
@@ -134,6 +157,16 @@ void URootMotionBakeModifier::OnApply_Implementation(UAnimSequence* AnimationSeq
 		return;
 	}
 
+	if (bBakeCurves)
+	{
+		TSet<FName> Names { CurvePosX, CurvePosY, CurveDist, CurveSpeed };
+		if (Names.Num() != 4 || Names.Contains(NAME_None))
+		{
+			UE_LOG(LogAnimation, Error, TEXT("RootMotionBake: curve names must be nonempty and distinct."));
+			return;
+		}
+	}
+
 	// 取载体原始轨道键
 	const FBoneAnimationTrack& CarrierTrack = Tracks[CarrierIdx];
 	const TArray<FVector3f>& Pos = CarrierTrack.InternalTrackData.PosKeys;
@@ -176,14 +209,33 @@ void URootMotionBakeModifier::OnApply_Implementation(UAnimSequence* AnimationSeq
 			ValDist.Add(Acc);
 		}
 
-		auto WriteCurve = [AnimationSequence](FName Name, const TArray<float>& Times2, const TArray<float>& Vals)
+		auto WriteCurve = [this, Model, &Controller](FName Name, const TArray<float>& Times2, const TArray<float>& Vals)
 		{
-			if (UAnimationBlueprintLibrary::DoesCurveExist(AnimationSequence, Name, ERawCurveTrackTypes::RCT_Float))
+			const FAnimationCurveIdentifier Id(Name, ERawCurveTrackTypes::RCT_Float);
+			FRootMotionBakeCurveChange Change;
+			if (const FFloatCurve* Existing = Model->FindFloatCurve(Id))
 			{
-				UAnimationBlueprintLibrary::RemoveCurve(AnimationSequence, Name);
+				Change.bExisted = true;
+				Change.Before = *Existing;
 			}
-			UAnimationBlueprintLibrary::AddCurve(AnimationSequence, Name, ERawCurveTrackTypes::RCT_Float, false);
-			UAnimationBlueprintLibrary::AddFloatCurveKeys(AnimationSequence, Name, Times2, Vals);
+			else if (!Controller.AddCurve(Id))
+			{
+				UE_LOG(LogAnimation, Error, TEXT("RootMotionBake: cannot create curve %s"), *Name.ToString());
+				return;
+			}
+			TArray<FRichCurveKey> Keys;
+			for (int32 Index = 0; Index < Times2.Num(); ++Index)
+			{
+				FRichCurveKey& Key = Keys.Emplace_GetRef(Times2[Index], Vals[Index]);
+				Key.InterpMode = RCIM_Linear;
+			}
+			if (!Controller.SetCurveKeys(Id, Keys))
+				UE_LOG(LogAnimation, Error, TEXT("RootMotionBake: cannot write curve %s"), *Name.ToString());
+			if (const FFloatCurve* Written = Model->FindFloatCurve(Id))
+			{
+				Change.After = *Written;
+				CurveChanges.Add(MoveTemp(Change));
+			}
 		};
 
 		WriteCurve(CurvePosX, Times, ValX);
@@ -204,7 +256,16 @@ void URootMotionBakeModifier::OnApply_Implementation(UAnimSequence* AnimationSeq
 			const float Z = bKeepVertical ? Pos[i].Z : P0.Z;
 			NewPos.Add(FVector3f(P0.X, P0.Y, Z));
 		}
-		Controller.SetBoneTrackKeys(Carrier.Name, NewPos, Rot, Scale);
+		Model->GetBoneTrackTransforms(Carrier.Name, BoneBefore);
+		if (Controller.SetBoneTrackKeys(Carrier.Name, NewPos, Rot, Scale))
+		{
+			ChangedBone = Carrier.Name;
+			Model->GetBoneTrackTransforms(ChangedBone, BoneAfter);
+		}
+		else
+		{
+			UE_LOG(LogAnimation, Error, TEXT("RootMotionBake: cannot write bone track"));
+		}
 		UE_LOG(LogRootMotionBake, Log, TEXT("  -> 已冻结 %s 水平位移(原地化)。"), *Carrier.Name.ToString());
 	}
 
@@ -219,14 +280,69 @@ void URootMotionBakeModifier::OnRevert_Implementation(UAnimSequence* AnimationSe
 		return;
 	}
 
-	// 只能撤销新增曲线；被移除的骨骼位移无法在此恢复，请用版本控制回退。
-	for (const FName& Name : { CurvePosX, CurvePosY, CurveDist, CurveSpeed })
+	if (SnapshotVersion == 0)
 	{
-		if (UAnimationBlueprintLibrary::DoesCurveExist(AnimationSequence, Name, ERawCurveTrackTypes::RCT_Float))
+		// Old verify-only applications never owned any data. Old destructive applications
+		// have no recoverable baseline; fail so the engine rolls back the entire reapply.
+		if (!bVerifyOnly)
+			UE_LOG(LogAnimation, Error, TEXT("RootMotionBake: legacy application has no snapshot; restore from source before reapply."));
+		return;
+	}
+	const IAnimationDataModel* Model = AnimationSequence->GetDataModel();
+	if (!Model) return;
+	// Validate ALL owned changes before touching anything. Never erase later edits.
+	for (const auto& Change : CurveChanges)
+	{
+		const FFloatCurve* Current = Model->FindFloatCurve(FAnimationCurveIdentifier(Change.After.GetName(), ERawCurveTrackTypes::RCT_Float));
+		if (!Current || !FFloatCurve::StaticStruct()->CompareScriptStruct(Current, &Change.After, 0))
 		{
-			UAnimationBlueprintLibrary::RemoveCurve(AnimationSequence, Name);
+			UE_LOG(LogAnimation, Error, TEXT("RootMotionBake: curve changed after apply; revert refused."));
+			return;
 		}
 	}
-	UE_LOG(LogRootMotionBake, Log, TEXT("[%s] 已移除烘焙曲线。骨骼位移不可自动恢复，请用版本控制回退。"),
-		*AnimationSequence->GetName());
+	if (!ChangedBone.IsNone())
+	{
+		TArray<FTransform> Current;
+		Model->GetBoneTrackTransforms(ChangedBone, Current);
+		bool bMatches = Current.Num() == BoneAfter.Num();
+		for (int32 Index = 0; bMatches && Index < Current.Num(); ++Index)
+			bMatches = Current[Index].Equals(BoneAfter[Index], 0.000001);
+		if (!bMatches)
+		{
+			UE_LOG(LogAnimation, Error, TEXT("RootMotionBake: bone changed after apply; revert refused."));
+			return;
+		}
+	}
+	IAnimationDataController& Controller = AnimationSequence->GetController();
+	Controller.OpenBracket(FText::FromString(TEXT("Restore root motion bake snapshot")));
+	bool bAllRestored = true;
+	for (const auto& Change : CurveChanges)
+	{
+		const FAnimationCurveIdentifier Id(Change.After.GetName(), ERawCurveTrackTypes::RCT_Float);
+		// Apply changed only keys on existing curves, retaining flags/color/attributes.
+		const bool bRestored = Change.bExisted
+			? Controller.SetCurveKeys(Id, Change.Before.FloatCurve.GetConstRefOfKeys())
+			: Controller.RemoveCurve(Id);
+		bAllRestored &= bRestored;
+		if (!bRestored) UE_LOG(LogAnimation, Error, TEXT("RootMotionBake: failed restoring curve"));
+	}
+	if (!ChangedBone.IsNone())
+	{
+		TArray<FVector> Positions, Scales;
+		TArray<FQuat> Rotations;
+		for (const FTransform& Key : BoneBefore)
+		{
+			Positions.Add(Key.GetTranslation()); Rotations.Add(Key.GetRotation()); Scales.Add(Key.GetScale3D());
+		}
+		if (!Controller.SetBoneTrackKeys(ChangedBone, Positions, Rotations, Scales))
+		{
+			bAllRestored = false;
+			UE_LOG(LogAnimation, Error, TEXT("RootMotionBake: failed restoring bone"));
+		}
+	}
+	Controller.CloseBracket();
+	if (bAllRestored)
+	{
+		CurveChanges.Reset(); ChangedBone = NAME_None; BoneBefore.Reset(); BoneAfter.Reset();
+	}
 }

@@ -141,6 +141,10 @@ def existing(unreal, path, expected_class, digest, skeleton=None):
         return None
     obj = unreal.load_asset(path)
     assert isinstance(obj, expected_class), 'Existing asset has wrong type: '+path
+    if obj.get_outer() in unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages():
+        raise RuntimeError('Unsaved existing asset preserved: ' + path)
+    if not persisted_package(unreal, obj).is_file():
+        raise RuntimeError('Existing asset has no persisted package: ' + path)
     assert unreal.EditorAssetLibrary.get_metadata_tag(obj,'BH3.ImportOwner') == OWNER, 'Unowned existing asset: '+path
     assert unreal.EditorAssetLibrary.get_metadata_tag(obj,'BH3.SourceSHA256') == digest, 'Source changed: '+path
     if skeleton:
@@ -167,6 +171,26 @@ def import_one(unreal, source, destination, ui, digest, expected_class):
     unreal.EditorAssetLibrary.set_metadata_tag(obj,'BH3.SourceFile',str(source))
     return obj
 
+def persisted_package(unreal, obj):
+    package = obj.get_path_name().split('.')[0]
+    if not package.startswith('/Game/'):
+        raise ValueError('Unexpected save mount: ' + package)
+    content = Path(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_content_dir())).resolve()
+    filename = (content / (package[len('/Game/'):] + '.uasset')).resolve()
+    if not filename.is_relative_to(content):
+        raise ValueError('Package escapes project content: ' + package)
+    return filename
+
+
+def save_checked(unreal, obj, only_if_is_dirty=False):
+    if not unreal.EditorAssetLibrary.save_loaded_asset(obj, only_if_is_dirty=only_if_is_dirty):
+        raise RuntimeError('Asset save failed: ' + obj.get_path_name())
+    # Confirm package persistence, rather than its in-memory registry entry.
+    filename = persisted_package(unreal, obj)
+    if not filename.is_file():
+        raise RuntimeError('Save reported success but package is absent: ' + str(filename))
+
+
 def run(stage):
     data = audit()
     if stage == 'audit':
@@ -186,11 +210,13 @@ def run(stage):
             skeleton = mesh.get_editor_property('skeleton')
             assert skeleton.get_path_name().split('.')[0] == SKELETON, 'Unexpected skeleton path'
             unreal.EditorAssetLibrary.set_metadata_tag(skeleton,'BH3.ImportOwner',OWNER)
-            unreal.EditorAssetLibrary.save_loaded_asset(skeleton,only_if_is_dirty=False)
-            unreal.EditorAssetLibrary.save_loaded_asset(mesh,only_if_is_dirty=False)
+            save_checked(unreal, skeleton)
+            save_checked(unreal, mesh)
         skeleton = mesh.get_editor_property('skeleton')
         assert skeleton.get_path_name().split('.')[0] == SKELETON
         assert unreal.EditorAssetLibrary.get_metadata_tag(skeleton,'BH3.ImportOwner') == OWNER
+        if skeleton.get_outer() in unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages():
+            raise RuntimeError('Unsaved skeleton preserved before animation import')
         report['material_slots'] = [str(m.material_slot_name) for m in mesh.materials]
         report['bounds'] = str(mesh.get_bounds())
         selection = [c for c in data['clips'] if c['name'] == 'BOSS_411_Ani_StandBy'] if stage == 'smoke' else data['clips']
@@ -209,13 +235,15 @@ def run(stage):
                 continue
             try:
                 seq = existing(unreal,row['asset'],unreal.AnimSequence,c['sha256'],skeleton)
-                row['status'] = 'existing_verified' if seq else 'imported'
+                row['status'] = 'existing_verified' if seq else 'importing_not_saved'
                 if seq is None:
                     seq = import_one(unreal,SOURCE/c['fbx'],row['asset'],options(unreal,True,skeleton,c['sample_rate']),c['sha256'],unreal.AnimSequence)
                     assert seq.get_editor_property('skeleton') == skeleton
                     set_properties(seq, enable_root_motion=False, force_root_lock=False)
                     unreal.EditorAssetLibrary.set_metadata_tag(seq,'BH3.SourceLoopTime',str(c['loop']))
-                    unreal.EditorAssetLibrary.save_loaded_asset(seq,only_if_is_dirty=False)
+                    save_checked(unreal, seq)
+                    row['saved_this_run'] = True
+                    row['status'] = 'imported'
                 row['duration'] = seq.get_play_length()
                 row['skeleton'] = seq.get_editor_property('skeleton').get_path_name()
                 row['enable_root_motion'] = seq.get_editor_property('enable_root_motion')
@@ -228,7 +256,7 @@ def run(stage):
                 if stage == 'smoke': raise
             finally:
                 write(report_name,report)
-        unreal.EditorAssetLibrary.save_loaded_asset(skeleton,only_if_is_dirty=True)
+        save_checked(unreal, skeleton, only_if_is_dirty=True)
         report['complete'] = all(c['status'] in ('imported','existing_verified') for c in report['clips'])
         report['counts'] = dict(collections.Counter(c['status'] for c in report['clips']))
         report['importable_complete'] = all(c['status'] in ('imported','existing_verified','source_empty') for c in report['clips'])

@@ -4,7 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "AnimationModifier.h"
+#include "Animation/AnimCurveTypes.h"
 #include "RootMotionBakeModifier.generated.h"
+
+/** Serialized on the engine's applied modifier instance; only these curves may be reverted. */
+USTRUCT()
+struct FRootMotionBakeCurveChange
+{
+	GENERATED_BODY()
+	UPROPERTY() bool bExisted = false;
+	UPROPERTY() FFloatCurve Before;
+	UPROPERTY() FFloatCurve After;
+};
 
 /**
  * URootMotionBakeModifier
@@ -18,8 +29,8 @@
  *      看日志确认能读到源数据、以及哪根骨骼承载位移。
  *   3. 确认无误并做好版本控制后，把 bVerifyOnly 设为 false 再应用，执行烘焙 + 移除。
  *
- * 注意：移除位移是破坏性修改。OnRevert 只能移除新增曲线，无法恢复被移除的骨骼位移，
- *       请依赖版本控制/资产备份回退。
+ * 本次修改的曲线/骨轨保存在已应用修改器实例中。撤销先核验写后基线，再恢复写前内容。
+ * 旧版没有快照的修改器拒绝破坏性撤销；已有人工冲突需先恢复/另存资产。
  */
 UCLASS()
 class GGYGOEDITOR_API URootMotionBakeModifier : public UAnimationModifier
@@ -65,4 +76,12 @@ public:
 
 	virtual void OnApply_Implementation(UAnimSequence* AnimationSequence) override;
 	virtual void OnRevert_Implementation(UAnimSequence* AnimationSequence) override;
+
+private:
+	// Not transient: the engine serializes the applied instance for later revert/reapply.
+	UPROPERTY() int32 SnapshotVersion = 0;
+	UPROPERTY() TArray<FRootMotionBakeCurveChange> CurveChanges;
+	UPROPERTY() FName ChangedBone = NAME_None;
+	UPROPERTY() TArray<FTransform> BoneBefore;
+	UPROPERTY() TArray<FTransform> BoneAfter;
 };

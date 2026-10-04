@@ -27,7 +27,7 @@
 | **脸 Shader**     | `F:\AnimeStudio\Exports\Shader\miHoYo_Character_NapAvatarStandardFace.shader`         | —       | 脸部材质                             |
 | **枪眼 Shader**    | `F:\AnimeStudio\Exports\Shader\miHoYo_Character_NapAvatarStandardGunEye.shader`       | —       | 枪械瞄准镜                            |
 | **半透明 Shader**   | `F:\AnimeStudio\Exports\Shader\miHoYo_Character_NapAvatarStandardTransparent.shader`  | —       | 半透明材质                            |
-| **注释版文档**        | `f:\ue_project\GGYGO\AAADocs\ZZZ_Shader_Annotated.hlsl`                               | \~1100行 | 反编译 HLSL 中文注释学习版                 |
+| **注释版文档**        | `f:\ue_project\GGYGO\AAADocs\References\Rendering\ZZZ_Shader_Annotated.hlsl`                               | \~1100行 | 反编译 HLSL 中文注释学习版                 |
 | **模型导出**         | `F:\AnimeStudio\Exports\Animator\Avatar_Male_Size03_Pyrois_Model\`                    | —       | Pyrios FBX + 贴图 + 材质 JSON        |
 
 ***
@@ -1254,4 +1254,3 @@ BlendMode: 0=AlphaBlended / 1=Add / 2=Overlay
 | ---- | ---------- | ------------------------------------------------------------------------------------------------------------------------ |
 | v2.0 | 2026-07-27 | 基于 3Dmigoto 反编译 HLSL 全面重写：修正贴图通道语义、新增 Ramp/Toon 光照系统、新增 Specular 系统、修正 MatCap 遮罩来源、新增 Rim Glow、Emission、Anisotropy 等完整细节 |
 | v1.0 | 2026-07-20 | 初始版本（基于 Shader Properties 推测）                                                                                            |
-
