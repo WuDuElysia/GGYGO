@@ -11,7 +11,6 @@ from pyrios_material_plan import SLOT_INSTANCES, SUFFIXES, load_plan
 ROOT = "/Game/Characters/Player/Pyrios/Materials"
 JSON_DIR = Path(__file__).resolve().parents[2] / "Content/Characters/Player/Pyrios/Materials"
 GLOBALS_PATH = Path(__file__).resolve().parents[1] / "Assets/Pyrios/Rendering/Pyrios_Toon_Globals.json"
-DEFAULT_MATCAP = "Eff_Matcap_125"
 
 
 def close(color, value):
@@ -45,17 +44,16 @@ def verify(recompile=False):
             assert actual and actual.get_name() == SLOT_INSTANCES[slot_name], (slot_name, actual)
     unreal.log("PYRIOS_VERIFY_EDITOR_PREVIEW_OK")
 
-    for body in ("Body_Map1", "Body_Map2", "Weapon"):
-        for suffix in ("N", "M", "A"):
-            tex = eal.load_asset(ROOT + "/Texture/Pyrois_" + body + "_" + suffix)
-            assert not tex.get_editor_property("srgb")
-            assert tex.get_editor_property("compression_settings") == unreal.TextureCompressionSettings.TC_BC7
+    for name, srgb in plan["texture_srgb"].items():
+        tex = eal.load_asset(ROOT + "/Texture/" + name)
+        assert tex.get_editor_property("srgb") == srgb, (name, srgb)
 
     for suffix in SUFFIXES:
         mi = eal.load_asset(ROOT + "/Generated/MI_Pyrois_" + suffix)
         for slot, name in plan["textures"][suffix].items():
             actual = mel.get_material_instance_texture_parameter_value(mi, slot)
-            assert actual is not None and actual.get_name() == (name or DEFAULT_MATCAP), (suffix, slot, actual)
+            default = next(plan["textures"][s][slot] for s in SUFFIXES if plan["textures"][s][slot])
+            assert actual is not None and actual.get_name() == (name or default), (suffix, slot, actual)
         expected = dict(plan["globals"])
         expected.update(plan["params"][suffix])
         for name, value in expected.items():

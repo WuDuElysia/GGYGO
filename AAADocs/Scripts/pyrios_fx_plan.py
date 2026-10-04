@@ -5,7 +5,7 @@
 - 层顺序：Materials/FXObjects/Pyrois_Body_FX_0*.json 的 SkinnedMeshRenderer.m_Materials。
   四个 FX 网格都只有一个 submesh，却挂了三个材质；Unity 会把多出的材质依次在同一几何上再画一遍，
   因此 m_Materials 的顺序就是叠加顺序（先画的在下）。
-- 采样寻址：Materials/FXTextures/*.json（AnimeStudio 以 JSON 导出的 Texture2D，取 m_WrapMode）。
+- 采样寻址与色彩空间：Materials/TextureSettings/*.json（AnimeStudio 以 JSON 导出的 Texture2D，取 m_WrapMode、m_ColorSpace）。
 - 着色逻辑：F:/AnimeStudio/Exports/Shader/ZZZ_20260925 下
   miHoYo/Particles/Particles_Dissolve_CustomColor_Mask_Cap 的 D3D11 反汇编，cbuffer 偏移靠同目录 .dat
   里的反射表还原成属性名。FX02 用的非 Cap 变体没有导出，按同族同属性集处理。
@@ -17,7 +17,11 @@ master 材质只实现这三个材质实际启用的特性分支。源材质启�
 """
 import json
 import math
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from pyrios_material_plan import load_texture_settings, unity_color_to_linear  # noqa: E402
 
 LAYER_COUNT = 3
 SHADER_FAMILY = "miHoYo/Particles/Particles_Dissolve_CustomColor_Mask"
@@ -75,15 +79,6 @@ for _tex in ("MainTex", "MaskTex", "DissolveTex", "DissolveRampTex", "RampTex", 
     REQUIRED_VALUES["_%sClampV" % _tex] = 0.0
 
 
-def unity_gamma_to_linear(v):
-    """Mathf.GammaToLinearSpace：<=1 用 sRGB 分段曲线，>1（HDR）用 pow 2.2。"""
-    if v <= 0.04045:
-        return v / 12.92
-    if v < 1.0:
-        return ((v + 0.055) / 1.055) ** 2.4
-    return v ** 2.2
-
-
 def _num(v, label):
     if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
         raise ValueError("需要有限数值: " + label)
@@ -107,7 +102,7 @@ def _vec(props, name, convert):
         raise ValueError("材质缺少向量/颜色属性 " + name)
     rgba = [_num(c[k], name + "." + k) for k in ("r", "g", "b", "a")]
     if convert:
-        rgba = [unity_gamma_to_linear(x) for x in rgba[:3]] + [rgba[3]]
+        rgba = list(unity_color_to_linear(rgba[:3])) + [rgba[3]]
     return tuple(rgba)
 
 
@@ -129,18 +124,23 @@ def wrap_code(texture_name, wrap):
     raise ValueError("%s 的 m_WrapMode=%s 未实现" % (texture_name, mode))
 
 
-def load_wrap_modes(settings_dir):
-    """读取 AnimeStudio 导出的 Texture2D JSON，返回 {贴图名: m_WrapMode}。"""
+def load_wrap_modes(settings):
+    """{贴图名: m_WrapMode}，来源见 pyrios_material_plan.load_texture_settings。"""
+    return {name: entry["wrap"] for name, entry in settings.items()}
+
+
+def slot_srgb(layers, settings):
+    """每个贴图槽的 sRGB 采样类型。master 的贴图参数采样类型按槽固定，三层同槽的贴图色彩空间必须一致。"""
     result = {}
-    for path in sorted(Path(settings_dir).glob("*.json")):
-        data = json.loads(path.read_text(encoding="utf-8"))
-        name = data.get("m_Name")
-        mode = data.get("m_TextureSettings", {}).get("m_WrapMode")
-        if not isinstance(name, str) or not isinstance(mode, int):
-            raise ValueError("贴图设置 JSON 结构不符: " + str(path))
-        if name in result and result[name] != mode:
-            raise ValueError("同名贴图的 m_WrapMode 不一致: " + name)
-        result[name] = mode
+    for layer in layers:
+        for slot, tex in layer["textures"].items():
+            if tex is None:
+                continue
+            if tex not in settings:
+                raise ValueError("缺少贴图导入设置: " + tex)
+            srgb = settings[tex]["srgb"]
+            if result.setdefault(slot, srgb) != srgb:
+                raise ValueError("槽 %s 在不同层里混用了 sRGB 与线性贴图" % slot)
     return result
 
 
@@ -247,7 +247,8 @@ def load_order(objects_dir):
 def load_plan(material_dir):
     material_dir = Path(material_dir)
     order = load_order(material_dir / "FXObjects")
-    wrap = load_wrap_modes(material_dir / "FXTextures")
+    settings = load_texture_settings(material_dir / "TextureSettings")
+    wrap = load_wrap_modes(settings)
     layers = []
     for mat_name in order:
         data = json.loads((material_dir / (mat_name + ".json")).read_text(encoding="utf-8"))
@@ -256,7 +257,8 @@ def load_plan(material_dir):
         textures, vectors = layer_params(data, wrap)
         layers.append({"source": mat_name, "textures": textures, "vectors": vectors})
     names = sorted({t for layer in layers for t in layer["textures"].values() if t})
-    return {"order": order, "layers": layers, "textures": names}
+    return {"order": order, "layers": layers, "textures": names,
+            "srgb": {n: settings[n]["srgb"] for n in names}, "slot_srgb": slot_srgb(layers, settings)}
 
 
 if __name__ == "__main__":

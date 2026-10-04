@@ -17,6 +17,30 @@
    "kind": "texture"
   },
   {
+   "name": "SecondaryEmissionTex",
+   "kind": "texture"
+  },
+  {
+   "name": "SecondaryEmissionMaskTex",
+   "kind": "texture"
+  },
+  {
+   "name": "SpecialWeaponEmissionTex",
+   "kind": "texture"
+  },
+  {
+   "name": "SpecialWeaponEmissionMaskTex",
+   "kind": "texture"
+  },
+  {
+   "name": "ScreenTex",
+   "kind": "texture"
+  },
+  {
+   "name": "ScreenMask",
+   "kind": "texture"
+  },
+  {
    "name": "MatCapTex1",
    "kind": "texture"
   },
@@ -38,6 +62,10 @@
   },
   {
    "name": "UV",
+   "kind": "builtin"
+  },
+  {
+   "name": "UV2",
    "kind": "builtin"
   },
   {
@@ -90,6 +118,10 @@
   },
   {
    "name": "NormalYSign",
+   "kind": "extra"
+  },
+  {
+   "name": "HighlightBleed",
    "kind": "extra"
   },
   {
@@ -193,11 +225,27 @@
    "kind": "material"
   },
   {
+   "name": "_Blink",
+   "kind": "material"
+  },
+  {
+   "name": "_BlinkFrequency",
+   "kind": "material"
+  },
+  {
+   "name": "_BlinkOpacity",
+   "kind": "material"
+  },
+  {
    "name": "_BumpScale",
    "kind": "material"
   },
   {
    "name": "_Color",
+   "kind": "material"
+  },
+  {
+   "name": "_ColorOverrideAlbedo",
    "kind": "material"
   },
   {
@@ -257,6 +305,30 @@
    "kind": "material"
   },
   {
+   "name": "_MatCapBlendModeFx",
+   "kind": "material"
+  },
+  {
+   "name": "_MatCapBumpScaleFx",
+   "kind": "material"
+  },
+  {
+   "name": "_MatCapColorTintFx",
+   "kind": "material"
+  },
+  {
+   "name": "_MatCapFX",
+   "kind": "material"
+  },
+  {
+   "name": "_MatCapNormalVSpeedFx",
+   "kind": "material"
+  },
+  {
+   "name": "_MatCapUSpeedFx",
+   "kind": "material"
+  },
+  {
    "name": "_Metallic",
    "kind": "material"
   },
@@ -278,6 +350,14 @@
   },
   {
    "name": "_ModelSize5",
+   "kind": "material"
+  },
+  {
+   "name": "_MultiplyAlbedo",
+   "kind": "material"
+  },
+  {
+   "name": "_MultiplySrcColor",
    "kind": "material"
   },
   {
@@ -314,6 +394,66 @@
   },
   {
    "name": "_RimGlowLightColor5",
+   "kind": "material"
+  },
+  {
+   "name": "_ScreenColor",
+   "kind": "material"
+  },
+  {
+   "name": "_ScreenImage",
+   "kind": "material"
+  },
+  {
+   "name": "_ScreenImageUvMove",
+   "kind": "material"
+  },
+  {
+   "name": "_ScreenMaskUV",
+   "kind": "material"
+  },
+  {
+   "name": "_ScreenMask_ST",
+   "kind": "material"
+  },
+  {
+   "name": "_ScreenScale",
+   "kind": "material"
+  },
+  {
+   "name": "_ScreenTex_ST",
+   "kind": "material"
+  },
+  {
+   "name": "_SecondaryEmission",
+   "kind": "material"
+  },
+  {
+   "name": "_SecondaryEmissionChannel",
+   "kind": "material"
+  },
+  {
+   "name": "_SecondaryEmissionColor",
+   "kind": "material"
+  },
+  {
+   "name": "_SecondaryEmissionMaskChannel",
+   "kind": "material"
+  },
+  {
+   "name": "_SecondaryEmissionMaskTex_ST",
+   "kind": "material"
+  },
+  {
+   "name": "_SecondaryEmissionTexSpeed",
+   "kind": "material"
+  },
+  {
+   "name": "_SecondaryEmissionTex_ST",
+   "kind": "material"
+  },
+  {
+   "name": "_SecondaryEmissionUseUV2",
    "kind": "material"
   },
   {
@@ -389,6 +529,42 @@
    "kind": "material"
   },
   {
+   "name": "_SpecialWeaponEmission",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecialWeaponEmissionColor",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecialWeaponEmissionColor2",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecialWeaponEmissionMaskTex_ST",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecialWeaponEmissionTexSpeed",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecialWeaponEmissionTex_ST",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecialWeaponMergeParam01",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecialWeaponMergeParam02",
+   "kind": "material"
+  },
+  {
+   "name": "_SpecialWeaponMergeParam03",
+   "kind": "material"
+  },
+  {
    "name": "_SpecularColor",
    "kind": "material"
   },
@@ -453,11 +629,19 @@
    "kind": "material"
   },
   {
+   "name": "_UseInvSecondaryEmissionMask",
+   "kind": "material"
+  },
+  {
    "name": "_UseMatCapMask",
    "kind": "material"
   },
   {
    "name": "_UseOverlayTex",
+   "kind": "material"
+  },
+  {
+   "name": "_VertexOffset",
    "kind": "material"
   },
   {

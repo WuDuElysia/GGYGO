@@ -27,15 +27,21 @@ HLSL_PATH = Path(__file__).resolve().with_name("nap_avatar_toon.hlsl")
 MEL = unreal.MaterialEditingLibrary
 EAL = unreal.EditorAssetLibrary
 MESH_PATH = "/Game/Characters/Player/Pyrios/Avatar_Male_Size03_Pyrois_Model"
-DEFAULT_MATCAP = "Eff_Matcap_125"
-# 每个贴图输入的默认贴图与采样类型；默认贴图必须与采样类型的 sRGB 设置一致，否则材质编译失败。
-TEXTURE_INPUTS = {
-    "MainTex": ("Pyrois_Body_Map1_D", "SAMPLERTYPE_COLOR"),
-    "LightTex": ("Pyrois_Body_Map1_N", "SAMPLERTYPE_LINEAR_COLOR"),
-    "OtherDataTex": ("Pyrois_Body_Map1_M", "SAMPLERTYPE_LINEAR_COLOR"),
-    "OtherDataTex2": ("Pyrois_Body_Map1_A", "SAMPLERTYPE_LINEAR_COLOR"),
-}
-TEXTURE_INPUTS.update({"MatCapTex%d" % i: (DEFAULT_MATCAP, "SAMPLERTYPE_COLOR") for i in range(1, 6)})
+def slot_inputs(plan):
+    """{贴图槽: (占位贴图名, 采样类型名)}。
+
+    采样类型按槽内贴图的 Unity sRGB 设置决定；占位贴图取任一材质在该槽用到的贴图，
+    保证与采样类型一致（不一致会编译失败）。
+    """
+    result = {}
+    for slot in [i["name"] for i in plan["inputs"] if i["kind"] == "texture"]:
+        used = [plan["textures"][s][slot] for s in SUFFIXES if plan["textures"][s][slot]]
+        if not used:
+            raise RuntimeError("没有任何材质使用贴图槽 " + slot)
+        result[slot] = (used[0], "SAMPLERTYPE_COLOR" if plan["slot_srgb"][slot] else "SAMPLERTYPE_LINEAR_COLOR")
+    return result
+
+
 # 编辑器静态预览的主光；运行时由组件覆盖。方向为 UE 世界空间指向光源。
 PREVIEW_LIGHT = {"KeyLightDirectionWS": (0.35, 0.25, 0.9, 0.0), "KeyLightColor": (1.0, 1.0, 1.0, 1.0)}
 PREVIEW_SCALARS = {"SceneLightStrength": 1.0, "KeyLightVisibility": 1.0}
@@ -68,14 +74,9 @@ def preflight():
     packed = {ROOT + "/Texture/Pyrois_" + body + "_" + suffix
               for body in ("Body_Map1", "Body_Map2", "Weapon") for suffix in ("N", "M", "A")}
     required = {ROOT + "/Texture/" + name for name in plan["texture_names"]} | packed
-    required |= {ROOT + "/Texture/" + tex for tex, _ in TEXTURE_INPUTS.values()}
     for path in sorted(required):
         if not isinstance(EAL.load_asset(path), unreal.Texture2D):
             raise RuntimeError("Missing/wrong texture type: " + path)
-    for suffix in SUFFIXES:
-        for slot, name in plan["textures"][suffix].items():
-            if name and slot.startswith("MatCap") and not EAL.load_asset(ROOT + "/Texture/" + name).get_editor_property("srgb"):
-                raise RuntimeError("MatCap texture must be sRGB: " + name)
     outputs = {OUT + "/M_Pyrois_Toon": unreal.Material, OUT + "/M_Pyrois_Outline": unreal.Material}
     outputs.update({OUT + "/MI_Pyrois_" + s: unreal.MaterialInstanceConstant for s in SUFFIXES})
     for path, cls in outputs.items():
@@ -87,7 +88,8 @@ def preflight():
     slots = [str(s.get_editor_property("material_slot_name")) for s in mesh.get_editor_property("materials")]
     if any(slots.count(name) != 1 for name in SLOT_INSTANCES):
         raise RuntimeError("Expected each target mesh slot exactly once: " + str(slots))
-    check_targets_clean(packed | set(outputs) | {MESH_PATH})
+    used = {ROOT + "/Texture/" + n for n in plan["texture_names"]}
+    check_targets_clean(packed | used | set(outputs) | {MESH_PATH})
     return plan
 
 
@@ -162,6 +164,7 @@ def build_main(plan):
     MEL.set_base_material_usage(m, unreal.MaterialUsage.MATUSAGE_MORPH_TARGETS)
     builtins = {
         "UV": (node(m, unreal.MaterialExpressionTextureCoordinate, -2400, -600), ""),
+        "UV2": (node(m, unreal.MaterialExpressionTextureCoordinate, -2400, -700, coordinate_index=2), ""),
         "Time": (node(m, unreal.MaterialExpressionTime, -2400, -500), ""),
         "WorldPos": (node(m, unreal.MaterialExpressionWorldPosition, -2400, -400), ""),
         "CameraPos": (node(m, unreal.MaterialExpressionCameraPositionWS, -2400, -300), ""),
@@ -172,7 +175,7 @@ def build_main(plan):
     for item in plan["inputs"]:
         name, kind = item["name"], item["kind"]
         if kind == "texture":
-            tex_name, sampler = TEXTURE_INPUTS[name]
+            tex_name, sampler = slot_inputs(plan)[name]
             src = node(m, unreal.MaterialExpressionTextureObjectParameter, -2000, y, parameter_name=name,
                        group="Textures", texture=EAL.load_asset(ROOT + "/Texture/" + tex_name),
                        sampler_type=getattr(unreal.MaterialSamplerType, sampler))
@@ -237,7 +240,7 @@ def set_instance(main, suffix, plan):
     MEL.clear_all_material_instance_parameters(mi)
     textures = {}
     for slot, name in plan["textures"][suffix].items():
-        tex = EAL.load_asset(ROOT + "/Texture/" + (name or DEFAULT_MATCAP))
+        tex = EAL.load_asset(ROOT + "/Texture/" + (name or slot_inputs(plan)[slot][0]))
         textures[slot] = tex
         MEL.set_material_instance_texture_parameter_value(mi, slot, tex)
     vectors = dict(plan["globals"])
@@ -260,17 +263,17 @@ def set_instance(main, suffix, plan):
     save(mi)
 
 
-def configure_packed_textures():
-    # _LightTex.B 是明暗偏移，法线贴图的 BC5 压缩会丢掉它；M/A 需要线性采样并保留 alpha。
-    for body in ("Body_Map1", "Body_Map2", "Weapon"):
-        for suffix in ("N", "M", "A"):
-            tex = EAL.load_asset(ROOT + "/Texture/Pyrois_" + body + "_" + suffix)
-            if tex is None:
-                raise RuntimeError("Missing packed texture for " + body + suffix)
-            touch(tex)
-            tex.set_editor_property("srgb", False)
+def configure_textures(plan):
+    # sRGB 照抄 Unity 导入设置（m_ColorSpace）。N/M/A 打包图另外用 BC7：_LightTex.B 是明暗偏移，
+    # 法线贴图的 BC5 压缩会丢掉它；M/A 需要保留 alpha。
+    packed = {"Pyrois_%s_%s" % (b, s) for b in ("Body_Map1", "Body_Map2", "Weapon") for s in ("N", "M", "A")}
+    for name in plan["texture_names"]:
+        tex = EAL.load_asset(ROOT + "/Texture/" + name)
+        touch(tex)
+        tex.set_editor_property("srgb", plan["texture_srgb"][name])
+        if name in packed:
             tex.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_BC7)
-            save(tex)
+        save(tex)
 
 
 def bind_editor_preview_materials(prechecked=False):
@@ -306,7 +309,7 @@ def main():
     try:
         plan = preflight()  # No writes before the complete source/asset/dirty check.
         EAL.make_directory(OUT)
-        configure_packed_textures()
+        configure_textures(plan)
         m = build_main(plan)
         build_outline()
         for suffix in SUFFIXES:

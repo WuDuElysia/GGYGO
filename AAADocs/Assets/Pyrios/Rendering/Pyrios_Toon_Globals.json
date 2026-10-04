@@ -15,8 +15,8 @@
   "_SkinShadowFadeTint": [1, 1, 1, 1],
   "//ambient": "_CharacterAmbient 只参与亮度压缩的亮度计算；真正加到颜色上的环境光是 EntityAmbient（皮肤组用 EntitySkinAmbient）。",
   "_CharacterAmbient": [0, 0, 0, 0],
-  "EntityAmbient": [0.3, 0.3, 0.3, 0],
-  "EntitySkinAmbient": [0.3, 0.3, 0.3, 0],
+  "EntityAmbient": [0.15, 0.15, 0.15, 0],
+  "EntitySkinAmbient": [0.15, 0.15, 0.15, 0],
   "//tonemap": "_CharacterLightTonemapParams.xy：亮度低于 x 不变，高于 x 渐近压到 y。y 必须大于 x。",
   "_CharacterLightTonemapParams": [1, 2, 0, 0],
   "//gradient": "_AmbientGradientShape.w 为 0 时关闭世界空间环境渐变。",
@@ -33,6 +33,8 @@
   "_RimGlowStyleForChara": [1, 1, 1, 1],
   "//entity": "EntityParams：x/y 是角色实体缓冲第 7、8 个 float（y 缩放阴影色带权重），z 是第 13 个（顶点阶段 o7.x = 1 - z * 顶点色 a）。",
   "EntityParams": [1, 1, 0, 0],
+  "//bleed": "HighlightBleed：超过 1 的最大分量按此比例加到三个通道，近似游戏后处理把强自发光推向白色（游戏的合成 Pass 未导出）。0 关闭。",
+  "HighlightBleed": [0.1, 0, 0, 0],
   "//normal": "NormalYSign：Unity 法线贴图 G 通道沿 +V（向上），UE 副切线沿 +V_UE（向下），所以取 -1。",
   "NormalYSign": [-1, 0, 0, 0]
 }

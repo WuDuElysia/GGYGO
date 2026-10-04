@@ -34,8 +34,7 @@ CHARACTER_BP = "/Game/BP/Character/Player/BP_PC_Pyrios"
 MATERIAL_JSON_DIR = HERE.parents[1] / "Content/Characters/Player/Pyrios/Materials"
 SOURCE_PNG_DIR = Path(r"F:\AnimeStudio\Exports\ZZZ\Avatar_Male_Size03_Pyrois_Model\FX\Player\Textures")
 HLSL_PATH = HERE / "fx_dissolve_mask_layer.hlsl"
-# 未赋值槽位的默认贴图；必须是线性贴图，否则与 LinearColor 采样类型不匹配导致编译失败。
-DEFAULT_TEXTURE = "Eff_Mask_032"
+
 
 VECTOR_DEFAULTS = {name: (0.0, 0.0, 0.0, 0.0) for name in VECTOR_PARAMS}
 VECTOR_DEFAULTS.update({k: (1.0, 1.0, 0.0, 0.0) for k in
@@ -106,14 +105,24 @@ def import_textures(plan):
 
 
 def configure_textures(plan):
-    # 扭曲图以 127/255 为零点，说明这批 FX 贴图在原工程按线性数据采样。
-    # 寻址由 master 里的共享采样器决定，这里不改贴图自身的 Address 设置。
+    # sRGB 照抄 Unity 导入设置（m_ColorSpace）。寻址由 master 里的共享采样器决定，这里不改贴图自身的 Address 设置。
     for name in plan["textures"]:
         tex = EAL.load_asset(TEX_DIR + "/" + name)
-        tex.set_editor_property("srgb", False)
+        tex.set_editor_property("srgb", plan["srgb"][name])
         tex.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_DEFAULT)
         tex.set_editor_property("lod_group", unreal.TextureGroup.TEXTUREGROUP_EFFECTS)
         REPORT.save(tex)
+
+
+def slot_defaults(plan):
+    """未赋值槽位的占位贴图：取任一层在该槽使用的贴图，保证与槽的 sRGB 采样类型一致（不一致会编译失败）。"""
+    result = {}
+    for slot in TEXTURE_SLOTS:
+        names = [layer["textures"][slot] for layer in plan["layers"] if layer["textures"][slot]]
+        if not names:
+            raise RuntimeError("没有任何层使用贴图槽 " + slot)
+        result[slot] = EAL.load_asset(TEX_DIR + "/" + names[0])
+    return result
 
 
 def node(material, cls, x, y, **props):
@@ -143,7 +152,7 @@ def custom(material, x, y, code, inputs, desc):
     return c
 
 
-def build_master():
+def build_master(plan):
     path = MASTER_DIR + "/" + MASTER_NAME
     EAL.make_directory(MASTER_DIR)
     m = EAL.load_asset(path) if EAL.does_asset_exist(path) else \
@@ -163,7 +172,7 @@ def build_master():
     m.set_editor_property("use_translucency_vertex_fog", False)
     MEL.set_base_material_usage(m, unreal.MaterialUsage.MATUSAGE_SKELETAL_MESH)
 
-    default_tex = EAL.load_asset(TEX_DIR + "/" + DEFAULT_TEXTURE)
+    defaults = slot_defaults(plan)
     code = HLSL_PATH.read_text(encoding="utf-8")
     uv = node(m, unreal.MaterialExpressionTextureCoordinate, -2600, -400)
     time = node(m, unreal.MaterialExpressionTime, -2600, -300, ignore_pause=True)
@@ -179,9 +188,10 @@ def build_master():
         for k, slot in enumerate(TEXTURE_SLOTS):
             t = node(m, unreal.MaterialExpressionTextureObjectParameter, -2000, base_y + k * 140,
                      parameter_name="L%d_%s" % (i, slot), group=group,
-                     sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR,
+                     sampler_type=(unreal.MaterialSamplerType.SAMPLERTYPE_COLOR if plan["slot_srgb"].get(slot, False)
+                                   else unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR),
                      sampler_source=unreal.SamplerSourceMode.SSM_WRAP_WORLD_GROUP_SETTINGS,
-                     texture=default_tex)
+                     texture=defaults[slot])
             inputs.append((slot, t, ""))
         for k, name in enumerate(VECTOR_PARAMS):
             v = node(m, unreal.MaterialExpressionVectorParameter, -1500, base_y + k * 90,
@@ -235,10 +245,10 @@ def build_instance(master, plan):
         raise RuntimeError("无法创建 " + path)
     MEL.set_material_instance_parent(mi, master)
     MEL.clear_all_material_instance_parameters(mi)
-    default_tex = EAL.load_asset(TEX_DIR + "/" + DEFAULT_TEXTURE)
+    defaults = slot_defaults(plan)
     for i, layer in enumerate(plan["layers"], 1):
         for slot, tex_name in layer["textures"].items():
-            tex = EAL.load_asset(TEX_DIR + "/" + tex_name) if tex_name else default_tex
+            tex = EAL.load_asset(TEX_DIR + "/" + tex_name) if tex_name else defaults[slot]
             if not isinstance(tex, unreal.Texture2D):
                 raise RuntimeError("缺少贴图 " + str(tex_name))
             # 引擎的 set_* 返回值恒为 False，写入结果统一在下面回读核对。
@@ -246,16 +256,16 @@ def build_instance(master, plan):
         for name, value in layer["vectors"].items():
             MEL.set_material_instance_vector_parameter_value(mi, "L%d_%s" % (i, name), unreal.LinearColor(*value))
     MEL.update_material_instance(mi)
-    verify_instance(mi, plan, default_tex)
+    verify_instance(mi, plan, defaults)
     REPORT.save(mi)
     return mi
 
 
-def verify_instance(mi, plan, default_tex):
+def verify_instance(mi, plan, defaults):
     for i, layer in enumerate(plan["layers"], 1):
         for slot, tex_name in layer["textures"].items():
             got = MEL.get_material_instance_texture_parameter_value(mi, "L%d_%s" % (i, slot))
-            want = tex_name or default_tex.get_name()
+            want = tex_name or defaults[slot].get_name()
             if got is None or got.get_name() != want:
                 raise RuntimeError("回读不符 L%d_%s: %s != %s" % (i, slot, got and got.get_name(), want))
         for name, value in layer["vectors"].items():
@@ -297,7 +307,7 @@ def main():
         preflight(plan)  # 完整检查通过前不写任何资产
         import_textures(plan)
         configure_textures(plan)
-        master = build_master()
+        master = build_master(plan)
         mi = build_instance(master, plan)
         bind_mesh(mi)
         report_character_override()

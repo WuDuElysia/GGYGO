@@ -27,7 +27,17 @@ SHADER_DIR = Path(r"F:\AnimeStudio\Exports\Shader\ZZZ_20260925")
 TEXT_PATH = SHADER_DIR / "PyriosFullText/miHoYo_Character_NapAvatarStandard.shader"
 DAT_PATH = SHADER_DIR / "PyriosRaw/miHoYo_Character_NapAvatarStandard.dat"
 PASS_NAME = "CharacterToonDeferred"
-KEYWORDS = {"_NAP_SHADER_QUALITY_HIGH", "_MATCAP_ON"}
+# 两个 _FX_UNCLIP_* 变体打开屏幕贴图（_ScreenImage）、二次自发光与特殊武器自发光分支；
+# Pyrios 胸口和右臂的蓝光就来自 Body_1 的 _ScreenImage / _SpecialWeaponEmission。
+KEYWORDS = {"_NAP_SHADER_QUALITY_HIGH", "_MATCAP_ON",
+            "_FX_UNCLIP_SCREEN_IMAGE_OVERRIDE_2_TONE", "_FX_UNCLIP_SECONDARY_EMISSION_RIM_GLOW"}
+DISABLED_BLOCKS = ("_OverrideRimGlow", "_Override2Tone")
+TEXTURE_REGISTERS = {
+    "t3": "MainTex", "t4": "LightTex", "t5": "OtherDataTex", "t6": "OtherDataTex2",
+    "t8": "SecondaryEmissionTex", "t9": "SecondaryEmissionMaskTex",
+    "t10": "SpecialWeaponEmissionTex", "t11": "SpecialWeaponEmissionMaskTex",
+    "t12": "ScreenTex", "t13": "ScreenMask",
+}
 OUT_HLSL = HERE / "nap_avatar_toon.hlsl"
 OUT_INPUTS = HERE / "nap_avatar_toon_inputs.json"
 
@@ -58,14 +68,13 @@ LOCAL_NAMES = {"_WorldSpaceCameraPos", "_AvatarMainLightColor"}
 COMPONENT_VECTORS = ("KeyLightDirectionWS", "KeyLightColor")
 COMPONENT_SCALARS = ("SceneLightStrength", "KeyLightVisibility")
 # 前导/替换代码引入的额外材质参数。
-EXTRA_VECTORS = ("EntityParams", "EntityAmbient", "EntitySkinAmbient", "NormalYSign",
+EXTRA_VECTORS = ("EntityParams", "EntityAmbient", "EntitySkinAmbient", "NormalYSign", "HighlightBleed",
                  "MC_Refract1", "MC_Refract2", "MC_Refract3", "MC_Refract4", "MC_Refract5",
                  "MC_Tint1", "MC_Tint2", "MC_Tint3", "MC_Tint4", "MC_Tint5",
                  "MC_A1", "MC_A2", "MC_A3", "MC_A4", "MC_A5",
                  "MC_B1", "MC_B2", "MC_B3", "MC_B4", "MC_B5")
-TEXTURES = ("MainTex", "LightTex", "OtherDataTex", "OtherDataTex2",
-            "MatCapTex1", "MatCapTex2", "MatCapTex3", "MatCapTex4", "MatCapTex5")
-BUILTINS = ("UV", "Time", "WorldPos", "CameraPos", "VCol", "FaceSign")
+TEXTURES = tuple(TEXTURE_REGISTERS.values()) + ("MatCapTex1", "MatCapTex2", "MatCapTex3", "MatCapTex4", "MatCapTex5")
+BUILTINS = ("UV", "UV2", "Time", "WorldPos", "CameraPos", "VCol", "FaceSign")
 
 
 def find_variant():
@@ -230,6 +239,13 @@ def transform(program):
     # 2. 阴影：整段替换为组件的角色级可见度，_ReceiveShadows 仍按原式混合
     s, e = cut_block(lines, lambda l: "_is_main_light_shadows_on" in l, "shadow")
     lines[s:e + 1] = ["  r9.w = lerp(1.0, KeyLightVisibility, _ReceiveShadows.x);", "  r8.w = r9.w;"]
+
+    # 3'. 运行时 FX 覆盖分支（覆盖边缘光、覆盖双色调）。Pyrios 材质都关着，pyrios_material_plan 要求其为 0；
+    # 整段删掉，避免引入对象矩阵和额外贴图。
+    for name in DISABLED_BLOCKS:
+        if any(("cmp(0.5 < %s.x)" % name) in l for l in lines):
+            s, e = cut_block(lines, lambda l, n=name: ("cmp(0.5 < %s.x)" % n) in l, name)
+            del lines[s:e + 1]
     text = "\n".join(lines)
 
     # 3. 角色实体缓冲
@@ -242,30 +258,38 @@ def transform(program):
         return ENTITY_FIELDS[off]
     text = must_sub(r"t1\[r\d+\.\w\]\.val\[(\d+)/4(?:\+(\d))?\]", entity, text, "entity")
 
-    # 4. 贴图
-    for reg, name in (("t3", "MainTex"), ("t4", "LightTex"), ("t5", "OtherDataTex"), ("t6", "OtherDataTex2")):
-        text = must_sub(reg + r"\.SampleBias\(s0_s, ([^,]+), _CharacterSampleTextureBias\.x\)",
-                        r"Texture2DSample(%s, %sSampler, \1)" % (name, name), text, reg)
+    # 4. 贴图。UV 都在 Unity 约定（V 向上）下计算，F.S 采样时翻成 UE 的 V。
+    for reg, name in TEXTURE_REGISTERS.items():
+        text = must_sub(reg + r"\.Sample(?:Bias)?\(s\d_s, ([^,()]+)(?:, _CharacterSampleTextureBias\.x)?\)",
+                        r"F.S(%s, %sSampler, \1)" % (name, name), text, reg)
     text = must_sub(r"t2\.SampleBias\(s0_s, [^,]+, _CharacterSampleTextureBias\.x\)\.xyz",
                     "float3(0.0, 0.0, 0.0)", text, "overlay", 1)
     text = must_sub(r"t7\.Sample\(s2_s, (r\d+\.xyz)\)",
                     r"F.MatCap(MatCapTex1, MatCapTex1Sampler, MatCapTex2, MatCapTex3, MatCapTex4, MatCapTex5, \1)",
                     text, "matcap", 1)
 
-    # 5. MatCap 用的视图矩阵列；行为 Unity 视空间的右/上轴
-    text = must_sub(r"unity_MatrixV\.xy", "float2(ViewRightU.x, ViewUpU.x)", text, "view0", 1)
-    text = must_sub(r"cb0\[118\]\.xy", "float2(ViewRightU.y, ViewUpU.y)", text, "view1", 1)
-    text = must_sub(r"cb0\[119\]\.xy", "float2(ViewRightU.z, ViewUpU.z)", text, "view2", 1)
+    # 5. Unity 视图矩阵（cbuffer 里按列存放 unity_MatrixV 的四列）：行 0/1/2 是右、上、-前。
+    text = text.replace("unity_MatrixV.xy", "float2(ViewRightU.x, ViewUpU.x)")
+    text = text.replace("cb0[118].xy", "float2(ViewRightU.y, ViewUpU.y)")
+    text = text.replace("cb0[119].xy", "float2(ViewRightU.z, ViewUpU.z)")
+    text = text.replace("unity_MatrixV.z", "(-ViewFwdU.x)").replace("cb0[118].z", "(-ViewFwdU.y)")
+    text = text.replace("cb0[119].z", "(-ViewFwdU.z)")
+    text = text.replace("cb0[120].z", "dot(ViewFwdU, _WorldSpaceCameraPos.xyz)")
+    # cb0[94].y 是投影矩阵 m11（1/tan(fovY/2)），unity_OrthoParams.w 为 1 表示正交相机。
+    text = text.replace("cb0[94].y", "View.ViewToClip[1][1]").replace("unity_OrthoParams.w", "0.0")
+    text = text.replace("_ScreenSize.", "View.ViewSizeAndInvSize.").replace("v9.xy", "Parameters.SvPosition.xy")
 
     # 6. 按材质组索引的 MatCap 打包数组
-    text = must_sub(r"cb4\[r4\.w\+(\d+)\]", r"MC[(int)r4.w+\1]", text, "mcarray")
+    text = must_sub(r"cb4\[(r\d+\.\w)\+(\d+)\]", r"MC[(int)\1+\2]", text, "mcarray")
 
     # 反射表里 _SkinMatId 是 int 型 cbuffer 成员，Unity 上传时把 Float 属性转成整数；
     # UE 参数都是 float，所以 asint 改成取整，否则 4.0 的位模式永远不等于组号。
     text = must_sub(r"asint\((_\w+)\.x\)", r"((int)round(\1.x))", text, "asint")
 
     # 7. 时间与正反面
-    text = text.replace("_GlobalTimeParamsB.y", "Time")
+    # Time 是标量，"_GlobalTimeParamsB.yy" 这类多分量写法换成标量重复 .xx。
+    text = re.sub(r"_GlobalTimeParamsB\.(y+)\b",
+                  lambda m: "Time" if len(m.group(1)) == 1 else "Time." + "x" * len(m.group(1)), text)
     text = must_sub(r"v10\.x \? 1 : -1", "(FaceSign > 0.0 ? 1 : -1)", text, "face", 1)
     text = must_sub(r"cmp\(\(int\)v10\.x == 0\)", "cmp(FaceSign < 0.0)", text, "face0", 1)
 
@@ -273,20 +297,35 @@ def transform(program):
     text = re.sub(r"^(\s*[\w.]+ = )(r\d+\.[xyzw]{2,4}) \? (.+) : (.+);$",
                   r"\1select(\2, \3, \4);", text, flags=re.M)
 
-    # 8. 输出：编码 SV_Target1 之前的边缘光与 SV_Target0 相加
-    tail = text.index("r0.xyw = sqrt(r0.xyw);")
-    text = text[:tail] + "  return o0.xyz + min(r0.xyw, 25.0);\n"
+    # 8. 输出：SV_Target1 存的是 min(1, 0.2*sqrt(边缘光))，在开方前截下边缘光，与 SV_Target0 相加。
+    lines = text.split("\n")
+    k = next(i for i, l in enumerate(lines) if re.match(r"\s*(r\d+\.[xyzw]{3}) = sqrt\(\1\);", l))
+    rim = re.match(r"\s*(r\d+\.[xyzw]{3})", lines[k]).group(1)
+    kept = [l for l in lines[k + 1:] if re.match(r"\s*o0\.xyz = ", l)]
+    # o1.w = 0.3333 * 自发光亮度，写进 8 位目标后最大表示 3；原管线用它驱动 Bloom。
+    glow = next(re.search(r"o1\.w = ([^;]+);", l).group(1) for l in lines[k + 1:] if "o1.w = " in l)
+    # o0 是 HDR 颜色，直接交给 UE 的 Bloom 与 tonemapper；自发光的过亮部分由它们处理。
+    # glow（o1.w，原管线写给自家 Bloom 的亮度）在 UE 里没有对应输入，不使用。
+    del glow
+    # 游戏的后处理合成没有导出。游戏画面里同一色相的自发光，弱处是饱和深蓝、强处（胸口光核、右臂纹线）发白；
+    # UE 的 tonemapper 逐通道处理，(0.1, 0.1, 20) 这类极端蓝只会饱和成纯蓝。这里把超过 1 的最大分量按
+    # HighlightBleed 均匀加到三个通道上，近似游戏后处理的高光去饱和；低于 1 的颜色不受影响。
+    text = "\n".join(lines[:k] + ["  float3 rimOut = %s;" % rim] + kept +
+                     ["  float3 c = o0.xyz + min(rimOut, 25.0);",
+                      "  return c + max(0.0, max(c.x, max(c.y, c.z)) - 1.0) * HighlightBleed.x;", ""])
     if re.search(r"\bcb[0-4]\[|\bt[0-9]\.|\bv(5|6|9)\.", text):
         raise RuntimeError("仍有未替换的寄存器: " + str(re.findall(r"\bcb[0-4]\[\d+\][^;]*|\bt[0-9]\.\w+", text)[:5]))
     return text
 
 
 PRELUDE = r"""// 由 gen_nap_avatar_hlsl.py 生成，勿手改。
-// 原 Shader：miHoYo/Character/NapAvatarStandard，Pass CharacterToonDeferred，变体 {_NAP_SHADER_QUALITY_HIGH, _MATCAP_ON}。
+// 原 Shader：miHoYo/Character/NapAvatarStandard，Pass CharacterToonDeferred，变体见 gen_nap_avatar_hlsl.KEYWORDS。
 // 运算在 Unity 约定下进行：Y 轴向上、长度单位米。U() 把 UE 向量换到该约定（交换 Y/Z，只用于点积，不影响结果）。
 struct NAPF
 {
     float3 U(float3 v) { return float3(v.x, v.z, v.y); }
+    // Unity UV（V 向上）采样 UE 导入的贴图（V 向下）。
+    float4 S(Texture2D T, SamplerState Smp, float2 uv) { return Texture2DSample(T, Smp, float2(uv.x, 1.0 - uv.y)); }
     // MatCap UV 在 Unity 贴图空间（V 向上），采样前翻成 UE 空间。slice 为材质组索引，>=5 时不会被调用。
     float4 MatCap(Texture2D T1, SamplerState S, Texture2D T2, Texture2D T3, Texture2D T4, Texture2D T5, float3 uvs)
     {
@@ -311,7 +350,9 @@ float3 nrmW = normalize(Parameters.TangentToWorld[2]);
 float3 tanW = normalize(Parameters.TangentToWorld[0]);
 float3 bitW = normalize(Parameters.TangentToWorld[1]) * NormalYSign.x;
 float3 posU = F.U(WorldPos) * 0.01;
-float4 v0 = float4(UV, UV);
+// v0.xy 是网格 UV0，v1.xy 是网格 UV2（原顶点着色器把 TEXCOORD2 传到 TEXCOORD1，材质里叫 "Use UV2"），都换成 Unity 约定（FBX 导入时 UE 把 V 翻过一次，这里翻回）。`n// 网格 UV1 存的是描边用平滑法线，表面 Pass 不用。v0.zw 是 UV3，双面/对称 UV 分支关闭时不用。
+float4 v0 = float4(UV.x, 1.0 - UV.y, 0.0, 0.0);
+float4 v1 = float4(UV2.x, 1.0 - UV2.y, 0.0, 0.0);
 float4 v2 = float4(F.U(nrmW), posU.x);
 float4 v3 = float4(F.U(tanW), posU.y);
 float4 v4 = float4(F.U(bitW), posU.z);
@@ -325,6 +366,7 @@ float4 _AvatarMainLightColor = float4(KeyLightColor.rgb * SceneLightStrength, 1.
 float3 LightDirU = normalize(F.U(KeyLightDirectionWS.xyz));
 float3 ViewRightU = F.U(normalize(View.ViewToTranslatedWorld[0].xyz));
 float3 ViewUpU = F.U(normalize(View.ViewToTranslatedWorld[1].xyz));
+float3 ViewFwdU = F.U(normalize(View.ViewToTranslatedWorld[2].xyz));
 
 float4 MC[20];
 MC[0] = MC_Refract1; MC[1] = MC_Refract2; MC[2] = MC_Refract3; MC[3] = MC_Refract4; MC[4] = MC_Refract5;

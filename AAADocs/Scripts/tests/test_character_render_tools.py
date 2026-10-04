@@ -47,6 +47,7 @@ class RenderToolsTest(unittest.TestCase):
         self.root = Path(self.temp.name)
         for suffix in SUFFIXES:
             shutil.copy(SOURCE_JSON / ("MAT_Pyrois_" + suffix + ".json"), self.root)
+        shutil.copytree(SOURCE_JSON / "TextureSettings", self.root / "TextureSettings")
         self.globals = self.root / "globals.json"
         shutil.copy(SOURCE_GLOBALS, self.globals)
 
@@ -97,6 +98,23 @@ class RenderToolsTest(unittest.TestCase):
             for g in range(1, 6):
                 has_tex = plan["textures"][suffix]["MatCapTex%d" % g] is not None
                 self.assertEqual(plan["params"][suffix]["MC_A%d" % g][0], float(g - 1) if has_tex else 100.0)
+
+    def test_texture_colorspace_from_settings(self):
+        plan = load_plan(self.root, self.globals)
+        self.assertTrue(plan["texture_srgb"]["Pyrois_Body_Map1_D"])
+        self.assertFalse(plan["texture_srgb"]["Pyrois_Body_Map1_N"])
+        self.assertTrue(plan["slot_srgb"]["SpecialWeaponEmissionMaskTex"])
+
+    def test_missing_texture_settings_rejected(self):
+        (self.root / "TextureSettings" / "Eff_Mask_032.json").unlink()
+        with self.assertRaisesRegex(ValueError, "Eff_Mask_032"):
+            load_plan(self.root, self.globals)
+
+    def test_hdr_color_scales_gamma_base(self):
+        from pyrios_material_plan import unity_color_to_linear
+        r, g, b = unity_color_to_linear((2.509804, 6.5254903, 47.937256))
+        self.assertAlmostEqual(b, 47.937256)
+        self.assertLess(g, 1.0)
 
     def test_unsupported_feature_rejected(self):
         self.edit(self.root / "MAT_Pyrois_Body_2.json",
