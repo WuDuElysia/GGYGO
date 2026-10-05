@@ -1,0 +1,24 @@
+{
+  "m_Width": 128,
+  "m_Height": 128,
+  "m_TextureFormat": "BC7",
+  "m_MipMap": false,
+  "m_MipCount": 8,
+  "m_TextureSettings": {
+    "m_FilterMode": 1,
+    "m_Aniso": 5,
+    "m_MipBias": 0.0,
+    "m_WrapMode": 1
+  },
+  "image_data": {
+    "Size": 21872
+  },
+  "m_StreamData": {
+    "offset": 0,
+    "size": 21872,
+    "path": "archive:/CAB-7cdb5a2a46dbe3777f1639ca11edf5d8/CAB-7cdb5a2a46dbe3777f1639ca11edf5d8.resS"
+  },
+  "m_ColorSpace": 1,
+  "m_Name": "Eff_Flare_005",
+  "Name": "Eff_Flare_005"
+}

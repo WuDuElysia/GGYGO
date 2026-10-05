@@ -9,7 +9,7 @@ if str(Path(__file__).resolve().parent) not in sys.path:
 from pyrios_material_plan import SLOT_INSTANCES, SUFFIXES, load_plan
 
 ROOT = "/Game/Characters/Player/Pyrios/Materials"
-JSON_DIR = Path(__file__).resolve().parents[2] / "Content/Characters/Player/Pyrios/Materials"
+JSON_DIR = Path(__file__).resolve().parents[1] / "Assets/Pyrios/Rendering/UnityMaterials"
 GLOBALS_PATH = Path(__file__).resolve().parents[1] / "Assets/Pyrios/Rendering/Pyrios_Toon_Globals.json"
 
 

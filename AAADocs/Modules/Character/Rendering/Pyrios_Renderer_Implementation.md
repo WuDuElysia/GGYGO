@@ -32,7 +32,7 @@
 - 阴影：原 Pass 的逐对象阴影与级联阴影换成组件的角色级 `KeyLightVisibility`；逐像素投影阴影仍缺。
 - 不经过 UE 光照：Unlit 不吃 Lit BRDF、Lumen、天光、点光、SSAO、投影阴影。仍作用于角色像素的只有整屏阶段：高度雾/体积雾、Bloom、tonemapper 与调色；原游戏的 UberPost/Bloom 未移植。
 - 网格 UV：骨骼网格需要 UV0/UV1/UV2（UV1 描边平滑法线，UV2 自发光）。AnimeStudio CLI 默认 `uvs` 设置不导出 UV2，导出时需临时打开，并用 `--merge_load` 同时加载模型块与三个材质所在块，否则 FBX 只有一个材质连接。重导用 `reimport_pyrios_mesh_uv.py`（Interchange，沿用资产里的导入设置）。
-- 贴图 sRGB 照抄 Unity `m_ColorSpace`（`Content/Characters/Player/Pyrios/Materials/TextureSettings/`）；HDR 颜色按“gamma 底色 × 强度”换算；输出超过 1 的部分按 `HighlightBleed` 推白（近似游戏后处理）。依据见 Obsidian `Character/渲染实现.md`。
+- 贴图 sRGB 照抄 Unity `m_ColorSpace`（`AAADocs/Assets/Pyrios/Rendering/UnityMaterials/TextureSettings/`）；HDR 颜色按“gamma 底色 × 强度”换算；输出超过 1 的部分按 `HighlightBleed` 推白（近似游戏后处理）。依据见 Obsidian `Character/渲染实现.md`。
 - 对照截图：`capture_pyrios_toon.py` → `AAADocs/References/Captures/PyriosToon/`，逐版文字结论在同目录 `INDEX.md`。像素统计用 `png_stats.py`。
 - 顶点色：已用 SceneCapture 读回材质中的顶点色，RG=0.5、A=0，与 FBX 一致。
 

@@ -17,7 +17,7 @@ PROJECT = SCRIPTS.parents[1]
 sys.path.insert(0, str(SCRIPTS))
 from pyrios_material_plan import BuildJournal, SUFFIXES, load_plan, unity_gamma_to_linear
 
-SOURCE_JSON = PROJECT / "Content/Characters/Player/Pyrios/Materials"
+SOURCE_JSON = PROJECT / "AAADocs/Assets/Pyrios/Rendering/UnityMaterials"
 SOURCE_GLOBALS = PROJECT / "AAADocs/Assets/Pyrios/Rendering/Pyrios_Toon_Globals.json"
 
 

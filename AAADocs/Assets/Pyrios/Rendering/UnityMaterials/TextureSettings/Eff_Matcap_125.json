@@ -1,0 +1,24 @@
+{
+  "m_Width": 256,
+  "m_Height": 256,
+  "m_TextureFormat": "BC7",
+  "m_MipMap": false,
+  "m_MipCount": 9,
+  "m_TextureSettings": {
+    "m_FilterMode": 1,
+    "m_Aniso": 1,
+    "m_MipBias": 0.0,
+    "m_WrapMode": 0
+  },
+  "image_data": {
+    "Size": 87408
+  },
+  "m_StreamData": {
+    "offset": 0,
+    "size": 87408,
+    "path": "archive:/CAB-1223a5e8a973f4e22e442521fd0d5305/CAB-1223a5e8a973f4e22e442521fd0d5305.resS"
+  },
+  "m_ColorSpace": 1,
+  "m_Name": "Eff_Matcap_125",
+  "Name": "Eff_Matcap_125"
+}

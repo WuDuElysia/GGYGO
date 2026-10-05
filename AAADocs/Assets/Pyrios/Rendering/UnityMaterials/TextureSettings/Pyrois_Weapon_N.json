@@ -1,0 +1,24 @@
+{
+  "m_Width": 1024,
+  "m_Height": 1024,
+  "m_TextureFormat": "RGB24",
+  "m_MipMap": false,
+  "m_MipCount": 11,
+  "m_TextureSettings": {
+    "m_FilterMode": 1,
+    "m_Aniso": 1,
+    "m_MipBias": 0.0,
+    "m_WrapMode": 0
+  },
+  "image_data": {
+    "Size": 4194303
+  },
+  "m_StreamData": {
+    "offset": 0,
+    "size": 4194303,
+    "path": "archive:/CAB-5daa179136dfc3b7c5cbb53a2cdf1f91/CAB-5daa179136dfc3b7c5cbb53a2cdf1f91.resS"
+  },
+  "m_ColorSpace": 0,
+  "m_Name": "Pyrois_Weapon_N",
+  "Name": "Pyrois_Weapon_N"
+}

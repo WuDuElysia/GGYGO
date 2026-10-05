@@ -1,0 +1,24 @@
+{
+  "m_Width": 2048,
+  "m_Height": 2048,
+  "m_TextureFormat": "BC7",
+  "m_MipMap": false,
+  "m_MipCount": 12,
+  "m_TextureSettings": {
+    "m_FilterMode": 1,
+    "m_Aniso": 1,
+    "m_MipBias": 0.0,
+    "m_WrapMode": 0
+  },
+  "image_data": {
+    "Size": 5592432
+  },
+  "m_StreamData": {
+    "offset": 0,
+    "size": 5592432,
+    "path": "archive:/CAB-ae30d1ec998b65f0007349357c38750a/CAB-ae30d1ec998b65f0007349357c38750a.resS"
+  },
+  "m_ColorSpace": 1,
+  "m_Name": "Eff_Mask_2403_LKJ_02",
+  "Name": "Eff_Mask_2403_LKJ_02"
+}

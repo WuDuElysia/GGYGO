@@ -232,7 +232,7 @@ class BuildJournal:
 
 if __name__ == "__main__":
     here = Path(__file__).resolve()
-    plan = load_plan(here.parents[2] / "Content/Characters/Player/Pyrios/Materials",
+    plan = load_plan(here.parents[1] / "Assets/Pyrios/Rendering/UnityMaterials",
                      here.parents[1] / "Assets/Pyrios/Rendering/Pyrios_Toon_Globals.json")
     for suffix in SUFFIXES:
         print(suffix, plan["textures"][suffix])

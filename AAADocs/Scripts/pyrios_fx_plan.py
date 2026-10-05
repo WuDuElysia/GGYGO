@@ -1,11 +1,11 @@
 """Pyrios 身体 FX 的纯数据规划（不依赖 Unreal，可单独运行自检）。
 
 数据来源：
-- 材质参数：Content/Characters/Player/Pyrios/Materials/MAT_Pyrois_Body_FX0*.json（AnimeStudio 导出的 Unity Material）。
-- 层顺序：Materials/FXObjects/Pyrois_Body_FX_0*.json 的 SkinnedMeshRenderer.m_Materials。
+- 材质参数：AAADocs/Assets/Pyrios/Rendering/UnityMaterials/MAT_Pyrois_Body_FX0*.json（AnimeStudio 导出的 Unity Material）。
+- 层顺序：UnityMaterials/FXObjects/Pyrois_Body_FX_0*.json 的 SkinnedMeshRenderer.m_Materials。
   四个 FX 网格都只有一个 submesh，却挂了三个材质；Unity 会把多出的材质依次在同一几何上再画一遍，
   因此 m_Materials 的顺序就是叠加顺序（先画的在下）。
-- 采样寻址与色彩空间：Materials/TextureSettings/*.json（AnimeStudio 以 JSON 导出的 Texture2D，取 m_WrapMode、m_ColorSpace）。
+- 采样寻址与色彩空间：UnityMaterials/TextureSettings/*.json（AnimeStudio 以 JSON 导出的 Texture2D，取 m_WrapMode、m_ColorSpace）。
 - 着色逻辑：F:/AnimeStudio/Exports/Shader/ZZZ_20260925 下
   miHoYo/Particles/Particles_Dissolve_CustomColor_Mask_Cap 的 D3D11 反汇编，cbuffer 偏移靠同目录 .dat
   里的反射表还原成属性名。FX02 用的非 Cap 变体没有导出，按同族同属性集处理。
@@ -263,7 +263,7 @@ def load_plan(material_dir):
 
 if __name__ == "__main__":
     here = Path(__file__).resolve()
-    plan = load_plan(here.parents[2] / "Content/Characters/Player/Pyrios/Materials")
+    plan = load_plan(here.parents[1] / "Assets/Pyrios/Rendering/UnityMaterials")
     print("ORDER", plan["order"])
     print("TEXTURES", plan["textures"])
     for i, layer in enumerate(plan["layers"], 1):

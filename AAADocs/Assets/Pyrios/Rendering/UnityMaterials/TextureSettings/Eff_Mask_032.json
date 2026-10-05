@@ -1,0 +1,24 @@
+{
+  "m_Width": 256,
+  "m_Height": 256,
+  "m_TextureFormat": "BC7",
+  "m_MipMap": false,
+  "m_MipCount": 1,
+  "m_TextureSettings": {
+    "m_FilterMode": 1,
+    "m_Aniso": 1,
+    "m_MipBias": 0.0,
+    "m_WrapMode": 0
+  },
+  "image_data": {
+    "Size": 65536
+  },
+  "m_StreamData": {
+    "offset": 0,
+    "size": 65536,
+    "path": "archive:/CAB-becac8756bff18c3c82dba82d33edcee/CAB-becac8756bff18c3c82dba82d33edcee.resS"
+  },
+  "m_ColorSpace": 1,
+  "m_Name": "Eff_Mask_032",
+  "Name": "Eff_Mask_032"
+}

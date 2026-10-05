@@ -21,7 +21,7 @@ from pyrios_material_plan import BuildJournal, SLOT_INSTANCES, SUFFIXES, load_pl
 
 ROOT = "/Game/Characters/Player/Pyrios/Materials"
 OUT = ROOT + "/Generated"
-JSON_DIR = Path(__file__).resolve().parents[2] / "Content/Characters/Player/Pyrios/Materials"
+JSON_DIR = Path(__file__).resolve().parents[1] / "Assets/Pyrios/Rendering/UnityMaterials"
 GLOBALS_PATH = Path(__file__).resolve().parents[1] / "Assets/Pyrios/Rendering/Pyrios_Toon_Globals.json"
 HLSL_PATH = Path(__file__).resolve().with_name("nap_avatar_toon.hlsl")
 MEL = unreal.MaterialEditingLibrary

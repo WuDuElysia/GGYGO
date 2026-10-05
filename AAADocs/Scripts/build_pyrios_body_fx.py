@@ -31,7 +31,7 @@ MASTER_NAME = "M_FX_DissolveMaskLayers"
 MESH_PATH = PYRIOS + "/Avatar_Male_Size03_Pyrois_Model"
 FX_SLOT = "MAT_Pyrois_Body_FX01"
 CHARACTER_BP = "/Game/BP/Character/Player/BP_PC_Pyrios"
-MATERIAL_JSON_DIR = HERE.parents[1] / "Content/Characters/Player/Pyrios/Materials"
+MATERIAL_JSON_DIR = HERE.parent / "Assets/Pyrios/Rendering/UnityMaterials"
 SOURCE_PNG_DIR = Path(r"F:\AnimeStudio\Exports\ZZZ\Avatar_Male_Size03_Pyrois_Model\FX\Player\Textures")
 HLSL_PATH = HERE / "fx_dissolve_mask_layer.hlsl"
 

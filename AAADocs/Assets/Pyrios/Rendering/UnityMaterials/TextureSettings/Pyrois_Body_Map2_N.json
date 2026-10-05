@@ -1,0 +1,24 @@
+{
+  "m_Width": 1024,
+  "m_Height": 1024,
+  "m_TextureFormat": "RGB24",
+  "m_MipMap": false,
+  "m_MipCount": 11,
+  "m_TextureSettings": {
+    "m_FilterMode": 1,
+    "m_Aniso": 1,
+    "m_MipBias": 0.0,
+    "m_WrapMode": 0
+  },
+  "image_data": {
+    "Size": 4194303
+  },
+  "m_StreamData": {
+    "offset": 0,
+    "size": 4194303,
+    "path": "archive:/CAB-6a03970456f5319649dde15fe6a6c7e8/CAB-6a03970456f5319649dde15fe6a6c7e8.resS"
+  },
+  "m_ColorSpace": 0,
+  "m_Name": "Pyrois_Body_Map2_N",
+  "Name": "Pyrois_Body_Map2_N"
+}

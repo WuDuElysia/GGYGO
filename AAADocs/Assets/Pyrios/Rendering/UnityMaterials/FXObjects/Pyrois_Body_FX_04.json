@@ -1,0 +1,194 @@
+{
+  "m_Components": [
+    {
+      "m_FileID": 0,
+      "m_PathID": 2476256764480813207,
+      "Name": "",
+      "IsNull": false
+    },
+    {
+      "m_FileID": 0,
+      "m_PathID": -9098594001728164529,
+      "Name": "",
+      "IsNull": false
+    },
+    {
+      "m_FileID": 0,
+      "m_PathID": 7975161810272895772,
+      "Name": "NapLodController",
+      "IsNull": false
+    }
+  ],
+  "m_Name": "Pyrois_Body_FX_04",
+  "m_Transform": {
+    "m_LocalRotation": {
+      "X": 0.0,
+      "Y": -0.0,
+      "Z": -0.0,
+      "W": 1.0
+    },
+    "m_LocalPosition": {
+      "X": -0.0,
+      "Y": 0.0,
+      "Z": 0.0
+    },
+    "m_LocalScale": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0
+    },
+    "m_Children": [],
+    "m_Father": {
+      "m_FileID": 0,
+      "m_PathID": 1986962058702766727,
+      "Name": "",
+      "IsNull": false
+    },
+    "m_GameObject": {
+      "m_FileID": 0,
+      "m_PathID": 570945497004552878,
+      "Name": "Pyrois_Body_FX_04",
+      "IsNull": false
+    },
+    "Name": ""
+  },
+  "m_MeshRenderer": null,
+  "m_MeshFilter": null,
+  "m_SkinnedMeshRenderer": {
+    "m_Mesh": {
+      "m_FileID": 4,
+      "m_PathID": 1727651255257076859,
+      "Name": "Pyrois_Body_FX_04",
+      "IsNull": false
+    },
+    "m_Bones": [
+      {
+        "m_FileID": 0,
+        "m_PathID": -5933839407911113577,
+        "Name": "",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 0,
+        "m_PathID": 5647390188823827617,
+        "Name": "",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 0,
+        "m_PathID": -5946969731000975875,
+        "Name": "",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 0,
+        "m_PathID": 4235347191341896395,
+        "Name": "",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 0,
+        "m_PathID": 7738386991439771025,
+        "Name": "",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 0,
+        "m_PathID": -673587759007728783,
+        "Name": "",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 0,
+        "m_PathID": -7411014809501850236,
+        "Name": "",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 0,
+        "m_PathID": 1690673206018282596,
+        "Name": "",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 0,
+        "m_PathID": 8060643800893203159,
+        "Name": "",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 0,
+        "m_PathID": -8042053757672496376,
+        "Name": "",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 0,
+        "m_PathID": -2100716874814489214,
+        "Name": "",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 0,
+        "m_PathID": -4587960785427600758,
+        "Name": "",
+        "IsNull": false
+      }
+    ],
+    "m_BlendShapeWeights": [],
+    "m_RootBone": {
+      "m_FileID": 0,
+      "m_PathID": 7738386991439771025,
+      "Name": "",
+      "IsNull": false
+    },
+    "m_AABB": {
+      "m_Center": {
+        "X": 0.38435572,
+        "Y": -0.29512697,
+        "Z": 0.04288107
+      },
+      "m_Extent": {
+        "X": 0.6918699,
+        "Y": 0.1991536,
+        "Z": 0.25883445
+      }
+    },
+    "m_DirtyAABB": false,
+    "m_Materials": [
+      {
+        "m_FileID": 1,
+        "m_PathID": -6313959268529578193,
+        "Name": "MAT_Pyrois_Body_FX04",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 2,
+        "m_PathID": -3848335956674398991,
+        "Name": "MAT_Pyrois_Body_FX01",
+        "IsNull": false
+      },
+      {
+        "m_FileID": 3,
+        "m_PathID": 3463924916132281847,
+        "Name": "MAT_Pyrois_Body_FX02",
+        "IsNull": false
+      }
+    ],
+    "m_StaticBatchInfo": {
+      "firstSubMesh": 0,
+      "subMeshCount": 0
+    },
+    "m_SubsetIndices": null,
+    "m_GameObject": {
+      "m_FileID": 0,
+      "m_PathID": 570945497004552878,
+      "Name": "Pyrois_Body_FX_04",
+      "IsNull": false
+    },
+    "Name": ""
+  },
+  "m_Animator": null,
+  "m_Animation": null,
+  "Name": "Pyrois_Body_FX_04"
+}

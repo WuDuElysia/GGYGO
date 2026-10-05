@@ -1,0 +1,102 @@
+
+============================================================
+材质: MAT_Pyrois_Body_1
+Shader: miHoYo/Character/NapAvatarStandard
+============================================================
+
+--- 贴图 ---
+  Normal Map: Pyrois_Body_Map1_N
+  Base Color: Pyrois_Body_Map1_D
+
+--- UE 材质属性 ---
+  Base Color Tint: (1, 1, 1, 1)
+  Roughness: 0.0  (from Glossiness=1.0)
+  Metallic: 1.0
+  Two Sided: YES
+  Normal Intensity: 1.0
+  Anisotropy: 0.5
+  Emissive: 0.0
+  AO Scale: 0.5
+  ⚠ MatCap 已启用 → UE 需要自行实现 MatCap 节点
+
+--- 其他非零参数 ---
+
+============================================================
+材质: MAT_Pyrois_Body_2
+Shader: miHoYo/Character/NapAvatarStandard
+============================================================
+
+--- 贴图 ---
+  Normal Map: Pyrois_Body_Map2_N
+  Base Color: Pyrois_Body_Map2_D
+
+--- UE 材质属性 ---
+  Base Color Tint: (1, 1, 1, 1)
+  Roughness: 0.0  (from Glossiness=1.0)
+  Metallic: 1.0
+  Two Sided: YES
+  Normal Intensity: 1.0
+  Anisotropy: 0.5
+  Emissive: 0.0
+  AO Scale: 0.5
+  ⚠ MatCap 已启用 → UE 需要自行实现 MatCap 节点
+
+--- 其他非零参数 ---
+
+============================================================
+材质: MAT_Pyrois_Body_FX01
+Shader: miHoYo/Particles/Particles_Dissolve_CustomColor_Mask_Cap
+============================================================
+
+--- 贴图 ---
+  _DissolveTex: Eff_Noise_105
+  _MaskTex: Eff_Mask_2408
+  Base Color: Eff_Noise_208
+  _DissolveRampTex: Eff_Mask_032
+  _DistortionTex: Eff_Noise_095
+
+--- UE 材质属性 ---
+  Base Color Tint: (1, 1, 1, 1)
+  Roughness: 0.5  (from Glossiness=0.5)
+  Metallic: 0.0
+  Two Sided: NO
+  Normal Intensity: 1.0
+  Anisotropy: 0.0
+  Emissive: 0.0
+  AO Scale: 1.0
+
+--- 特效参数 (FX) ---
+  _BumpScale: 1.0
+  _Cutoff: 0.5
+  _DetailNormalMapScale: 1.0
+  _Glossiness: 0.5
+  _OcclusionStrength: 1.0
+  _Parallax: 0.02
+  _SrcBlend: 1.0
+  _ZTest: 4.0
+  _AmbientColor: (1.0, 1.0, 1.0, 0.6)
+  _EmissionColor: (0.0, 0.0, 0.0, 1.0)
+
+--- 其他非零参数 ---
+
+============================================================
+材质: MAT_Pyrois_Weapon01
+Shader: miHoYo/Character/NapAvatarStandard
+============================================================
+
+--- 贴图 ---
+  Normal Map: Pyrois_Weapon_N
+  Base Color: Pyrois_Weapon_D
+
+--- UE 材质属性 ---
+  Base Color Tint: (1, 1, 1, 1)
+  Roughness: 0.0  (from Glossiness=1.0)
+  Metallic: 1.0
+  Two Sided: YES
+  Normal Intensity: 1.0
+  Anisotropy: 0.5
+  Emissive: 0.0
+  AO Scale: 0.5
+  ⚠ MatCap 已启用 → UE 需要自行实现 MatCap 节点
+
+--- 其他非零参数 ---
