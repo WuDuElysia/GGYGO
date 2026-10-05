@@ -73,5 +73,17 @@
 - 换算：`AAADocs/Scripts/pyrios_fx_plan.py` 可单独 `python` 运行，打印三层参数；源材质启用了 master 未实现的特性时报错。
 - 层逻辑：`AAADocs/Scripts/fx_dissolve_mask_layer.hlsl`，对应 `Particles_Dissolve_CustomColor_Mask_Cap` 在 `_UsingNonPSR=1` 下的像素着色器。
 - 叠加：Unity 端每个 FX 网格挂 `[FX04, FX01, FX02]` 三个材质画三遍；UE 在 `M_FX_DissolveMaskLayers` 内按同序做预乘 over 合成，`BlendMode=AlphaComposite`。
-- 贴图寻址来自 `Content/Characters/Player/Pyrios/Materials/FXTextures/*.json`（AnimeStudio CLI `--types Texture2D --export_type JSON`，只有 `Eff_Mask_2408` 为 Clamp）。
+- 贴图寻址与色彩空间来自 `AAADocs/Assets/Pyrios/Rendering/UnityMaterials/TextureSettings/*.json`（AnimeStudio CLI `--types Texture2D --export_type JSON`，只有 `Eff_Mask_2408` 为 Clamp）。
 - 2026-10-04 验证：SM6 编译通过、新进程重载无编译错误、MI 参数回读一致、网格槽位保存。未做视口/PIE 与游戏画面对照。设计与边界见 Obsidian `Character/渲染实现.md`「身体 FX」。
+
+## 技能特效
+
+- 在开着的编辑器（MCP 8000）里依次运行，前两步只需一次：
+  ```
+  python AAADocs/Scripts/zzz_fx_fetch.py <fx.json>          # 依赖导出 + 网格 FBX
+  python AAADocs/Scripts/zzz_fx_import_assets.py <deps.json> # 贴图/网格导入
+  python AAADocs/Scripts/zzz_fx_build.py <fx.json>           # 材质 + Niagara
+  ```
+- `fx.json` 由 `zzz_fx_index.py` / `zzz_fx_extract.py` 从 Raw 导出生成（见脚本头注释）；中间数据在 `F:/AnimeStudio/Exports/ZZZ/Pyrois_SkillFX/`。
+- 结果报告 `<根名>.ue_report.json` 列出生成的发射器与跳过原因。全局常量取值在 `AAADocs/Assets/Shared/FX/ZZZ_FX_Globals.json`。
+- 2026-10-05：试点 `NS_Eff_Pyrois_Attack_Normal_01_01_Trail` 7/8 发射器，编译 UpToDate；未挂攻击、未与游戏对照。设计见 Obsidian `Character/渲染实现.md`「技能特效」。

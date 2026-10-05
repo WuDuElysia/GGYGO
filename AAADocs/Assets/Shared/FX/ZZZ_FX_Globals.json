@@ -1,0 +1,29 @@
+{
+ "说明": "ZZZ 特效 shader 读取的全局常量在 UE 里的取值。rows 是该常量各寄存器行的 HLSL 表达式（Unity 空间约定，米），comps 是已核对语义、允许读取的分量；未列出的全局量或分量被读到时 zzz_dxbc_hlsl 直接报错。disabled_by 表示该取值是“无效果”值，只在材质对应开关等于给定值时成立，否则 zzz_fx_material 报错。",
+ "globals": {
+  "_WorldSpaceCameraPos": {"rows": ["float4(CamU, 1.0)"], "comps": "xyz", "why": "相机位置"},
+  "_ScreenSize": {"rows": ["float4(ViewSize, 1.0 / ViewSize)"], "why": "视口像素尺寸与倒数"},
+  "_ZBufferParams": {"rows": ["float4(0.0, 0.0, 1.0, 0.0)"], "comps": "zw", "why": "与 SV_Position.z、深度贴图的编码配套：raw = 1/眼空间深度(米)，LinearEyeDepth(raw) = 1/(z*raw+w) 还原成米"},
+  "_GlobalTimeParamsA": {"rows": ["float4(0.0, 0.0, 0.0, 0.0)", "float4(Time, 0.0, 0.0, 0.0)", "float4(0.0, 0.0, 0.0, 0.0)", "float4(0.0, 0.0, 0.0, 0.0)"], "comps": ["", "x", "", ""], "why": "第 1 行 x 是不受时间缩放的时间（_IgnoreTimeScale 时使用）"},
+  "_GlobalTimeParamsB": {"rows": ["float4(0.0, Time, 0.0, 0.0)", "float4(0.0, Time, 0.0, 0.0)", "float4(0.0, Time, 0.0, 0.0)", "float4(0.0, Time, 0.0, 0.0)"], "comps": ["y", "y", "y", "y"], "why": "按时间缩放分组的时间（材质 _TimeScaleSpeed 选组）；本项目没有分组时间缩放，各组都是引擎时间"},
+  "unity_WorldToObject": {"rows": ["float4(1.0, 0.0, 0.0, 0.0)", "float4(0.0, 1.0, 0.0, 0.0)", "float4(0.0, 0.0, 1.0, 0.0)", "float4(0.0, 0.0, 0.0, 1.0)"], "why": "与 unity_ObjectToWorld 互逆，同为单位阵"},
+  "unity_MatrixV": {"rows": ["float4(CamRightU.x, CamUpU.x, -CamFwdU.x, 0.0)", "float4(CamRightU.y, CamUpU.y, -CamFwdU.y, 0.0)", "float4(CamRightU.z, CamUpU.z, -CamFwdU.z, 0.0)", "float4(-dot(CamRightU, CamU), -dot(CamUpU, CamU), dot(CamFwdU, CamU), 1.0)"], "why": "Unity 世界→观察矩阵，常量缓冲里按列存（寄存器 k = 第 k 列）；观察空间右手、相机朝 -Z，只用点积构造，与 F.U 的轴交换无关"},
+  "_ProjectionParams": {"rows": ["float4(1.0, View.NearPlane * 0.01, 0.0, 0.0)"], "comps": "y", "why": "y 是近裁剪面（米）"},
+  "unity_ObjectToWorld": {"rows": ["float4(1.0, 0.0, 0.0, 0.0)", "float4(0.0, 1.0, 0.0, 0.0)", "float4(0.0, 0.0, 1.0, 0.0)", "float4(0.0, 0.0, 0.0, 1.0)"], "why": "VS 输入已经是世界坐标（粒子顶点在 Unity 里同样烘成世界坐标）"},
+  "_MainLightColor": {"rows": ["float4(1.0, 1.0, 1.0, 1.0)"], "comps": "xyz", "disabled_by": {"_AffectedByMainLightColor": 0.0}, "why": "特效不受主光颜色影响时的中性值"},
+  "_SceneParticleFogColorMultiply": {"rows": ["float4(1.0, 1.0, 1.0, 0.0)"], "why": "场景特效雾：乘 1、混合权重 0 即无雾"},
+  "_SceneWeatherSandstorm": {"rows": ["float4(1.0, 1.0, 1.0, 0.0)"], "why": "沙尘天气：乘 1、混合权重 0 即无效果"},
+  "_NapEffectBrightnessParams4": {"rows": ["float4(1.0, 0.0, 0.0, 0.0)"], "why": "全局特效亮度压缩曲线；配合 Extra.y=0 时压缩权重为 0，不改变颜色"},
+  "_NapEffectBrightnessExtraParams": {"rows": ["float4(0.0, 0.0, 0.0, 0.0)"], "comps": "xy", "why": "压缩权重 = saturate((max(rgb)-x)*y)，y=0 即关闭；HDR 交给 UE 的 Bloom/Tonemapper"},
+  "_SceneWeatherParamsPart1": {"rows": ["float4(0.0, 0.0, 0.0, 0.0)", "float4(0.0, 0.0, 0.0, 0.0)", "float4(0.0, 0.0, 1.0, 0.0)", "float4(0.0, 0.0, 0.0, 0.0)"], "comps": ["", "", "z", ""], "why": "第 2 行 z 是全局饱和度倍率，1 为不变"},
+  "_SceneWeatherParamsPart6": {"rows": ["float4(0.0, 0.0, 0.0, 0.0)", "float4(0.0, 0.0, 0.0, 0.0)", "float4(0.0, 0.0, 0.0, 0.0)", "float4(-10000.0, 0.0, 0.0, 0.0)"], "comps": ["", "", "", "x"], "why": "第 3 行 x 是场景裁切高度（低于该世界高度的特效淡出），放到 -10 km 即不裁切"},
+  "_SceneWeatherParamsPart7": {"rows": ["float4(0.0, 0.0, 0.0, 0.0)", "float4(0.0, 0.0, 0.0, 0.0)", "float4(0.0, 0.0, 0.0, 0.0)", "float4(1.0, 0.0, 0.0, 0.0)"], "comps": ["xyz", "", "xyz", "xy"], "why": "区域淡出盒：第 3 行 y>0.01 才启用，0 即关闭"},
+  "_UIFxExtraAlphaWeight": {"rows": ["float4(0.0, 0.0, 0.0, 0.0)"], "comps": "x", "why": "3D UI 额外透明度权重，0 即不影响"},
+  "_AvatarPosition0": {"rows": ["float4(0.0, 0.0, 0.0, 0.0)"], "comps": "xyz", "disabled_by": {"_CollideWithAvatar": 0.0}, "why": "粒子避让角色时的角色位置"},
+  "_SceneWeatherParamsPart2": {"rows": ["float4(0.0, 0.0, 0.0, 0.0)", "float4(0.0, 0.0, 0.0, 0.0)", "float4(0.0, 0.0, 0.0, 0.0)", "float4(0.0, 0.0, 0.0, 0.0)"], "comps": ["w", "w", "w", "w"], "disabled_by": {"_AffectByGlobalEtherColor": 0.0}, "why": "以太颜色替换自定义颜色"},
+  "_SceneWeatherParamsPart3": {"rows": ["float4(0.0, 1.0, 0.0, 0.0)", "float4(0.0, 1.0, 0.0, 0.0)", "float4(0.0, 1.0, 0.0, 0.0)", "float4(0.0, 1.0, 0.0, 0.0)"], "comps": ["y", "y", "y", "y"], "disabled_by": {"_AffectByGlobalWaterColor": 0.0}, "why": "水下颜色"}
+ },
+ "textures": {
+  "_CameraDepthTexture": "float4(1.0 / (CalcSceneDepth(ViewportUVToBufferUV({uv})) * 0.01), 0.0, 0.0, 0.0).xxxx"
+ }
+}
