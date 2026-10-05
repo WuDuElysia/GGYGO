@@ -2,6 +2,40 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
+## 当前有效批次：分段判定已冻结，攻击接管与曲线来源只读评估（2026-10-05）
+
+最新有效状态：Gate86统一构建及原必要八烟已执行，11份源码停写；Gate87角色专用GA/AbilitySet/PawnData三包单独保存、公开读回并由原作者冻结，资产写权关闭。统筹实际PIE确认专用Combo授予，外部/手动输入日志出现三段启动和正常退出，不作为完整受控命中/音效验收。下面原源码/资产授权条目保留历史，不能据此恢复写权；三包当前身份分别为`6E71D7B3…`、`FE5D803B…`、`1B5416FD…`，PawnData原包备份在`Saved/AssetBackups/PyriosComboRole_20261005_Gate87/`。
+
+当前仅只读：战斗原组长牵头诊断玩家攻击未申请位移/普通移动未限制，与Movement、动画资产组长直接配对；Movement另牵头用户提出的动画混合曲线来源评估，与Animation运行时协商旧move数据和求值顺序，保留既有联机契约，不把独立DA视为玩家既定方案。RunStop/WalkStop生成/求值根因已只读定位，Profile扩展及修复暂停，等待来源方案收敛。所有源码、资产、局部笔记继续冻结；不操作用户正在测试的PIE，不扩大矩阵、不新建代理/临时会话/过程JSON。统筹可独立交付Gate86/Gate87已验证检查点的中文Git，明确未验项，不把提交当整条需求完成。
+
+用户已明确选择分段判定，覆盖下文Gate82阶段“路线未答/源码关闭”的历史停点。AbilitySystem组长`01a0e5b5-1b3a-7783-a667-e8e38d7a72fb`牵头组织整链，仍不取得参与模块的文件写权；无子代理，gpt-6.1-sol/xhigh，Fast关闭。
+
+- Combat查询原作者`01a0e5b5-f763-78c1-86c8-fa760a9f2100`独占4个源码文件：`Source/GGYGO/Combat/HitDetection/GGYGOMeleeTraceShape.h`（新增）、`GGYGOMeleeTraceComponent.h`、`GGYGOMeleeTraceComponent.cpp`及`Source/GGYGO/Combat/Tests/GGYGOMeleeTraceSafetyTest.cpp`。由其先建立并冻结公共Shape定义，直接交玩家作者；其余实现可在同一既定范围内自主推进，不逐方法审批。
+- 玩家战斗原作者`01a0ebc0-8780-7f92-86d0-2f028f08f147`独占3个源码文件：`Source/GGYGO/AbilitySystem/Abilities/GGYGOComboTypes.h`、`GGYGOPlayerComboAbility.cpp`及`Source/GGYGO/AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp`。收到公共定义冻结后直接适配；旧三字段仅保留历史序列化，新Shape唯一运行配置，缺失/非法明确拒绝，不自动转换或回落旧字段。未知蓝图Pin迁移边界继续保留。
+- 单一Combat执行器、Owned身份、主Mesh一致性、整窗预算与去重保持；招式链/半径通过角色资产配置，不把角色骨名或业务硬编码进通用C++。运行Trace故障只关闭原Trace并诊断的既有边界不变，不擅自改为EndGA。只补必要兼容与正常链路验证，不扩严格矩阵、测试框架或过程JSON。
+- 动画资产原作者`01a0ebeb-4283-79b1-8ecc-9edae131297b`独占A刃尖单资产窗口，与两条源码线文件/反射类型独立：仅`Content/Characters/Player/Pyrios/Avatar_Male_Size03_Pyrois_Model.uasset`，沿用原生Mesh-only Socket入口补`Pyrios_BladeTip_A`，父骨`Ctr_Weapon_A_04`、相对X=43.85825361cm、Rotation=0/Scale=1，原B tip及其它属性保持。统筹提供编辑器后仅该作者操作UE/MCP，不PIE/播放、不接新Combo、不compile/LiveCoding/SaveAll；目标包已有他人未保存改动或已有A端点不一致时止步，不覆盖/丢弃。先保留精确备份，单包保存/公开读回后归还窗口；源模型仍走既有外部资产策略，不force-add。
+- 角色3资产待新DLL后的独占后继窗口，尚无写权；共享GA/Common、Boss、引擎/GAS库、Build.cs及批外资产不授写权。公共UE/build/Git归统筹；源码作者全部冻结且A刃尖窗口释放/编辑器关闭后一次Editor构建与必要冒烟，角色资产使用新反射结构后再接线。整条需求实现和测试完成后集中更新架构笔记。
+
+Gate83实际EndPlay失败增量（2026-10-05）：旧DLL的原Shared GA激活后，Logout销毁Slot；项目native Cancel及End在Super前被拒绝，随后ClearAllAbilities发现Spec仍Active并ensure。AbilitySystem与Teams只读核对到工作绑定资格被误用于原生销毁收尾；不是新分段源码/A tip导致，也不是仅凭CDO名称推断蓝图漏Super。AbilitySystem原作者独占追加4个生产文件：`Source/GGYGO/AbilitySystem/Abilities/GGYGOGameplayAbility.h`、`.cpp`及`Source/GGYGO/AbilitySystem/GGYGOAbilitySystemComponent.h`、`.cpp`，负责可信原生清理来源与业务请求资格的分离。具体拆分、实现和自审由组长决定，与Combat4/玩家3互斥；不得修改引擎/GAS库、Teams销毁顺序或另建技能生命周期，不自动排队/兜底。既定业务拒绝与原身份资源隔离保留，销毁清理不能冒充业务请求完成。必要夹具如需修改先协调其唯一作者，不默认扩大测试范围。所有相关源码冻结后统一构建，先以原Shared GA/Common验证真实激活→Logout/EndPlay，再迁移角色3资产；原失败日志保留，不扩严格矩阵。
+
+A-tip资产作者已单包保存、公开读回后冻结并交回UE窗口：Mesh SHA256=`8AD7E0672CAFFEA242FC693596EE496AF8613C05419BC02BE91AA22F92C52BC4`，精确A备份为此前B-only状态`F513E0A0…`。A/B均Mesh-only，A两端点存在，B及受保护属性保持，保存后dirty=[]；依据Gate83日志3978/4023/4028–4031/4072。该资产写权关闭，不表示分段运行或EndPlay已通过。Gate83有用户手动PIE与上述ensure，不能称整个编辑器窗口未PIE。
+
+分段源码完整交回（2026-10-05）：Combat4件与玩家3件已经实际实现、相互静态审查并冻结，7件写权关闭。互审发现SocketOverride到Bone的名称/位置解析不一致；原查询作者已在原cpp/SafetyTest修正，对伪有效点明确拒绝，真实Socket重定向和普通Bone路径保留，公共Shape/header不变。统筹实际核对组件/夹具及唯一执行、整窗预算、全链基线和清理；最终cpp SHA256=`679BE877…`，SafetyTest=`765536E4…`，Shape=`E55D6BCE…`、组件header=`7D3E8C5F…`。测试新增5个具体故障Warning匹配，原3个保持，总8；合成机理不是角色实景验收。7件尚未编译/运行，不能标正式攻击完成。角色3资产无写权，先完成原Shared GA的退出复现门禁。Gate83日志已Editor shut down/Exiting/file closed，原进程消失（退出码未捕获）；用户停止Computer Use后统筹未再操作界面。
+
+GAS原生清理修正完整交回（2026-10-05）：GA/ASC四生产文件由原作者完成、自审并冻结，统筹核对，四件写权关闭；可信原生调用栈来源与业务准入分离，精确绑定原实例/Spec/ActorInfo/资源，复用原终止记录，原生清理不发布业务Completed；锁定作用域内的原生清理仍明确诊断且未解决。Kiro UE PID58240已消失，统筹未关闭或操作其MCP，不使用LiveCoding/热重载绕过冲突。
+
+Gate84首轮构建及唯一续写范围（2026-10-05）：十一件冻结后实际统一Editor构建，exit6/27.21秒；UHT成功、三处C2660均在原LifecycleTest.cpp新增CanActivateAbility两参数调用，项目公开override为五参数，两条既存NonInstanced C4996保留。新DLL及运行未完成，原日志`Saved/Logs/GGYGO_Gate84_Build_20261005.log`保留。仅玩家战斗原作者`01a0ebc0-8780-7f92-86d0-2f028f08f147`重获`Source/GGYGO/AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp`写权，适配现有公开接口并自审冻结；生产及其它十件保持冻结，不改契约/断言/故障Error，不新增测试叶、ExpectedError或文档/JSON。后继统一构建、必要烟和原Shared GA实际退出仍由统筹，先复验原问题再开放角色三资产。
+
+Gate84-R2当前检查点：R1实际因项目override protected产生C2248，前述“项目公开override”描述已纠正；原作者借同一实例的UGameplayAbility公开基类虚接口，仍动态进入项目final/附加Shape校验，未限定父实现或放宽生产。单cpp重新冻结（C316B975…），十一件写权关闭。R2 Editor Succeeded/4 actions/10.97秒/exit0，DLL 4B4B0318…；八烟3Success/5Fail/0W、exit255，原报告完整保留。E14-C四Case行为PASS且原3条生产Error保持；新Shape两叶各额外UnsupportedEntry(reason15，不是NativeCleanup)交AbilitySystem牵头与玩家作者只读分类，Safety三条ExpectedWarning匹配失败交原Combat作者只读分类。源码尚无续写权，不扩大验证矩阵/改断言或过滤Error。Gate85原Shared GA真实退出窗口由统筹独占，新DLL上先复验原问题，不保存/迁角色三资产；其他会话不操作UE/build/Git/全局入口，局部笔记等整链完成再更新。
+
+Gate85实际原问题有限复验及后继两条互斥源码线：原Untitled/正式PC/Pawn/Slot/Common保持，原Shared GA_Attack_Light_C由MCP确认false，经一次真实视口左键输入后true，其余三GA均false；原生StopPIE后false、原Slot查询为空，当前日志无ensure/still-active/Cancel或End拒绝及项目清理Error，不用新GA遮蔽。原四保护检查dirty=false、两保护资产hash保持。后继只授原玩家作者LifecycleTest.cpp适配两个新Shape叶受控Try/固定Original/真实返回见证，旧raw严格叶与helper、所有断言及原两配置Error保持；只授原Combat查询作者SafetyTest.cpp将8个故障案例日志期望改为互斥具体片段、每案仍1次，防止宽模式抢先消费与TSet同字符串覆盖，生产Warning/算法/全部行为断言保持。两cpp互斥可并行，其余九源冻结；不加ExpectedError吞Error/扩大计数或矩阵，不UE/build/Git/文档JSON。作者各自自审冻结后统一构建及原必要烟，再开放角色三资产。
+
+Gate85公共资源新冲突：正常关闭时保存清单唯一M_ZZZFX_Particles_Dissolve（/Game/Characters/Shared/FX/ZZZ/Materials），属于Kiro特效工作；本批未调用材质写入。日志08:04:15–16实际有另一客户端的material_instance参数写入/save_assets及material.create_material/add_expression/set_properties，证明旧Kiro进程消失不等于其MCP客户端已停，它连到了本批同一8000端口。统筹取消关闭保留内存工作，不保存/丢弃、不force-kill；用户需协调Kiro停止UE/MCP、保存并正常关闭。PID21556未退出前不编译。以后本侧新测试编辑器使用独立端口、客户端显式对应URL，但仍遵守同一项目UE/资产唯一写入窗口，不以分端口当并行资产写入许可。原Shared有限复验结果保留，正式角色资产与后继运行尚未完成。
+
+后继源码冻结交回：玩家LifecycleTest.cpp=`A0827D72…`、Combat SafetyTest.cpp=`8D40AB59…`均由各原作者自审、明确停写且无在途写入，统筹磁盘读回相符；Safety作者的服务容量中断已由其本人续完，不迁移写权。两测试单cpp续写权关闭，十一件全部冻结，生产四件及查询/玩家其余五件保持。两修正版尚未重新编译/运行，下一统一Editor构建与原八条必要烟等待上述UE释放，不新增严格矩阵、测试叶或过程JSON；角色三资产仍未开放写权。
+
+Gate86及当前Gate87资产窗口：原PID21556已消失，统筹未保存/丢弃Kiro资产，退出码未捕获。十一件与冻结证据保持，统一Editor Succeeded（5 actions、17.54秒、exit0）；原八烟5 Success/3 Fail/0Warning、exit255，Safety及Shape兼容成功，Shape非法仅原2配置Error且行为PASS，E14-C四Case行为PASS、原Builder2Error/RequiredGE1Error保留，额外UnsupportedEntry已消失。原报告/失败历史保留，不标全部通过。统筹新启PID12440、MCP `http://127.0.0.1:8001/mcp`，非PIE已核；唯一战斗资产作者`01a0ebc0-8780-7f92-86d0-2f028f08f147`获三包写权：新`Content/Characters/Player/Pyrios/Abilities/GA_Pyrios_Attack_Combo.uasset`、新`Content/Characters/Player/Pyrios/DA/DA_AbilitySet_Pyrios.uasset`及既有`Content/Characters/Player/Pyrios/DA/DA_Pawn_Pyrios.uasset`（原DBEB1C55…，仅AbilitySets[0]引用替换）。沿用已确认三段Montage/Main/End及分段链配置，保留原四项能力、等级/InputTag与空GE/AttributeSet；不修改Shared/Common、Boss、ABP、Montage、Skeleton/Mesh及源码。该作者独占UE/MCP完成备份、创建/编译、三包单独保存和公开读回后冻结交回；本窗口不PIE/直接播放、不SaveAll/LiveCoding/Git/笔记。其它会话与统筹不并发操作UE。整链正式输入、Trace/Audio及退出仍待后继必要冒烟。
+
 ## 最新协作方式（2026-10-05，覆盖冲突的历史步骤要求）
 
 统筹只负责需求理解、按模块分发、依赖/文件冲突协调及验收；模块技术方案、内部拆分、实现和自审由组长自主负责。当前分配的文件归属仍有效，同一文件唯一写入者；同一授权文件内不再因方法白名单或每个内部步骤未另审批而停工。共享接口和文件换手仍须相关组长协调并冻结，不扩大无关范围。

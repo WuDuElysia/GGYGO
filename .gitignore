@@ -67,6 +67,21 @@ __pycache__/
 !/Content/Map/
 !/Content/Collections/
 
+# Pyrios 自研能力与配置三包；模型、骨架、动画、纹理等美术资源仍走外部资产管线。
+!/Content/Characters/
+/Content/Characters/*
+!/Content/Characters/Player/
+/Content/Characters/Player/*
+!/Content/Characters/Player/Pyrios/
+/Content/Characters/Player/Pyrios/*
+!/Content/Characters/Player/Pyrios/Abilities/
+/Content/Characters/Player/Pyrios/Abilities/*
+!/Content/Characters/Player/Pyrios/Abilities/GA_Pyrios_Attack_Combo.uasset
+!/Content/Characters/Player/Pyrios/DA/
+/Content/Characters/Player/Pyrios/DA/*
+!/Content/Characters/Player/Pyrios/DA/DA_AbilitySet_Pyrios.uasset
+!/Content/Characters/Player/Pyrios/DA/DA_Pawn_Pyrios.uasset
+
 # Boss AI 自研测试资产（含 World Partition 外部 Actor/Object 包）
 !/Content/AI/
 !/Content/AI/Boss/
