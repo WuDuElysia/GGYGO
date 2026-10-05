@@ -2,7 +2,15 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
-## 当前有效批次：动画曲线来源迁移/旧DA退役已有限验收，图文集中同步（2026-10-05）
+## 当前有效批次：来源迁移图文已交付，玩家攻击底层接缝分批实施（2026-10-06）
+
+来源迁移最终14份图文已由原Animation/Movement作者自审冻结、统筹集中接受并中文提交push：笔记仓 `5b04399`，父仓退役 `0bd5b47`，Source `6b7361d`。六Canvas共119节点/123边，原ID/JSON/端点/标签/矩形与341个wiki链接/锚点静态检查通过；原生Obsidian视觉、真实Run/网络/攻击位移未验。局部和全局笔记写权全部关闭，下文原笔记授权只保留历史，不可自行续写。
+
+玩家战斗仍为后继攻击链牵头；相关只读参与者现在包括Movement、Animation运行时、AbilitySystem通用Task和Input/Hero原长期作者。各自收敛原动画动作源、CMC执行资源、原实例Section事实和真实Held/准入薄接口，牵头汇总准确唯一文件范围；尚未授任何源码/资产写权，统一build/UE/Git仍由统筹安排。没有子代理、新严格矩阵或手工过程JSON，不因接口协商重开已经退役的七DA。
+
+上述只读阶段已给出精确互斥范围，现仅开放两条底层源码工作线（覆盖上一段的全零源码授权）：Animation运行时原作者独占新增 `Source/GGYGO/Animation/Data/GGYGOActionMotionSourceBinding.h/.cpp`；AbilitySystem原作者独占 `Source/GGYGO/AbilitySystem/Tasks/GGYGOAbilityTask_PlayMontageAndWaitForEvent.h/.cpp` 与既有 `Source/GGYGO/AbilitySystem/Tests/GGYGOMontageTaskLifecycleTest.cpp` 必要适配。作者先直接与牵头/Movement协商并冻结其公开接口，收到消费方确认后在该范围自主实施，不逐方法等待统筹；新通用源描述不依赖GA/ASC状态，不持第二时钟或复制曲线，Task只报告原实例区段事实，不决定Main/End业务。提交共享接口冻结结果和最后源码停写证据即可，不新过程JSON。Movement、玩家GA和Input仍只读，待两接缝准备后另开整链消费者批次。原Locomotion/Set/旧ActionProfile、引擎/GAS源码、资产与笔记不在此写权内；无UE/build/Git窗口，不以实施授权当作已完成。
+
+玩家攻击后继需求已获真实玩法决定：Main 锁定普通 Walk/Run，由动作位移接管；End 可由移动输入打断收招并恢复普通移动。玩家战斗组长 `01a0ebc0-8780-7f92-86d0-2f028f08f147` 牵头，Movement 参与，先有限只读协商既有 ActionMotion／移动限制／收尾接口及必要唯一文件范围；没有源码、资产或公共 UE/build/Git 写权。不得借该决定恢复七旧 Locomotion 曲线 DA，动作曲线来源和接线由组长依照已迁移的职责自行收敛；必要范围交回后由统筹登记互斥实施。本段覆盖下文“具体限制窗口待用户选择”的历史停点，不改变未验状态。
 
 最新有效状态（覆盖本节以下旧窗口）：Source `6b7361d` 已push，Gate91编译exit0及原四烟3Success/1Fail；两Stop三值精确保存与冷读通过。七旧DA已按用户追加要求完成实际退役：准备CLI session40123/PID42108 exit0、八原包备份/Set七null/十九参数保持/完整incoming为空，正常退出后统筹精确离线删除七uasset；冷CLI session5491/PID23288 exit0、`VerifyPyriosLocomotionRetirement_20261005.json` completed，七包与Registry目标/依赖节点缺席，Set七null/参数/源包/备份保持、dirty=[]。两临时脚本作者冻结，资产/源码/UE写权关闭；未验的raw骨键/Channel、正式Run/网络/攻击位移仍开放，不扩严格矩阵。
 
