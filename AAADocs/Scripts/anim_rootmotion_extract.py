@@ -24,11 +24,13 @@ import math
 import os
 import sys
 
-from fbx_bin_reader import FbxReader
-from fbx_anim_extract import build_index, get_curve_arrays, resolve_take_curvenodes
-
 FBXTIME = 46186158000.0
 ROOT_NODE = "Root"
+MOTION_CURVES = [
+    "RootMotion_PosX", "RootMotion_PosY", "RootMotion_PosZ",
+    "RootMotion_Yaw", "RootMotion_Pitch", "RootMotion_Roll",
+    "RootMotion_Dist", "RootMotion_Speed", "RootMotion_DirX", "RootMotion_DirY",
+]
 
 # muscleClip 里需要带到 UE 侧的标量（其余如 leftFootStartX 等足部对齐数据 UE 用不上）
 MUSCLE_SCALARS = [
@@ -38,6 +40,104 @@ MUSCLE_SCALARS = [
     "startAtOrigin", "keepOriginalOrientation", "keepOriginalPositionY",
     "keepOriginalPositionXZ", "heightFromFeet",
 ]
+
+
+def finite_number(value, context):
+    """必需的运动数据不接受字符串、布尔、NaN/Inf 或不可表示的数。"""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError("%s: expected a finite number, got %r" % (context, value))
+    try:
+        result = float(value)
+    except (OverflowError, ValueError) as exc:
+        raise ValueError("%s: number is not representable" % context) from exc
+    if not math.isfinite(result):
+        raise ValueError("%s: non-finite value %r" % (context, value))
+    return result
+
+
+def validate_samples(values, count, context):
+    if not isinstance(values, (list, tuple)) or len(values) != count:
+        raise ValueError("%s: expected %d samples" % (context, count))
+    for i, value in enumerate(values):
+        finite_number(value, "%s[%d]" % (context, i))
+
+
+def validate_sample_times(times, context, minimum=2):
+    if not isinstance(times, (list, tuple)) or len(times) < minimum:
+        raise ValueError("%s: expected at least %d times" % (context, minimum))
+    previous = None
+    for i, value in enumerate(times):
+        current = finite_number(value, "%s[%d]" % (context, i))
+        if previous is not None and current <= previous:
+            raise ValueError("%s[%d]: time must strictly increase (%r <= %r)"
+                             % (context, i, current, previous))
+        previous = current
+
+
+def validate_motion_curves(times, curves, context):
+    """Speed 是非负水平速率；正速率必须有有限非零方向，真实静止两者皆零。
+
+    生成方向为单位向量。写入端线性重采样可生成非单位的方向分量，仍必须非零；
+    不能靠速度阈值、上一帧方向或固定方向把不一致数据接纳成成功。
+    """
+    validate_sample_times(times, context + ".times")
+    if not isinstance(curves, dict):
+        raise ValueError(context + ": required motion curves are missing")
+    for name in MOTION_CURVES:
+        if name not in curves:
+            raise ValueError("%s: required curve %s is missing" % (context, name))
+        validate_samples(curves[name], len(times), context + "." + name)
+    for i, speed in enumerate(curves["RootMotion_Speed"]):
+        direction = math.hypot(curves["RootMotion_DirX"][i],
+                               curves["RootMotion_DirY"][i])
+        if not math.isfinite(direction):
+            raise ValueError("%s: direction magnitude is non-finite at frame %d" % (context, i))
+        if speed < 0.0 or (speed > 0.0 and direction == 0.0):
+            raise ValueError("%s: invalid Speed/Direction at frame %d (speed=%r, dir=%r)"
+                             % (context, i, speed, direction))
+        if speed == 0.0 and direction != 0.0:
+            raise ValueError("%s: zero Speed requires zero Direction at frame %d" % (context, i))
+    distance = curves["RootMotion_Dist"]
+    if distance[0] != 0.0 or any(b < a for a, b in zip(distance, distance[1:])):
+        raise ValueError(context + ": RootMotion_Dist must start at zero and never decrease")
+
+
+def validate_motion_record(record):
+    if not isinstance(record, dict) or not isinstance(record.get("name"), str) or not record["name"]:
+        raise ValueError("RootMotion: record requires a non-empty clip name")
+    context = "RootMotion[%s]" % record["name"]
+    times = record.get("times")
+    validate_sample_times(times, context + ".times")
+    duration = finite_number(record.get("duration"), context + ".duration")
+    if times[0] != 0.0 or duration <= 0.0 or times[-1] != duration:
+        raise ValueError(context + ": times must span exactly [0, positive duration]")
+    if "frameCount" in record and record["frameCount"] != len(times):
+        raise ValueError(context + ": frameCount does not match times")
+    validate_motion_curves(times, record.get("curves"), context)
+
+
+def derive_horizontal_motion(times, pos_x, pos_y):
+    """任何可表示的非零位移都同时生成速率和单位方向，不把微位移当静止。
+
+    hypot 避免先平方微位移导致的下溢；严格递增时间不跳帧。
+    首帧沿用首个间隔的运动，保持原导出采样约定。
+    """
+    validate_sample_times(times, "RootMotion.times")
+    validate_samples(pos_x, len(times), "RootMotion.PosX")
+    validate_samples(pos_y, len(times), "RootMotion.PosY")
+    distance = [0.0]
+    speed, dir_x, dir_y = ([0.0] * len(times) for _ in range(3))
+    for i in range(1, len(times)):
+        dx, dy = pos_x[i] - pos_x[i - 1], pos_y[i] - pos_y[i - 1]
+        magnitude = math.hypot(dx, dy)
+        distance.append(distance[-1] + magnitude)
+        if magnitude != 0.0:
+            speed[i] = magnitude / (times[i] - times[i - 1])
+            dir_x[i], dir_y[i] = dx / magnitude, dy / magnitude
+            if speed[i] == 0.0:
+                raise ValueError("RootMotion: non-zero displacement speed underflows at frame %d" % i)
+    speed[0], dir_x[0], dir_y[0] = speed[1], dir_x[1], dir_y[1]
+    return distance, speed, dir_x, dir_y
 
 
 def unwrap_degrees(values):
@@ -59,11 +159,13 @@ def unwrap_degrees(values):
 def resample_channel(times, values, frame_times):
     """把 FBX 曲线按目标帧时间线性重采样。FBX 的 Root 轨道本身就是逐帧烘焙，
     这一步主要负责补齐通道之间 key 数不一致的情况。"""
-    if not times or not values:
-        return [0.0] * len(frame_times)
-    n = min(len(times), len(values))
-    ts = [t / FBXTIME for t in times[:n]]
-    vs = list(values[:n])
+    validate_sample_times(times, "FBX channel times", minimum=1)
+    validate_samples(values, len(times), "FBX channel values")
+    validate_sample_times(frame_times, "FBX target times")
+    n = len(times)
+    ts = [t / FBXTIME for t in times]
+    validate_sample_times(ts, "FBX channel seconds", minimum=1)
+    vs = list(values)
     out = []
     j = 0
     for ft in frame_times:
@@ -76,7 +178,7 @@ def resample_channel(times, values, frame_times):
         else:
             t0, t1 = ts[j], ts[min(j + 1, n - 1)]
             v0, v1 = vs[j], vs[min(j + 1, n - 1)]
-            a = 0.0 if t1 <= t0 else (ft - t0) / (t1 - t0)
+            a = (ft - t0) / (t1 - t0)
             out.append(v0 + (v1 - v0) * a)
     return out
 
@@ -84,6 +186,9 @@ def resample_channel(times, values, frame_times):
 def read_root_tracks(fbx_path):
     """返回 (frame_times, {'tX':[..], 'tY':[..], 'tZ':[..], 'rX':[..], 'rY':[..], 'rZ':[..]})。
     读不到 Root 节点则返回 (None, None)。"""
+    from fbx_bin_reader import FbxReader
+    from fbx_anim_extract import build_index, get_curve_arrays, resolve_take_curvenodes
+
     r = FbxReader(fbx_path)
     try:
         idx = build_index(r.parse())
@@ -101,23 +206,28 @@ def read_root_tracks(fbx_path):
             for chan in ("X", "Y", "Z"):
                 cur_id = node.get(prop, {}).get(chan)
                 if cur_id is None:
-                    raw[prefix + chan] = ([], [])
+                    raise ValueError("RootMotion[%s]: missing Root %s.%s curve"
+                                     % (fbx_path, prop, chan))
                 else:
                     raw[prefix + chan] = get_curve_arrays(r.f, idx["curves"][cur_id])
 
         # 帧时间线取 key 数最多的通道；Root 的六条轨道通常等长且为 60fps 烘焙
         best = max(raw.values(), key=lambda tv: len(tv[0]))
         if not best[0]:
-            return None, None
+            raise ValueError("RootMotion[%s]: Root curves have no samples" % fbx_path)
         frame_times = [t / FBXTIME for t in best[0]]
+        validate_sample_times(frame_times, "RootMotion[%s].FBX times" % fbx_path)
         t0 = frame_times[0]
         frame_times = [t - t0 for t in frame_times]
 
         tracks = {}
         for k, (times, values) in raw.items():
             shifted = [t / FBXTIME - t0 for t in times]
-            tracks[k] = resample_channel(
-                [t * FBXTIME for t in shifted], values, frame_times)
+            try:
+                tracks[k] = resample_channel(
+                    [t * FBXTIME for t in shifted], values, frame_times)
+            except ValueError as exc:
+                raise ValueError("RootMotion[%s].%s: %s" % (fbx_path, k, exc)) from exc
         return frame_times, tracks
     finally:
         r.close()
@@ -127,6 +237,10 @@ def build_clip_record(name, fbx_path, json_path):
     frame_times, tracks = read_root_tracks(fbx_path)
     if frame_times is None:
         return None, "FBX 中没有带曲线的 Root 节点"
+    context = "RootMotion[%s]" % name
+    validate_sample_times(frame_times, context + ".times")
+    for channel in ("tX", "tY", "tZ", "rX", "rY", "rZ"):
+        validate_samples(tracks.get(channel), len(frame_times), context + "." + channel)
 
     with open(json_path, "r", encoding="utf-8") as f:
         meta = json.load(f)
@@ -150,27 +264,7 @@ def build_clip_record(name, fbx_path, json_path):
     yaw, pitch, roll = rebase(yaw), rebase(pitch), rebase(roll)
 
     # 派生：累计路程、逐帧速度、水平速度方向
-    dist = [0.0]
-    for i in range(1, len(frame_times)):
-        dist.append(dist[-1] + math.hypot(pos_x[i] - pos_x[i - 1],
-                                          pos_y[i] - pos_y[i - 1]))
-    speed = [0.0] * len(frame_times)
-    dir_x = [0.0] * len(frame_times)
-    dir_y = [0.0] * len(frame_times)
-    for i in range(1, len(frame_times)):
-        dt = frame_times[i] - frame_times[i - 1]
-        if dt <= 1e-6:
-            continue
-        dx = pos_x[i] - pos_x[i - 1]
-        dy = pos_y[i] - pos_y[i - 1]
-        mag = math.hypot(dx, dy)
-        speed[i] = mag / dt
-        if mag > 1e-5:
-            dir_x[i] = dx / mag
-            dir_y[i] = dy / mag
-    if len(speed) > 1:
-        speed[0] = speed[1]
-        dir_x[0], dir_y[0] = dir_x[1], dir_y[1]
+    dist, speed, dir_x, dir_y = derive_horizontal_motion(frame_times, pos_x, pos_y)
 
     duration = frame_times[-1] if frame_times else 0.0
 
@@ -179,8 +273,12 @@ def build_clip_record(name, fbx_path, json_path):
     # 但差分出的速度/方向会在末帧掉到 0，运行时表现为最后一帧速度突降。
     # 判据用“FBX 时长恰好比 muscleClip 长一帧”，这样只命中导出多出来的那一帧，
     # 不会误伤真正在末尾停下的动画（如 Walk_End）。
-    clip_len = float(muscle.get("stopTime", 0.0)) - float(muscle.get("startTime", 0.0))
-    frame_dt = 1.0 / float(clip.get("sampleRate") or 60.0)
+    clip_len = (finite_number(muscle.get("stopTime", 0.0), context + ".stopTime")
+                - finite_number(muscle.get("startTime", 0.0), context + ".startTime"))
+    sample_rate = finite_number(clip.get("sampleRate", 60.0), context + ".sampleRate")
+    if sample_rate <= 0.0 or clip_len < 0.0:
+        raise ValueError(context + ": sampleRate must be positive and clipLength non-negative")
+    frame_dt = 1.0 / sample_rate
     trailing_dup = (len(frame_times) >= 3
                     and abs(duration - clip_len - frame_dt) < 1e-4)
     if trailing_dup:
@@ -237,6 +335,7 @@ def build_clip_record(name, fbx_path, json_path):
     }
     record["scalars"]["hasMotionFloatCurves"] = clip.get("hasMotionFloatCurves")
     record["scalars"]["wrapMode"] = clip.get("wrapMode")
+    validate_motion_record(record)
     return record, None
 
 
@@ -257,6 +356,10 @@ def main():
             continue
         try:
             rec, err = build_clip_record(name, fbx, js)
+        except ValueError as exc:
+            # 非法运动数据不能被排除后让整批看似成功；保留既有输出，显式拒绝本次生成。
+            raise ValueError("RootMotion[%s]: generation rejected; output unchanged: %s"
+                             % (name, exc)) from exc
         except Exception as exc:  # 解析失败不应中断整批
             rec, err = None, "解析异常: %s" % exc
         if rec is None:
@@ -272,10 +375,16 @@ def main():
                  v["pathLengthCm"], v["peakSpeedCms"], v["peakSpeedFrame"],
                  v["maxFrameStepCm"], v["fbxYawDeg"]))
 
+    # 完整编码也先于打开目标文件，非有限元数据/诊断不能留下截断的既有输出。
+    try:
+        payload = json.dumps({"model": "Avatar_Male_Size03_Pyrois_Model",
+                              "clips": records}, allow_nan=False)
+    except (ValueError, TypeError) as exc:
+        raise ValueError("RootMotion[%s]: invalid output data; output unchanged: %s"
+                         % (out_path, exc)) from exc
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump({"model": "Avatar_Male_Size03_Pyrois_Model",
-                   "clips": records}, f)
+        f.write(payload)
     print("\n写出 %d 个 clip -> %s" % (len(records), out_path))
 
     dup = [r["name"] for r in records if r["trailingDuplicateFrame"]]

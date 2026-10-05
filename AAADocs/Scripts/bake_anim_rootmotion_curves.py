@@ -4,7 +4,8 @@ bake_anim_rootmotion_curves.py —— 把 anim_rootmotion_extract.py 产出的�
 AnimSequence 上的真实 FloatCurve。
 
 在 UE 编辑器 Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/bake_anim_rootmotion_curves.py", encoding="utf-8").read())
+  p = r"F:/ue_project/GGYGO/AAADocs/Scripts/bake_anim_rootmotion_curves.py"
+  exec(compile(open(p, encoding="utf-8").read(), p, "exec"), {"__name__": "__main__", "__file__": p})
 
 MODE 控制行为：
   "probe" —— 只处理 PROBE_CLIPS 里的动画，写入后立刻回读校验并打印，不保存包。
@@ -31,10 +32,19 @@ MODE 控制行为：
 import json
 import os
 import hashlib
+import importlib.util
+import math
+import struct
 import time
 from pathlib import Path
 
 import unreal
+
+# 同一份离线契约供生成与写入接纳使用；加载它不读取 FBX 或操作 UE。
+_CONTRACT_PATH = Path(__file__).resolve().with_name("anim_rootmotion_extract.py")
+_contract_spec = importlib.util.spec_from_file_location("rootmotion_curve_contract", _CONTRACT_PATH)
+_contract = importlib.util.module_from_spec(_contract_spec)
+_contract_spec.loader.exec_module(_contract)
 
 MODE = "all"
 
@@ -55,12 +65,7 @@ PROBE_CLIPS = [
     "Avatar_Male_Size03_Pyrois_Ani_Idle_Loop",  # 全静止，校验常量曲线压缩
 ]
 
-MOTION_CURVES = [
-    "RootMotion_PosX", "RootMotion_PosY", "RootMotion_PosZ",
-    "RootMotion_Yaw", "RootMotion_Pitch", "RootMotion_Roll",
-    "RootMotion_Dist", "RootMotion_Speed",
-    "RootMotion_DirX", "RootMotion_DirY",
-]
+MOTION_CURVES = _contract.MOTION_CURVES
 
 # muscleClip 标量 -> 常量曲线名。布尔按 0/1 写入。
 SCALAR_CURVES = [
@@ -133,7 +138,7 @@ def read_float_at(anim, name, time):
 
 def compress_constant(times, values):
     """恒定序列压成首尾两个 key，其余原样返回。"""
-    if len(values) > 2 and (max(values) - min(values)) < 1e-6:
+    if len(values) > 2 and all(value == values[0] for value in values):
         return [times[0], times[-1]], [values[0], values[0]]
     return times, values
 
@@ -142,8 +147,9 @@ def compress_constant(times, values):
 
 def resample(src_times, src_values, dst_times):
     """把源曲线线性重采样到目标帧时间。仅在 UE 资产帧数与 FBX 帧数不一致时用到。"""
-    if not src_times:
-        return [0.0] * len(dst_times)
+    _contract.validate_sample_times(src_times, "Bake source times")
+    _contract.validate_samples(src_values, len(src_times), "Bake source values")
+    _contract.validate_sample_times(dst_times, "Bake target times")
     out = []
     j = 0
     n = len(src_times)
@@ -157,7 +163,7 @@ def resample(src_times, src_values, dst_times):
         else:
             t0, t1 = src_times[j], src_times[min(j + 1, n - 1)]
             v0, v1 = src_values[j], src_values[min(j + 1, n - 1)]
-            a = 0.0 if t1 <= t0 else (t - t0) / (t1 - t0)
+            a = (t - t0) / (t1 - t0)
             out.append(v0 + (v1 - v0) * a)
     return out
 
@@ -188,17 +194,85 @@ def sequence_length(anim):
 
 # ---------------------------------------------------------------- 单个 clip
 
-def scalar_value(scalars, key):
+def scalar_value(scalars, key, context="Bake scalar"):
     v = scalars.get(key)
     if isinstance(v, bool):
         return 1.0 if v else 0.0
     if v is None:
         return 0.0
-    return float(v)
+    return _contract.finite_number(v, context + "." + key)
+
+
+def unreal_float(value, context):
+    """检查实际 FloatCurve 精度；不可表示的非零数据不静默钳零。"""
+    value = _contract.finite_number(value, context)
+    try:
+        converted = struct.unpack("<f", struct.pack("<f", value))[0]
+    except (OverflowError, struct.error) as exc:
+        raise ValueError(context + ": value overflows UE float32") from exc
+    if not math.isfinite(converted):
+        raise ValueError(context + ": value overflows UE float32")
+    if value != 0.0 and converted == 0.0:
+        raise ValueError(context + ": non-zero value underflows UE float32")
+    return converted
+
+
+def prepare_curve_writes(record, ue_keys, ue_length):
+    """纯数据写入计划：全部源、目标时间/精度/曲线在打开 bracket 前验证。"""
+    _contract.validate_motion_record(record)
+    context = "Bake[%s/%s]" % (ANIM_FOLDER, record["name"])
+    if isinstance(ue_keys, bool) or not isinstance(ue_keys, int) or ue_keys < 2:
+        raise ValueError(context + ": target requires at least two sampled keys")
+    ue_length = unreal_float(ue_length, context + ".sequence_length")
+    if ue_length <= 0.0:
+        raise ValueError(context + ": target sequence length must be positive")
+    src_times = record["times"]
+    resampled = ue_keys != len(src_times)
+    if resampled:
+        step = ue_length / (ue_keys - 1)
+        sample_times = [i * step for i in range(ue_keys)]
+    else:
+        sample_times = src_times
+    dst_times = [unreal_float(t, "%s.times[%d]" % (context, i))
+                 for i, t in enumerate(sample_times)]
+    _contract.validate_sample_times(dst_times, context + ".float32 times")
+    if dst_times[0] != 0.0 or dst_times[-1] > ue_length:
+        raise ValueError(context + ": target times must stay inside the sequence duration")
+    curves = {}
+    for name in MOTION_CURVES:
+        values = record["curves"][name]
+        if resampled:
+            values = resample(src_times, values, sample_times)
+        curves[name] = [unreal_float(v, "%s.%s[%d]" % (context, name, i))
+                        for i, v in enumerate(values)]
+    # 重采样可使相反方向抵消，float32 也可能丢失非零分量；检查实际待写数据。
+    _contract.validate_motion_curves(dst_times, curves, context + ".planned")
+    writes = {name: compress_constant(dst_times, curves[name]) for name in MOTION_CURVES}
+
+    # 保留原可选 Cfg 的含义，仅将计算及有限性检查移到任何曲线变更之前。
+    scalars = record.get("scalars") or {}
+    avg = record.get("averageSpeed") or {}
+    scalar_context = context + ".scalars"
+    derived = {
+        "Cfg_ClipLength": scalar_value(scalars, "stopTime", scalar_context)
+                          - scalar_value(scalars, "startTime", scalar_context),
+        "Cfg_AvgSpeed": 100.0 * (avg.get("x", 0.0) ** 2 + avg.get("y", 0.0) ** 2
+                                + avg.get("z", 0.0) ** 2) ** 0.5,
+        "Cfg_AvgAngularSpeed": 57.2957795
+                               * scalar_value(scalars, "averageAngularSpeed", scalar_context),
+    }
+    derived.update({name: scalar_value(scalars, key, scalar_context)
+                    for name, key in SCALAR_CURVES})
+    span = [dst_times[0], dst_times[-1]]
+    for name, value in derived.items():
+        value = unreal_float(value, context + "." + name)
+        writes[name] = (span, [value, value])
+    return writes, resampled
 
 
 def bake_clip(record):
     """返回 (状态字符串, 详情 dict)。"""
+    _contract.validate_motion_record(record)
     name = record["name"]
     asset_path = "%s/%s" % (ANIM_FOLDER, name)
     anim = unreal.load_asset(asset_path)
@@ -209,14 +283,7 @@ def bake_clip(record):
     ue_keys = sampled_key_count(anim)
     ue_len = sequence_length(anim)
 
-    # UE 资产的帧数与 FBX 提取的帧数一致时逐帧一对一写入；否则按 UE 帧重采样。
-    if ue_keys == len(src_times):
-        dst_times = src_times
-        resampled = False
-    else:
-        step = ue_len / (ue_keys - 1) if ue_keys > 1 else 0.0
-        dst_times = [i * step for i in range(ue_keys)]
-        resampled = True
+    writes, resampled = prepare_curve_writes(record, ue_keys, ue_len)
 
     ctrl = None
     try:
@@ -227,40 +294,9 @@ def bake_clip(record):
 
     written = {}
     try:
-        for curve_name in MOTION_CURVES:
-            values = record["curves"].get(curve_name)
-            if values is None:
-                continue
-            if resampled:
-                values = resample(src_times, values, dst_times)
-            t, v = compress_constant(dst_times, values)
+        for curve_name, (t, v) in writes.items():
             add_curve(anim, curve_name)
             written[curve_name] = write_float_keys(anim, curve_name, t, v)
-
-        scalars = record.get("scalars") or {}
-        avg = record.get("averageSpeed") or {}
-        derived = {
-            # muscleClip 的 [startTime, stopTime] 才是规范化后的循环长度，
-            # 通常比 FBX take 少一帧（循环动画末帧等于首帧，不该重复计入）。
-            "Cfg_ClipLength": float(scalars.get("stopTime", 0.0))
-                              - float(scalars.get("startTime", 0.0)),
-            # averageSpeed 是 Unity 单位 m/s，乘 100 换成 cm/s
-            "Cfg_AvgSpeed": 100.0 * (avg.get("x", 0.0) ** 2 + avg.get("y", 0.0) ** 2
-                                     + avg.get("z", 0.0) ** 2) ** 0.5,
-            # averageAngularSpeed 是弧度/秒且无符号，转身方向只在 RootMotion_Yaw 里
-            "Cfg_AvgAngularSpeed": 57.2957795
-                                   * float(scalars.get("averageAngularSpeed", 0.0)),
-        }
-        span = [dst_times[0], dst_times[-1]] if dst_times else [0.0, 0.0]
-        for curve_name, value in derived.items():
-            add_curve(anim, curve_name)
-            written[curve_name] = write_float_keys(
-                anim, curve_name, span, [value, value])
-        for curve_name, key in SCALAR_CURVES:
-            value = scalar_value(scalars, key)
-            add_curve(anim, curve_name)
-            written[curve_name] = write_float_keys(
-                anim, curve_name, span, [value, value])
     finally:
         if ctrl is not None:
             try:
@@ -316,7 +352,14 @@ def load_records():
         raise RuntimeError("找不到中间数据 %s，先在命令行跑 anim_rootmotion_extract.py"
                            % SOURCE_JSON)
     with open(SOURCE_JSON, "r", encoding="utf-8") as f:
-        return json.load(f)["clips"]
+        records = json.load(f)["clips"]
+    if not isinstance(records, list):
+        raise ValueError("Bake[%s]: clips must be a list" % SOURCE_JSON)
+    # 先接纳整份必需源数据，不能写到半途才发现后面的源记录非法。
+    for record in records:
+        _contract.validate_motion_record(record)
+        prepare_curve_writes(record, len(record["times"]), record["duration"])
+    return records
 
 
 PROGRESS_SCHEMA = 2
