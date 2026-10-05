@@ -24,6 +24,7 @@
 | Character 渲染子模块 | 还原角色渲染管线 | `01a0d21a-84e2-7f00-808d-1618fa4dd2b8` |
 | 资源解包（独立工具工作线） | GGYGO｜资源解包组长 | `01a0ed0f-fcd8-7b02-bb03-5bc01e0e2977` |
 | Audio 音效 | GGYGO｜Audio 音效模块 | `01a10014-f4d3-7f91-a84f-da95248c8fc3` |
+| FX 特效表现 | GGYGO｜FX 特效模块 | `01a10c8b-2eb6-7d53-880e-a5c7f6caeda7` |
 
 以上是既有会话路由，不是允许同时修改共享文件。Animation 与 Combat 的两个入口按运行时/资产、查询/动作子职责区分；需要共享接口变更时由统筹指定一个写入批次。全模块修复期间以 `Module_Audit_Repair_Ledger.md` 的租约为准，未收到批次授权的会话保持只读。
 
@@ -33,7 +34,9 @@
 
 资源解包组长是用户明确新设的独立工作线，实际工具范围为 `F:\AnimeStudio`，只用 CLI，不用 GUI。首次任务：调查 ZZZ 的 Pyrios/Pyrois 特效和音效能否发现、关联与导出，优先复用既有导出/索引，必要时仅独立目录小样本验证。该会话不取得 GGYGO 运行时修复文件或 UE/资产导入权限，不受无关运行时批次等待限制，也不得覆盖既有导出。是否可提取、是否能在 UE 还原表现分别报告，不能把调查派发写成资源已导出。组长可按下列规则拆分明确任务；后续解包需求复用此会话。
 
-历史设置事实：2026-10-03此前向原19个长期组长逐一发送 `gpt-6.1-sol / ultra`，19次成功，保留当时实施记录。本轮用户提供协作规则指定 `gpt-6.1-sol / xhigh`，后续任务派发显式遵循xhigh，不冒称又批量修改了未派发会话。新增Audio已显式使用xhigh；路由现为20个。模型设置不扩大租约、不恢复子代理。
+历史设置事实：2026-10-03此前向原19个长期组长逐一发送 `gpt-6.1-sol / ultra`，19次成功，保留当时实施记录。本轮用户提供协作规则指定 `gpt-6.1-sol / xhigh`，后续任务派发显式遵循xhigh，不冒称又批量修改了未派发会话。新增Audio和FX已显式使用xhigh；路由现为21个。模型设置不扩大租约、不恢复子代理。
+
+2026-10-05用户明确新建「GGYGO｜FX 特效模块」，在既有GGYGO项目原目录长期接手特效表现；首轮仅完整阅读`AAADocs/Modules/Character/Rendering/ZZZ_FX_Handoff.md`及相关只读上下文，交回管线、现状、缺口与下一步建议，无源码/脚本/资产/笔记写权，不操作UE/PIE/build/Git。角色Toon与既有身体渲染仍由Character渲染组长负责，原始解包由资源解包组长负责，Animation/GA/Combat的时序、生命周期和命中职责不迁移给FX；后续实现按实际需求协调唯一文件作者与公共窗口。该会话已创建，不等于文档全部事实已核实或特效实战已验收。
 
 历史统一设置（2026-10-03，用户“全部会话开fast和xhigh”）：对以上20个长期模块会话逐一调用派发接口，显式`gpt-6.1-sol / xhigh`，20次成功。本机`C:/Users/Kaven/.codex/config.toml`曾保存默认`service_tier="fast"`、`model_reasoning_effort="xhigh"`及`[features].fast_mode=true`，当时回读一致，本机Codex只读解析返回`fast_mode stable true`。现有派发接口没有逐会话Fast字段，未核实会话自己的Fast覆盖项，不能据此宣称全部正在运行的请求已切Fast；统筹当前请求也未强制重启。后续派发保持模型与xhigh，任务、原租约、冻结/只读边界及取消子代理约定不变。证据：`Saved/ValidationRecords/AllModuleChats_Fast_Xhigh_20261003_Result.json`。
 

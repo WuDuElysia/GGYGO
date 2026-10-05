@@ -2,7 +2,11 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
-## 当前有效批次：生成工具已验收冻结，攻击接管与动画曲线迁移待接续（2026-10-05）
+## 当前有效批次：动画曲线来源迁移/旧DA退役已有限验收，图文集中同步（2026-10-05）
+
+最新有效状态（覆盖本节以下旧窗口）：Source `6b7361d` 已push，Gate91编译exit0及原四烟3Success/1Fail；两Stop三值精确保存与冷读通过。七旧DA已按用户追加要求完成实际退役：准备CLI session40123/PID42108 exit0、八原包备份/Set七null/十九参数保持/完整incoming为空，正常退出后统筹精确离线删除七uasset；冷CLI session5491/PID23288 exit0、`VerifyPyriosLocomotionRetirement_20261005.json` completed，七包与Registry目标/依赖节点缺席，Set七null/参数/源包/备份保持、dirty=[]。两临时脚本作者冻结，资产/源码/UE写权关闭；未验的raw骨键/Channel、正式Run/网络/攻击位移仍开放，不扩严格矩阵。
+
+仅最终笔记写权开放：Animation原组长 `01a0e5b5-766b-7ac0-9edf-254f3964f543` 独占 Obsidian `GGYGO架构规划/Animation/` 的 `结构.md`、`计划_动画与表现层.md`、`曲线处理.md`、`GGYGO_结构_动画与表现.canvas`、`GGYGO_流程_动画表现.canvas`、`GGYGO_结构_动画曲线.canvas`、`GGYGO_流程_动画曲线处理.canvas`；Movement原组长 `01a0e5b5-83e6-70b3-9e67-c9e8547586a4` 独占 `Movement/结构.md`、`计划_移动与动作位移.md`、`GGYGO_结构_移动与位移.canvas`、`GGYGO_流程_移动与位移.canvas`。按技能与源码核对现行关键接口/流程、实际BS样本混合、CMC唯一时间/执行及保原绑定回放；旧Profile只为兼容/历史，七资产已删，Action不改。统筹独占根模块参考/实施状态/总入口与工程总览；保护既有渲染笔记改动。组长自行整理、自审并冻结交回，不写其它文件、不源码/UE/build/Git/子代理/过程JSON。图文验收后精确中文提交push。
 
 最新有效状态：Gate86统一构建及原必要八烟已执行，11份源码停写；Gate87角色专用GA/AbilitySet/PawnData三包单独保存、公开读回并由原作者冻结，资产写权关闭。统筹实际PIE确认专用Combo授予，外部/手动输入日志出现三段启动和正常退出，不作为完整受控命中/音效验收。下面原源码/资产授权条目保留历史，不能据此恢复写权；三包当前身份分别为`6E71D7B3…`、`FE5D803B…`、`1B5416FD…`，PawnData原包备份在`Saved/AssetBackups/PyriosComboRole_20261005_Gate87/`。
 
@@ -27,6 +31,10 @@ Gate89必要烟后的有效范围：原四叶报告`Saved/AutomationReports/Modu
 Gate90资源冲突历史与Gate91检查点（2026-10-05，覆盖上述六源开放状态）：Movement已交回CMC.cpp与MovementTest.cpp修正并明确冻结；原夹具漏保存native source group，生产新增Prepared存在却缺原资源的明确拒绝，原0.416/292/不可变断言保持并分别执行。Gate90链接因外部GGYGO编辑器占用DLL失败（LNK1104、exit6、86.07秒），本侧未强杀或丢弃内容；下一轮系统复查确认UE已退出，Gate91仅重链2 actions、2.70秒、exit0，新DLL`8522A74F…`。同四烟3Success/1Fail/0Warning，原失败恢复仅原2条非法速度Error且请求3完成；AuthorityAndMapping含0.416/292/原Prepared不可变全部Success。所有18件源码已精确中文提交`6b7361d`并实际push，Source clean/HEAD=origin/main，全部源码写权关闭；正式Run与完整网络仍未验。
 
 当前唯一后继写入范围：post-update临时脚本D7D78B38已单次实跑，原pre完整读取成功、三键内存更新API返回后，首PosX字符串guard失败，报告`Saved/AssetReadbacks/StopCurvePostUpdateDiagnostic_20261005.json`；同次actualName=`rootmotion_posx`、expectedName=`RootMotion_PosX`，wrapper均正确类型、nativeSucceeded=true，保存未调用、两包磁盘hash保持，UE正常exit-1且无新fatal/AV。不证明原AV已修复或仅三值保护已通过。原资产作者仅额外独占新临时`Saved/Automation/StopDirectionFixSemanticNames_20261005.py`准备经原生身份语义验证的精确writer，结果单独`Saved/AssetReadbacks/StopDirectionFixSemanticNames_20261005.json`；旧reader/writer/diagnostics/失败/备份全部冻结保留。不得以lowercase/sort/忽略字段冒称原JSON仅三字段变化，须保留真实身份/顺序/类型与非目标数据保护，实际Name表示变化单列。目标仍仅原两源三DirX.Value，完整读回差异证明后由统筹单次CLI精确逐包保存；作者不自行UE/save，不改源码/七DA/其它资产或笔记。脚本自审冻结后统筹全文核对并安排公共窗口，失败不自动重试/回滚，整需求开发和测试后集中同步图文。
+
+两源保存检查点及唯一后继范围（2026-10-05，覆盖上一段 writer 准备状态）：原作者已冻结 semantic writer `BB1391B8…`，统筹全文审查后单次 CLI session28881 exit0。结果 `Saved/AssetReadbacks/StopDirectionFixSemanticNames_20261005.json` 为 completed，三个既有 DirX.Value 0→1 与非目标保护全部通过，两包逐一 saveTrue／同进程读回通过／最终 dirty=[]；实际名称表示变化单列，未冒称 JSON 只有三处字面变化。磁盘 Run_End=`8D52D5C0…`、Walk_End=`FCCA7218…`，原备份保持，日志正常退出、无新 fatal，不证明原退出 AV 因果已关闭。生产两包和全部旧脚本/结果再次冻结。现在仅原动画资产组长独占新临时 `Saved/Automation/StopDirectionFixColdReadback_20261005.py`，唯一结果 `Saved/AssetReadbacks/StopDirectionFixColdReadback_20261005.json`：复用已冻结 native reader／保护比较，准备只读新进程冷验证后停写，由统筹单次执行；不 save/reimport/bake，不覆盖旧证据、不改其它资产/源码/七 DA/manifest/cache/笔记。原始骨键、底层 Channel 与正式 Run/网络仍未验。
+
+冷读回检查点与用户追加的旧 DA 退役（2026-10-05，覆盖上述冷脚本准备状态）：冻结冷脚本 `8827E9B2…` 经统筹全文核对后单次 CLI session65371 exit0／PID37708，结果 `Saved/AssetReadbacks/StopDirectionFixColdReadback_20261005.json` completed，两源加载前未驻留，三个现有 Time/Value 及全部已约定 native 字段冷对照通过、dirty=[]／盘包及备份保持，日志正常退出。用户明确要求最终删除七个旧动画曲线 DA，不能继续把“暂时保留”作为交付状态。现在仅原动画资产组长独占新临时 `Saved/Automation/RetirePyriosLocomotionProfiles_20261005.py`，唯一机器结果 `Saved/AssetReadbacks/RetirePyriosLocomotionProfiles_20261005.json`：核对七个 `DA_LocomotionMotionProfile_Pyrios_*` 的全 Registry incoming 引用／dirty及 `DA_Movement_Default` 七个精确废弃引用，先保留八原包至 `Saved/AssetBackups/LocomotionProfileRetirement_20261005/`，只清空并单独保存 Set 七引用，其它参数保持；保存后重扫确认无剩余磁盘引用。Python 公共删除 API 内部强删，现成查询也不能证明全部原生内存引用为空，因此不采用该 API、不新增 Editor C++ 桥。脚本不删除资产；正常 CLI 退出后，统筹确认没有 UE 进程／资产写入者、核对七包与备份后以七个精确绝对路径离线删除（不递归），再做必要冷读回。出现其它真实引用或脏包则任何变更前拒绝，不扩范围、force-delete、广删或自动迁移；异常／部分保存保留真实状态，不自动回滚或重试。作者只准备脚本冻结交统筹，不自行 UE/save/delete。原动画曲线、ActionMotionProfile、源码、工具、manifest/cache 与所有旧证据保持；冷骨键／底层 Channel／正式 Run／网络仍未验。退役开发及必要验收完成后，再统一同步 Movement/Animation 图文，不提前将清理标完成。
 
 用户已明确选择分段判定，覆盖下文Gate82阶段“路线未答/源码关闭”的历史停点。AbilitySystem组长`01a0e5b5-1b3a-7783-a667-e8e38d7a72fb`牵头组织整链，仍不取得参与模块的文件写权；无子代理，gpt-6.1-sol/xhigh，Fast关闭。
 
