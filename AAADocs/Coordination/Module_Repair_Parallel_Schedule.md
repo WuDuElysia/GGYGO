@@ -12,6 +12,22 @@
 
 整链检查点：GAS共同入口与各派生/夹具配齐、Movement/真实输入消费配齐；牵头交回完整接线及冻结状态后，由统筹合并可同批验证的链路做一次Editor构建和必要冒烟。不是每个小步骤构建，也不运行未配对链路。Input Hero1在Movement牵头确认已有M3接口/接入契约稳定后可自主接续，仅原`Source/GGYGO/Character/Components/GGYGOHeroComponent.cpp`，需要改共享文件或扩大到头文件时说明真实接口缺口后协调；原已接受预检直接复用，不再重复整轮。此消费者在接口冻结后可与其余互斥实现并行，但统一构建仍等所有相关作者冻结。
 
+当前后继（2026-10-05 Gate82）：AbilitySystem牵头正式攻击/动画/音效整链，参与既有玩家动作、动画资产与Audio组长；两处实际生产阻断见[进度总览](../进度总览.md)。FullBody资产已交回，源码和其它资产写权关闭。所属组长自主确定角色专有资产及必要引用范围，交回精确清单/唯一作者后由统筹排队开放资产窗口；不盲改Shared GA、批外脏资产，不增加临时播放器或新过程JSON。源未变不重编译；前置齐备、所有作者冻结后只做一次正常整链冒烟，通过后集中同步图文/中文提交push。
+
+Gate82单资产交回：动画资产组长`01a0ebeb-4283-79b1-8ecc-9edae131297b`已编译并精确保存`Content/BP/Anim/ABP_Pyrios.uasset`，保存后dirty=false，明确停写、无在途请求，单资产写权关闭。FullBody位于原空间修正前，AlwaysUpdateSourcePose=true；另24图及AnimSet/Tuning保持。统筹磁盘核对目标SHA256=`1F49B7B14B97CAA951598BB3BA5FBEA0AC9CADF25B28C089C739ED99F782D877`，两份批外保护资产保持，未PIE；这不代表正式攻击整链完成。
+
+Gate82后继只读资源窗口：PID24292/UE/MCP独占交给同一动画资产组长核实Pyrios实际武器几何、可用端点与对应半径依据，方法由组长自主选择，结果直接交AbilitySystem牵头与玩家战斗组长。只读现有Mesh/Skeleton、关联导出、既有三段Normal AnimSequence骨轨/静态姿势与对应Montage引用和公开接口，不创建/保存资产、不改源码或笔记、不PIE、不直接播放Montage/声音；动画仅公开只读求值，不改变组件播放状态。不得用骨名、同点端点或猜测参数掩盖缺配置。其它会话与统筹不同时查询/操作UE。已有公开能力不足则交回具体缺口并归还窗口，不扩调查框架。几何齐备后由牵头配对角色三资产清单，统筹安排唯一战斗作者窗口；Mesh-only socket如确有必要另行协调该资产范围，Skeleton不扩。
+
+Gate82并行素材取证：既有资源解包组长`01a0ed0f-fcd8-7b02-bb03-5bc01e0e2977`仅只读核对现有Pyrios导出/索引中Normal01/02/03的Weapon01/02显隐或形态绑定依据，使用既有CLI、不用GUI，不全游戏重解包或新建生成器，不写源码/脚本/笔记/导出/资产、不操作UE。事实与缺口直接交AbilitySystem牵头和战斗作者，由牵头收束判定配置；未找到证据不推定两形态同时生效。与动画几何取证并行，无额外写入租约。
+
+Gate82几何与素材只读阶段已冻结归还：现有导出不能证明确切显隐；01/02同轴刃身有10cm依据，03同一直线包络已采样下界约48.30cm，取49cm会早段多覆盖约39cm非刃空间。统筹已就“按当前两刃链分段”与“接受宽直线包络”的可见行为询问用户，不默认任一方案，不删第三段换容易通过的冒烟。AbilitySystem牵头已直接组织既有Combat命中查询组长`01a0e5b5-f763-78c1-86c8-fa760a9f2100`只读评估现有契约/必要适配范围，并与战斗作者配对；不授源码、资产、UE或新文档写权。
+
+Gate82独立端点资产已交回冻结：动画资产组长`01a0ebeb-4283-79b1-8ecc-9edae131297b`仅保存`Content/Characters/Player/Pyrios/Avatar_Male_Size03_Pyrois_Model.uasset`，Mesh-only `Pyrios_BladeTip_B`归Mesh、父骨`Ctr_Weapon_B_05`、相对Location=(40.55395932,0,0)cm/Rotation=0/Scale=1，Start复用`Ctr_Weapon_B_02`。单包保存后dirty=[]、原组件两端DoesSocketExist=true，Socket0→1；Skeleton/ABP及Mesh其它依赖/LOD保持，未PIE。统筹磁盘核对新SHA256=`F513E0A094223F09F9316AF815D468176897883257D7390A71480852604AED4C`，精确备份`Saved/AssetBackups/PyriosBladeTipB_20261005/Avatar_Male_Size03_Pyrois_Model.uasset`保持原`FCC53423…`，两批外保护资产与Source clean保持；原日志G82_SOCKET_SAVED_READBACK相符。该资产写权关闭、无在途请求、窗口归还，不代替正式Combo冒烟。
+
+Gate82最小存量资产只读窗口已关闭：原动画资产作者已交回冻结、无在途请求，结果直接交AbilitySystem牵头及玩家作者。项目Registry已识别的Combo继承与表行候选没有既存旧Step数组，原生Combo/生命周期夹具CDO数组为空；生产Common Set仍授予通用GA_Attack_Light，另三授予保留值已核实。任意Blueprint变量/Struct节点/Pin默认及嵌入常量未穷尽，不能把候选空值当成删除旧字段绝对安全的证明。迁移接缝由牵头与原作者直接收束，不扩全项目调查。统筹随后正常关闭原编辑器，日志Exiting/file closed且PID24292已消失（退出码未捕获）；当前无UE使用者，所有源码和资产写权继续关闭，不从历史窗口自行恢复操作。
+
+Gate82独立资产交付边界：FullBody目标在普通Git中跟踪，可与本表/进度入口精确交付；角色Mesh由既有`.gitignore:63`排除，B刃尖修改及精确备份仅在本地/外部资产管线保留，不擅自force-add或更改美术资产策略。多链已采样离散查询候选A7/B12（固定world半径）、实际Sweep上界52≤65；直线49仍非离散覆盖保证。用户判定路线未答，7源码候选及角色三资产未开放；只更新此真实里程碑，不将独立资产保存或Git提交标成正式攻击整链完成。
+
 历史门禁：2026-10-02 Gate51。统一Editor Succeeded／7 actions／22.60秒／exit0，新运行时DLL。实际全量82 Success／2 Fail／其它0，原84条路径状态保持。D14独立Fail／1Error1Warning（1.28873秒），全量同叶Fail／1Error2Warning（含HTTP超时旁路警告）；两次均真实证明首次引擎帧CleanupGameViewport→RemoveLocalPlayer→PlayerRemoved发生于夹具清理前，Cold→Unavailable，PC失效、Source仍存活、重建计数0，未Begin／Attach／W。已定位测试窗口生命周期问题，不改生产Cold政策。FAILED红叶两生产Error／原1/1、2/2及请求3完成标记保持；日志全量56 Error6 Warning、独立15／4，不称全绿。256源／九保护构建及两次运行保持，UE退出。Character纯槽快照现已编译，无生产调用或本地动态证据。原R0／Montage／Run／资产／网络／GF／最终中文提交push继续开放。证据Saved/ValidationRecords/ModuleRepairGate_20261002_51_Result.json。
 
 历史模型设置保留：此前向原19组长发送ultra成功。本轮用户提供规则指定gpt-6.1-sol／xhigh，实际后继任务显式遵循xhigh；当前路由含新增Audio共20会话，未向闲置会话重复派设置任务。取消子代理、精确范围、唯一作者及统筹门禁不变。
