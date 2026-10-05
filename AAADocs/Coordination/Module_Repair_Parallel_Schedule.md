@@ -2,7 +2,35 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
-## 当前有效批次：来源迁移图文已交付，玩家攻击底层接缝分批实施（2026-10-06）
+## 当前有效批次：玩家攻击25件已冻结，R4编译与必要冒烟交回（2026-10-06）
+
+最新有效检查点：Gate92-R4 Editor Succeeded（6 actions、60.71秒、exit0，DLL `7D2E1C75…`）；16个既有必要叶10Success/6Fail/0Warning。动作原loop100、真实Model求值、WalkRun数学/端点、配置、权威回放及正常Combo/Section归属全部Success，原曲线读取根因的必要Editor链已通过。6Fail保持原故障GE/Builder/Shape诊断、Task原播放被后继取代的拒绝、旧raw重入17E及Recovery两非法曲线Error；旧重入14条断言与R3实际比对差异0，Recovery实际RecoveredInputRequest=3到达，不吞Error或冒称全绿。报告 `Saved/AutomationReports/ModuleRepairGate_20261006_92_R4_Smoke/index.json`、构建/冒烟日志保留。整批25件及全部资产/笔记写权仍关闭；下一窗口仅角色GA三项MotionSlotName最小接线及必要生产烟，由统筹另行提供8001独占编辑器。正式Held/Run、Main/End实景、Cook与网络仍未验，不扩严格矩阵。
+
+Gate93唯一资产窗口现已开放给玩家战斗牵头 `01a0ebc0-8780-7f92-86d0-2f028f08f147`：本轮编辑器PID49064，MCP `http://127.0.0.1:8001/mcp`，实际IsPIERunning=false，加载新R4 DLL。唯一可写生产包 `Content/Characters/Player/Pyrios/Abilities/GA_Pyrios_Attack_Combo.uasset`，仅三个既有Step的MotionSlotName=FullBody，读回MotionTranslationScale=1及其余配置保护；新临时资产读回/精确备份仅Saved范围，复用原生MCP，不新C++/输入框架或过程JSON。作者自主核对原3步、源Sequence/Slot/Main-End/Pos/nativeRM/RootLock与前后dirty，再单包编译/保存及读回；他人脏包不保存/丢弃。源Montage/Sequence、Shared/Common、AbilitySet/PawnData、Audio、BP_PC_Pyrios及其它包零写权。该作者唯一UE操作者，仅资产接线、不PIE；完成后停写归还窗口，统筹再安排必要生产烟及FX顺序只读。所有25源码/笔记/build/Git继续冻结。
+
+上述单GA窗口已交回关闭：三MotionSlotName实际None→FullBody，倍率1保持；作者已明确停写且无在途UE请求。统筹独立核对36项原生属性，编译后/保存后均仅三槽变化；17保护包前后及当前盘SHA/长度全部相同，18包package路径dirty=false，单包save=true，精确原包备份保持。目标19993bytes/SHA `02BA38DE…`，实际Before/After为 `Saved/ValidationRecords/PyriosAttackMotion_20261006_Gate93_Before.json` 与 `_After.json`。原object-path查询假脏及更正保留，当前没有真实foreign dirty停点。25源码已中文提交并push Source `1ec076b`、Source clean；父仓资产/指针/进度尚未提交。统筹接管49064/8001必要生产PIE，不保存任何包；原CompositeSections/数值端点今日未验，真实Main/End/Held/Run/姿态未验。Animation只读核对现有FullBody后置Bip001平移修正，暂无必须改RootLock/ABP的证据，新增资产范围0；不凭两个RootMotion开关先改六源。FX仍顺序只读排队，无源码/笔记/资产续写权。
+
+用户已答复真实输入“稍后我来测试”，生产输入冒烟暂由用户后续配合，不开启静止PIE或伪造Held，不将必要数学烟标成真实Run/Main-End完成。整链测试前不集中重画架构笔记。现顺序接力独立FX组长 `01a10c8b-2eb6-7d53-880e-a5c7f6caeda7` 独占49064/8001只读窗口，按用户上沿偏左断口截图核对原Mesh/Section/LOD/材质/现成实例；不PIE、save/reimport/清脏/丢弃、不源码/笔记/build/Git，不与渲染组长并发操作。其它会话零UE权；FX有限交回后明确无在途请求再释放，统筹安排正常关闭/必要冷读或用户测试。Parent精确提交仅单GA、Source指针及统筹两记录，批外配置/Boss/BP保护不纳入。
+
+最新检查点：Input三件、Animation两件、通用Task三件、Movement七件及玩家GA五件共20件均由原作者实际完成并明确停写，统筹已接受实际差异、精确范围及空白检查；全部源码写权关闭。进入Gate92统一Editor构建与既有动作/Task/Combo必要冒烟，不新增严格矩阵。Main动作接管、End合格移动取消目前仅源码静态交付，尚未编译或生产验证；生产GA三项MotionSlotName仍待后继单资产窗口，不以停写当需求完成。原Recovery失败、正式Run/姿态相位/网络未验边界保持，下面旧开放条目只保留历史，不得恢复写权。
+
+Gate92首轮构建实际失败（exit1，101.98秒）：MontageTaskLifecycleTest.cpp两处调用UE私有TriggerQueuedMontageEvents（C2248），ActionMotionTest.cpp两个局部名遮蔽（C4459/C4456）。两测试cpp已由原作者互斥修正并重新停写，统筹实际读回接受：使用公开原生DispatchQueuedAnimEvents、局部标识符重命名，原断言/场景与生产18件保持。两件返修写权关闭，全部20件再次冻结，进入R1统一编译；原失败日志保留，尚未运行冒烟或生产资产接线。
+
+Gate92-R1统一编译Succeeded（5 actions、24.94秒、exit0，DLL C3B74BBF…）；首次既有十烟报告1Success/9Fail，进程exit1/报告原生255，失败证据不覆盖。新Section/后继原归属叶成功；其余出现Montage Task未签发原资源、玩家LocalPredicted夹具无本地归属、原Sequence模型无Skeleton错误。现仅开放三个互斥夹具返修范围：AbilitySystem原作者MontageTaskLifecycleTest.cpp；Movement原作者ActionMotionTest.cpp；玩家战斗原作者PlayerComboLifecycleTest.cpp与TestTypes.h。作者先确认真实原因和合法原生前提，保留旧正常/故障及所有断言，不通过改生产权限/策略、忽略Error或排除失败场景变绿。其余源码持续冻结，无生产资产/UE/build/Git/笔记窗口；三作者停写后统一R2构建及同十叶必要烟。
+
+上述四个测试文件均已返修、自审并明确停写，统筹读回接受，测试写权关闭；全部20件重新冻结。Sequence使用私有瞬态真实Skeleton，本地夹具经ULocalPlayer→SetPlayer→Possess建立真实归属，Task夹具使用已支持的Guard/原生Started及真实原播放资源，旧plain原生诊断与全部原断言保留，不冒称支持post-guard-return重入。进入R2统一编译及同十叶冒烟，原首烟失败历史保持；没有生产权限/策略或资产变更。
+
+R2实际Editor Succeeded（6 actions、32.72秒、exit0，DLL 3B234C50…）；同十烟4Success/6Fail/0Warning。原Skeleton/LocalPredicted/无签发前置问题消失，正常命中/Shape兼容/TypedCorrection及原Section后继成功；GE1/Builder2/Shape2生产故障Error重到达且无断言失败，Task仅原播放退休诊断待分类，旧same-instance raw重入17E保留。真实新失败为ActionMotion原loop位移100断言不匹配：现仅Movement作者独占ActionMotionTest.cpp及ActionMotionEvaluation.h/.cpp三件定位并修正，CMC/RMS/Animation源映射继续冻结；另Task与玩家牵头只读分类旧诊断，不扩大strict矩阵或为绿改日志。全部生产资产/笔记窗口仍关闭，三件停写后R3批量编译与必要烟，旧失败不覆盖。
+
+只读分类已交回接受：Task唯一Error为OuterReentrant已被成功后继取代后的明确启动拒绝，88旧断言及后续清理/lease检查均到达无失败；Combo17E与Gate71完全相同（3 UnsupportedEntry、14同文断言，统筹实际报告比对差异0），旧raw立即重开与现行Busy/原Completed政策不符，不为这两叶改生产或日志，仍保留Fail。Movement只在原Action叶失败分支补真实键/Model-raw-native端点/映射区间诊断并停写，两个Evaluation未改，三件写权关闭；全部20件再次冻结。R3仅为实际取值，不冒称loop根因已修复，不新增矩阵或曲线副本。
+
+R3诊断构建Succeeded（4 actions、21.08秒、exit0），原十烟与R2状态保持；实际delta=0，原Model PosX键47→147，0/.5/1为47/97/147，native与raw求值均0；两loop映射分别.5→1和0→.5正确。现再开放同Movement三件修原Sequence可求值前置/读取契约，不能改100断言或以默认零成功、曲线副本、速度兜底掩盖。其它17件、CMC/RMS/Animation及所有生产资产/笔记继续冻结，实修停写后R4必要链编译/冒烟。
+
+实际根因已由UE5.8源码与R3数值确认：Populated清Legacy RawCurveData，逐名称求值raw分支读该空容器，而原生整组求值读取Model/正常compressed codec。ActionEvaluation两件已由原作者改为整组原生读取、严格存在/finite检查并停写，测试100不变；尚未编译。同作者只读发现LocomotionEvaluation同类逐名称入口，不能留已证实同类缺陷：现Movement唯一范围扩为上述三件＋Character/Data/GGYGOLocomotionEvaluation.cpp、Character/Tests/GGYGOLocomotionEvaluationTest.cpp，并允许如确有复用需要新增Character/Data/GGYGOAnimationSourceCurveEvaluation.h/.cpp轻量无状态读取辅助；不要求新类/模块或复制读取机制。各纯求值继续同原Sequence唯一来源/CMC唯一时间，不新增时钟、曲线副本或错误替代路径；只在既有叶必要覆盖原Model可读与缺失明确失败，不扩矩阵。其余源码与资产/笔记冻结，所有范围再次停写后R4统一编译和必要原叶。
+
+同作者已确认共用测试Sequence仅覆写旧标量入口，bulk迁移会使既有Movement夹具缺项；现只再授Character/Tests/GGYGOLocomotionMovementTestTypes.h一件，必要适配该模拟Sequence的原生bulk接口、保原测试数据/故障注入语义和其它测试职责。不在生产helper识别测试类型或加legacy fallback；Evaluation原叶另以真实Model验证底层契约，模拟夹具不作为真实模型/正式Run证明。该h原行内实现无独立cpp，未授权其它MovementTest/CMC文件。
+
+上述八件已由原Movement作者实际完成、自审并停写，统筹实际读取新helper、两消费方、真实Model与共用Mock适配、范围及diff --check接受，写权关闭；当前整批25件全部冻结。两路径共用唯一native bulk读取，必需项存在/finite、错误asset/name/time及原子输出；原100/旧数学/相位/混合/Stop/CMC权威不改。进入R4统一构建及受影响既有必要叶，Cook/正式W/网络未验，不以本次Editor通过代替。
 
 来源迁移最终14份图文已由原Animation/Movement作者自审冻结、统筹集中接受并中文提交push：笔记仓 `5b04399`，父仓退役 `0bd5b47`，Source `6b7361d`。六Canvas共119节点/123边，原ID/JSON/端点/标签/矩形与341个wiki链接/锚点静态检查通过；原生Obsidian视觉、真实Run/网络/攻击位移未验。局部和全局笔记写权全部关闭，下文原笔记授权只保留历史，不可自行续写。
 
@@ -10,7 +38,15 @@
 
 上述只读阶段已给出精确互斥范围，现仅开放两条底层源码工作线（覆盖上一段的全零源码授权）：Animation运行时原作者独占新增 `Source/GGYGO/Animation/Data/GGYGOActionMotionSourceBinding.h/.cpp`；AbilitySystem原作者独占 `Source/GGYGO/AbilitySystem/Tasks/GGYGOAbilityTask_PlayMontageAndWaitForEvent.h/.cpp` 与既有 `Source/GGYGO/AbilitySystem/Tests/GGYGOMontageTaskLifecycleTest.cpp` 必要适配。作者先直接与牵头/Movement协商并冻结其公开接口，收到消费方确认后在该范围自主实施，不逐方法等待统筹；新通用源描述不依赖GA/ASC状态，不持第二时钟或复制曲线，Task只报告原实例区段事实，不决定Main/End业务。提交共享接口冻结结果和最后源码停写证据即可，不新过程JSON。Movement、玩家GA和Input仍只读，待两接缝准备后另开整链消费者批次。原Locomotion/Set/旧ActionProfile、引擎/GAS源码、资产与笔记不在此写权内；无UE/build/Git窗口，不以实施授权当作已完成。
 
-玩家攻击后继需求已获真实玩法决定：Main 锁定普通 Walk/Run，由动作位移接管；End 可由移动输入打断收招并恢复普通移动。玩家战斗组长 `01a0ebc0-8780-7f92-86d0-2f028f08f147` 牵头，Movement 参与，先有限只读协商既有 ActionMotion／移动限制／收尾接口及必要唯一文件范围；没有源码、资产或公共 UE/build/Git 写权。不得借该决定恢复七旧 Locomotion 曲线 DA，动作曲线来源和接线由组长依照已迁移的职责自行收敛；必要范围交回后由统筹登记互斥实施。本段覆盖下文“具体限制窗口待用户选择”的历史停点，不改变未验状态。
+Input只读协商已交回，第三条互斥底层线开放给原Input组长 `01a0e5b5-276c-7ea0-b469-4797f5059e2b`：仅 `Source/GGYGO/Input/GGYGOMovementInputTypes.h`、`GGYGOPlayerInput.h/.cpp` 三件，向原Session提供Held／NotHeld／AwaitingPhysicalProof／Unavailable明确查询，旧bool入口转接并保持原可见条件及诊断，不解析Error分类、不新增物理状态/订阅/时钟/网络字段。作者与Movement/牵头冻结接口后自主实施，Hero无新文件或通知链；其它Input、Movement与玩家GA仍零写权。该三件与上文五底层文件互斥，全部作者停写后才统一编译及必要整链烟。原笔记均继续冻结，进行中仅保留本排程必要接口/范围，不重画或新过程JSON。
+
+Input三件已落盘、自审并明确停写，统筹实际diff/范围/空白检查接受；公开四态const查询与旧bool转接只有一个事实检查，尚未编译或动态验证，Input写权关闭。现接力开放Movement原作者七件：`Source/GGYGO/Character/Components/GGYGOCharacterMovementComponent.h/.cpp`、`GGYGOActionCurveRootMotionSource.h/.cpp`、新增 `Source/GGYGO/Character/Data/GGYGOActionMotionEvaluation.h/.cpp` 与既有 `Source/GGYGO/Character/Tests/GGYGOActionMotionTest.cpp` 必要适配。沿已直接确认的Animation source DTO/Build/Validate/Map和Input四态接口实施，共享公开签名由原作者保持冻结；Action唯一资源槽/RMS执行原动画Pos分片差分、Main压普通平移/转向、End精确交接、原请求资格薄查询/通知均由Movement独占，不新增Combo阶段/曲线副本/第二时钟/协议或默认方向速度。正常末区间与显式取消分开，原严格断言保留、不扩矩阵。Animation/Task两作者仍其原范围，合计最多三条源线；玩家GA继续只读，等待Task停写后接力。源资产/旧ActionProfile/Locomotion/Set/笔记与公共build/UE/Git继续关闭。
+
+Animation原动画动作源两件、Task三件均已实际完成、自审冻结，统筹全文/diff、范围、空白及交接身份接受，写权关闭；原Source只有资产描述与区间映射，Task只有原实例段事实/即时快照，曲线求值和执行仍属Movement，尚未编译/运行。Animation源槽释放后已正式开放玩家战斗牵头五件：`Source/GGYGO/AbilitySystem/Abilities/GGYGOPlayerComboAbility.h/.cpp`、`GGYGOComboTypes.h`（仅必要配置）、既有 `Source/GGYGO/AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp` 与 `GGYGOPlayerComboLifecycleTestTypes.h` 必要适配。消费已直接确认的原Source、Task段事实/快照及Movement公开契约，自主实现Main动作接管和End当前Held/后续合格请求取消，精确原激活/Step/Task/资源清理；不复制物理输入/CMC阶段或用LooseTag补丁。该五件与Movement七件互斥并行，覆盖上一段“GA等待Task停写”的旧接力条件；公共接口保持冻结，编译仍待全部作者停写。生产角色GA的三项MotionSlotName资产配置只为后继候选，当前没有资产/UE/build/Git/笔记写权；原测试断言/故障保留，不扩矩阵。
+
+玩家攻击后继需求已获真实玩法决定：Main 锁定普通 Walk/Run，由动作位移接管；End 可由移动输入打断收招并恢复普通移动。玩家战斗组长 `01a0ebc0-8780-7f92-86d0-2f028f08f147` 牵头，Movement 参与，已按上述互斥范围进入实现；不得借该决定恢复七旧 Locomotion 曲线 DA。动作曲线来源和接线由组长依照已迁移的职责自行收敛；本段覆盖下文“具体限制窗口待用户选择”的历史停点，不改变未验状态。
+
+独立FX诊断窗口排队（2026-10-06）：已核实FX长期会话中用户授权转交斗篷固定缺片诊断并协调只读UE，未授权修复或保存。当前系统UE/构建进程及8000/8001监听均0；先完成攻击源码停写、Gate92统一构建、角色GA最小接线及必要烟，再由统筹提供同一编辑器端点，FX与原渲染组长顺序只读核对Section/LOD/材质绑定。双方可继续现成离线诊断，不自行启动/操作UE或扩资产/源码权，保护批外BP_PC_Pyrios等改动，不让该窗口请求阻断现攻击实现。
 
 最新有效状态（覆盖本节以下旧窗口）：Source `6b7361d` 已push，Gate91编译exit0及原四烟3Success/1Fail；两Stop三值精确保存与冷读通过。七旧DA已按用户追加要求完成实际退役：准备CLI session40123/PID42108 exit0、八原包备份/Set七null/十九参数保持/完整incoming为空，正常退出后统筹精确离线删除七uasset；冷CLI session5491/PID23288 exit0、`VerifyPyriosLocomotionRetirement_20261005.json` completed，七包与Registry目标/依赖节点缺席，Set七null/参数/源包/备份保持、dirty=[]。两临时脚本作者冻结，资产/源码/UE写权关闭；未验的raw骨键/Channel、正式Run/网络/攻击位移仍开放，不扩严格矩阵。
 
