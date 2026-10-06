@@ -2,9 +2,53 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
-## 当前有效批次：玩家攻击25件已冻结，R4编译与必要冒烟交回（2026-10-06）
+## 当前有效批次：攻击位移/动作姿态必要烟验收，集中图文与Git交付（2026-10-06）
 
-最新有效覆盖（Gate99）：Editor成功（4 actions、12.45秒）；正式地图同三叶3Success/0Fail/0Error。两个原角色首段End场景实际W/攻击、原实例尚余0.490826/0.492855秒立即停止，原Completed/来源/资源与正常真实Run/curve/位移均通过；XYZ原生物理叶0Warning，End各4个启动/PIE收尾Warning保持。Gate95–98原失败不覆盖。UE9464已正常退出，原生关闭OK、实际零UE/LiveCoding，只不保存自测/Temp/Untitled_1。七份Source已中文提交并push `1b9acd6`、工作树clean；全部源码写权关闭，下面旧测试开放条目不得恢复。下一完整姿态链候选Animation八源＋Task两源＋玩家GA一源/唯一ABP资产已经收敛，但尚未正式授写；同一根因链不扩无关矩阵，资产和编译仍由统筹公共窗口安排。
+Gate101-R2 已实际编译Succeeded/exit0（4 actions、10.45秒，DLL `CFD75DFA…`），原六叶12.444705秒，报告3Success/3Fail保持原样。正常End两叶与XYZ成功；两Pose故障全部原行为断言PASS，各2条故意缺失依赖的生产Error保留。恢复叶无断言失败，完整 NativeMomentumBoundary 与 FailedRequestRecovery 标记均到达：64→48.640→42.988cm/s正常制动、拒绝未准入输入/RMS、保留他人源、停止后的外部写入被拒；3条真实负向Error仍使Automation=Fail，不过滤或改绿。Gate101/R1真实失败已有限复验关闭，网络/Cook/完整混合未验不扩本批门禁。UE35924正常关闭，仅不保存两个自测Temp空包，close=OK，读回零UE/LiveCoding；16保护盘文件保持。
+
+本轮写入窗口现全部关闭：三个相关组长已明确停写并actual completed。21份模块图文加统筹四入口集中校验25/25通过，10Canvas的JSON/ID/端点/边标签与500个文件内去重wiki链接可解析、无重叠Warning，不宣称Obsidian UI渲染。Source `3746f55`与笔记 `9f13ff7`已中文提交/push；本次父仓提交交付单ABP、Editor节点与子仓指针。笔记暂存采用所属语义增量，原布局/特效文本留在工作区；新Movement节点在提交的原布局单独避让，不覆写实际工作区。其他未提交配置/蓝图保持。C12真实政策未决、C15外部Borrowed提供者未实现及网络/表现未验继续留账，不因此恢复任何源码/UE写权。
+
+本轮生产源码/资产写权全部关闭；下述文档租约已完成、自审停写并关闭：运行时Animation七件（含新动作姿态说明/子图）、Movement七件、AbilitySystem七件。它们只同步核实接口/资产/流程/有限验收及剩余边界，保留原ID/顺序/布局与他人文本，未改架构或源码；根计划蓝图/模块参考/实施状态/自查、AAADocs全局与Git仍由统筹唯一维护。不得从本段或后续历史记录推导续写权限。
+
+### 前序窗口与失败证据（历史，不授予当前写权）
+
+Gate101-R1 已实际编译 Succeeded/exit0（8 actions、25.06秒，新 DLL `DC7B1352…`），统筹自行新 UE50568 跑原六叶：3Success/3Fail、12.578999秒。End剩0.492116/0.492420秒即停并恢复真实Walk/Run，XYZ通过；两Pose故障的原清理/后继/收尾行为PASS，各两条生产Error保留，没有额外Movement错误。恢复叶原断言仍真实失败；新增有限诊断明确 Coast=(48.640,0,0) 后 Rejected=(0,0,0)、CapsuleDelta=(0,0,0)，Mode=Walking、Input/Curve=0、MaxSpeed=0、Override=1，合法动量被清零，不归为预期故障。原 R1 报告/日志保留。UE已正常关闭，只不保存自测两个空Temp包，close=OK、零UE/LiveCoding，16保护盘文件保持。
+
+R2 返修已自审并明确停写，三件交接读回匹配（h `EC491553…`、cpp `4639361E…`、既有test `630E489E…`）。真实根因是 UpdateVelocityBeforeMovement 早于 StartNewPhysics，原生 bMovementInProgress 尚未置true；仅修正该阶段条件，保留同角色/胶囊/当前区间快照，以及物理内原生结果身份守卫。原断言、生产Error、其他RMS资源与动量政策保持，无新增叶/范围。返修写权关闭，全部Source/资产/Obsidian冻结，diff --check成功、UE/LiveCoding零；统筹统一R2编译和原六叶必要烟，尚未运行，旧失败证据保留。
+
+Gate101 六叶实际完成，3Success/3Fail，报告 `Saved/AutomationReports/GGYGO_Gate101_MovementAdmissionSmoke_20261006_MCP.json`，12.525862秒。正常End两叶0Error（剩0.498866/0.498761秒即停，Walk与真实Run/曲线/胶囊移动均到达）、XYZ叶0Warning；两个Pose故障原清理/后继/自有PIE行为断言PASS，各两条真实生产Error保留，原Runtime额外Movement Error消失。恢复叶原两坏曲线Error、请求3健康恢复及合法无请求胶囊制动均到达；新未知Override＋未准入Acceleration/RequestedVelocity场景真实断言失败，后续外部速度/完整恢复收尾未到达，不能标整个需求通过。故障入口实测 NativeMomentum=1、Velocity=(48.640,0,0)、Acceleration=(0,2048,0)、RequestedVelocity=(0,128,0)、源UnownedGroundAdmissionProbe；断言后速度尚无读回，不猜唯一原因。UE1600已正常关闭，仅不保存自测/Temp/Untitled_1与_2空包，原生close=OK、实际零UE/LiveCoding。
+
+Gate101-R1 返修已交回、自审并明确停写：CMC.h `EC491553…`、CMC.cpp `2782765E…`、既有恢复测试 `630E489E…`。实际原生 PerformMovement 在物理前直接累加 Override，先前只守 ApplyRootMotionToVelocity 未覆盖该入口；改用原生 UpdateVelocityBeforeMovement 检查本次 move 的有限快照，不恢复上帧速度、不移除其他持有者的 RMS。原断言与真实 Error 保留，既有失败分支仅加有限向量诊断，没有新增测试叶。统筹实际核对 15/15 源码交接、相关作者 idle/停写、diff --check 成功，UE/LiveCoding 为零；三件返修写权关闭，全部 Source/资产/笔记冻结。进入统一 R1 编译与原六叶必要冒烟，未运行不能标通过，保留原 Gate101 失败报告。
+
+Gate101 源码窗口关闭：Movement 原作者已完成三件、自审并明确停写，无在途写入。统筹最终 diff/原断言及实际交接核对通过：CMC.h `70A4E8EB…`、CMC.cpp `CCAE7685…`、恢复测试 `284CADBE…`，diff --check 成功；新原生物理结果记录不提供输入准入或第二执行器，未准入 Override 不能跳过正常原生制动。原 FAILED/真实新请求、精确原动作取消、空气 Z 与后继保护保留。网络分支仅静态核对，原 frame646 仍待实测。三件写权关闭，其余姿态12件及资产继续冻结；统一构建前实际 UE/LiveCoding 为零，进入统筹 Gate101 编译及既定六叶必要冒烟，未运行不能标通过。
+
+Gate101 Editor Succeeded / exit0，176 actions、115.41秒（含 RiderLink/工程插件及 PCH 重建，UBA112.32秒），运行时及Editor均重新链接；原 C4996、UEFormat弃用警告和旧失败证据保持。构建日志 `Saved/Logs/GGYGO_Gate101_MovementAdmission_Build_20261006.log`。Source及资产继续全冻结，进入统筹新编辑器/8001正式地图的六叶必要烟，尚未运行，不以编译成功代替动态验收。
+
+最新唯一源码窗口：Gate100五叶为3Success/2Fail，两个Pose故障的清理/后继/自有PIE行为断言PASS，生产Error原样保留；Runtime故障另有一条Movement准入Error尚未闭合。Movement已只读确认普通准入将Velocity物理结果与Acceleration/RequestedVelocity请求合并，原OwnerInvalidated动作释放不清原生动量，实际触发向量仍未采到。现授权原Movement组长独占 `Source/GGYGO/Character/Components/GGYGOCharacterMovementComponent.h/.cpp` 与既有 `Source/GGYGO/Character/Tests/GGYGOLocomotionMovementTest.cpp` 三件，独立设计并修正请求准入与无请求物理收束的职责边界，保留真实请求拒绝/失败门禁/原生碰撞与动量政策，不在GA或Animation吞错/补请求、不盲清后继或外部RMS、不增加兜底或矩阵。允许沿既有once日志补必要向量来源证据；内部实施不逐方法审批，改变可见取消/动量政策或公共接口须先交具体问题。其它12件姿态源码、所有资产/笔记保持冻结；UE38424/8001仅统筹测试，不构建。作者自审停写后统一构建，沿用原Runtime故障、两个正常End、XYZ及既有FailedRequestRecovery必要叶，不另扩严格回归。
+
+Saved姿态观察脚本已自审停写并由统筹全文读回，10028bytes/SHA `A1147A2A…`；通过正式编辑器Python控制台执行并复用原Held叶，1Success/0Error/4Warning，End剩0.491050秒立即停止后Run成功。原PIE最终Mesh姿态有147次post-tick采样/Main（146种BodyXYZ，不等于147次独立Evaluate），Bip001组件Z范围19.342265～51.118433cm（起伏31.776168cm）、XY误差约0.00000175cm；原World结束后注销，无读失败，不声称最初0.150655秒/Slot中间量/Cook/联机或未观察的End姿态。脚本写权关闭，Source/资产仍未提交；原五叶失败报告及额外Movement问题保持。UE38424随后正常关闭，仅不保存自测临时`/Temp/Untitled_1`空包，读回零UE/LiveCoding；作者完成冻结前不构建。
+
+姿态 Gate100 构建窗口：上述后继 11 件生产源码及唯一测试 cpp 均已由原作者完成、自审并明确停写，Animation 牵头确认全部 12 件无在途写入；统筹已读回接受，最后测试为 165086 bytes / SHA256 `07BCC732…`。全部源码写权关闭，当前仅统筹可统一编译。唯一 ABP 迁移仍待新 DLL 编译成功后另开资产窗口；正常两 End 叶、XYZ 物理叶与新增两 PoseFailure 叶待该窗口交回后执行。负向真实 Error 保留，行为断言与 Automation 整体状态分别验收，不能将静态冻结标为动态通过。
+
+Gate100 首编 Failed / OtherCompilationError / exit1，26.47 秒：唯一错误为 `GGYGOAnimNode_ActionPoseSlot.cpp:453` 选择了受保护的非 const `FAnimInstanceProxy::GetMontageEvaluationData`（C2248），测试与其它本批编译动作未报错。原日志 `Saved/Logs/GGYGO_Gate100_ActionPose_Build_20261006.log` 保留；尚未启动新 DLL 或资产迁移。现仅重新授权 Animation 原作者独占该节点 cpp 修复合法原生读取入口并自审停写，公开合同、其它 11 件、资产及 UE/build/Git/笔记继续冻结；不改 UE/GAS 库或新增 Proxy/第二播放状态。停写后统筹统一 R1 重编，不用旧 DLL 代验。
+
+上述返修范围现覆盖为 Animation 原作者独占 `GGYGOAnimNode_ActionPoseSlot.h/.cpp` 与 `GGYGOMontageGuardAnimInstance.cpp` 三件，取消仅节点 cpp 的旧限制。两重载皆 protected，没有合法 worker 全元数据数组读取入口；必需 Montage 资产/Profile/additive 校验迁回已有 Guard 的原生 GT NativeUpdate，节点只消费该轮有明确有效期的能力诊断并继续原 native Slot/WeightData/Source hook/实际姿态校验。纯底层正确性修正，不改播放政策、公共 Ticket API/Task/GA，不删必需校验、不借 friend/强转或加 Proxy/帧调度器；原 native 输入只读一致性检查不能成为第二份权重权威。其余九件继续冻结，三件自审停写后再统一 R1 构建；UE/资产/笔记/Git仍未开放。
+
+三件 R1 返修已由原作者完成、自审并明确停写，统筹实际读回与最终交接一致（node.h `0E93875C…`、node.cpp `A95135C9…`、Guard.cpp `815C1B85…`），写权关闭，12件再次全部冻结。必需校验保留在原 GT NativeUpdate，原生 WasSynchronizedCounter 接受同 counter 或落后一次；冷启动发布清理迁到原生 GT OnInitializeAnimInstance，延迟 worker 图初始化不清本轮结果。公共合同及其余九件保持；进入统一 R1 构建，尚未证明新 DLL/ABP/动态链通过。
+
+Gate100-R1 Editor Succeeded / exit0，9 actions、14.96 秒（UBA12.80秒），已链接新的运行时与Editor DLL。原 C4996 与首编失败保持；Source仍全部冻结。统筹现启动正式地图与8001原生MCP，待实际就绪后另开唯一ABP资产接线窗口；编译通过不替代ABP/正常姿态/故障退出动态证明。
+
+Gate100 单ABP窗口现仅授权动画资产原组长 `01a0ebeb-4283-79b1-8ecc-9edae131297b` 独占 UE38424 / 原生MCP8001；实际IsPIERunning=false，已加载R1新DLL。唯一可写生产包 `Content/BP/Anim/ABP_Pyrios.uasset`：保留原StateMachine/其它图和父类，以已编译Action Pose Slot替换原FullBody Slot与后置全轴Replace校正，避免双校正；节点FullBody、AlwaysUpdateSourcePose=true、Bip001/Root及原锚点(0,0,50.802)，Guard角色声明RequiredPoseCorrectionSlot=FullBody。作者自行核对真实菜单/引脚/原图、精确备份、保护包和dirty，逐单包编译/保存/读回；若Root实际需要Mesh骨保留或其他包改变，报告事实而不自行扩大。Source/其它资产/笔记/build/Git/PIE继续零写权，不SaveAll或保存/丢弃他人脏包。完成并明确无在途UE请求后归还窗口，再由统筹自行跑必要整链测试。
+
+实际身体Z检查仅另授 Animation 运行时原作者一个 Saved 文件 `Saved/ValidationScripts/ObservePyriosActionPose_20261006.py`，与ABP资产作者文件互斥。使用已核实官方UE Python公开 GetBoneIndex/GetBoneName/GetBoneTransform 当前组件空间入口，严格原PIE/角色/primary mesh/model/AnimInstance身份、有限原日志；只观察原生post-tick、超时/结束统一注销，不启动/停止PIE、不输入/手Tick/forceEvaluate、不改Source或资产/配置，不新增插件/bridge/运行夹具/结果文件。脚本先实现自审停写，执行只由统筹待单包窗口交回后排队；现MCP无live bone入口，不绕Programmatic沙箱。该观察仅补最终Mesh姿态变化，不能独立声称CompactPose/Slot中间量/精确混合数学/Cook或联机已验。
+
+单ABP窗口已完成并关闭：原资产作者明确停写、无在途UE请求；目标439793 bytes/SHA `5088D779…`，精确原包备份保持。统筹独立核16盘文件，仅目标改变，其余15保护相同；主图7→6节点、旧Slot/ModifyBone删除、其余24图及原父类/配置保护与保存后读回交回。只检查列明package，不冒称全项目无脏包。UE38424/8001现由统筹接管，资产/Source写权关闭；先执行已定五个必要原生测试，实际姿态Saved观察由运行时作者在互斥文件准备，不阻塞本轮烟，后续只复用必要正常输入场补观察。
+
+姿态合同的必要验证范围补充：Animation 牵头确认 11 件生产源码已落盘，Task 与玩家 GA 已配对修正 EndTask 清 Ability/标记 Garbage 后的历史 Failed 接缝。现另外仅授权原玩家战斗作者独占既有 `Source/GGYGO/AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp`，复用原正式 PIE/输入/资源夹具补两个有限场景：必需姿态配置缺失时播放前拒绝，以及运行中原姿态票失败时即使 GA 不允许用户取消也结束原动作、归还原 Montage/CMC 资源且不影响后继。不修改旧断言或生产业务、不新增测试框架/严格矩阵、不扩 TestTypes 或其他文件；必要接口缺口先交牵头协调。该测试作者与 Animation 生产作者文件互斥，可并行；普通 End 两烟与 XYZ 物理叶保持。所有生产与此测试源码必须实际停写后才统一编译；唯一 ABP 接线和 UE 实测仍由统筹后续排队开放，未编译、未动态验证不得标完成。此前测试写权关闭的历史描述不再限制本条唯一新范围。
+
+最新有效覆盖（Gate99）：Editor成功（4 actions、12.45秒）；正式地图同三叶3Success/0Fail/0Error。两个原角色首段End场景实际W/攻击、原实例尚余0.490826/0.492855秒立即停止，原Completed/来源/资源与正常真实Run/curve/位移均通过；XYZ原生物理叶0Warning，End各4个启动/PIE收尾Warning保持。Gate95–98原失败不覆盖。UE9464已正常退出，原生关闭OK、实际零UE/LiveCoding，只不保存自测/Temp/Untitled_1。七份Source已中文提交并push `1b9acd6`，父仓检查点`42531f5`已push，批外四项保持。旧End测试写权关闭，下面旧开放条目不得恢复。
+
+当前新有效范围：Animation运行时牵头与Task/玩家GA已冻结最小姿态合同，统筹授权11个互斥生产Source，组长直接实现，无逐方法过目。Animation原作者独占新`Source/GGYGO/Animation/Nodes/GGYGOAnimNode_ActionPoseSlot.h/.cpp`、新`Source/GGYGOEditor/Animation/GGYGOAnimGraphNode_ActionPoseSlot.h/.cpp`、既有`Source/GGYGO/GGYGO.Build.cs`、新`Source/GGYGO/Animation/Runtime/GGYGOActionPoseContract.h`及既有同Runtime的`GGYGOMontageGuardAnimInstance.h/.cpp`八件。AbilitySystem原作者独占`Source/GGYGO/AbilitySystem/Tasks/GGYGOAbilityTask_PlayMontageAndWaitForEvent.h/.cpp`两件。玩家战斗原作者仅独占`Source/GGYGO/AbilitySystem/Abilities/GGYGOPlayerComboAbility.cpp`一件，保持Gate99有限诊断及全部已验证End/输入/动作语义；既有test.cpp关闭。共享叶头与公开签名由Animation唯一写入、先交参与作者冻结实际声明，参与作者直接协商匹配，不另造临时接口。原native Slot hook/权重/执行复用；Guard仅自身逻辑合同与原ticket查询，Task仅Required模式启用UE原GameplayTasks只读Poll，typed Failed精确清原资源后由原GA必需End，不加第二时钟/执行器/兜底、不改UE/GAS库。原Root实际RequiredBones可能缺席须明确失败并报告，不猜补骨/socket或扩大范围。生产资产（候选唯一ABP_Pyrios）、测试、UE/build/Git/笔记仍未开放；资产作者只读准备接线，完整Source全部停写后统筹统一编译/单资产窗口/必要烟，不扩严格矩阵或每步骤更新图文。
 
 最新有效检查点：Gate92-R4 Editor Succeeded（6 actions、60.71秒、exit0，DLL `7D2E1C75…`）；16个既有必要叶10Success/6Fail/0Warning。动作原loop100、真实Model求值、WalkRun数学/端点、配置、权威回放及正常Combo/Section归属全部Success，原曲线读取根因的必要Editor链已通过。6Fail保持原故障GE/Builder/Shape诊断、Task原播放被后继取代的拒绝、旧raw重入17E及Recovery两非法曲线Error；旧重入14条断言与R3实际比对差异0，Recovery实际RecoveredInputRequest=3到达，不吞Error或冒称全绿。报告 `Saved/AutomationReports/ModuleRepairGate_20261006_92_R4_Smoke/index.json`、构建/冒烟日志保留。整批25件及全部资产/笔记写权仍关闭；下一窗口仅角色GA三项MotionSlotName最小接线及必要生产烟，由统筹另行提供8001独占编辑器。正式Held/Run、Main/End实景、Cook与网络仍未验，不扩严格矩阵。
 
