@@ -1,5 +1,51 @@
 # 第 13 工作线 E7/E8 验证与交接
 
+状态：本次 E8 最终 Current 结算、有限内部 Base、原帧提交消息、客户端原生 NetReceive 上限投影及 Router 生命周期需求已完成约定门禁。Gate103-R5 实际统一 Editor 构建 Succeeded/exit0；旧 HealthMessage 13 叶与新 2 叶全部 Success、0Error/0Warning。客户端冒烟只证明原生回调合同，真实网络与更广生命周期边界保留。下方早期轮次、旧“meta 待决/E8 未关闭”及子租约描述均为历史，以本节当前契约与证据为准；不能推导新增写权。源码/测试继续冻结。
+
+## E8 当前契约与 Gate103-R5 验收（2026-10-06）
+
+### 根因与已确认决定
+
+- 旧结算把 Current 目标传入 GAS Base setter；持续乘法/加法 GE 会再次聚合，造成最终资源偏离本次目标。Health/Poise Base 与 Current 共用 `0..Max/MinimumHealth` 边界，也无法表达加法 Buff 下需要的负 Base。
+- 用户决定：Base100 ×2 → Current200，Damage10 → Current190，移除 Buff → 95；Base100 +200 → 300，Damage110 → 190 需要 Base−10，移除 Buff → Current0，沿既有死亡处理。有限内部 Base 允许越界；可见 Current 保持 `0..Max` 和对应 MinimumHealth，不新增复活/补偿。
+- Messages 牵头维护 HealthSet 与原帧事件；AbilitySystem 原作者提供薄计算接口。ASC 按真实原生资格、逐通道唯一有限逆解与正向舍入回验返回 Ready/Rejected/Stale，不写属性、不建第二聚合器状态或业务公式。客户端显式同 Base 模式独立于权威逆算。
+- 元属性清理 setter 能引发真实重入，因此不能提交 Pre 阶段的候选。Post 在清理回调返回后重读 Current/Max 和聚合来源，立即沿 GAS 写入；原标记的真实 Post 值证明该次提交，后来的 Current 不替代历史。拒绝或未确认只撤原帧 Damage 候选，不伪造整体 GE 回滚。
+- Max 复制在原生 batch 尚开放时，短标记可能早于 dirty 回调清除；无 Max 聚合器的宏又只广播。HealthSet 在原 NetReceive 保存弱源请求，Super 收尾后先清请求再取真实同 Base 重算；非批处理 OnRep 同步执行，真实嵌套写入保留自身边沿与消息。
+- Router 缺失原来可能静默丢消息。现逐项区分 Delivered、真实生命周期 Retired 与 DependencyFailure；无效 Owner、缺 World/GI/Router 有定位诊断，原因恢复前只报告一次。结算及属性委托保留，旧事件不追送；合法 PreBeginPlay 和零监听者不作为错误。
+- R4 的隔离 DependencyWorld 曾跳过 InitWorld 却执行 DestroyWorld，产生清理 Warning。夹具恢复原生 CreateWorld 默认初始化，保留原断言与资源清理；R5 对应叶已无该 Warning，R4 原报告保留。
+
+### 实际统一门禁
+
+| 证据 | 已读结果与范围 |
+| --- | --- |
+| `Saved/Logs/GGYGO_Gate103_R5_Closure_Build_20261006.log` | Succeeded，10 actions，145.63 秒；统筹确认 exit0，全部源码作者冻结后构建。 |
+| `Saved/AutomationReports/GGYGO_Gate103_R5_Closure_Smoke_20261006_MCP.json` | 合并 23 项全部 Success、0Error/1Warning；HealthMessage 15 项全部 Success、0Error/0Warning。唯一 Warning 属于 Teams 合法不可取消拒绝，不计为 Health 失败或警告。 |
+| `Saved/Logs/GGYGO_Gate103_R5_Closure_Editor_20261006.log` | 原生日志保留，隔离 World 正常初始化/清理；故障分支的预期诊断按用例精确次数验证。0Error 是自动化汇总，不表示故障日志被删除。 |
+| `Saved/AutomationReports/GGYGO_Gate103_R4_Closure_Smoke_20261006_MCP.json` | 历史整体失败及 DeliveryLifecycle 清理 Warning 保留，不改写为通过；后续结果单独由 R5 证明。 |
+
+统筹通过原生接口确认本轮 UE 进程 68600 非PIE，窗口显示“所有已保存”，随后正常关闭；本轮未执行SaveAll或保存用户资产。本模块未自行执行构建、UE、资产或 Git 操作。
+
+### 本轮必要冒烟
+
+既有表中 12 项断言与夹具正文保留，并在 R5 全部 Success；以下三项也在同一 R5 新 DLL 实际运行通过。共同前缀仍为 `GGYGO.AbilitySystem.HealthMessage.`。
+
+| 后缀 | 实际证明 |
+| --- | --- |
+| `DeliveryLifecycle` | 合法 PreBeginPlay、零监听者、缺 World/GI/Router 的定位/抑制/恢复、meta 与委托继续完成、不追送旧事件；真实 World teardown 与 OnPoiseChanged 中 Actor 销毁退休后续消息。隔离 World 清理无 Warning。 |
+| `CurrentValueSettlement` | ×2 后 Damage10→190/移除→95；Healing、PoiseDamage、Max 下调同一 Current 契约；+200 下 Damage110→190/Base−10、移除→0及既有死亡；半倍率治疗后的 Base200/Current100。meta 清理回调改变聚合后重新计算，原 OwnPost290 后再治疗300仍保留原 Damage；Override 在 Pre 或清理回调后造成不可逆时明确拒绝且无假成功消息。 |
+| `ClientMaxNetReceive` | 合法模拟客户端角色与原生 authority cache；真实持续 GE，有/无 Max 聚合器；PreNetReceive→Max OnRep→Super PostNetReceive 收尾后 Health/Poise 限幅、Base 保持100、GE仍存在、仅实际 Changed、无伪造消息/重放；非批处理 OnRep 后原生回调的真实直接归零保留自身 PoiseBreak。 |
+
+### 静态同步、责任与剩余边界
+
+- Messages 四源码与 ASC 两源码均已由原作者实施、自审停写后进入 R5；不改 UE/GAS 源码。HealthSet 持数值/边沿与调用局部事实，ASC 持原生聚合计算，Router 只派发，未增加循环依赖、第二权威状态或帧调度器。
+- 数值失败明确诊断，不用固定速度、默认资源、另一个能力或成功结果掩盖错误。客户端请求只存原 NetReceive 的弱来源/属性标记；在回调前移除，请求失效不无限等待或重试。
+- 本次集中更新 Messages 结构 MD、结构/流程 Canvas 与本记录；结构只放当前职责/关键接口，流程只放实际调用与分支。保留已引用复制作用域锚点、原节点/边 ID 和可复用布局，实际 Canvas JSON/引用/容量与回读结果在交回时报告。静态检查不等于 Obsidian 原生视觉验收。
+- 本轮 `ClientMaxNetReceive` 是真实 ASC/GE 加原生 Pre/Post/OnRep 的同步回调合同冒烟，未证明真实包传输、网络丢包/乱序、全预测、全复制批处理或联机玩法。同步业务换算在仍开放的 native batch 内明确拒绝，不假报提交。
+- 已有聚合器下任意新持续 GE/同栈移除、嵌套 OnRep、重登记/来源迁移、同 Set 多 ASC 交错写入、dirty 广播栈任意聚合器移除/销毁和 Scope 中止均未新增完整矩阵；不把有限正常/拒绝场景通过解释成全生命周期安全。原 LateCreate 两例维持 Results21 的历史证明，本 R5 没有重新运行该独立诊断。
+- PIE 完整战斗、蓝图生产资产/消费者接线与消息网络传输未新增验收；没有 C++ 消费者的既有检索不证明蓝图不存在消费者。本次 Current/Router/原生 NetReceive 需求已完成约定门禁，上述更广边界继续保留。
+
+## 历史检查点（以下内容保留）
+
 状态：13E8-P1已获根审查及第21次新DLL完整构建Succeeded；常规52/52、旧HealthMessage12项及独立LateCreate两例均Success，0 errors/warnings，严格夹具hash未变。迟到创建场景的恢复Changed、重新打开归零锁存及Poise真实移除Break幅度5已验证。第19次2 Fail/13 errors保留历史；已有聚合器新持续GE矩阵、嵌套/重登记/来源迁移、meta及网络等边界仍未全面验，E8保持开放。13-M1结构与13-M2流程已获根审查冻结；本轮13-M3-Nav仅清理结构MD/结构Canvas两处已失效入口文字并登记两记录，四文件静态验收后冻结。源码/测试/Flow本体保持冻结，契约及证明范围未改。授权与原子范围见 `Module_Repair_Parallel_Schedule.md`、`Module_Repair_13_Subleases.md`。
 
 ## 固定范围与契约

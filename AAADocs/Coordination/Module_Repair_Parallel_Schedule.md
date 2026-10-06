@@ -2,7 +2,65 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
-## 当前批次已交付：GAS 同绑定刷新后的终止身份与 Boss 必需树启动（2026-10-06）
+## 当前批次：已验收需求的文档与Git交付（2026-10-06）
+
+Gate103-R5实际Editor编译Succeeded/exit0（10 actions、145.63秒）；原生23项必要烟全部Success，0Error／1Warning。Health15叶和Camera3叶均0E0W，C12／C5五叶保持通过，唯一Warning是合法切人拒绝。结果 `Saved/AutomationReports/GGYGO_Gate103_R5_Closure_Smoke_20261006_MCP.json`，Build／Editor日志同名保留；R4失败不改绿，真实联机／暂停Photography provider不冒称验收。全部源码和资产作者继续冻结；此前以下源码授权表及过程只保留为历史，不构成续写权。
+
+本次集中笔记写权仅恢复三个原组长，范围互斥：AbilitySystem可写Obsidian `AbilitySystem/结构.md`、`GGYGO_结构_AbilitySystem.canvas`、`GGYGO_流程_AbilitySystem.canvas`、`计划_AbilitySystem.md`；Messages可写 `Messages/结构.md`、`GGYGO_结构_Messages.canvas`、`GGYGO_流程_Messages.canvas` 及项目既有 `AAADocs/Modules/Messages/Module_Repair_13_Validation.md`；Camera可写 `Camera/结构.md`、`模式栈实现.md`、`GGYGO_结构_相机.canvas`、`GGYGO_流程_相机.canvas`、`GGYGO_流程_相机模式求值.canvas`、`GGYGO_流程_相机覆盖恢复.canvas` 及既有 `AAADocs/Modules/Camera/Module_Repair_05_Validation.md`。只同步本次已核实契约，按实际影响选必要文件，不新增过程JSON／摘要，不改源码／测试／资产／其他模块。结构图文只放当前职责／接口／关系，流程只放真实接口／调用／分支；验证轮次与边界留计划／验收，不把静态检查冒称Obsidian视觉。保留批前未提交文本／布局／ID／锚点，各自自审停写后交回。根三入口和`计划蓝图.md`的Messages既有流程导航、进度／排程、统一检查及Git仍统筹独占，不新增代理／临时会话。
+
+AS四件、Camera七件均已自审保存回读并明确停写，无在途写入；现仅Messages四件继续局部图文收尾。统筹接手AS计划页仅校正顶部旧“当前C12待决”一句为前序检查点并链接已选现状，保留原证据；其余AS／Camera文件继续冻结。AS新增数值节点与客户端分支、Camera摄影分支均已有限源码／接口核对，整批链接待Messages交回后统一检查，不再让局部链接等待阻塞作者停写。
+
+Messages四件也已明确停写，三个原组长均completed/idle，无在途写入；上述局部写权现全部关闭。统筹统一28份图文静态验收通过：14Canvas／217节点／207边、520个文件内去重wiki链接，0Failure／0重叠Warning；两处跨模块新标题实际可定位，非原生Obsidian视觉。统筹接手Messages验证记录仅校正“非PIE／所有已保存”观测措辞，未执行SaveAll或保存用户资产。Source `8bddaa3`／`d2bcd76` 已实际中文提交push且干净；当前仅精确笔记与父仓Git交付。重叠文件只纳入本轮语义；AS结构图随同步统一JSON格式，既有节点／边的非正文数据保持；原连段x布局、FX条目及批外工作不纳入提交，不再新增源码或严格矩阵。
+
+最终交付检查点：Source/main实际远端为d2bcd76，四项C12／C5／E8／Camera中文提交均已push；笔记28件已中文提交c090f5f并push，实际暂存14图与已验正文一致，原连段两处x布局与FX条目未纳入。父仓本次仅提交源码指针、进度／排程／清单及Camera／Messages两既有验收记录；原四份配置／蓝图不纳入。全部源码／测试／资产／局部图文授权关闭，无子代理；当前不新增严格回归，真实网络／Photography provider／完整资源与Created销毁等未验仍留账。后继功能另开需求租约，历史C12授权表不恢复写权。
+
+用户已在主会话确认：默认取消旧角色技能；实际待取消集合存在不可取消技能时在任何副作用前拒绝切人；蓝图明确配置的后台Continue即使不可取消也不挡切人、不请求取消。Teams牵头，与AbilitySystem直接收敛共享接口后各自实施；不再等纯技术过目。上一批全部写权关闭，历史授权不延续。
+
+| 唯一写入者 | 本轮精确范围 | 结果与依赖 |
+| --- | --- | --- |
+| Teams | `Source/GGYGO/Teams/GGYGOSquadComponent.h/.cpp`；必要烟专用新文件 `Source/GGYGO/Teams/Tests/GGYGOSquadSwitchTestTypes.h`、`GGYGOSquadSwitchTest.cpp` | 消费真实技能退出结果，保护同步重入，核实PC/Pawn实际控制结果后提交切换；保持Slot/ASC/GE/冷却归属。测试仅覆盖正常取消切换、不可取消无副作用拒绝、显式后台继续的真实结束与旧权限隔离，不扩矩阵。 |
+| AbilitySystem | `Source/GGYGO/AbilitySystem/Abilities/GGYGOGameplayAbility.h/.cpp`、`Source/GGYGO/AbilitySystem/GGYGOAbilitySystemComponent.h/.cpp` | 配置退出政策、全体前检、唯一取消执行和真实完成结果。复用Gate102同Binding终止身份，不借此续签旧输入/镜头/位移权限，不修改引擎。 |
+| 战斗模块牵头（只读） | 玩家Combo、现有输入方向/CMC和Combat目标接口 | 用户新增方向模式与三段End→首段接招仅做现状核对、模块拆分与业务待决项收敛；暂不写源码/资产/笔记，不混入C12优化提交。 |
+
+全部源码作者自审停写后，由统筹统一编译与必要UE冒烟；UE、资产、Git及全局文档仍由统筹独占。局部Obsidian仅整需求开发/必要烟后集中同步；其余文件无写权。用户已明确选择外部GameFeature借用留作后续，仍记录未实施，不作为本轮门槛；项目自管链路保留，不造生产插件或声称借用完成。
+
+Gate103首轮统一构建真实失败（exit1、113.59秒），未运行UE/三烟；原日志 `Saved/Logs/GGYGO_Gate103_C12_Build_20261006.log` 保留。现仅原AbilitySystem作者续写 `Source/GGYGO/AbilitySystem/GGYGOAbilitySystemComponent.cpp` 修正原生Spec查询API；原Teams作者续写两新测试件修正同一API及受保护取消性setter的合法夹具调用。不得放宽生产可见性/校验、删除原断言或改引擎，其余六生产件仍冻结；两作者再次明确停写后统一R1构建。
+
+上述返修均已停写，R1统一构建Succeeded/exit0（5 actions、28.79秒）；新UE24720启动真实Fatal/退出3，调用栈定位两新测试的Cooldown CDO构造中FindOrAddComponent走匿名NewObject，未到MCP/三烟。仅原Teams作者继续独占两新测试件修正合法默认子对象初始化，保留真实duration/cooldownTag及全部断言；6件生产源全部冻结。失败Editor日志保持，停写后统筹统一R2构建和原三烟，不重复启动旧DLL。
+
+R2统一构建Succeeded/exit0（5 actions、28.62秒），新UE38960/MCP8001实际运行原三烟，0Success/3Fail；共同到达AbilityExit Outcome=4/Detail=6，当前头文件核实为Stale/CallerExpired（此前误读为BindingChanged，原报告不改），正常切换与后台Continue尚未通过，不可取消叶另有presentation前后断言失败。原结果 `Saved/AutomationReports/GGYGO_Gate103_R2_C12_Smoke_20261006_MCP.json` 与Editor日志保留。现Teams继续牵头定位：原AbilitySystem作者仅恢复本批GA/ASC四件；原Teams作者仅恢复两新测试件，区分合法夹具前置与真实生产契约问题，直接对齐共同根因，不放宽身份校验或删改无副作用/真实切换标准。双方已定位退出借用ActorInfo写入Busy会关闭真实Extension Ready/CallerQuery，AS在本批范围分清两种操作的重入边界。Squad两件仍冻结；若需改其生产调用先交回具体根因与范围。统筹独占现UE只读/正常关闭及后继统一构建，所有作者停写后只复验原三烟，不扩矩阵；笔记/资产/Git仍未开放。
+
+新攻击需求已确认：每段开始重新定向，Main不持续追转；最近目标模式无合法目标明确按当前朝向空挥。三段End由首段真实请求接续，不能提前打断三段Main/无输入自动循环，待本轮收尾后独立实施。用户追加：选向/选目标策略可扩展，先提供输入方向/最近目标，通过可配置且可改键的一个抽象输入动作按策略列表轮换；不能封死两种模式或把模式权威放到Input/Camera，切换只影响下一个段开始。战斗牵头只读更新所属模块范围和唯一模式宿主，未授权后继源码/资产。C12全部玩法边界已选定，作者直接推进，不存在用户决策门禁；必要Continue场景使用不可取消实例验证已选行为。
+
+R3候选由原AS/Teams作者完成并明确停写，实际回合completed/idle；全部八件源码写权关闭。AS退出使用原C12栈scope，不再冒充ActorInfo原生写入，真实ActorInfo写入/激活等接缝仍显式排他；Teams原三叶补完整Context/Ready前置、精确NotCancelable和真实presentation前后严格相等，保原目标。统筹实际差异/范围与空白检查通过，当前UE原生查询非PIE/所有已保存且四保护资产dirty=false，已点击正常退出按钮；进程退出核实后统一Gate103-R3编译与原三烟，尚未运行不标成功。其余模块仅只读封账，無新增写权/矩阵/过程JSON；笔记/资产/Git仍关闭。
+
+R3实际统一构建Succeeded/exit0（10 actions、94.81秒），新UE16812/MCP8001原三烟1Success/2Fail：不可取消集合精确NotCancelable/无副作用通过（正常拒绝Warning保留）；正常取消与后台Continue已越过退出入口，但在原生UnPossess后报UnPossessOrRefreshFailed。原R3结果/日志完整保留。现仅原Teams作者重新独占Squad h/cpp与两新测试件，核对原生控制/ActorInfo刷新后的实际归属，修所属生产生命周期契约并保原三烟标准；AS四件保持冻结、只读配合，不抢改Character/Host/Input。必要接缝超出Teams范围时先报根因与原作者范围。统筹独占现UE及后继构建，作者全部停写后复验原三烟；不重复铺矩阵、笔记/资产/Git仍关闭。
+
+只读封账发现C5现行死亡入口未获有效最小烟，原历史夹具不具真实Extension/H/Ready，不能沿旧报告冒称通过。与Teams返修互斥的第二条源码线仅授原Character作者 `Source/GGYGO/Combatants/Tests/GGYGOCombatantDeathProjectionTestTypes.h`、`GGYGOCombatantDeathProjectionTest.cpp`：沿既有L1原生commit/真实H/Dispatching Receipt接入合法Health合同，保原MonotonicAndPersistent、LateBindingAndAvatarIdentity目标与幂等/身份/持久标签断言，无生产迁移或额外矩阵。其它源码保持冻结；两作者全部停写后同一R4构建，必要烟合并切人三叶＋死亡原两叶。Messages/E8与Camera剩余项目前仅只读收敛实际范围/业务选择，无写权；不新增过程JSON，整需求验收后才统一笔记。
+
+Camera只读核对已确认原“Stopped保留原生缓存”入口遗漏：UE5.8的UpdateCameraPhotographyOnly实际为虚函数（此前非虚判断错误），只需项目覆盖，不改引擎/PC暂停full-tick或Running摄影政策。第三条互斥源线仅授原Camera作者 `Source/GGYGO/Camera/GGYGOPlayerCameraManager.h/.cpp`、`Camera/Tests/GGYGOCameraLifecycleTest.cpp`：NotActivated/Stopped保持原缓存，Running沿已确认行为；原最小缓存合同烟复用现有世界/类型，明确是否满足摄影支持前置，不把不支持摄影的空通过当原场景动态复现。无TestTypes/其它源/资产/笔记写权；若必要类型无法表达，先报范围。三个作者全部停写后统一R4，原Offset/Penetration必要兼容烟合并同新Editor，不另扩摄影矩阵。
+
+Messages/E8只读封账确认存活宿主缺World/GI/Router时仍静默跳过真实结果消息，是独立于持续Modifier数值政策的技术缺口。现仅原Messages作者独占 `Source/GGYGO/AbilitySystem/Attributes/GGYGOHealthSet.h/.cpp`、`AbilitySystem/Tests/GGYGOHealthMessageTestTypes.h`、`GGYGOHealthMessageTest.cpp`：依真实销毁/teardown退休通知，存活缺依赖明确投递失败和有界诊断，保留既有GAS结算/委托、不造Router/重放；正常PreBegin和无监听者不误拒。沿原NativeDamageMetaReentry、PoiseEdges及最小生命周期烟，不扩聚合器/网络矩阵。Teams与Character已停写，Camera及Messages为互斥在写线；全部停写后合并统一R4及必要烟。用户随后已明确按最终显示值扣减：×2时200→190、移除后95；数值后继由Messages牵头与AS只读收敛原生逆求值接缝/精确范围，当前写权不自行扩大，也不未经选择改变死亡复活政策。资产/笔记/UE/Git写权不因本段开放。
+
+E8数值后继的兼容选择也已确认：Base作为有限内部量允许低于0/高于上限，实际Current生命/韧性仍限制在0～上限；Buff移除后Current归零沿现有死亡流程，无隐式复活/补偿。Messages牵头，AS只读核对原生资格/逆求值及正向回验；当前尚未授后继写权，不用原生不可逆时的数值回落冒充成功，也不让后继方案分析拖住Router四件交回和R4。
+
+R4编译窗口现已由统筹接管：Teams四件、AS四件、Character两件、Camera三件、Messages四件共17件全部作者明确停写，源码写权全部关闭；后继数值会话只读，不等纯方案完成。统筹实际核对差异/原叶保留及空白检查，四保护文件hash保持、UE/LiveCoding为零。只运行切人原三叶、死亡原两叶、Camera新入口及Offset/Penetration三叶、Messages原两叶及DeliveryLifecycle三叶，共11项必要烟。直接入口合同/teardown标记烟不冒称真实暂停派发/完整世界退出；原报告和日志保留。未编译运行不标通过，笔记/资产/Git仍未开放。
+
+R4实际Editor Succeeded/exit0（9 actions、131.74秒），新UE8276/MCP8001原11烟10Success/1Fail：C12三叶与C5两叶全部成功，真实控制/持久GE冷却/后台原End和死亡原目标均到达；Camera两兼容叶成功，新Photography叶在真实源准入前置失败（2Error），尚未到Stopped。Messages三叶成功，新DependencyWorld清理保留1Warning，Teams正常拒绝保留1Warning；原报告 `Saved/AutomationReports/GGYGO_Gate103_R4_Closure_Smoke_20261006_MCP.json` 和日志不改。现仅原Camera作者恢复 `Camera/Tests/GGYGOCameraLifecycleTest.cpp` 修合法活源夹具，原Messages作者恢复 `AbilitySystem/Tests/GGYGOHealthMessageTest.cpp` 修隔离World初始化/清理前置；其余源均冻结，不放宽生产合同/删断言。整C12/C5必要门禁有限接受，局部笔记待本批集中同步；E8数值仍方案收敛、尚未实施，不能称全模块结束。统筹独占UE及后继统一编译/烟，未放行笔记/资产/Git。
+
+C12八件已中文提交 `b514c1d`，C5两测试已中文提交 `4aac7e2`，Source/main两项均实际push，远端指针与本地一致；未纳入Camera/Router未复验改动。UE8276原生非PIE/所有已保存后正常关闭（16:32:50），进程/LiveCoding为零。Camera唯一fixture十行修正已停写，Messages隔离World一行初始化修正也已交回停写，均尚未复验。
+
+本轮分两条互斥源码线实施E8已选政策，不再等待技术过目：AS仅 `Source/GGYGO/AbilitySystem/GGYGOAbilitySystemComponent.h/.cpp` 提供无状态原生Current→Base薄计算/明确失败结果，不写属性、不复制聚合器/缓存；Messages仅 `AbilitySystem/Attributes/GGYGOHealthSet.h/.cpp` 与 `AbilitySystem/Tests/GGYGOHealthMessageTestTypes.h`、`GGYGOHealthMessageTest.cpp` 消费共享计算、分离Base/Current边界、真实原帧数值及客户端上限联动，不伪造消息。Messages牵头，两作者直接冻结接口后独立实施；客户端原生NetReceive延后dirty是既有接缝，来源不得猜测，不能新增tick/RPC/复制调度器/隐式补偿。必要数学/客户端烟沿既有文件最小叶，不扩全网络矩阵。Camera/C12/C5其余源冻结，全作者停写后与两个fixture修正统一R5，不边写边编译。
+
+已完成需求的局部图文集中同步可独立并行：原Teams作者仅Obsidian `Teams/结构.md`、`Teams/计划_队伍与装配.md`、`Teams/GGYGO_结构_队伍与装配.canvas`、`Teams/GGYGO_流程_队伍与装配.canvas`；原Character作者仅 `Character/结构.md`、`Character/计划_角色与组件.md`、`Character/GGYGO_结构_角色与组件.canvas`、`Character/GGYGO_流程_角色初始化.canvas`。八目标交接时均无原未提交改动，16份批外笔记保持；修过时当前口径、保历史/锚点/ID/布局/拓扑，不把有限C4/C5或切人烟扩成实角色/网络/Created销毁全部验收。全局入口/笔记Git仍统筹独占；AS/Camera/Messages局部笔记等各自完整需求门禁，不按内部函数步骤更新。
+
+AS数值两源码已交回自审停写；统一R5只等Messages四源码，不等文档。按用户纠正的结构／流程内容边界，原AS作者可并行清理既有已验证接口的七份局部笔记：`AbilitySystem/结构.md`、`GGYGO_结构_AbilitySystem.canvas`、`GGYGO_流程_AbilitySystem.canvas`、`GGYGO_结构_玩家普攻连段.canvas`、`GGYGO_流程_玩家普攻连段.canvas`，以及仅机械同步旧结构标题锚点的 `AbilitySystem/计划_AbilitySystem.md`、`AbilitySystem/计划_玩家普攻连段.md`。结构／流程不放施工轮次或测试统计；原证据留已有计划／任务记录，不新增摘要。保持未提交内容、ID／布局／拓扑及其他锚点；E8未验新契约不写成现状。根 `模块参考.md` 对应五标题锚点由统筹唯一同步；其余全局入口、源码／资产／Git范围不扩大。
+
+上述Teams四件、Character四件、AS七件与统筹三入口共18份图文已交回明确停写；统一静态检查通过，八图131节点/123边、330个文件内去重链接，无重叠Warning，不代表原生Obsidian视觉。AS／Teams节点拓扑保持，Character仅三处必要高度调整；AS玩家连段结构图相对Git HEAD另有既有工作区布局差异，不能把HEAD几何比较冒称完全一致或夹带提交该布局。图文写权现关闭，Git仍统筹唯一安排，保留批外及重叠文件原改动。源码当前仅Messages四件仍实施／自审，AS两件及Camera三件均冻结；不因文档完成提前启动R5或写入未验E8结构。
+
+Messages四件现已明确自审停写，AS两件及Camera三件仍冻结；全部源码／局部图文写权关闭。统筹实际核对九件差异与空白、真实UE／LiveCoding／UBT为零、四保护文件hash保持，已开启统一Gate103-R5 Editor编译，日志 `Saved/Logs/GGYGO_Gate103_R5_Closure_Build_20261006.log`；当前未结束，不标编译或动态通过。新DLL后只合并受影响的既有Health十三叶与新CurrentValueSettlement／ClientMaxNetReceive两叶、Camera三叶及C12/C5五叶，共23项已有／最小必要烟，不新建严格矩阵或展开原R0／Montage／全网络。入口合同仍不冒称真实暂停Photography provider，客户端原生NetReceive烟不冒称全网络验收。原报告／失败保持，笔记及父仓Git尚待统筹精确交付。
+
+## 上一批已交付：GAS 同绑定刷新后的终止身份与 Boss 必需树启动（2026-10-06，以下均为历史）
 
 当前所有写权关闭，以下Gate102过程与原授权范围仅为历史，不可推导续写。R3统一Editor Succeeded/exit0（4 actions、13.92秒），新UE1468仅复验两个GAS必要叶，2Success/0E0W；原同Binding/后继/新Binding/自有grant清理链完整通过，带Montage/相机/CMC资源的刷新清理未动态证明。R2正式Held与Audio实际Playing/有界退出已有限接受，Boss成功/非法树行为PASS及真实Error/Fail保持。原R0/R1/R2真实夹具失败不改绿。Source `cfafe21`、笔记 `ab9db00`已中文提交/push；10份笔记集中静态核对通过，四图ID/布局/拓扑与用户原工作保留。Audio五件、Boss验证MD、AS四件与统筹两笔记均明确停写，全部Source/测试/资产/脚本/笔记窗口关闭，UE1468正常退出。C12真实玩法选择与C15实际外部提供者缺口仍未关闭；未另派矩阵或恢复任何历史租约。
 

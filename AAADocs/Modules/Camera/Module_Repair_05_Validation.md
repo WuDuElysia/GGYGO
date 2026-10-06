@@ -1,5 +1,42 @@
 # 第05批 Camera 验证与交接
 
+当前状态（2026-10-06）：摄影原生入口发布准入已完成 Gate103-R5 统一 Editor 编译及约定的三项 Camera 必要冒烟；三叶均 Success／0 Error／0 Warning。生产及测试继续冻结。此结果证明直接虚入口的准入与原生 Cache 契约，不代表真实暂停 LevelTick 派发或 Photography 插件已验收。
+
+## Gate103-R5：摄影原生入口发布准入
+
+### 根因与当前修正
+
+- UE 5.8 `APlayerCameraManager::UpdateCameraPhotographyOnly` 是 virtual 入口。LevelTick 在暂停、Controller 不要求 full tick 且 provider 支持该 World 时直接虚派发，绕过普通 `UpdateCamera`。此前只拒绝作用域外 POV setter，原生 `FillCameraCache` 仍会独立写当前／上一帧时间戳；旧笔记的“非虚”判断不准确。
+- `AGGYGOPlayerCameraManager` 现在 override 此入口：NotActivated／Stopped 在 Super 前返回，保持两帧原生 POV 和时间戳；Running 委托原生摄影链，保留既有行为。没有改变 Controller 暂停 full tick 政策、引擎代码、Hero／GA／Stack 状态归属或增加 POV／帧调度器。
+- 新叶复用原 Camera World／Pawn／Component，使用公开 Initialize、Activate、非法 ViewTargetTransition 建立 NotActivated→Running→Stopped；在调用摄影入口前以真实 World Tick 推进时间，并断言 native Fill 的时间与缓存不同。Qualified 原生对照必须实际改写时间戳，避免无支持后端或相同时间的空证明。
+
+### 统一编译与必要冒烟
+
+- 构建日志：`Saved/Logs/GGYGO_Gate103_R5_Closure_Build_20261006.log`，Succeeded／exit 0，10 actions／145.63 秒。
+- 原报告：`Saved/AutomationReports/GGYGO_Gate103_R5_Closure_Smoke_20261006_MCP.json`；运行日志：`Saved/Logs/GGYGO_Gate103_R5_Closure_Editor_20261006.log`。
+
+| 必要叶 | 实际结果 | 本次证明 |
+| --- | --- | --- |
+| `GGYGO.Camera.PhotographyPublicationAdmission` | Success／0E0W | NotActivated、Stopped 保持两帧 POV／时间戳及确认／失败状态；Running 保持原生 Fill 行为；qualified native 对照实际推进时间戳；Controller full tick 政策不变。 |
+| `GGYGO.Camera.OffsetOwnership` | Success／0E0W | 保持原单槽所有权、严格输入拒绝和原断言范围。 |
+| `GGYGO.Camera.PenetrationAggregationAndFinalResolve` | Success／0E0W | 保持原可见贡献聚合、Offset 后最终碰撞与恢复断言范围。 |
+
+R4 的新摄影叶真实 Fail 保留在 `Saved/AutomationReports/GGYGO_Gate103_R4_Closure_Smoke_20261006_MCP.json`：`CameraActivation.Component/exact-original-component-is-not-the-selected-live-source` 与 public activation 成功断言失败，尚未到 Running／Stopped。最小 Game World 的 Pawn 未经历 Actor 初始化，Camera 虽注册但未自动激活；UE 原生 OnRegister 在该前置下延后 auto-activation。返修只向测试增加公开 `Camera->Activate()` 和注册、Pawn 选定开关、默认 CameraStyle、唯一活相机前置，保留全部原准入／缓存／停止／对照断言及四旧叶正文。R5 已复验通过，不覆盖原失败。
+
+### 仍未验证的边界
+
+- 运行日志明确 `Photography supported=0`。本叶直接调用实际虚入口，并通过原生对照验证时间戳写入；没有触发真实暂停 LevelTick 支持分支、启动 Photography provider 或验证插件产生的镜头位移。
+- Running 保留既有作用域外 POV 限制与原生时间戳行为；此任务没有选择新的摄影玩法／发布政策。Stopped 由非法公开 ViewTargetTransition 建立，不把该叶扩称全部求值失败、重入或显式 Restart 场景的动态证明。
+- H1 首次 Ready／首帧／LP 投影联合链、原失败身份 Restart、生产资产和正式 ViewTarget／贴墙／模式混合／PIE／联机未由本次三叶证明。旧真实解绑叶仍只证明正常无输入会话；Input／IMC 重入、带完整镜头资源的终止链及计数耗尽等原边界保留。
+
+### 集中图文同步
+
+结构／实现页和四张 Canvas 仅记录当前职责、关键接口、算法与真实调用分支；旧轮次、数量及验证边界收存本记录。主流程新增一个摄影入口分支节点及一条派发边，保留原节点 ID、布局、颜色和正文锚点。仅修改本轮已授权的七份局部图文，源码／测试／资产保持冻结；未操作 UE、构建、Git 或创建代理。
+
+四张 Canvas 的 JSON、节点／边 ID、端点与标签均已核对；主流程新增摄影节点及派发边，其余原节点几何和属性保持，正文锚点保留。保存后读回与预期一致，wikilink 目标及锚点存在、节点矩形无重叠。此为静态检查，不代表原生 Obsidian 视觉验收。
+
+## 历史记录（以下保留原检查点，不作为当前状态）
+
 当前状态：生产和测试保持冻结；第22次完整构建成功，常规55/55 Success，Camera 四叶 errors/warnings 均0。C4本地广播及07唯一Hero输入入口已实现，新叶仅证明正常无输入会话真实解绑、存活能力与旧End保护新镜头；完整B6、后继输入/IMC重入、Avatar失配分支、死亡GE、资产/PIE/联机未全面证明。本轮仅同步结构MD/结构Canvas及两记录，历史结果按下文阶段保留。
 
 ## 验证门禁
@@ -310,3 +347,10 @@
 - 两记录仅追加本A14登记/结果，前56167/61559字节历史前缀实际SHA256仍为8A0B3878…/FB51D40A…；最终读回与hash交回前再次核对，不改既有历史。
 - 架构核对没有新增循环依赖、接口、状态/执行机制、清理责任或第二帧调度器，没有跨模块抢写；图文当前状态与既有实现/有限证据保持一致，未扩大模块职责。
 - 四文件最终冻结停止写入，全部hash随交回；本D3-Nav未运行UE/MCP/构建/自动化/Git/资产/代理，没有新增动态或屏幕验证，不自动其它MD/Canvas/全局入口收尾或下一整改。
+
+## 既有检查点与证据入口
+
+结构／实现页和流程图中的旧施工轮次、数量和验收说明已回到本记录管理，不再复制整段重复证据：
+
+- 第22／26／27次及44次严格 Offset 拒绝等历史结果，保留在上文 `05-M1-Structure`、`05-B5-StrictInput-I/T/D1/D2`；覆盖恢复、求值和主流程的旧静态结果保留在 `D3-R`、`D3-E`、`D3-M` 与 `D3-Nav`。原记录正文完整保持，按各自报告／日志引用，不从旧成功推导新合同或全面 Camera 验收。
+- Gate66 的 M1、Gate67 的 H1／L1 编译和旧必要叶检查点属于此前已验证状态；原报告 `Saved/AutomationReports/ModuleRepairGate_20261004_67_Smoke/index.json` 保留。此前 CDO／2026-09-28鼠标 PIE／正常无输入解绑的有限事实不替代本次真实暂停 provider、完整 Ready／Restart／投影、资产／Input 重入或联机验证。当前新摄影契约与实际 R4→R5 结果以上文为准。

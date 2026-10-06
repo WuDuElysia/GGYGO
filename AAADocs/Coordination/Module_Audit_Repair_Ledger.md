@@ -266,14 +266,14 @@ B0来源架构预检已交回且零写入；用户2026-10-01现已批准项目GA
 - [ ] C2 Avatar 跨宿主接管及旧宿主清理校验 ASC 身份。
 - [ ] C3 CombatantState 销毁先解绑活 Pawn，清本地订阅与缓存。
 - [ ] C4 PawnExtension 本地解绑始终广播；共享 ASC 状态仅当前 Avatar 可清。
-- [ ] C5 Health 死亡状态与 ASC tags 投影幂等，预绑定死亡状态可重放而非重复表现。
+- [x] C5 Health 死亡状态与 ASC tags 投影幂等，预绑定死亡状态可重放而非重复表现。Gate103-R4原LateBindingAndAvatarIdentity／MonotonicAndPersistent两项在真实commit/H/Dispatching/Ready合同下Success、0E0W，原身份／持久标签／幂等断言保留；两测试迁移已中文提交4aac7e2并push。此为约定必要烟验收，不含实际角色死亡表现、完整R0或联机。
 - [ ] C6 Hero 所有输入绑定记录来源组件/句柄，重初始化不重复。
 - [ ] C7 Hero retry 订阅跟随 ASC 初始化/解绑/替换，清陈旧队列。
 - [ ] C8 retry 不伪造物理 held 状态，独立排入同一 ASC 输入处理入口。
 - [ ] C9 Hero 只释放自己申请的 IMC，不能 ClearAllMappings 误删 UI/GameFeature。
 - [ ] C10 队伍容量/注册返回成功契约，Spawn 失败回收 Slot/半成品。
 - [ ] C11 GameMode 创建入口幂等，禁止重复组队。
-- [ ] C12 Slot 退出清输入/瞬时任务，有明确 GA 退出策略，保留持久 GE/CD/ASC。
+- [x] C12 Slot 退出清输入/瞬时任务，有明确 GA 退出策略，保留持久 GE/CD/ASC。默认取消与显式后台Continue分责；整集合前检拒绝实际待取消的不可取消技能，只有真实Completed后才交接控制。Slot.Owner持久归属与Pawn原生Owner分离，不强行恢复UnPossess清空的Owner。Gate103-R4原切人三项Success，真实取消／双Slot控制／GE冷却／旧输入退休／后台原End标准到达，正常拒绝Warning保留；八件已中文提交b514c1d并push。不含携带全部业务资源、完整Created销毁或联机验收，C13仍独立。
 - [ ] C13 队伍销毁/玩家断线由唯一所有者回收。
 - [x] C14 保存模型反向Accessor与具体LocalPlayer依赖已清除，P4/P5/P6随Gate63编译；P7三处PC真实消费保存请求bool已冻结有限接受并随Gate64R1编译。true不是持久化完成，C13另项。
 - [ ] C15 GameFeature 复用引擎原生使用者引用与唯一释放权；同GameInstance保留Loaded，只停用不卸载，跨World保护其它使用者和明确外部借用。
@@ -293,7 +293,7 @@ B0来源架构预检已交回且零写入；用户2026-10-01现已批准项目GA
 - [x] E5 HitImpact已有HitResult直接保留ImpactPoint，包括世界原点；2026-10-04有限源码核对。既有原点夹具为合成载荷，未证明真实碰撞有效性；无Hit的位置模式及表面默认项的隐式替代另留开放，不冒称全部Cue完成。
 - [ ] E6 距离衰减明确施放原点→命中点契约，不能算到 EffectCauser。
 - [x] E7 HealthSet唯一结算／消息源，只在正值→零且未已破韧的边沿发PoiseBreak；零追加不重复、恢复后可再破，普通削韧不发。原PoiseEdges与重入证据保留；2026-10-04统筹补读实际HealthSet路径，正式蓝图／网络E8未验。
-- [ ] E8 结果消息在属性与 meta 更新后广播，载荷快照避免重入读取旧值。
+- [x] E8 结果消息在真实属性／meta提交后广播，载荷来自原帧结算快照；Current最终值结算与有限内部Base边界分离，客户端上限依原生NetReceive批次完成后再投影，不猜来源／不加复制调度器。Gate103-R5既有13叶与CurrentValueSettlement／ClientMaxNetReceive两叶全部Success0E0W，达到用户指定的必要冒烟范围；真实联机、全Modifier／网络严格矩阵仍未验，旧失败原样保留，不扩成全部专项通过。源码8bddaa3与笔记c090f5f已中文提交push；父仓本次同步结果与源码指针。
 - [x] E9 Encounter原创建记录先退休，再停止Brain／UnPossess／State Detach，销毁只限自建对象；2026-10-04实际路径有限接受。真实World EndPlay／联机未新验，配置BT启动失败传播另留开放。
 - [x] E10 ActionSet整体合法后，仅eligible且BaseWeight>0候选参与；重复软权重耗尽只恢复这些候选，RepeatPenalty=0不锁死。2026-10-04有限源码核对与既有必要冒烟保留，不扩严格矩阵。
 - [x] E11 ActionSet唯一标签／类CDO标签／数值校验及重复Find拒绝；消费原选择先清claim，再复核原set／phase／ASC／class／avatar／spec。2026-10-04有限接受，不保证任意运行中资产内容变更。
