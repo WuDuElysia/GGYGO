@@ -2,7 +2,30 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
-## 当前有效批次：攻击位移/动作姿态必要烟验收，集中图文与Git交付（2026-10-06）
+## 当前批次已交付：GAS 同绑定刷新后的终止身份与 Boss 必需树启动（2026-10-06）
+
+当前所有写权关闭，以下Gate102过程与原授权范围仅为历史，不可推导续写。R3统一Editor Succeeded/exit0（4 actions、13.92秒），新UE1468仅复验两个GAS必要叶，2Success/0E0W；原同Binding/后继/新Binding/自有grant清理链完整通过，带Montage/相机/CMC资源的刷新清理未动态证明。R2正式Held与Audio实际Playing/有界退出已有限接受，Boss成功/非法树行为PASS及真实Error/Fail保持。原R0/R1/R2真实夹具失败不改绿。Source `cfafe21`、笔记 `ab9db00`已中文提交/push；10份笔记集中静态核对通过，四图ID/布局/拓扑与用户原工作保留。Audio五件、Boss验证MD、AS四件与统筹两笔记均明确停写，全部Source/测试/资产/脚本/笔记窗口关闭，UE1468正常退出。C12真实玩法选择与C15实际外部提供者缺口仍未关闭；未另派矩阵或恢复任何历史租约。
+
+两条源码线已自审并明确停写，实际会话均 completed/idle；统筹核对精确八件差异与原断言保留，`git diff --check`通过，UE/LiveCoding为零。六件GAS修正与两件Boss测试写权现关闭，其余Source/资产/笔记仍冻结，进入 Gate102 一次统一编译及必要冒烟，尚未运行不能标通过。Audio仅一个Saved观察脚本仍在准备，不进入构建；作者冻结后才执行脚本。C12玩法未决仍与本技术修正分开。
+
+Gate102已实际编译Succeeded/exit0（10 actions、26.95秒），新UE17692/8001运行四必要叶，2Success/2Fail。Boss有效树和原ActorInfo生命周期成功；非法必需树原行为断言PASS、两条生产Error保留。新增GAS叶在“ActorInfo captured original Controller”前置断言真实失败，未到Refresh/End；原报告与日志保留，不标通过。仅重新授权原AbilitySystem作者独占既有ActorInfoTransaction testTypes.h/test.cpp两件，核对原生Controller寻址并修正合法夹具，保留原断言，不直接写ActorInfo或伪造来源；GA/ASC四件仍冻结，生产问题须先交回准确范围。统筹唯一操作现UE完成Audio烟后正常关闭，两件自审停写后再统一R1复验，不扩矩阵。
+
+夹具R1已补齐生产Slot所要求的Owner→Controller原生归属，仅新增5行，所有原断言保留，原作者completed/idle且两件停写；Audio脚本也已自审停写，限定正式L_Movement_Test。UE17692正常退出，零UE/LiveCoding；所有Source/脚本/资产/笔记写权关闭。Gate102-R1编译Succeeded/exit0（4 actions、9.53秒）；统筹以原生ExecCmds安装只读observer，新进程/MCP有限复验原四叶并合并既有ProductionNativeHeld，尚未运行不标通过，不因界面输入框不可达另加桥接。
+
+R1新UE21608实际五叶2Success/3Fail，原报告完整保留。新GAS叶因Spec原CDO仍LocalPredicted而拒绝无本地玩家夹具，未到修正点；Held全部原End/Run行为到达，但observer读取受保护的AudioComponent.bAutoDestroy失败且自有回调已撤销，不能标音效播放通过。Boss结果保持。现仅重开AS原两测试件和Audio原一个Saved脚本，分别修合法原生激活夹具与公开只读观察契约；不取消断言、伪造source/自动销毁事实或扩生产源码/桥接/矩阵。全部生产源/资产/笔记冻结；作者停写后才统一R2构建和必要复验，现UE由统筹正常关闭。
+
+R2编译Succeeded/exit0（176 actions、114.47秒），新UE39956五叶3Success/2Fail，原报告保留。Held正常End剩0.494577秒打断并进入真实Run；Audio实际Playing、固定Sound/原Mesh与音量音高1、198样本及有界退出/回调撤销已观察，天然结束原因/AutoDestroy动态值/GC/听感不冒称。Boss有限结果保持。新GAS叶已完成同Binding Refresh后A精确End，但B的Completed计数与一次性实例End订阅不符，原断言失败保留；仅原AS两测试件续租核对原生每次Broadcast后Clear的观察生命周期，不写生产四件或扩矩阵。UE39956正常关闭。Audio脚本写权关闭，仅Audio既有契约与四局部图文，以及Boss既有14b验证MD互斥续租集中同步已完成需求；全部Source生产、资产与其它笔记仍冻结，统一R3编译待测试作者停写。
+
+上一批 Source `3746f55`、父仓 `c685cff`、笔记 `9f13ff7`均已中文提交/push，源码与21份局部图文作者明确停写。现在只授权两条互斥工作线，不恢复旧租约，不扩严格矩阵：
+
+- AbilitySystem 原组长：独占 `Source/GGYGO/AbilitySystem/Abilities/GGYGOGameplayAbility.h/.cpp`、`Source/GGYGO/AbilitySystem/GGYGOAbilitySystemComponent.h/.cpp` 与既有 `Source/GGYGO/AbilitySystem/Tests/GGYGOAvatarActorInfoTransactionTestTypes.h`、`GGYGOAvatarActorInfoTransactionTest.cpp`。结果是合法同 Binding 的 Controller/ActorInfo Refresh 后，原活 GA 仍可由精确原激活身份完成 End；旧输入/镜头/移动/播放资源的工作权限不因保留终止资格而升级，后继或换 Binding 仍不能借旧身份操作。不新增换人退出政策或 Teams 调用，不改 UE/GAS 库；模块自主分析、拆分、实现与必要有限验证。只有真实公共接缝越界才交回协调，不逐方法审批。
+- BossAI 原组长：独占既有 `Source/GGYGO/AI/Boss/Tests/GGYGOBossEncounterBehaviorTreeTestTypes.h`、`GGYGOBossEncounterBehaviorTreeTest.cpp`，只补现有生产 InitialPossess/SpawnBoss 的有效必需树启动及失败拒绝/自有资源回收的最小冒烟；先复用已有检查，不重写旧测试或展开矩阵，不改生产策略、蓝图/资产或他人 BB/BT。若发现真实生产问题，交回根因和所属精确文件，不抢写未授权源。
+
+- Audio 原组长另独占一个必要的只读观察脚本 `Saved/ValidationScripts/ObservePyriosNormal01Audio_20261006.py`，仅准备在统筹下一新DLL正式GA冒烟中观察原Notify附着到原Mesh的固定Sound组件、实际播放与有界退出。复用原公开组件差集/身份核对及既有observer模式，不发输入/播放/Stop、不改资产或运行UE，不猜组件数字为创建时间；未观测/歧义/失败明确保留。首批一次性声自然结束、不承诺Montage取消即停的既有政策不变，人工听感不由状态采样替代。
+
+两线测试/源码互斥，Audio只读脚本不进入UBT；统一编译前源码作者均须自审并明确停写，运行脚本前其作者也须停写。所有其它 Source、生产资产及 Obsidian 零写权，UE/build/Git由统筹排队。开发中只在本条与已有局部记录留必要简短状态，禁止新过程JSON/哈希快照/重复报告；整条需求完成并经过约定测试后再集中同步笔记。C12换人可见政策仍未决；C15实际外部Borrowed提供者未实现且正式来源为空，不能凭空造生产插件或改称已完成。
+
+### 上一批已交付：攻击位移/动作姿态（关闭租约）
 
 Gate101-R2 已实际编译Succeeded/exit0（4 actions、10.45秒，DLL `CFD75DFA…`），原六叶12.444705秒，报告3Success/3Fail保持原样。正常End两叶与XYZ成功；两Pose故障全部原行为断言PASS，各2条故意缺失依赖的生产Error保留。恢复叶无断言失败，完整 NativeMomentumBoundary 与 FailedRequestRecovery 标记均到达：64→48.640→42.988cm/s正常制动、拒绝未准入输入/RMS、保留他人源、停止后的外部写入被拒；3条真实负向Error仍使Automation=Fail，不过滤或改绿。Gate101/R1真实失败已有限复验关闭，网络/Cook/完整混合未验不扩本批门禁。UE35924正常关闭，仅不保存两个自测Temp空包，close=OK，读回零UE/LiveCoding；16保护盘文件保持。
 
