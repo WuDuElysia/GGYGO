@@ -15,7 +15,7 @@
 
 当前写入交接：Movement源码／观察脚本／Set全部冻结，只恢复Obsidian `Movement/结构.md` 与 `Movement/计划_移动与动作位移.md` 两份集中参数／根因／有限证据同步，结构接口不变不空改Canvas。Animation资产原作者获下一独占非PIE窗口，仅 `Content/Characters/Player/Pyrios/Animation/Movement/BS_Pyrios_WalkRun.uasset` X轴display_name规范为 `WalkRunBlendAlpha`；轴范围／样本／过滤与ABP兼容成员／引脚不改，不以显示名冒称Run根因。单包保存回读后停写归还，不PIE／构建／Git／SaveAll。统筹暂停UE操作。FX仍离线；资源组长可CLI向独立 `Pyrois_SkillFX_Evidence` 补真实Clip/binding/events/脚本布局/deps/Shader证据，旧导出不覆盖。生产仅三段普攻GA/Montage，技能与闪避入口缺口分别保留，未得源时序／挂点不得猜接或以HitWindow代替。
 
-转向需求集中同步已交回冻结：Movement两Markdown仅35插入／5删除，中文提交 `b5037a5` 已push。两份局部笔记写权随之关闭，不扩图、不改已有用户布局。实际机器结果合并留在 `Saved/AutomationReports/GGYGO_Gate107_TurnResponse_Smoke_20261008_MCP.json`，含原生叶、229样本结果与首次0样本调度失败；不是额外任务分配JSON。BS显示名小项仍由资产作者独占处理，非转向收尾阻塞，不含本次配置提交。FX离线正在写的脚本／待生成资产不进入这次Git；四份原有配置／Boss测试／角色BP及原笔记改动保持。
+转向需求集中同步已交回冻结：Movement两Markdown仅35插入／5删除，中文提交 `b5037a5` 已push。两份局部笔记写权随之关闭，不扩图、不改已有用户布局。实际机器结果合并留在 `Saved/AutomationReports/GGYGO_Gate107_TurnResponse_Smoke_20261008_MCP.json`，含原生叶、229样本结果与首次0样本调度失败；不是额外任务分配JSON。配置三件中文提交push `854cb6d`。BS显示名小项现也已由原作者单包保存／回读，仅display_name改变，轴／样本／过滤和ABP保持，全局dirty为空；原字节备份在Saved/AssetBackups，原Editor日志G108_BS_AXIS_FINAL记录实值。该单包窗口已归还、写权关闭，统筹仅关闭计划页两处对应待办并单独精确Git，不恢复模块开发或追加测试。FX仍离线，完整预检与精确目标包清单尚未交回，当前没有FX UE写权；其在写脚本／待生成资产不进入本次Git。四份原有配置／Boss测试／角色BP及原笔记改动保持。
 
 跨模块职责：FX负责材质／粒子／特效展示资源与其清理；资源解包组长负责CLI素材和真实动作关联，渲染组长只提供原移植接缝；Animation资产作者唯一写Montage／骨骼挂点，Combat唯一写GA及业务能力接入。相关组长现在可只读协商，修改其文件前冻结共享接缝并登记实际唯一作者，不由FX抢写GA／Montage。已有闪避能力若是占位，先交付可用特效和具体接入缺口，不伪造运行时闪避。Camera／移动位移／命中／伤害／音效权威保持；不改UE/GAS库，不新增特效用总状态机／第二播放时钟。
 
