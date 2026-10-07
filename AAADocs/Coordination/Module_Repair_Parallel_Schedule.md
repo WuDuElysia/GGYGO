@@ -2,7 +2,26 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
-## 当前批次：WalkRun 运动偏移（2026-10-07，约定门禁通过，仅集中图文／Git收尾）
+## 当前批次：大角度转向手感修正与Pyrios攻击／技能／闪避特效（2026-10-07）
+
+用户新增两条实施需求：小角度慢、大角度快，纠正当前大视角转弯追转过慢；还原当前Pyrios普攻／技能与闪避特效。Movement与FX分别牵头，自主分析并按完整动作链拆分；允许与本需求实际相关的长期模块会话沟通，不建子代理，不由统筹代拟全部技术实现。模型gpt-6.1-sol／xhigh、Fast沿用关闭；两线可并行源码／离线工作，UE写操作仍只有一个窗口。当前父仓ca63c1b、Source b80a80c、笔记4e44e1c均已push，前序授权全部关闭。
+
+| 唯一写入者 | 本次范围 | 公共资源与验收 |
+| --- | --- | --- |
+| Movement | 本需求源码／观察脚本／专用Set及两份局部笔记均已冻结，写权关闭 | 八件源码零改；只调整 `DA_Movement_Pyrios` 四项角色参数，必要真实响应与兼容烟通过。笔记两件已中文提交并push `b5037a5`，其他图文保持；配置资产随本次父仓精确交付。共享DTO／Character／Animation／Camera仍只读。 |
+| FX | `AAADocs/Scripts/zzz_fx_material.py`、`zzz_fx_material_ue.py`、`zzz_fx_niagara.py`、`zzz_fx_niagara_ue.py`、`zzz_fx_build.py`、`zzz_fx_import_assets.py`；必要新增同前缀专用辅助／`tests/test_zzz_fx*.py`；既有 `AAADocs/Modules/Character/Rendering/ZZZ_FX_Handoff.md` 只在可运行批次完成后集中更新 | 当前仅离线分析／实现，UE窗口待Movement归还后交接。目标资产目录为既有Shared/FX/ZZZ与Pyrios/FX/Skill，实际精确资产清单由FX汇总后登记窗口；既有系统先核自有改动及备份，不无核对删除重建。缺功能须实现或明确真实缺口，不把skipped当完整还原。 |
+
+转向参数必要验收已完成：仅专用 Set 的角响应改为(0,0)/(15,.07)/(45,.22)/(90,.7)/(135,1)/(180,1)、min0/max1440°/s、Run增益.75；其余28项保持，八件源码零改、无需构建。原 RunObservation 6.999681秒、1Success/0E/4W，229实际样本覆盖小／中／大角渐转及真实释放恢复；120°阶跃约.5145秒时实际轨迹转过113.58°、胶囊91.47°。原自然攻击兼容烟20.964859秒、1Success/0E/8W。第一次观察因统筹MCP调度超过15秒未采到原PIE，明确失败并保留日志；紧邻启动重试通过，不改断言。原Editor日志与机器结果保留；未验HID／联机／Cook或全部TurnBack，不扩矩阵。观察回调已撤，非PIE且全局dirty_content/maps均空。
+
+当前写入交接：Movement源码／观察脚本／Set全部冻结，只恢复Obsidian `Movement/结构.md` 与 `Movement/计划_移动与动作位移.md` 两份集中参数／根因／有限证据同步，结构接口不变不空改Canvas。Animation资产原作者获下一独占非PIE窗口，仅 `Content/Characters/Player/Pyrios/Animation/Movement/BS_Pyrios_WalkRun.uasset` X轴display_name规范为 `WalkRunBlendAlpha`；轴范围／样本／过滤与ABP兼容成员／引脚不改，不以显示名冒称Run根因。单包保存回读后停写归还，不PIE／构建／Git／SaveAll。统筹暂停UE操作。FX仍离线；资源组长可CLI向独立 `Pyrois_SkillFX_Evidence` 补真实Clip/binding/events/脚本布局/deps/Shader证据，旧导出不覆盖。生产仅三段普攻GA/Montage，技能与闪避入口缺口分别保留，未得源时序／挂点不得猜接或以HitWindow代替。
+
+转向需求集中同步已交回冻结：Movement两Markdown仅35插入／5删除，中文提交 `b5037a5` 已push。两份局部笔记写权随之关闭，不扩图、不改已有用户布局。实际机器结果合并留在 `Saved/AutomationReports/GGYGO_Gate107_TurnResponse_Smoke_20261008_MCP.json`，含原生叶、229样本结果与首次0样本调度失败；不是额外任务分配JSON。BS显示名小项仍由资产作者独占处理，非转向收尾阻塞，不含本次配置提交。FX离线正在写的脚本／待生成资产不进入这次Git；四份原有配置／Boss测试／角色BP及原笔记改动保持。
+
+跨模块职责：FX负责材质／粒子／特效展示资源与其清理；资源解包组长负责CLI素材和真实动作关联，渲染组长只提供原移植接缝；Animation资产作者唯一写Montage／骨骼挂点，Combat唯一写GA及业务能力接入。相关组长现在可只读协商，修改其文件前冻结共享接缝并登记实际唯一作者，不由FX抢写GA／Montage。已有闪避能力若是占位，先交付可用特效和具体接入缺口，不伪造运行时闪避。Camera／移动位移／命中／伤害／音效权威保持；不改UE/GAS库，不新增特效用总状态机／第二播放时钟。
+
+验证采用必要离线检查、完整可运行链路的一次批量编译（仅必要C++变更时）及UE冒烟／视觉对照，不扩历史矩阵。完整可运行批次验收后才集中同步模块笔记及中文Git；全局进度／排程／Git仍统筹独占。原四份未提交配置／Boss测试／角色蓝图与笔记布局／FX条目保护；未恢复身体FX斗篷诊断或其他无关修复写权。
+
+## 前序检查点：WalkRun 运动偏移（2026-10-07，已完成三仓交付，授权关闭）
 
 当前唯一有效授权：所有源码／测试／工具／资产／局部笔记写入者均已保存停写，无开发写权；源码26件中文提交push `b80a80c`，笔记34件中文提交push `74d17d2`／单新增节点布局修正 `4e44e1c`。统筹仅完成父仓精确13件交付，不再新增构建或严格矩阵。Gate106-R3构建Succeeded／exit0（11 actions、42.28秒），R2六叶6Success／0E0W、R3补初始化Movement叶通过；正式Held持续Run／释放观察1Success／0Error／5Warning（7.063208秒）、227样本全部必需覆盖成立，原Natural兼容烟1Success／0Error／8Warning（20.948912秒）。原R1／R2失败与未验网络／HID／Cook／完整碰撞边界保留。新增参数Set仅该一份获用户入库批准。
 
