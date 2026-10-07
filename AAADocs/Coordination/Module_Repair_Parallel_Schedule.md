@@ -11,6 +11,26 @@
 | Movement | 本需求源码／观察脚本／专用Set及两份局部笔记均已冻结，写权关闭 | 八件源码零改；只调整 `DA_Movement_Pyrios` 四项角色参数，必要真实响应与兼容烟通过。笔记两件已中文提交并push `b5037a5`，其他图文保持；配置资产随本次父仓精确交付。共享DTO／Character／Animation／Camera仍只读。 |
 | FX | `AAADocs/Scripts/zzz_fx_material.py`、`zzz_fx_material_ue.py`、`zzz_fx_niagara.py`、`zzz_fx_niagara_ue.py`、`zzz_fx_build.py`、`zzz_fx_import_assets.py`；必要新增同前缀专用辅助／`tests/test_zzz_fx*.py`；既有 `AAADocs/Modules/Character/Rendering/ZZZ_FX_Handoff.md` 只在可运行批次完成后集中更新 | 当前仅离线分析／实现，UE窗口待Movement归还后交接。目标资产目录为既有Shared/FX/ZZZ与Pyrios/FX/Skill，实际精确资产清单由FX汇总后登记窗口；既有系统先核自有改动及备份，不无核对删除重建。缺功能须实现或明确真实缺口，不把skipped当完整还原。 |
 
+### 当前唯一UE窗口：FX普通展示小批（2026-10-08）
+
+Animation显示名单包已保存停写并归还；统筹最新原生MCP查询非PIE成功。现交FX唯一非PIE窗口，仅下列7个new-only版本包；先收到资源组长对此小批的源冻结确认、冻结实际执行的相关脚本，并重新核全局脏包、全部目标不存在及真实源hash，再开始写。任一同名已存在或必要预检失败则整批拒写，不覆盖／删除旧资产。未知编译／Error不得保存，只精确保存本批自己创建的对象。工具机器消费的plan/import/targets数据可以生成，不另建任务分配JSON。
+
+- `/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Noise_030_1cb670f2f7fd`
+- `/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Noise_031_8e489bbd7796`
+- `/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Smoke_002_3f1413552da9`
+- `/Game/Characters/Shared/FX/ZZZ/Meshes/Eff_Cone_01_6a19ddf1a61f`
+- `/Game/Characters/Shared/FX/ZZZ/Materials/M_ZZZFX_Particles_Dust_a537e4f8_e3da3896754c`
+- `/Game/Characters/Shared/FX/ZZZ/MaterialInstances/MI_Eff_Others_LKJ_120_2236c13ef57c`
+- `/Game/Characters/Player/Pyrios/FX/Skill/NS_PREVIEW_Eff_Pyrois_Attack_Normal_01_01_Trail_Smoke_Cone01__2__62a61f7b2dae`
+
+预写修正：旧Texture2D的 `m_MipMap=false` 与实际 `m_MipCount=9/10/9` 不一致，经资源作者核实旧bool失效，按真实层数配置；因此仅三Texture／MI／NS五个内容版本名更新为上列，Material／Mesh两包保持。旧清单零创建，旧五名称不再有写权。资源小批源已明确冻结；FX最新非PIE／全局脏包空的实际读回在原Editor日志 `FX109_PREFLIGHT_DIRTY`。本次仍7个new-only包、相同普通子树与预览范围，不扩大资产或业务语义。
+
+本批检查点已交回：批准7包new-only创建保存，原完整Shader Code逐字符恢复／精确保存，Niagara UpToDate／0编译Error/Warning。肉眼初判“正常材质不可见”已由原材质存活／消亡帧ROI对照纠正，实际有很淡渲染；探针未保存，源游戏同帧视觉一致性／完整prefab和业务接线仍未验。复用 `Saved/AutomationReports/GGYGO_FX_OrdinaryPreview_20261008_0128.json` 的native_preview与两张OriginalMaterial PNG留证，不把像素差当全还原。FX7包现已明确冻结、资产写权关闭，无在途请求，独占UE/MCP窗口归还统筹；自身性能／计数／Lit／窗口／观察器已恢复清理，非PIE／原Map保持／全局dirty为空。仅原授权离线生成器和资源取证可继续；新精确资产批次另登记，完整RGB渲染线等用户选择，map／Actor／GA／Montage／Toon/bodyFX／渲染插件仍无写权。
+
+脚本／局部说明交付窗口：FX实际又完成v2组件／deps来源适配和独立WrapU/V读取，13件（10管线、两test、Handoff）现已最终整文件保存冻结、无在途写入，统筹Git结果交回前不再续写；仅只读取证沟通。22/22专项通过，其中七包执行前16项、归还后新增6项分列，v2/Wrap新增未再次入UE。旧PREVIEW七目标再规划与报告完全相同；真实Back03因精确native子程序／全局关键字来源尚未接入而预检失败，零UE写入，不借旧关键词缓存。既有运行依赖七件均在父仓跟踪且零改；仅13候选与统筹两入口精确提交，不把快照列出的其它zzz_fx文件／源数据／忽略uasset自动纳入。
+
+这是Normal01_Trail中完整 `Smoke_Cone01 (2)` 子树的独立PREVIEW，父prefab仍incomplete，游戏触发不在本批；不得把单子树展示标为普攻或全特效还原完成。只用Niagara原生资产编辑器预览，核源四依赖的轴／Bounds、材质编译及实际普通展示；保留当前地图，不创建／删除场景Actor，不保存地图、GA、Montage、ABP、Toon/bodyFX。若原生资产预览无法完成，先报告必要范围，不自行扩临时关卡／Actor租约。源依赖未知部分不进该批，不等全30根闭包才交有证据的独立产物。UE原生MCP使用当前已连接服务，统筹暂停并行UE操作；本批不PIE、构建、Git、引擎源码修改或新渲染插件实施。完整RGB链仍待用户可见效果选择；其它离线工作继续。写入／回读／实际预览证据交回后即停写归还，再统一批次笔记与Git。
+
 转向参数必要验收已完成：仅专用 Set 的角响应改为(0,0)/(15,.07)/(45,.22)/(90,.7)/(135,1)/(180,1)、min0/max1440°/s、Run增益.75；其余28项保持，八件源码零改、无需构建。原 RunObservation 6.999681秒、1Success/0E/4W，229实际样本覆盖小／中／大角渐转及真实释放恢复；120°阶跃约.5145秒时实际轨迹转过113.58°、胶囊91.47°。原自然攻击兼容烟20.964859秒、1Success/0E/8W。第一次观察因统筹MCP调度超过15秒未采到原PIE，明确失败并保留日志；紧邻启动重试通过，不改断言。原Editor日志与机器结果保留；未验HID／联机／Cook或全部TurnBack，不扩矩阵。观察回调已撤，非PIE且全局dirty_content/maps均空。
 
 当前写入交接：Movement源码／观察脚本／Set全部冻结，只恢复Obsidian `Movement/结构.md` 与 `Movement/计划_移动与动作位移.md` 两份集中参数／根因／有限证据同步，结构接口不变不空改Canvas。Animation资产原作者获下一独占非PIE窗口，仅 `Content/Characters/Player/Pyrios/Animation/Movement/BS_Pyrios_WalkRun.uasset` X轴display_name规范为 `WalkRunBlendAlpha`；轴范围／样本／过滤与ABP兼容成员／引脚不改，不以显示名冒称Run根因。单包保存回读后停写归还，不PIE／构建／Git／SaveAll。统筹暂停UE操作。FX仍离线；资源组长可CLI向独立 `Pyrois_SkillFX_Evidence` 补真实Clip/binding/events/脚本布局/deps/Shader证据，旧导出不覆盖。生产仅三段普攻GA/Montage，技能与闪避入口缺口分别保留，未得源时序／挂点不得猜接或以HitWindow代替。

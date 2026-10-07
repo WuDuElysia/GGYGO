@@ -1,7 +1,7 @@
 """按 zzz_fx_niagara 的发射器方案，在用户打开的 UE 编辑器里（经 MCP 的 NiagaraToolset）建 Niagara 系统。
 
     build_system(path, specs):
-        已存在则删除重建（系统内容完全由方案生成，没有手工编辑需要保留）
+        仅创建审批清单内的新内容版本；已有系统保留，禁止删除重建
         CreateNiagaraSystem(DefaultSystem) → 删掉模板自带的 Fountain 发射器
         for spec: AddEmitter(CompletelyEmpty) → 发射器属性 → Emitter State / Spawn Burst / Spawn Rate
                   → 粒子生成 Set Parameters → Particle State + 粒子更新 Set Parameters → Mesh 渲染器
@@ -13,7 +13,6 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from ue_mcp import Mcp  # noqa: E402
 
 NS = "NiagaraToolsets.NiagaraToolset_System."
 AS = "editor_toolset.toolsets.asset.AssetTools."
@@ -27,8 +26,9 @@ ENUM = "/Script/NiagaraEditor.NiagaraExt_StackInputData_Enum"
 
 
 class NiagaraBuilder:
-    def __init__(self, mcp=None):
-        self.m = mcp or Mcp()
+    def __init__(self, session):
+        self.session = session
+        self.m = session.m
 
     def ns(self, name, **kw):
         return self.m.tool(NS + name, **kw)["returnValue"]
@@ -56,11 +56,13 @@ class NiagaraBuilder:
         return self.ns("AddModule", moduleLocationRef=self.loc(emitter, script), moduleAsset={"refPath": asset})["moduleName"]
 
     def set_params(self, emitter, script, entries):
-        if not entries:
-            return
-        params = [{"variable": {"name": n, "type": {"classStructOrEnum": {"refPath": TYPES[t]}}}} for n, t, _ in entries]
-        mod = self.ns("AddSetParametersModule", moduleLocationRef=self.loc(emitter, script), parameters=params)["moduleName"]
-        for n, _, e in entries:
+        # A Niagara assignment node reads every input from its incoming map.
+        # Chain/random/size expressions depend on preceding assignments, so each
+        # ordered entry needs a distinct map write before the next input is read.
+        for n, t, e in entries:
+            params = [{"variable": {"name": n, "type": {"classStructOrEnum": {"refPath": TYPES[t]}}}}]
+            mod = self.ns("AddSetParametersModule", moduleLocationRef=self.loc(emitter, script),
+                          parameters=params)["moduleName"]
             self.set_input(emitter, script, mod, n, self.hlsl(e))
 
     def build_emitter(self, s):
@@ -103,25 +105,35 @@ class NiagaraBuilder:
 
     def build_system(self, path, specs):
         folder, name = path.rsplit("/", 1)
-        if self.m.tool(AS + "exists", path=path)["returnValue"]:
-            self.m.tool(AS + "delete", path=path)
+        if not specs:
+            raise ValueError("Cannot build an empty FX system: " + path)
+        self.session.begin_create(path)
         self.ns("CreateNiagaraSystem", assetName=name, assetPath=folder, templateSystem={"refPath": DEFAULT_SYSTEM})
+        self.session.created_asset(path)
         self.sref = {"refPath": "%s.%s" % (path, name)}
         for e in self.ns("GetSystemSummary", system=self.sref)["emitters"]:
             self.ns("RemoveEmitter", emitterToRemove=self.loc(e["emitterName"]))
         for s in specs:
             self.build_emitter(s)
-        self.m.tool(AS + "save_assets", asset_paths=[path])
         self.m.tool("EditorToolset.EditorAppToolset.OpenEditorForAsset", assetPath=path)
-        state = None
-        for _ in range(120):
-            time.sleep(2)
+        return self.finish_compile(path)
+
+    def finish_compile(self, path, timeout=50):
+        """A bounded check. Timeout is a failure, never an implicit success/save."""
+        self.session.require_created(path)
+        deadline = time.monotonic() + timeout
+        while True:
             state = self.ns("GetSystemCompileState", system=self.sref)
             if not state["bIsCompiling"] and state["aggregateStatus"] != "Unknown":
                 break
+            if time.monotonic() >= deadline:
+                raise RuntimeError("Niagara compile is incomplete; package was not saved: " + path)
+            time.sleep(min(2, max(0, deadline - time.monotonic())))
         errors = [(x["emitterName"], x["scriptName"], ev["message"]) for x in state["scripts"]
                   for ev in x["compileEvents"] if ev["severity"] == "Error"]
         if errors:
             raise RuntimeError("Niagara 编译失败：\n" + "\n".join("%s %s\n%s" % e for e in errors[:4]))
-        self.m.tool(AS + "save_assets", asset_paths=[path])
+        if state["aggregateStatus"] not in ("UpToDate", "UpToDateWithWarnings"):
+            raise RuntimeError("Niagara compile did not succeed: %s %s" % (path, state["aggregateStatus"]))
+        self.session.save([path])
         return state

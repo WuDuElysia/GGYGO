@@ -11,7 +11,7 @@
                 Position / MeshOrientation / Scale / Color / DynamicMaterialParameter0..3
 
 坐标约定（与网格导入一致）：Unity (x, y, z) 米 → UE (-x, z, y)×100 厘米；
-四元数 (x, y, z, w) → (x, -z, -y, w)；缩放 (sx, sy, sz) → (sx, sz, sy)。
+四元数 (x, y, z, w) → (-x, z, y, w)；缩放 (sx, sy, sz) → (sx, sz, sy)。
 所有 Unity 量先在 Unity 坐标里算好，最后一步才换到 UE。
 
 未实现的模块（形状发射、速度、噪声、碰撞、子发射器、拖尾…）一旦启用就报错，不生成近似效果。
@@ -94,7 +94,9 @@ def ue_pos_h(p):
 
 
 def ue_quat_h(q):
-    return "float4(({q}).x, -({q}).z, -({q}).y, ({q}).w)".format(q=q)
+    # C=(-X,Z,Y) has determinant +1, so C*R(q)*C^-1 maps the quaternion
+    # vector part by C. The old sign pattern rotated mesh axes backwards.
+    return "float4(-({q}).x, ({q}).z, ({q}).y, ({q}).w)".format(q=q)
 
 
 def ue_scale_h(s):
@@ -109,38 +111,51 @@ def srgb_to_linear_h(c):
 
 # ---------------------------------------------------------------- 曲线与渐变
 
-WEIGHTED_SAMPLES = 16
+class CurveProgram:
+    """Ordered transient assignments for time-inverted weighted Bezier curves.
+
+    Bisection reaches single precision in 24 steps. Values stay on the original
+    cubic curve; no piecewise linear resampling or second animation clock.
+    """
+    def __init__(self, stage):
+        self.prefix = "Transient.UWeighted" + stage
+        self.entries = []
+
+    def temp(self, kind, expr):
+        name = self.prefix + str(len(self.entries))
+        self.entries.append((name, kind, expr))
+        return name
 
 
-def bezier_segment(a, b, n=WEIGHTED_SAMPLES):
-    """Unity 加权关键帧之间是时间-数值二维三次贝塞尔：控制柄长度 = 权重 × dt（未加权的一侧取 1/3）。
-    按 Unity 的求值方式先由时间反解贝塞尔参数再取值；这里离线采样成 n 段折线，返回采样点。"""
-    t0, v0, t1, v1 = a["time"], a["value"], b["time"], b["value"]
-    dt = t1 - t0
-    w0 = a.get("outWeight", 1 / 3) if a.get("weightedMode", 0) in (2, 3) else 1 / 3
-    w1 = b.get("inWeight", 1 / 3) if b.get("weightedMode", 0) in (1, 3) else 1 / 3
-    p = [(t0, v0), (t0 + w0 * dt, v0 + w0 * dt * a["outSlope"]), (t1 - w1 * dt, v1 - w1 * dt * b["inSlope"]), (t1, v1)]
-
-    def bz(u, i):
-        m = 1 - u
-        return m * m * m * p[0][i] + 3 * m * m * u * p[1][i] + 3 * m * u * u * p[2][i] + u * u * u * p[3][i]
-    pts = []
-    for k in range(n + 1):
-        tt = t0 + dt * k / n
-        lo, hi = 0.0, 1.0
-        for _ in range(60):
-            mid = (lo + hi) / 2
-            if bz(mid, 0) < tt:
-                lo = mid
-            else:
-                hi = mid
-        pts.append((tt, bz((lo + hi) / 2, 1)))
-    return pts
+def bezier_h(points, u):
+    a, b, c, d = points
+    return "(((%s * (%s) + %s) * (%s) + %s) * (%s) + %s)" % (
+        f(-a + 3*b - 3*c + d), u, f(3*a - 6*b + 3*c), u, f(-3*a + 3*b), u, f(a))
 
 
-def curve_h(curve, t):
-    """Unity AnimationCurve → HLSL（两端 Clamp）。普通关键帧段为 Hermite；
-    带权重的段按 bezier_segment 采样成折线（每段 16 份），与 Unity 求值的偏差在采样间距的二阶小量内。"""
+def weighted_segment_h(a, b, t, program):
+    if program is None:
+        raise SpecError("Weighted curve requires ordered transient assignments")
+    dt = b["time"] - a["time"]
+    w0 = a["outWeight"] if a.get("weightedMode", 0) in (2, 3) else 1/3
+    w1 = b["inWeight"] if b.get("weightedMode", 0) in (1, 3) else 1/3
+    if not (0 <= w0 <= 1 and 0 <= w1 <= 1):
+        raise SpecError("Weighted curve time handles must be within [0, 1]")
+    target = program.temp("Float", "saturate(((%s) - %s) / %s)" % (t, f(a["time"]), f(dt)))
+    bounds = program.temp("Vector4", "float4(0.0, 1.0, 0.0, 0.0)")
+    for _ in range(24):
+        mid = "((%s.x + %s.y) * 0.5)" % (bounds, bounds)
+        x = bezier_h((0, w0, 1-w1, 1), mid)
+        bounds = program.temp("Vector4", "((%s) < %s ? float4(%s, %s.y, 0.0, 0.0) : "
+                              "float4(%s.x, %s, 0.0, 0.0))" % (x, target, mid, bounds, bounds, mid))
+    u = "((%s.x + %s.y) * 0.5)" % (bounds, bounds)
+    y = bezier_h((a["value"], a["value"] + w0*dt*a["outSlope"],
+                  b["value"] - w1*dt*b["inSlope"], b["value"]), u)
+    return program.temp("Float", y)
+
+
+def curve_h(curve, t, program=None):
+    """Unity AnimationCurve → HLSL: Hermite or time-inverted weighted Bezier."""
     keys = curve["m_Curve"]
     if not keys:
         raise SpecError("空曲线")
@@ -155,11 +170,7 @@ def curve_h(curve, t):
         elif abs(a["outSlope"]) == float("inf") or abs(b["inSlope"]) == float("inf"):
             seg = f(a["value"])
         elif weighted:
-            pts = bezier_segment(a, b)
-            seg = f(pts[-1][1])
-            for (ta, va), (tb, vb) in reversed(list(zip(pts, pts[1:]))):
-                lin = "lerp(%s, %s, saturate(((%s) - %s) / %s))" % (f(va), f(vb), t, f(ta), f(tb - ta))
-                seg = "((%s) < %s ? %s : %s)" % (t, f(tb), lin, seg)
+            seg = weighted_segment_h(a, b, t, program)
         else:
             s = "saturate(((%s) - %s) / %s)" % (t, f(a["time"]), f(dt))
             # h00 v0 + h10 dt m0 + h01 v1 + h11 dt m1，按 s 展开成多项式系数，避免重复长子式
@@ -172,15 +183,15 @@ def curve_h(curve, t):
     return "((%s) <= %s ? %s : %s)" % (t, f(keys[0]["time"]), f(keys[0]["value"]), expr)
 
 
-def minmax_curve_h(c, t, rand_attr):
+def minmax_curve_h(c, t, rand_attr, program=None):
     """MinMaxCurve：0 常量、1 曲线、2 双曲线随机、3 双常量随机。rand_attr 是该粒子固定的随机数。"""
     s = c["minMaxState"]
     if s == 0:
         return f(c["scalar"])
     if s == 1:
-        return "(%s * %s)" % (f(c["scalar"]), curve_h(c["maxCurve"], t))
+        return "(%s * %s)" % (f(c["scalar"]), curve_h(c["maxCurve"], t, program))
     if s == 2:
-        return "(%s * lerp(%s, %s, %s))" % (f(c["scalar"]), curve_h(c["minCurve"], t), curve_h(c["maxCurve"], t), rand_attr)
+        return "(%s * lerp(%s, %s, %s))" % (f(c["scalar"]), curve_h(c["minCurve"], t, program), curve_h(c["maxCurve"], t, program), rand_attr)
     if s == 3:
         return "lerp(%s, %s, %s)" % (f(c["minScalar"]), f(c["scalar"]), rand_attr)
     raise SpecError("MinMaxCurve 模式 %r" % s)
@@ -252,8 +263,8 @@ def anim_curve_h(keys, comp, t):
 class Chain:
     """预制体根 → 节点的变换，常量部分在 Python 里折叠，带动画的节点生成 HLSL。
 
-    累积量 (P, Q, S)：世界点 = P + Q ⊗ (S ∘ 本地点)。Unity 的非均匀缩放与旋转组合会产生切变，
-    这里按分量相乘近似，只在出现"父节点非均匀缩放 + 子节点旋转"时成立；遇到这种组合直接报错。"""
+    累积量 (P, Q, S)：世界点 = P + Q ⊗ (S ∘ 本地点)。非均匀父缩放与
+    子旋转组合产生切变时，不能用三个缩放分量可靠表达，须使用矩阵路径。"""
 
     def __init__(self, prefix="Particles.UChain"):
         self.P, self.Q, self.S = (0.0, 0.0, 0.0), (0.0, 0.0, 0.0, 1.0), (1.0, 1.0, 1.0)
@@ -292,15 +303,10 @@ class Chain:
         if anim_rot and not all(self.commutes(k["value"]) for k in anim_rot):
             raise SpecError("父节点非均匀缩放 %r 下子节点旋转动画会产生切变，未实现" % (self.S,))
         if not self.commutes(rot):
-            # 产生切变时按 Unity Transform.lossyScale 的定义取近似缩放：diag(Rᵀ·diag(S)·R) ∘ s；
-            # 粒子系统的尺寸缩放与网格朝向分别用 lossyScale 和世界旋转，因此这正是 Unity 实际渲染用的值
+            # The leaf origin and world quaternion are still exact. No lossy
+            # scale is invented here; consumers must prove they do not use it.
             if anim_pos is not None:
-                raise SpecError("切变节点自身有位置动画，未实现")
-            x, y, z, w = rot
-            R = [[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
-                 [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
-                 [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]]
-            diag = [sum(R[k][i] * self.S[k] * R[k][i] for k in range(3)) for i in range(3)]
+                raise SpecError("切变节点位置动画需要矩阵变换路径")
             local_p = tuple(self.S[i] * pos[i] for i in range(3))
             if self.animated:
                 self.Ph = self.temp("P", "(%s + %s)" % (self.Ph, qrot_h(self.Qh, f3(local_p))))
@@ -309,7 +315,6 @@ class Chain:
                 off = qrot(self.Q, local_p)
                 self.P = tuple(self.P[i] + off[i] for i in range(3))
                 self.Q = qmul(self.Q, rot)
-            self.S = tuple(diag[i] * scale[i] for i in range(3))
             self.sheared = True
             return
         if anim_pos is None:
@@ -393,8 +398,12 @@ class Randoms:
 
 
 def check_modules(ps, path):
+    for name, expected in (("simulationSpeed", 1.0), ("useUnscaledTime", False),
+                           ("stopAction", 0), ("ringBufferMode", 0), ("playOnAwake", True)):
+        if name in ps and ps[name] != expected:
+            raise SpecError("%s %s=%r requires its source runtime lifecycle/time contract" % (path, name, ps[name]))
     for k, v in ps.items():
-        if isinstance(v, dict) and "enabled" in v and k not in SUPPORTED_MODULES:
+        if isinstance(v, dict) and v.get("enabled") and k not in SUPPORTED_MODULES:
             raise SpecError("%s 启用了 %s，未实现" % (path, k))
     im = ps["InitialModule"]
     if ps.get("prewarm"):
@@ -407,12 +416,12 @@ def check_modules(ps, path):
         raise SpecError("%s randomizeRotationDirection≠0 未实现" % path)
     if ps.get("ShapeModule", {}).get("enabled"):
         raise SpecError("%s 启用了 ShapeModule，形状发射未实现" % path)
-    em = ps.get("EmissionModule")
-    if em and em["rateOverDistance"]["scalar"] != 0.0:
+    em = ps.get("EmissionModule") if ps.get("EmissionModule", {}).get("enabled") else None
+    if em and minmax_curve_const(em["rateOverDistance"]) != 0.0:
         raise SpecError("%s rateOverDistance≠0 未实现" % path)
 
 
-def custom_data_h(cd, idx, age, rnd):
+def custom_data_h(cd, idx, age, rnd, program=None):
     if cd is None:
         return "float4(0.0, 0.0, 0.0, 0.0)"
     mode = cd["mode%d" % idx]
@@ -420,7 +429,7 @@ def custom_data_h(cd, idx, age, rnd):
         return "float4(0.0, 0.0, 0.0, 0.0)"
     if mode == 1:
         n = cd["vectorComponentCount%d" % idx]
-        comps = [minmax_curve_h(cd["vector%d_%d" % (idx, k)], age, rnd.take()) if k < n else "0.0" for k in range(4)]
+        comps = [minmax_curve_h(cd["vector%d_%d" % (idx, k)], age, rnd.take(), program) if k < n else "0.0" for k in range(4)]
         return "float4(%s)" % ", ".join(comps)
     if mode == 2:
         return minmax_gradient_h(cd["color%d" % idx], age, rnd.take())
@@ -429,10 +438,15 @@ def custom_data_h(cd, idx, age, rnd):
 
 def emitter_spec(node, path_nodes, clip, ue_assets, material_paths, material_plan):
     path = "/".join(n["name"] for n in path_nodes)
-    ps, rd = node["particle"]["system"], node["particle"]["renderer"]
+    raw_ps, rd = node["particle"]["system"], node["particle"]["renderer"]
+    # New source evidence preserves disabled modules as well as enabled ones.
+    # Their serialized curves are inert and must never become live simulation.
+    ps = {k: v for k, v in raw_ps.items() if not isinstance(v, dict) or "enabled" not in v
+          or v["enabled"] or k == "InitialModule"}
     check_modules(ps, path)
     im = ps["InitialModule"]
     rnd = Randoms()
+    spawn_curves, update_curves = CurveProgram("Spawn"), CurveProgram("Update")
     age = "Particles.NormalizedAge"
     eage = "Emitter.NormalizedLoopAge"
     sim_local = ps["moveWithTransform"] == 0
@@ -440,38 +454,38 @@ def emitter_spec(node, path_nodes, clip, ue_assets, material_paths, material_pla
         raise SpecError("%s 自定义模拟空间未实现" % path)
 
     spawn, update = [], []
-    spawn.append(("Particles.Lifetime", "Float", minmax_curve_h(im["startLifetime"], eage, rnd.take())))
+    spawn.append(("Particles.Lifetime", "Float", minmax_curve_h(im["startLifetime"], eage, rnd.take(), spawn_curves)))
     spawn.append(("Particles.UStartColor", "Vector4", minmax_gradient_h(im["startColor"], eage, rnd.take())))
     if im["size3D"]:
-        sz = "float3(%s, %s, %s)" % tuple(minmax_curve_h(im[k], eage, rnd.take()) for k in ("startSize", "startSizeY", "startSizeZ"))
+        sz = "float3(%s, %s, %s)" % tuple(minmax_curve_h(im[k], eage, rnd.take(), spawn_curves) for k in ("startSize", "startSizeY", "startSizeZ"))
     else:
-        sz = "(%s * float3(1.0, 1.0, 1.0))" % minmax_curve_h(im["startSize"], eage, rnd.take())
+        sz = "(%s * float3(1.0, 1.0, 1.0))" % minmax_curve_h(im["startSize"], eage, rnd.take(), spawn_curves)
     spawn.append(("Particles.UStartSize", "Vector", sz))
     if im["rotation3D"]:
-        rot0 = "float3(%s, %s, %s)" % tuple(minmax_curve_h(im[k], eage, rnd.take()) for k in ("startRotationX", "startRotationY", "startRotation"))
+        rot0 = "float3(%s, %s, %s)" % tuple(minmax_curve_h(im[k], eage, rnd.take(), spawn_curves) for k in ("startRotationX", "startRotationY", "startRotation"))
     else:
-        rot0 = "float3(0.0, 0.0, %s)" % minmax_curve_h(im["startRotation"], eage, rnd.take())
+        rot0 = "float3(0.0, 0.0, %s)" % minmax_curve_h(im["startRotation"], eage, rnd.take(), spawn_curves)
     spawn.append(("Particles.URot", "Vector", rot0))
     spawn.append(("Particles.UStable", "Vector4", "float4(rand(1.0), rand(1.0), rand(1.0), rand(1.0))"))
     # 形状模块关闭时 Unity 从变换原点沿本地 +Z 以 startSpeed 发射；没有任何力，位移 = 速度 × 年龄
-    spawn.append(("Particles.USpeed", "Float", minmax_curve_h(im["startSpeed"], eage, rnd.take())))
+    spawn.append(("Particles.USpeed", "Float", minmax_curve_h(im["startSpeed"], eage, rnd.take(), spawn_curves)))
     local_pos = "(float3(0.0, 0.0, 1.0) * Particles.USpeed * Particles.Age)"
 
     # 旋转随寿命（角速度，弧度/秒）
     rm = ps.get("RotationModule")
     if rm:
         if rm["separateAxes"]:
-            w = "float3(%s, %s, %s)" % tuple(minmax_curve_h(rm[k], age, rnd.take()) for k in ("x", "y", "curve"))
+            w = "float3(%s, %s, %s)" % tuple(minmax_curve_h(rm[k], age, rnd.take(), update_curves) for k in ("x", "y", "curve"))
         else:
-            w = "float3(0.0, 0.0, %s)" % minmax_curve_h(rm["curve"], age, rnd.take())
+            w = "float3(0.0, 0.0, %s)" % minmax_curve_h(rm["curve"], age, rnd.take(), update_curves)
         update.append(("Particles.URot", "Vector", "(Particles.URot + %s * Engine.DeltaTime)" % w))
     # 尺寸随寿命
     sm = ps.get("SizeModule")
     if sm:
         if sm["separateAxes"]:
-            mul = "float3(%s, %s, %s)" % tuple(minmax_curve_h(sm[k], age, rnd.take()) for k in ("curve", "y", "z"))
+            mul = "float3(%s, %s, %s)" % tuple(minmax_curve_h(sm[k], age, rnd.take(), update_curves) for k in ("curve", "y", "z"))
         else:
-            mul = "(%s * float3(1.0, 1.0, 1.0))" % minmax_curve_h(sm["curve"], age, rnd.take())
+            mul = "(%s * float3(1.0, 1.0, 1.0))" % minmax_curve_h(sm["curve"], age, rnd.take(), update_curves)
         update.append(("Particles.USize", "Vector", "(Particles.UStartSize * %s)" % mul))
     else:
         update.append(("Particles.USize", "Vector", "Particles.UStartSize"))
@@ -485,12 +499,20 @@ def emitter_spec(node, path_nodes, clip, ue_assets, material_paths, material_pla
     # 节点位姿
     t_anim = "System.Age"
     chain = node_chain(None, path_nodes, clip, t_anim)
+    if getattr(chain, "sheared", False):
+        speed = im["startSpeed"]
+        stationary = speed["minMaxState"] == 0 and speed["scalar"] == 0.0 or (
+            speed["minMaxState"] == 3 and speed["scalar"] == 0.0 and speed["minScalar"] == 0.0)
+        if ps["scalingMode"] == 0 or not stationary:
+            raise SpecError("%s 切变影响层级尺寸或运动，需要矩阵变换路径" % path)
     if ps["scalingMode"] == 0:
         tscale = chain.S
     elif ps["scalingMode"] == 1:
         tscale = _vals(node["scale"], "xyz")
-    else:
+    elif ps["scalingMode"] == 2:
         tscale = (1.0, 1.0, 1.0)
+    else:
+        raise SpecError("%s 未知 scalingMode %r" % (path, ps["scalingMode"]))
     mode = rd["m_RenderMode"]
     if mode != 4:
         raise SpecError("%s 渲染模式 %s 未实现（只做了 Mesh）" % (path, UNITY_RENDER_MODE.get(mode, mode)))
@@ -504,7 +526,14 @@ def emitter_spec(node, path_nodes, clip, ue_assets, material_paths, material_pla
         raise SpecError("%s 网格对齐模式 %d 未实现" % (path, align))
     scale_u = "(Particles.USize * %s)" % f3(tscale)
     pose = list(chain.temps)
-    pose_q = ("Particles.MeshOrientation", "Quat", ue_quat_h(q_u))
+    owner_q = "Engine.Owner.Rotation"
+    if align == 1:
+        # World-aligned meshes keep world orientation even in local simulation.
+        inverse_owner = "float4(-Engine.Owner.Rotation.xyz, Engine.Owner.Rotation.w)"
+        q_local = qmul_h(inverse_owner, ue_quat_h(q_u)) if sim_local else ue_quat_h(q_u)
+    else:
+        q_local = ue_quat_h(q_u)
+    pose_q = ("Particles.MeshOrientation", "Quat", q_local)
     # 粒子在节点本地的位移经节点变换到预制体根空间（scalingMode=Shape 时位置也按变换缩放，与 Hierarchical 同）
     pos_u = "(%s + %s)" % (chain.pos_h(), qrot_h(chain.quat_h(), "(%s * %s)" % (f3(chain.S), local_pos)))
     if sim_local:
@@ -520,7 +549,8 @@ def emitter_spec(node, path_nodes, clip, ue_assets, material_paths, material_pla
         update += [(n, t, e) for n, t, e in pose]
         update.append(("Particles.Position", "Position",
                        "(Particles.UWorldOrigin + Particles.UWorldDir * Particles.USpeed * Particles.Age)"))
-        update.append(("Particles.MeshOrientation", "Quat", qmul_h("Engine.Owner.Rotation", ue_quat_h(q_u))))
+        world_q = ue_quat_h(q_u) if align == 1 else qmul_h(owner_q, ue_quat_h(q_u))
+        update.append(("Particles.MeshOrientation", "Quat", world_q))
     update.append(("Particles.Scale", "Vector", ue_scale_h(scale_u)))
 
     # 动态材质参数（与 zzz_fx_material 的槽约定一致）
@@ -530,14 +560,15 @@ def emitter_spec(node, path_nodes, clip, ue_assets, material_paths, material_pla
              2: "Particles.DynamicMaterialParameter2", 3: "Particles.DynamicMaterialParameter3"}
     for slot in sorted(int(k) for k in dyn):
         if slot in (0, 1):
-            expr = custom_data_h(cd, slot, age, rnd)
+            expr = custom_data_h(cd, slot, age, rnd, update_curves)
         elif slot == 2:
             expr = "Particles.UStable"
         else:
             expr = "float4(Particles.USize, 1.0 / Particles.Lifetime)"
         update.append((names[slot], "Vector4", expr))
 
-    spawn = rnd.spawn_entries() + spawn
+    spawn = rnd.spawn_entries() + spawn_curves.entries + spawn
+    update = update_curves.entries + update
 
     em = ps.get("EmissionModule")
     bursts, rate = [], 0.0

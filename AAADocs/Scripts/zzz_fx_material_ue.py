@@ -1,7 +1,7 @@
 """按 zzz_fx_material.plan() 的方案，在用户打开的 UE 编辑器里（经 MCP）建 master 材质与材质实例。
 
     build_master(plan):
-        已存在同名 master → 直接复用（名字里带方案哈希，代码/参数集变化就是新 master）
+        新建本批次审批清单内的内容版本；仅在同一批次内复用本会话刚创建的 master
         create_material → 设 BlendMode / Unlit / TwoSided / Niagara 用途
         Custom 节点：代码 = plan.code 前面补内置输入的拼装（VCol/PCol/DPk → float4）
         每个输入一个节点：材质参数（Scalar/Vector/TextureObject）或内置节点，连到 Custom 同名输入
@@ -16,7 +16,6 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from ue_mcp import Mcp  # noqa: E402
 
 MASTER_DIR = "/Game/Characters/Shared/FX/ZZZ/Materials"
 MI_DIR = "/Game/Characters/Shared/FX/ZZZ/MaterialInstances"
@@ -58,8 +57,10 @@ def linear_color(v):
 
 
 class Builder:
-    def __init__(self, mcp=None):
-        self.m = mcp or Mcp()
+    def __init__(self, session):
+        self.session = session
+        self.m = session.m
+        self.masters = set()
 
     def exists(self, path):
         return self.m.tool(AS + "exists", path=path)["returnValue"]
@@ -95,10 +96,14 @@ class Builder:
         return "SAMPLERTYPE_Color" if props["SRGB"] else "SAMPLERTYPE_LinearColor"
 
     def build_master(self, plan):
+        if plan.get("output_contract", "color") != "color":
+            raise RuntimeError("Distortion fields require their dedicated buffer/composite renderer")
         path = "%s/%s" % (MASTER_DIR, plan["master"])
-        if self.exists(path):
+        if path in self.masters:
             return path
+        self.session.begin_create(path)
         mat = self.m.tool(MT + "create_material", folder_path=MASTER_DIR, asset_name=plan["master"])["returnValue"]
+        self.session.created_asset(path)
         # 只开实际用到的用途：每多一种顶点工厂就多编一整套排列，大 Custom 节点会把编译内存撑爆。
         # 自动补用途也关掉，误挂到别的组件上时直接显示默认材质，而不是在编辑器里临时加编。
         self.set(mat, {"BlendMode": plan["blend"], "ShadingModel": "MSM_Unlit", "TwoSided": plan["two_sided"],
@@ -159,13 +164,17 @@ class Builder:
             self.connect(custom, "", mask, "")
             self.m.tool(MT + "connect_to_output", expression=mask, output_name="", material_property="MP_Opacity")
         self.m.tool(MT + "recompile", material_or_function=mat)
-        self.m.tool(AS + "save_assets", asset_paths=[path])
+        self.session.save([path])
+        self.masters.add(path)
         return path
 
     def build_instance(self, plan, master, name):
         path = "%s/%s" % (MI_DIR, name)
-        if not self.exists(path):
-            self.m.tool(MI + "create", folder_path=MI_DIR, asset_name=name, parent=ref(master))
+        if path in self.session.created:
+            return path
+        self.session.begin_create(path)
+        self.m.tool(MI + "create", folder_path=MI_DIR, asset_name=name, parent=ref(master))
+        self.session.created_asset(path)
         mi = ref(path)
         for n, p in plan["params"].items():
             if p["dim"] == 1:
@@ -174,5 +183,5 @@ class Builder:
                 self.m.tool(MI + "set_vector_parameter", instance=mi, name=n, value=linear_color(p["value"]))
         for n, tex in plan["textures"].items():
             self.m.tool(MI + "set_texture_parameter", instance=mi, name=n, value=ref(tex))
-        self.m.tool(AS + "save_assets", asset_paths=[path])
+        self.session.save([path])
         return path

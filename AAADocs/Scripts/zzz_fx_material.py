@@ -174,11 +174,11 @@ def vs_inputs(vp, live, renderer, ctx):
 # ---------------------------------------------------------------- 前导代码与方案
 
 PRELUDE = r"""// 由 zzz_fx_material.py 生成，勿手改。Shader：%(shader)s，Pass：%(pass)s，关键字：%(keywords)s
-// 运算在 Unity 约定下进行：Y 轴向上、长度单位米；F.U() 把 UE 向量换到该约定（交换 Y/Z）。
+// 运算在 Unity 约定下进行：Y 轴向上、长度单位米；F.U() 与导入的 (-X,Z,Y) 轴换算互逆。
 // 寄存器按位存放（uint4），与 D3D 反汇编一一对应，比较结果是 0xFFFFFFFF 掩码。
 struct ZF
 {
-    float3 U(float3 v) { return float3(v.x, v.z, v.y); }
+    float3 U(float3 v) { return float3(-v.x, v.z, v.y); }
     // Unity UV（V 向上）→ UE 贴图（V 向下）。寻址模式来自贴图资产，已按 Unity 导入设置配置。
     float4 S(Texture2D Tex, SamplerState Smp, float2 uv) { return Texture2DSample(Tex, Smp, float2(uv.x, 1.0 - uv.y)); }
     float4 SL(Texture2D Tex, SamplerState Smp, float2 uv, float lod) { return Texture2DSampleLevel(Tex, Smp, float2(uv.x, 1.0 - uv.y), lod); }
@@ -267,23 +267,81 @@ def pick_pass(shader, material):
                     % (sorted(disabled), [p["lightmode"] for p in shader["passes"]]))
 
 
-def plan(material_path, renderer, tex_assets):
+def plan(material_path, renderer, tex_assets, shader_name=None, output_contract="color"):
     """renderer: {"kind": "particle"/"mesh", "streams": [...], "custom_streams": bool, "mesh": bool, "uv_count": n}
     tex_assets: Unity 贴图 PathID(str) → UE 资产路径。"""
     mat = json.load(open(material_path, encoding="utf-8"))
-    shader_name, keywords, shader_file = V.export_variant(material_path)
+    # Planning must not invoke the exporter or overwrite a source export.
+    shader_name = shader_name or mat["m_Shader"].get("Name")
+    if not shader_name:
+        raise PlanError("Shader name is missing; supply its resolved dependency name")
+    keywords = sorted((mat.get("m_ShaderKeywords") or "").split())
+    variants = sorted(V.variant_dir(shader_name, keywords).glob("Shader/*.shader"))
+    if len(variants) != 1:
+        raise PlanError("Expected one existing shader variant for %s %s, found %d at %s"
+                        % (shader_name, keywords, len(variants), V.variant_dir(shader_name, keywords)))
+    shader_file = variants[0]
     shader = T.parse_shader(Path(shader_file).read_text(encoding="utf-8", errors="replace"))
-    p = pick_pass(shader, mat)
+    if output_contract == "distortion_field":
+        if shader_name != "miHoYo/Particles/Distortion UVMove":
+            raise PlanError("Unverified distortion producer: " + shader_name)
+        matches = [q for q in shader["passes"] if q["lightmode"] == "Distortion" and
+                   q["lightmode"] not in (mat.get("m_DisabledShaderPasses") or [])]
+        if len(matches) != 1:
+            raise PlanError("Expected one enabled Distortion field pass")
+        p = matches[0]
+        mode = mat["m_SavedProperties"]["m_Floats"]["_DistortionMode"]
+        if mode not in (0.0, 1.0):
+            raise PlanError("Unknown original distortion mode: " + str(mode))
+        output_register = int(mode)
+    elif output_contract == "color":
+        p = pick_pass(shader, mat)
+        output_register = 0
+    else:
+        raise PlanError("Unknown shader output contract: " + output_contract)
+    targets = [r for r in p["fp"]["out"] if r["name"] == "SV_Target"]
+    if output_contract == "color" and any(r["index"] != 0 for r in targets):
+        raise PlanError("%s/%s writes multiple render targets; its specific render output contract must be implemented"
+                        % (shader_name, p["name"]))
     sp = mat["m_SavedProperties"]
     floats, colors, texenvs = sp["m_Floats"], sp["m_Colors"], sp["m_TexEnvs"]
     provider, builtin_docs = load_globals()
 
-    ps = T.translate(p["fp"], "b", provider, {0: "xyzw"})
+    if output_contract == "distortion_field":
+        depth_slots = [slot for slot, info in p["fp"]["bind"]["tex"].items()
+                       if info["name"] == "_DepthMipChain"]
+        for slot in depth_slots:
+            samples = [s for s in p["fp"]["asm"] if re.search(r"\bt%d\." % slot, s)
+                       and s.startswith("sample")]
+            if not samples or any(not s.startswith("sample_l ") or not s.endswith("l(0.000000)")
+                                  for s in samples):
+                raise PlanError("Distortion depth pyramid requires an unimplemented mip sampling contract")
+        if depth_slots:
+            provider["__textures__"] = dict(provider["__textures__"])
+            provider["__textures__"]["_DepthMipChain"] = (
+                "float4(1.0 / (CalcSceneDepth(ViewportUVToBufferUV({uv})) * 0.01), 0.0, 0.0, 0.0).xxxx")
+
+    ps = T.translate(p["fp"], "b", provider, {output_register: "xyzw"})
     need = {}
     ps_special = []
+    screen_override = False
     for row in p["fp"]["in"]:
-        used = {c for v, c in ps["live_inputs"] if v == "v%d" % row["reg"]}
+        used = {c for v, c in ps["live_inputs"] if v == "v%d" % row["reg"] and c in row["mask"]}
         if not used:
+            continue
+        if output_contract == "distortion_field" and row["name"] == "TEXCOORD" and row["index"] == 4:
+            reg = row["reg"]
+            uses = [s for s in p["fp"]["asm"] if not s.startswith("dcl_") and
+                    re.search(r"\bv%d\." % reg, s)]
+            # This producer only divides its ComputeScreenPos interpolant by W.
+            # Substitute the actual viewport UV and our canonical reciprocal eye
+            # depth; no guessed projection sign or fabricated camera matrix.
+            expected = r"div r\d+\.xyz, v%d\.xyzx, v%d\.wwww" % (reg, reg)
+            if len(uses) != 1 or not re.fullmatch(expected, uses[0]):
+                raise PlanError("Distortion screen interpolant contract changed: %s" % uses)
+            ps_special.append("    uint4 bv%d = asuint(float4((Parameters.SvPosition.xy - View.ViewRectMin.xy) / ViewSize, "
+                              "1.0 / (PixelDepth * 0.01), 1.0));" % reg)
+            screen_override = True
             continue
         if row["name"] == "SV_POSITION":
             ps_special.append("    uint4 bv%d = asuint(float4(Parameters.SvPosition.xy - View.ViewRectMin.xy, "
@@ -298,7 +356,13 @@ def plan(material_path, renderer, tex_assets):
         if vo is None:
             raise PlanError("PS 输入 %s%d 在 VS 输出里找不到" % (row["name"], row["index"]))
         need.setdefault(vo["reg"], (set(), row["reg"]))[0].update(used)
-    vs = T.translate(p["vp"], "a", provider, {k: "".join(sorted(v[0])) for k, v in need.items()})
+    vs_provider = dict(provider)
+    if screen_override:
+        # The translator checks partial providers while translating dead camera
+        # outputs. Omitting this provider defers the check until dead-code removal;
+        # any live projection dependency still fails explicitly.
+        vs_provider.pop("_ProjectionParams", None)
+    vs = T.translate(p["vp"], "a", vs_provider, {k: "".join(sorted(v[0])) for k, v in need.items()})
 
     ctx = {"builtins": set(), "dyn": {}, "mesh": renderer.get("mesh", False), "uv_count": renderer.get("uv_count", 1),
            "warnings": []}
@@ -337,7 +401,7 @@ def plan(material_path, renderer, tex_assets):
         pre_pos = ""
     body = (PRELUDE % {"shader": shader_name, "pass": p["name"], "keywords": " ".join(keywords) or "无"}
             + pre_pos + "\n".join(av) + "\n" + vs["code"] + "\n" + "\n".join(link + ps_special) + "\n"
-            + ps["code"] + "\n    float4 c = asfloat(bo0);\n"
+            + ps["code"] + "\n    float4 c = asfloat(bo%d);\n" % output_register
             + ("    return float4(c.rgb * c.a, c.a);\n" if out_conv == "rgb*a" else "    return c;\n"))
     # Custom 节点函数体里不需要缩进；去掉 4 空格前缀便于阅读
     body = "\n".join(l[4:] if l.startswith("    ") else l for l in body.split("\n"))
@@ -358,7 +422,9 @@ def plan(material_path, renderer, tex_assets):
             raise PlanError("贴图 %s（PathID %s）没有导入到 UE" % (name, pid))
         tex_params[name] = tex_assets[pid]
 
-    key_src = json.dumps({"code": body, "params": sorted(params), "tex": sorted(tex_params), "blend": blend,
+    key_src = json.dumps({"generator": 2, "renderer_kind": renderer["kind"], "mesh": renderer.get("mesh", False),
+                          "output_contract": output_contract,
+                          "code": body, "params": sorted(params), "tex": sorted(tex_params), "blend": blend,
                           "two_sided": cull == 0.0, "builtins": sorted(builtins)}, sort_keys=True)
     key = hashlib.md5(key_src.encode()).hexdigest()[:8]
     short = shader_name.split("/")[-1].replace(" ", "")
@@ -367,6 +433,10 @@ def plan(material_path, renderer, tex_assets):
         "master": "M_ZZZFX_%s_%s" % (short, key), "code": body, "blend": blend,
         "two_sided": cull == 0.0, "builtins": sorted(builtins), "dyn_params": ctx["dyn"],
         "params": params, "textures": tex_params,
+        "renderer_kind": renderer["kind"], "mesh": renderer.get("mesh", False),
+        "output_contract": output_contract, "output_register": output_register,
+        "source_variant": str(shader_file),
+        "source_variant_sha256": hashlib.sha256(shader_file.read_bytes()).hexdigest(),
         "disabled_passes": mat.get("m_DisabledShaderPasses") or [], "warnings": ctx["warnings"],
         "skipped_passes": [q["lightmode"] for q in shader["passes"]
                            if q is not p and q["lightmode"] not in (mat.get("m_DisabledShaderPasses") or [])],
