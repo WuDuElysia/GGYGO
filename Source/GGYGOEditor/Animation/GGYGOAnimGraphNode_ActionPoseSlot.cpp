@@ -17,7 +17,7 @@ FLinearColor UGGYGOAnimGraphNode_ActionPoseSlot::GetNodeTitleColor() const
 
 FText UGGYGOAnimGraphNode_ActionPoseSlot::GetTooltipText() const
 {
-	return LOCTEXT("Tooltip", "Native Slot with component alignment and body Z relative to a trajectory bone. Requires fixed reference ancestors and uniform nonadditive montage blending.");
+	return LOCTEXT("Tooltip", "Native Slot with component alignment and authored body translation relative to a trajectory bone. Requires fixed reference ancestors and uniform nonadditive montage blending.");
 }
 
 FText UGGYGOAnimGraphNode_ActionPoseSlot::GetNodeTitle(ENodeTitleType::Type TitleType) const

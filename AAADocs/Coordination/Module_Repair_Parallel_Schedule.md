@@ -2,7 +2,95 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
-## 当前批次：已验收需求的文档与Git交付（2026-10-06）
+## 当前批次：WalkRun 运动偏移（2026-10-07，约定门禁通过，仅集中图文／Git收尾）
+
+当前唯一有效授权：所有源码／测试／工具／资产／局部笔记写入者均已保存停写，无开发写权；源码26件中文提交push `b80a80c`，笔记34件中文提交push `74d17d2`／单新增节点布局修正 `4e44e1c`。统筹仅完成父仓精确13件交付，不再新增构建或严格矩阵。Gate106-R3构建Succeeded／exit0（11 actions、42.28秒），R2六叶6Success／0E0W、R3补初始化Movement叶通过；正式Held持续Run／释放观察1Success／0Error／5Warning（7.063208秒）、227样本全部必需覆盖成立，原Natural兼容烟1Success／0Error／8Warning（20.948912秒）。原R1／R2失败与未验网络／HID／Cook／完整碰撞边界保留。新增参数Set仅该一份获用户入库批准。
+
+完整需求一次集中笔记范围已全部关闭：Movement既有三Markdown／三Canvas（动作子图本轮零写入）；Camera既有两Markdown／四Canvas；Animation运行时既有四Markdown／三Canvas；Character既有两Markdown／两Canvas。只改实际接口／算法／生产配置和有限证据，四作者均保存自审冻结；连同前序笔记和根入口共34件集中静态核对通过（16Canvas／307节点／334边／739wiki链接）。精确Git对象同样通过JSON／正文／ID／端点／标签／无重叠；旧节点布局、格式和FX保护，重叠修正仅移动本次新增初始化节点。未做原生Obsidian视觉验收。以下源码授权表和过程段落全部为本需求历史，不恢复写权。
+
+用户已授权实施原 Movement 计划第14节：真实轨迹与胶囊朝向共同平滑转弯，Walk 较弱、Run 较强，方向误差响应曲线及角速度上下限可调。镜头规则已明确为世界弯道外侧投影到 camera-right 的纯横移，侧视可减弱、正视可换号；不改 ControlRotation／FOV。状态机合集留待后续，不纳入本需求。
+
+| 负责人 | 当前授权 | 责任与边界 |
+| --- | --- | --- |
+| Movement 牵头 | 原作者交回后收敛为八件唯一写权：`Source/GGYGO/Character/Components/GGYGOCharacterMovementComponent.h/.cpp`、`Source/GGYGO/Character/Data/GGYGOMovementSet.h/.cpp`、新增 `GGYGOLocomotionSteeringTypes.h`、`GGYGOLocomotionSteeringEvaluation.h/.cpp`、新增 `Source/GGYGO/Character/Tests/GGYGOLocomotionSteeringTest.cpp` | 独占真实速度轨迹、Yaw 与原生区间结果；纯角预算数学／校验拆入无状态 Evaluation，CMC保唯一执行；旧MovementTypes与原Locomotion测试范围收回且原作者报告零写入。 |
+| Camera 参与 | 已开放六件唯一写权：`Source/GGYGO/Camera/GGYGOCameraMode.h/.cpp`、`GGYGOCameraMode_ThirdPerson.h/.cpp`、`Source/GGYGO/Camera/Tests/GGYGOCameraLifecycleTestTypes.h`、`GGYGOCameraLifecycleTest.cpp` | 模式内构图侧移／回收与可配置表现；UpdateView 接回既有明确求值失败结果，保原模式栈、GA Offset、唯一最终碰撞。移动快照接口须与原作者冻结后再消费。 |
+| Animation 参与 | 已开放七件唯一写权：`Source/GGYGO/Animation/Runtime/GGYGOAnimationStateFrame.h`、`GGYGOAnimationStateCapture.cpp`、`Source/GGYGO/Animation/zzzAnim/ZZZAnimInstance.h/.cpp`、`Data/ZZZAnimTuning.h`、`Source/GGYGO/Animation/Tests/GGYGOAnimationLifecycleTest.cpp`、`GGYGOAnimationLifecycleTestTypes.h` | 只读原移动区间事实，普通 WalkRun 最小可配置倾身／恢复；保原动作轨迹／ActionPoseSlot，不另决定速度或胶囊方向。新增 Frame 字段先与 Movement 冻结；正式 ABP 接线仍待统筹资产窗口。 |
+
+三个既有长期会话均已实际派发 `gpt-6.1-sol / xhigh`，Fast 关闭、无子代理。当前 Movement 八件、Camera 六件、Animation 七件源码／必要测试互斥写权开放；全部资产／笔记仍冻结。必要共享接口由原作者直接冻结后适配，自主实施，不逐方法审批。共享 DTO 为原 CMC／Character／UpdatedComponent 弱身份、来源代次和已完成原生区间编号／dt，区分 Initial／Valid／NotApplicable／Invalid；GT getter只读。真实轨迹 `ActualSignedVelocityYawRate`／有效速度导数标志与胶囊 `ActualSignedYawRate` 语义分开，Camera 不用后者猜世界弯道外侧；速度方向／偏角／WalkRun强度复用原getter，不建第二权威。整链完成并必要冒烟后集中图文同步。统筹独占 UE／构建／资产／Git；前序 Combo 两件收尾修正继续冻结，增量构建 Succeeded／exit0（5 actions、27.48秒），原 AttackAndNatural 一烟实际 Success／0Error／9Warning、21.045790秒，不把旧链补验当新功能通过。批外配置／蓝图／笔记布局和 FX 内容保持。
+
+Animation 资产生产原会话现仅获独占 UE／MCP 只读准备窗口：核实 `/Game/BP/Anim/ABP_Pyrios` 的普通 WalkRun 姿态支路、实际骨轴及公共 BlueprintTools 接线能力，并与运行时作者对齐输出字段。编辑器仍为 Gate105-R1 旧 DLL，不保存资产、不改图、不 PIE／编译／Git／笔记；源码三线可继续互斥开发，统筹不并行操作 UE。生产资产写权在新 DLL 统一构建后另行精确登记。
+
+统一集成检查点：Movement八件、Camera六件、Animation七件共21件源码／必要测试现已全部原作者明确保存冻结，源码写权关闭，无在途写入；统筹只读核对scope、关键权威／来源清理及diff --check通过。三个新增必要叶为 `GGYGO.Movement.Locomotion.Steering.NativeInterval`、`GGYGO.Camera.WalkRunSteeringComposition`、`GGYGO.Animation.WalkRunLean.PresentationAndReset`；前两者不冒称正式Hero／HID，Animation消费夹具也不代替真实CMC。资产原作者交还只读UE窗口后，由统筹正常关闭旧DLL，统一Gate106构建，再接Pyrios专用Set／PawnData、唯一CameraMode与原ABP WalkRun支路；整链当前未编译／未动态验。公共节点引脚“读”API内部临时建删节点使ABP未保存变脏，磁盘未变、根图原6节点无残留已观察，停止该探针；真实原图与dirty列表核对后再处理自身临时状态，不自动SaveAll或丢弃用户内容。
+
+Gate106首轮统一构建真实失败（exit6／44.27秒，8个Compile动作已完成）：`AI/Boss/GGYGOBossEncounter.cpp:218` 对前置声明 `UBehaviorTree` 调用 `GetNameSafe` 缺完整类型，源文件未直接包含BehaviorTree头，新增CPP使unity重新分组后暴露旧隐式包含依赖。其余21件仍冻结。仅恢复BossAI原组长对该 `.cpp` 一件的唯一写权，修必要显式包含／完整类型，不扩Boss玩法／测试／资产／笔记／UE／Git；作者停写后统一R1构建，首轮失败日志保留，不当新功能验收。
+
+Gate106-R1统一Editor构建已实际Succeeded／exit0（4 actions、11.21秒）；Boss一件仅补显式 `BehaviorTree/BehaviorTree.h` 已停写，源码／测试写权再次全部关闭。旧UE在自身工具临时ABP经限定原生Reload恢复／dirty=[]后正常退出，保留旧包外部BlueprintGraphEditor引用Warning，磁盘不保存，未强杀。现在统筹独占新DLL启动及三包资产写权：新增 `/Game/Characters/Player/Pyrios/DA/DA_Movement_Pyrios`（正常参数Set，不复制原动画曲线）、既有 `DA_Pawn_Pyrios` 的MovementSet引用、既有 `/Game/Camera/Modes/BP_CameraMode_ThirdPerson_Pyrios` 的新构图参数。共享 `/Game/System/DA_Movement_Default` 只读，原ABP尚无生产写权；新DLL三包精确保存／回读后再授资产原作者仅ABP单包窗口。其余资产／笔记冻结，动态烟未运行，不冒称功能完成。
+
+统筹三配置包已实际精确save=true／dirty content&maps=[]，原共享Set关闭状态及曲线不变，镜头TargetOffset/FOV/Pitch／穿透参数数值保持。保护检查曾因Vector包装内存地址误报，在保存前明确比较原XYZ／标量证实相同后继续，原失败日志不覆盖。现关闭统筹三包写权，恢复Animation资产原作者仅 `Content/BP/Anim/ABP_Pyrios.uasset` 单包与UE/MCP独占窗口：原WalkRun Player→L2C→Spine ModifyBone→C2L→原Result及Angle/Valid读取、Tuning.WalkRunLean配置；只用已核公开原生BlueprintGraphEditor／正式属性API，保原Root ActionPoseSlot、GaitBlendY、所有过渡／其它图及动画源。已备份原包，新DLL PID74808／MCP8000；作者精确保存／必要回读并停写交还后，统筹再统一必要烟。其余源／工具／资产／笔记继续冻结，不并行UE操作。
+
+Movement牵头另仅获离线诊断脚本 `Saved/ValidationRecords/observe_pyrios_walkrun_steering_gate106.py` 一件写权，为统筹的正式Held叶准备有界转弯采样／验证。不得运行脚本或连接UE、不改生产源码／其它资产／笔记；只在原真实PIE／Hero输入链完成攻击并回普通WalkRun后驱动测试镜头方向，记录胶囊轨迹／朝向、镜头和动画表现及清理结果，不另造输入业务执行器。脚本是实际由编辑器消费的测试驱动，不建任务JSON；自审保存停写后由统筹在资产交回窗口运行。
+
+### 本需求R1／R2冷启动与数值修正的历史交接（无当前写权）
+
+冷启动窄接缝补充有效租约：原Character只读核实pre-DataInitialized标签可能停在Spawned/DataAvailable，不能让展示永久Initial；仅新增授原Character作者 `Source/GGYGO/Character/Components/GGYGOPawnExtensionComponent.h/.cpp` 两件唯一写权，公开原同步PawnData初始化在途只读事实，退出/失效立即关闭，不改原调度顺序或建Ready状态/重试/timer。Movement在原八件范围内消费该公开契约，构造注册期仍按原Actor生命周期、构造后Pending必须真实同步scope+未提交Set+未执行native区间，scope退出缺配置明确Invalid。两作者直接冻结接口、自主实施、互不抢写，全部保存停写后统一R3及原单轮烟；其他文件/资产/笔记冻结，root独占UE/build/Git。
+
+Gate106-R2真实检查点：Camera两件double投影修正、Combat单测试有界模式及Movement离线脚本均已保存冻结；统筹在dirty=[]后正常退出旧UE，R2统一Succeeded／exit0（5actions、12.56秒），新UE97612／MCP8000六必要叶6Success／0Error／0Warning。正式RunObservation单轮Fail暴露真实合法冷启动：CMC尚未接受MovementSet时新快照过早Invalid，Camera／Animation拒绝首画面；脚本又在PIE调用原生禁止的GetEditorWorld查询，0sample并清理no_view_change。原报告保持。当前只恢复Movement原八件源码／必要测试及同一离线脚本唯一写权，牵头按真实原初始化与明确失效边界修正；相关Character／Animation／Camera组长可范围内只读协商，任何其它文件必须先协调唯一作者。没有速度／画面兜底、第二就绪状态机或静默无限等待。全部资产／笔记／其他源码冻结，UE/build/Git仍统筹独占。用户仅批准新增DA_Movement_Pyrios强制纳入Git，未放开其他ignore。
+
+当前有效窗口补记：ABP原作者已实际编译并精确保存单包、节点errors/warnings=[]，其余24图及原BlendSpace输入保持，dirty=[]并停写交还UE窗口；三配置包与ABP资产写权均关闭。统筹Gate106-R1六必要叶实跑5Success／1Fail，唯一失败为Camera侧视投影消失断言，真实报告保留。仅恢复Camera原六件源码／必要测试唯一写权自主复核根因；另授权Combat玩家动作原作者仅 `Source/GGYGO/AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp`，复用原真实Held夹具增加明确选择的首次Run后约3游戏秒持续W、真实释放后约1游戏秒观察模式，原叶行为与身份／资源断言保留，不改生产攻击逻辑。两线文件互斥、无UE／资产／笔记／Git操作；Movement只继续上述一件离线观察脚本，直接与Combat对齐用法，不能运行或连接UE。源码作者全部再次冻结后，统筹一次R2构建并正式整链烟；不以首轮失败冒称功能完成。
+
+## 前序批次：Montage 信号开放攻击／移动打断（2026-10-07）
+
+用户最新明确确认：以 Montage 中作者化信号开放打断，而非等 Main 结束；信号前拒绝打断，越过后该次动作持续允许真实移动取消及下一段攻击，第三段可接01，下一次播放重新关闭。没有后续请求仍完整自然收招。此政策已由Combat牵头实施，原Task作者提供stock Notify强身份事实，Movement复用既有真实输入／句柄取消；没有子代理、第二播放执行器或CMC改动。Gate105构建／四包保存冷读／五必要烟已通过，六源中文提交push `f423f49`。下方局部笔记均已冻结，本节仅保留历史；当前权限只由顶部运动偏移租约确定。
+
+当前有效交接：前序 Movement 六份图文、Combat 三份图文、Animation 七份图文均已明确保存冻结，旧局部笔记写权全部关闭；Combat 前序计划页仅部分同步，两 Canvas 尚未改，不冒称前序全部图文完成。此前 Combat 四件候选也已明确冻结，所有源码／测试／资产／局部笔记暂无写权。Combat 与 Animation 只读交回必要精确范围后再登记唯一写入者；Movement 已静态核对 Query／Subscribe／Cancel／Release(Cancelled) 不依赖 Main／End，无 CMC 改动需要，若发现真实新接缝缺口再提交实证。共享 GA／ASC／Task、Input／Hero、UE／GAS 引擎代码不因本需求自动开放。UE、构建、资产与 Git 窗口仍由统筹安排。
+
+| 唯一写入者 | 当前精确写入范围 | 交付／边界 |
+| --- | --- | --- |
+| Combat 玩家连段牵头 | `Source/GGYGO/AbilitySystem/Abilities/GGYGOPlayerComboAbility.h/.cpp`、`GGYGOComboTypes.h`、`Source/GGYGO/AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp` | 现恢复原四件唯一写权，调整候选为作者化信号权限、下一段／03→01与原资源退出；独立设计，与原 Task 作者直接冻结必要接口后适配。缺失信号不得偷偷由 End 代开，拒绝自动循环；必要原测试随新语义调整。 |
+| Movement 参与者 | 暂无写权；上述共享接口、CMC／RMS及输入来源只读 | 定位真实 Qualified／Cancel／普通移动接管接缝，不另持攻击段／连段状态。实证需改 CMC 时先登记原作者独占范围。 |
+| Animation 运行时 | 无写权；前序七份图文已保存冻结，本需求只读 | 核对原 Notify／Task 事件身份、旧混出信号隔离及实际 Montage 作者化接缝，交回必要精确范围，不修改当前源码或资产。 |
+| AbilitySystem 原 Task 作者 | `Source/GGYGO/AbilitySystem/Tasks/GGYGOAbilityTask_PlayMontageAndWaitForEvent.h/.cpp` | 现恢复两件唯一写权，复用原生 Montage Notify 精确原播放事实，沿既有 Task／Callbacks 提供窄接缝，不持业务门／第二播放执行器，不放宽旧窗口事件校验。与 Combat 直接收敛共享接口；其他源／测试／图文不开放。 |
+
+最新范围交接：Combat 四件与 AbilitySystem Task 两件开放为两条互斥源码工作线。Animation 资产原作者另独占 `AAADocs/Scripts/create_pyrios_combo_montages.py` 与 `AAADocs/Scripts/tests/test_animation_asset_safety.py` 两件离线工具，适配新资产的唯一原生点及保已有作者位置，原 Hit／Combo／Sound、完整 End／末帧混出保护；不写资产／Editor C++。共享接缝由原作者直接明确后消费，六件源保存冻结后才统一编译。无自定义 Notify 桥／新 Editor 工具；资产窗口仍关闭，新 DLL 后拟只开放三 Montage 和专用 GA 四包给原资产作者。UE 已在 content/maps dirty=[]后正常退出且实际 UE／LiveCoding 为零，没有 SaveAll／强杀／丢弃。
+
+当前有效状态：六件源码／必要原测试及两件离线工具均已由三个原作者明确保存停写，所有开发写权关闭，无在途写入。Task 只认证原生单点事实，GA 本原资源唯一持门，NextStepIndex 为唯一后继配置；旧 End-only 字段已撤回，旧输入缓冲仅保序列化兼容且不授权限。原离线工具14项通过；六源根核对四件交回hash及diff --check通过。统筹进入 Gate105统一Editor编译／新DLL窗口，随后四包精确资产接线和五项必要烟；当前不称运行时验证完成，不扩历史矩阵。
+
+Gate105统一Editor构建已实际 Succeeded／exit0（6 actions、26.32秒），日志 `Saved/Logs/GGYGO_Gate105_InterruptionSignal_Build_20261007.log`；两条既有 NonInstanced 弃用 Warning保留。全部开发作者继续冻结，统筹启动新DLL编辑器／MCP8000，实际连接后才交原资产作者四包独占窗口；目前信号资产接线及动态烟仍未运行，不提前开放全局笔记。
+
+新UE85396／MCP8000原生非PIE查询成功。现仅恢复 Animation 资产原作者独占三 `Content/Characters/Player/Pyrios/Animation/Attack/AM_Pyrios_Attack_Normal_01/02/03.uasset` 与 `Content/Characters/Player/Pyrios/Abilities/GA_Pyrios_Attack_Combo.uasset` 四包及其必要 MCP 操作窗口：各唯一 stock Montage Notify，名字 `Event.Montage.CancelPoint`；三步同名及 Next1／2／0。先读dirty／实际配置并备份，已有合法信号保原作者位置；缺点才从实际End入口新增，不删旧窗口／覆盖原Source。仅精确保存四目标、回读及保护核对后停写交还；全部源码／脚本／笔记继续冻结，统筹暂不并行操作UE或启动烟。
+
+完整需求验收检查点：四包原作者已实际精确save=true／dirty=[]及13批外保持并停写交还，全部资产写权关闭。统筹正常退出85396、新UE86036冷读四包保持唯一stock点／Name／Next1／2／0／完整总长且dirty=[]；Gate105原五必要烟5Success／0Error／17Warning、43.915秒，实际Main内点与真移动／03→01新按下／新播放重闭／三段移动重置／原任务订阅清理／无请求完整自然End有限通过。报告 `Saved/AutomationReports/GGYGO_Gate105_InterruptionSignal_Smoke_20261007_MCP.json`，ColdSmoke Editor日志保留；运行卡帧／渲染变量／原生PIE退出清理Warning不吞，资产API初失败原证据保持。未跑全量历史矩阵／联机／HID／所有技能，不称全部项目完成。
+
+完整需求的一次集中局部笔记范围为：Combat仅Obsidian `AbilitySystem/计划_玩家普攻连段.md`、`GGYGO_结构_玩家普攻连段.canvas`、`GGYGO_流程_玩家普攻连段.canvas`；AbilitySystem原Task作者仅 `AbilitySystem/结构.md`、`GGYGO_结构_AbilitySystem.canvas`、`GGYGO_流程_AbilitySystem.canvas`、`计划_AbilitySystem.md`；Animation运行时仅前序四Markdown／三Canvas七件；Movement仅前序三Markdown／三Canvas六件，运动偏移第14节保现有计划不扩实施。已交回的Animation七件、Combat三件、AbilitySystem四件均停写；Movement保存自审后即停写。只同步本需求真实职责／接口／作者化配置与验收边界，保原节点／边／布局／FX及批外未提交内容；不新增摘要JSON／新图／严格检查矩阵。
+
+最后源码对照发现具体收尾接缝：Task先结束而CMC末消费未到时，资源继续存活但许可不应继续工作；Gate105五烟实际顺序为Motion先完成，不能声称反向间隙已测。Combat独占 `GGYGOPlayerComboAbility.cpp` 与既有 `GGYGOPlayerComboLifecycleTest.cpp` 两件必要正确性补修现已保存自审冻结，原Task完成关闭许可／晚到信号不得重开，仍保Scope/Handle与双完成自然消费。全部源码／测试／工具／资产／局部笔记写权关闭，无在途写入；统筹23份图文静态通过。只余一次增量Editor编译＋原ProductionNativeAttackAndNatural一烟及三仓Git收束，不扩矩阵；补修版本未编译前不冒称通过。UE86036原生退出停于保存确认，仅 `/Temp/Untitled_2` 测试空包，已向用户请求不保存确认，未强杀／SaveAll／丢弃。原f423f49保持已push，两个补修未提交；保护四配置蓝图／原笔记布局格式FX。
+
+旧四件 End-only 候选已自审冻结，尚未编译、新字段尚未正式接线；其 EndAttackStepIndex／Main窗口规则需按上述最新信号政策由原作者调整。原请求顺序纠正及精确资源清理保留，原测试需按新信号准入／新播放关闭／03→01／真实移动重置及无请求自然收尾验证，不能沿旧 Main 锁规则验收。必要源码全部停写后统筹安排 Gate105 一次统一编译及新 DLL；正式三 Montage 信号／GA配置的精确资产写权待作者方案交回另行登记，不默认开放 SaveAll 或原 Sequence。运动偏移第14节计划也已保存冻结，全部局部文档当前停写；之前完整自然End证据及原失败保留。
+
+WalkRun 运动偏移的只读方案已由 Movement 牵头汇总 Camera／Animation，并仅在 Obsidian `Movement/计划_移动与动作位移.md` 第14节一次保存更新后明确冻结，其它章节／图文保持。方向／真实轨迹／角速度归 Movement，Camera 构图偏移，Animation 表现；仅规划、接口未生产冻结、不实施、不重画Canvas。自由侧视时“世界弯道外侧投影／始终画面左右偏移”的可见行为已单独向用户异步询问，只影响后续镜头实施，不阻塞攻击修复。所有参与者当前均无源码／测试／笔记／UE资产写权。
+
+Gate105实际尚未开始构建。前次96140／85700及临时空包保存弹窗仅留作历史，未推断用户保存／丢弃结果；本次实际只有新 UE79624／LiveCoding82644，8000监听归 UE79624，原生 MCP 查询非PIE已成功。当前真实日志在原 Scope16 两次03 End记录 Qualified→原Handle取消成功→GAEnd，之后重开01，只佐证旧 End 链，不代表新信号验收。新源码／信号接线／必要烟均未完成；正常关闭新UE前仍核对实际未保存内容，不边开UE边编译。
+
+## 前序批次：玩家攻击自然收招与姿态衔接修复（2026-10-07，源码／资产冻结）
+
+用户已明确授权实施：第三段滑步、End 尚未播放完便混入 Idle，以及已确认的 End 轨迹漏执行／Body 水平姿态余量删除。Animation 运行时牵头，参与者自行分析和拆分、直接协商必要接口；统筹只协调唯一写入者、公共窗口与最终验收。既定 Main 锁普通移动、End 可被真实移动输入打断不变，不新增 IK、第二时钟／执行链、隐式兜底或 UE/GAS 库修改。
+
+| 唯一写入者 | 本轮精确源码范围 | 职责与前置 |
+| --- | --- | --- |
+| Animation 运行时牵头 | `Source/GGYGO/Animation/Nodes/GGYGOAnimNode_ActionPoseSlot.h/.cpp`、`Source/GGYGO/Animation/Data/GGYGOActionMotionSourceBinding.h/.cpp`；必要时 `Source/GGYGOEditor/Animation/GGYGOAnimGraphNode_ActionPoseSlot.h/.cpp` | 保留原动作水平姿态余量、分离已执行轨迹贡献；组织完整 Main／End／自然混出契约。其它运行时和测试文件仍只读，新增范围先协调。 |
+| Movement | `Source/GGYGO/Character/Components/GGYGOCharacterMovementComponent.h/.cpp`、`GGYGOActionCurveRootMotionSource.h/.cpp`；`Source/GGYGO/Character/Data/GGYGOActionMotionEvaluation.h/.cpp`；`Source/GGYGO/Character/Tests/GGYGOActionMotionTest.cpp` | CMC／原 RMS 唯一执行自然动作轨迹，衔接 Main→End 及移动打断清理。消费已冻结的 Animation／Combat 接缝，不写其它模块文件。 |
+| 玩家战斗 | `Source/GGYGO/AbilitySystem/Abilities/GGYGOPlayerComboAbility.h/.cpp`、`GGYGOComboTypes.h`；`Source/GGYGO/AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp` | 管原能力／Task／动作资源的段落生命周期，区分 End 准许打断与自然完成，不提前终止收招；不写通用 GA／ASC／Task 或 CMC。 |
+| Animation 资产生产（新 DLL 独占三包窗口） | `Content/Characters/Player/Pyrios/Animation/Attack/AM_Pyrios_Attack_Normal_01/02/03.uasset`，其余资产只读 | 用户已指出短 End 裁剪错误：恢复三份完整原 End，按实际目标采样率／倍率定位完整收招最后一帧开始混出，混合时长独立保留 Montage 配置。先实读 BlendModeOut 并确认原生自然混出兼容；重算并回读实际完整总长、End入口及窗口未变。原 Main／Hit／Combo窗口／ABP／六源／Skeleton保持，仅备份与保存三目标；不得修改原 AnimSequence、SaveAll、源码、Git或其它会话范围。 |
+
+所有源码写入者自审冻结后一次批量 Editor 编译，必要冒烟沿原正式角色 01→02→03→自然 End→Idle，并保留真实移动打断。上一轮实测日志 `Saved/Logs/GGYGO_AttackMotion_Diagnostic_20261007.log` 及有限采样脚本保留，不把首轮输入失效中止当自然收招。有效轮 End 左脚骨等高后滑约60cm；没有胶囊起落，鞋底悬空／完整联机不冒称已定位。整需求开发及约定测试完成后集中同步笔记、中文提交／push；现有四份未提交配置／蓝图及批外笔记保护。UE／资产／构建／Git及全局文档仅统筹安排；Fast关闭、gpt-6.1-sol/xhigh，无子代理。
+
+本需求三源码作者共15件实际改动均已明确冻结。Gate104首轮UHT/C++通过、DLL占用导致链接失败（exit1，163.64秒），原日志保留；统筹纠正受限进程查询漏检后，经原生File→退出和真实进程/正常退出日志确认关闭UE80884。Gate104-R1已Succeeded/exit0（3 actions，3.20秒），新UE76828加载本批DLL；现仅Animation资产作者独占上述三包及必要MCP操作，其他作者只读。另将 `AAADocs/Scripts/create_pyrios_combo_montages.py` 与必要时既有 `Scripts/tests/test_animation_asset_safety.py` 同归资产原作者：旧脚本End 30/45/90帧是实际截断来源，改为原完整End和实际末采样帧混出，不覆写既有资产；不扩大运行时源码。资产/脚本交回冻结后统筹接回UE，运行原动作叶、Held/NewPress和有限完整第三段观察，不扩严格矩阵；动态验收尚未运行，笔记/Git写权未开放。
+
+当前有效状态：全部15件源码、三Montage和两个脚本均已明确冻结，UE／构建／验收窗口归还统筹，全部开发写权关闭。三ModeOut实际均Standard，公开Notify查询与原生ObjectExporterT3D已核原Section／NextLink／窗口业务语义；完整End只恢复原资产，合法原生派生缓存更新保留证据。完整01的亚微秒末端差由原SourceBinding作者按真实帧域及至多两float ULP限定正规化，真实gap／overlap仍拒绝。三包已实际save_assets成功、全局dirty=[]，13批外文件磁盘保持；双UE冲突经正常退出解除。Gate104-R2 Editor已Succeeded/exit0（9 actions，79.08秒），离线原资产工具11项通过；新UE96140冷读保持三完整End／总长／末帧Trigger，原四项必要烟4Success／0Error。有限1170样本覆盖原第三段完整End及自然混出，原StepToken3／Instance13／MotionHandle3的Task与实际位移消费分别完成、共同自然收尾；后续另一链的InputFlushed真实Error保留且不误归为原自然链失败。完整联机、全部动作／落地／IK仍未验，不扩矩阵。
+
+本需求开发和约定烟已完成，现仅恢复三个原组长互斥的集中笔记写权：Animation运行时可写 Obsidian `Animation/结构.md`、`动作姿态修正.md`、`普攻动画实施.md`、`计划_动画与表现层.md`、`GGYGO_结构_动画与表现.canvas`、`GGYGO_流程_动画表现.canvas`、`GGYGO_流程_动作姿态修正.canvas`；Movement可写 `Movement/结构.md`、`动作曲线执行.md`、`计划_移动与动作位移.md`、`GGYGO_结构_移动与位移.canvas`、`GGYGO_流程_移动与位移.canvas`、`GGYGO_流程_动作曲线执行.canvas`；Combat可写 `AbilitySystem/计划_玩家普攻连段.md`、`GGYGO_结构_玩家普攻连段.canvas`、`GGYGO_流程_玩家普攻连段.canvas`。仅按实际影响改必要段落，保留批前未提交布局／格式／ID／锚点／历史和原失败，不把验收过程塞入结构／流程图。全局入口、进度、Git仍统筹独占；Source／测试／UE资产不恢复写权，三作者自审停写后一次静态核对与精确中文Git交付，不新增过程摘要／JSON或严格回归。
+
+## 前序批次：已验收需求的文档与Git交付（2026-10-06，写权全部关闭）
 
 Gate103-R5实际Editor编译Succeeded/exit0（10 actions、145.63秒）；原生23项必要烟全部Success，0Error／1Warning。Health15叶和Camera3叶均0E0W，C12／C5五叶保持通过，唯一Warning是合法切人拒绝。结果 `Saved/AutomationReports/GGYGO_Gate103_R5_Closure_Smoke_20261006_MCP.json`，Build／Editor日志同名保留；R4失败不改绿，真实联机／暂停Photography provider不冒称验收。全部源码和资产作者继续冻结；此前以下源码授权表及过程只保留为历史，不构成续写权。
 
