@@ -4,6 +4,39 @@
 
 ## 当前批次：大角度转向手感修正与Pyrios攻击／技能／闪避特效（2026-10-07）
 
+### 当前公共窗口：FX112已归还，UE／MCP归统筹（2026-10-08）
+
+FX112整批已结束并明确停写归还，模块现无UE操作权。批准八包new-only创建、精确保存、材质recompile与Niagara UpToDate／0E0W通过；实际Custom Code28665字符与冻结生成Code逐字符／摘要相等，目的下标依赖和_CustomData1Z/W=0节点／MI已读回。有效瞬态快照仍为一帧／一存活粒子，核心绑定正确；原材质存活／消亡图像的实际ROI差异>8像素为0、最大6，故仅关闭转换器缺陷，不关闭烟雾可见性。补充报告 `Saved/AutomationReports/GGYGO_FX_Back03_DxbcFixValidation_20261008_FX112.json` 保留 `asset_build_passed_shader_dependency_fixed_visual_unconfirmed`，旧失败不覆盖。
+
+根独立核原Editor第11006行FX112_RETURN及原生非PIE／仅root observer_1；脏内容／地图空、原地图保持、自有控制台引用／回调空，未推进／重置／回放或保存缓存。全部23本地预览包、共享转换器两件、自有管线及Handoff均冻结；Handoff已仅一次集中同步并整文件交回。统筹交付两源＋Handoff＋本表／进度共五件精确中文Git，不包含用户四份配置／蓝图、忽略资产或外部导出。FX仅继续既有需求只读源分析，提出最短可见性定位，不重复八包试未知原因；新工具／诊断资产／管线范围另协调。斗篷只读离线线保持，准确UE观察清单交回前不交窗；受光／NTE新跨会话任务授权仍待用户，不混入本批。
+
+独立斗篷需求的受控并行：用户在FX既有会话再次指出左上沿背甲下方固定缺口，不能用Back03检查点代替验收。Character Rendering既有组长现仅可只读离线核现有源/工程及与FX直接取截图，制定最短拓扑/蒙皮/深度分流和准确UE只读清单；共享转换器两件仍冻结，不改代码/资产/配置/说明，不写源导出、不操作UE/MCP。FX112已归还，斗篷准确清单尚待交回再独立排只读窗口；未确认根因，不默认关SoftParticle或改亮度，身体与技能链不合并。该诊断不阻塞本批已核产物Git。
+
+共享转换器及专项已整文件冻结，根47项同组复核通过；FX仅执行已冻结管线重做真实源预检，未改源程序／旧证据／自有代码。根核 `Saved/AutomationReports/GGYGO_FX_Back03_DxbcFix_Preflight_20261008_FX112.json`：计划/imports一致、8目标唯一/磁盘不存在/与旧15包互斥，冻结helper摘要一致，原生非PIE。完整VP/FP依赖恢复，源参数仅新增_CustomData1Z/W=0，裸Code28625＋既有40前导；候选选择与模拟spec保持。本段现交FX唯一非PIE纯资产窗口，仅以下8包new-only创建、精确保存、原生编译／预览与实际运行读回，统筹停止并行UE操作。
+
+- `/Game/Characters/Player/Pyrios/FX/Skill/NS_PREVIEW_Eff_Pyrois_Evade_Back_03_Trail_root_smoke_flow_2c5515eed71b`
+- `/Game/Characters/Shared/FX/ZZZ/MaterialInstances/MI_Eff_Objects_MSH_GUID53029b4738568da4e9cc9c9b20eae7da_557274c793e4`
+- `/Game/Characters/Shared/FX/ZZZ/Materials/M_ZZZFX_Particles_Dissolve_CustomColor_Mask_6a1a1c20_2b737514d87d`
+- `/Game/Characters/Shared/FX/ZZZ/Meshes/FXMD_TRAIL_652ceb46c43d`
+- `/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Mask_036_YZ_02_eecbc9181806`
+- `/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Mask_556_d7306a2139b9`
+- `/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Noise_114_7c3d94a86575`
+- `/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Smoke_305_36f1160019cf`
+
+写前原生重核脏包、registry/memory目标不存在、共享及执行源冻结摘要和真实v3证书；任一必要预检失败整批拒写。旧15包不得复用／覆盖／删除，未知编译／Error不保存，失败新包留证；不改源Shader/亮度/参数来制造可见成功。只验证同一root/smoke_flow原材质，必要实际出生帧读回/原生图像可与FX111事实对照，观测不推进或回放缓存、不设第二时钟。C++／引擎／构建／Git／map／Actor／PIE／GA／Montage／ABP／Toon/bodyFX／RGB插件仍无写权，所有代码与Handoff保持冻结。源运行态/同帧/完整prefab和业务接入仍未验，不以编译或单子树冒充全还原；不扩矩阵。整批实际证据交回、自有开关/缓存引用/观察器清理与脏包/非PIE核对后立即停写归还，再一次集中局部说明及精确中文Git。
+
+### 当前共享转换器修复：动态目的下标读取依赖（2026-10-08）
+
+FX在已授权的FX110只读诊断中发现明确静态缺陷：原FP `pass_0_fp_04.txt:69` 的 `ftou r0.y, cb1[64].y` 被活跃性裁剪删除，但下一条动态目的写入 `x0[r0.y + 0].x` 保留；旧HLSL用front-face位值作5项数组下标。统筹已核原指令、translate_ins仅收源uses与live_block消费该集合，缺陷成立；是否为预览近空白的唯一原因尚未证实，不能与斗篷候选混为同因。
+
+共享源 `AAADocs/Scripts/zzz_dxbc_hlsl.py` 当前HEAD干净、无有效写入者；Rendering既有组长已完成前轮只读工作。现由Rendering担任该共享脚本唯一离线写入者，可修改整文件的必要依赖/裁剪正确性并新增 `AAADocs/Scripts/tests/test_zzz_dxbc*.py` 专项；不以角色/特定ftou白名单、关掉裁剪、默认下标或改源Shader绕过根因。保留严格最小原复现，核受影响翻译入口与必要既有FX专项，具体算法/内部拆分由组长自主决定；不扩全项目矩阵。公共输出契约/状态归属不改变，若需要实质改变共享接口或新增范围，先协调实际冲突。
+
+FX仍牵头整条需求，负责原单NS只读运行事实和冻结源候选/生成链后续消费，与Rendering直接协商；共享转换器修复期间不得重新导入/执行它生成新结果或抢写。Rendering完成自审测试后整文件冻结、准确交回FX和统筹，FX才据新转换器重新做完整离线预检；新资产清单与公共窗口另登记。旧7包/8包、来源及失败证据保持，两个模块均无C++/引擎/资产/业务接线/构建/Git或逐步笔记写权；只读UE仍仅FX既有窗口，Rendering不操作UE。完整可运行批次后再一次集中说明与中文Git。
+
+FX111只读窗口现已结束归还，UE/MCP归统筹、无模块操作权。有效瞬态SimCache在.25秒读得1帧/1存活粒子，实际Age .2333333、Lifetime .9、Color alpha .923284，renderer启用/引用/主要绑定正确；根核原Editor 9257/9260/9263行及机器读回。报告 `Saved/AutomationReports/GGYGO_FX_Back03_RuntimeReadOnly_20261008_FX111.json` 保留模拟与Shader语义缺陷的区分：不证明栅格输出/唯一视觉根因。自有引用为空、observer_8撤销、仅root observer_1、非PIE/原地图/dirty空，临时cache正常GC不强制；无资产保存或代码/说明写入。Rendering继续唯一共享脚本/专项离线写权；FX仅等其整文件冻结后运行已冻结自有生成链进行完整源预检，不恢复自有代码或资产写权。
+
+Rendering两件已完成保存自审并明确整文件冻结、无在途写入，写权关闭：共享转换器与新增 `tests/test_zzz_dxbc_liveness.py`。目的地址读取统一进入所有已支持写入入口，严格原复现另外暴露的break/continue最近出口/回边依赖已一并修正，公共translate接口保持、不禁用有效裁剪或默认下标。根核冻结字节与实际diff/专项，并原命令复跑47项通过（新22＋相关25），不是GPU验收；原失败与未绑定global保留。FX已收到直接交接，可用该冻结版做完整源候选预检并交新目标清单；旧8包保持，UE仍归统筹。开发与GPU检查点整链交回后再集中说明/Git，不为该共享子步骤同步架构笔记。
+
 用户新增两条实施需求：小角度慢、大角度快，纠正当前大视角转弯追转过慢；还原当前Pyrios普攻／技能与闪避特效。Movement与FX分别牵头，自主分析并按完整动作链拆分；允许与本需求实际相关的长期模块会话沟通，不建子代理，不由统筹代拟全部技术实现。模型gpt-6.1-sol／xhigh、Fast沿用关闭；两线可并行源码／离线工作，UE写操作仍只有一个窗口。当前父仓ca63c1b、Source b80a80c、笔记4e44e1c均已push，前序授权全部关闭。
 
 | 唯一写入者 | 本次范围 | 公共资源与验收 |

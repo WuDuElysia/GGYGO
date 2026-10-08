@@ -445,11 +445,21 @@ def mask_str(positions):
 
 
 class Ins:
-    __slots__ = ("defs", "uses", "side", "text", "refs")
+    __slots__ = ("defs", "uses", "side", "text", "refs", "flow")
 
-    def __init__(self, text, defs=(), uses=(), side=False):
+    def __init__(self, text, defs=(), uses=(), side=False, flow=None):
         self.text, self.defs, self.uses, self.side = text, list(defs), set(uses), side
         self.refs = None
+        # (nearest loop target, conditional). No extra emitted instructions.
+        self.flow = flow
+
+
+def address_uses(o):
+    """下标计算读取寄存器；写入目标的值本身不因此变成读取。"""
+    if not o.arr:
+        return set()
+    return {("r" + m.group(2), m.group(3)) if m.group(1) == "r" else ("x" + m.group(2), "*")
+            for m in re.finditer(r"(r|x)(\d+)\.([xyzw])", o.arr)}
 
 
 def var_of(ctx, o):
@@ -460,11 +470,7 @@ def var_of(ctx, o):
         out |= {("%s%d" % (o.kind, o.idx), c) for c in sw}
     elif o.kind == "x":
         out.add(("x%d" % o.idx, "*"))
-    if o.arr:
-        for m in re.finditer(r"(r|x)(\d+)\.([xyzw])", o.arr):
-            out.add((("%s%s" % (m.group(1), m.group(2))) if m.group(1) == "r" else "x" + m.group(2),
-                     m.group(3) if m.group(1) == "r" else "*"))
-    return out
+    return out | address_uses(o)
 
 
 def src_uses(ctx, o, positions):
@@ -482,6 +488,15 @@ def dest_defs(o):
 
 def translate_ins(ctx, op, sat, ops):
     """返回 Ins。"""
+    def assignment(text, destinations, uses):
+        # Every supported writer (including multi-output and texture samples)
+        # consumes the old address before updating destination values.
+        defs, reads = [], set(uses)
+        for d in destinations:
+            defs += dest_defs(d)
+            reads |= address_uses(d)
+        return Ins(text, defs, reads)
+
     def wr(d, expr_f=None, expr_u=None, n=None):
         name, pos = ctx.dest(d)
         if expr_f is not None:
@@ -564,19 +579,19 @@ def translate_ins(ctx, op, sat, ops):
                     text = wr(d, expr_u=convert(e, "u" if to == "uint" else "i", "u", n))
             else:
                 raise TranslateError("未实现 " + op)
-        return Ins(text, dest_defs(d), uses)
+        return assignment(text, [d], uses)
 
     if op in ("sincos",):
         dsin, dcos, s = ops
-        lines, defs, uses = [], [], set()
+        lines, destinations, uses = [], [], set()
         for d, fn in ((dsin, "sin"), (dcos, "cos")):
             if d.kind == "null":
                 continue
             _, pos = ctx.dest(d)
             uses |= src_uses(ctx, s, pos)
             lines.append(wr(d, expr_f="%s(%s)" % (fn, ctx.read(s, pos, "f")[0])))
-            defs += dest_defs(d)
-        return Ins(" ".join(lines), defs, uses)
+            destinations.append(d)
+        return assignment(" ".join(lines), destinations, uses)
 
     if op in SAMPLE:
         base = op.replace("_indexable", "")
@@ -607,7 +622,7 @@ def translate_ins(ctx, op, sat, ops):
         if tname in ctx.provider.get("__textures__", {}):
             call = ctx.provider["__textures__"][tname].format(uv=uv)
             del ctx.textures[tname]
-        return Ins(wr(d, expr_f="(%s).%s" % (call, rsw)), dest_defs(d), uses)
+        return assignment(wr(d, expr_f="(%s).%s" % (call, rsw)), [d], uses)
 
     raise TranslateError("未实现指令 " + op)
 
@@ -682,13 +697,16 @@ def parse_program(ctx, asm):
             elif op == "endloop":
                 stack.pop()
             elif op in ("break", "continue"):
-                stack[-1].append(Ins("%s;" % op, side=True))
+                stack[-1].append(Ins("%s;" % op, side=True, flow=(op, False)))
             elif op in ("breakc_nz", "breakc_z", "continuec_nz", "continuec_z", "discard_nz", "discard_z"):
-                c = ctx.read(ops[0], [0], "u")[0]
+                c, refs = capture(ctx, lambda: ctx.read(ops[0], [0], "u")[0])
                 kind = op.split("c_")[0] if not op.startswith("discard") else "discard"
                 cmpop = "!=" if op.endswith("_nz") else "=="
                 act = "clip(-1.0)" if kind == "discard" else kind
-                stack[-1].append(Ins("if (%s %s 0u) { %s; }" % (c, cmpop, act), (), src_uses(ctx, ops[0], [0]), True))
+                ins = Ins("if (%s %s 0u) { %s; }" % (c, cmpop, act), (), src_uses(ctx, ops[0], [0]), True,
+                          flow=(kind, True) if kind != "discard" else None)
+                ins.refs = refs
+                stack[-1].append(ins)
             elif op == "ret":
                 if len(stack) != 1 or i != len(asm) - 1:
                     raise TranslateError("程序中途 ret 不支持")
@@ -702,11 +720,22 @@ def parse_program(ctx, asm):
     return decl, root
 
 
-def live_block(nodes, live):
+def live_block(nodes, live, break_live=None, continue_live=None):
     kept = []
     live = set(live)
     for node in reversed(nodes):
         if isinstance(node, Ins):
+            if node.flow:
+                kind, conditional = node.flow
+                target = break_live if kind == "break" else continue_live
+                if target is None:
+                    raise TranslateError("%s 必须在 loop 内" % kind)
+                if conditional:
+                    live |= target
+                else:
+                    # The following statements in this block cannot execute.
+                    kept.clear()
+                    live = set(target)
             need = node.side or any((v, c) in live for v, c, _ in node.defs)
             if need:
                 kept.append(node)
@@ -715,22 +744,25 @@ def live_block(nodes, live):
                         live.discard((v, c))
                 live |= node.uses
         elif node["t"] == "if":
-            tk, lt = live_block(node["then"], live)
-            ek, le = live_block(node["else"], live) if node["else"] is not None else ([], set(live))
+            tk, lt = live_block(node["then"], live, break_live, continue_live)
+            ek, le = live_block(node["else"], live, break_live, continue_live) if node["else"] is not None else ([], set(live))
             if tk or ek:
                 kept.append({"t": "if", "cond": node["cond"], "then": tk, "refs": node.get("refs"),
                              "else": ek if node["else"] is not None else None})
                 live = lt | le | node["uses"]
         else:
-            cur = set(live)
+            # A DXBC loop executes its body before exiting. Solve its back edge
+            # separately from break exits; later writes cannot kill values read
+            # by an earlier break/continue path.
+            cur = set()
             while True:
-                bk, li = live_block(node["body"], cur | live)
+                bk, li = live_block(node["body"], cur, live, cur)
                 if li <= cur:
                     break
                 cur |= li
             if bk:
                 kept.append({"t": "loop", "body": bk})
-                live = cur | live
+                live = cur
     kept.reverse()
     return kept, live
 
