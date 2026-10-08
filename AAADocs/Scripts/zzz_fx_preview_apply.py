@@ -33,6 +33,7 @@ def main():
     parser.add_argument("node")
     parser.add_argument("--revision", required=True)
     parser.add_argument("--deps-path", type=Path)
+    parser.add_argument("--native-selections-json")
     parser.add_argument("--endpoint", required=True)
     parser.add_argument("--approved-targets-json", required=True)
     parser.add_argument("--result", type=Path, required=True)
@@ -42,7 +43,8 @@ def main():
     if result_path.parent != result_root or result_path.exists():
         raise ValueError("Result must be a new file in the project AutomationReports directory")
     result_root.mkdir(parents=True, exist_ok=True)
-    batch = P.plan_preview(args.fx, args.node, args.revision, args.deps_path)
+    selection = json.loads(args.native_selections_json) if args.native_selections_json is not None else None
+    batch = P.plan_preview(args.fx, args.node, args.revision, args.deps_path, selection)
     approved = json.loads(args.approved_targets_json)
     if set(batch["targets"]) != set(approved):
         raise ValueError("Current offline plan differs from the exact approved batch")
@@ -52,6 +54,9 @@ def main():
               "scope": batch["plans"][0]["scope"], "source_node": args.node,
               "source_prefab_restore": "incomplete", "action_integration": "outside preview scope",
               "visual_comparison": "unverified", "executed_script_sha256": scripts,
+              "native_shader_selections": {mi: material["source_selection"]
+                                            for mi, material in batch["plans"][0]["materials"].items()
+                                            if "source_selection" in material},
               "imports": batch["imports"]["entries"], "created": [], "saved": []}
     session = None
     try:

@@ -267,21 +267,31 @@ def pick_pass(shader, material):
                     % (sorted(disabled), [p["lightmode"] for p in shader["passes"]]))
 
 
-def plan(material_path, renderer, tex_assets, shader_name=None, output_contract="color"):
+def plan(material_path, renderer, tex_assets, shader_name=None, output_contract="color", native_source=None):
     """renderer: {"kind": "particle"/"mesh", "streams": [...], "custom_streams": bool, "mesh": bool, "uv_count": n}
     tex_assets: Unity 贴图 PathID(str) → UE 资产路径。"""
-    mat = json.load(open(material_path, encoding="utf-8"))
+    with open(material_path, encoding="utf-8-sig") as source:
+        mat = json.load(source)
     # Planning must not invoke the exporter or overwrite a source export.
     shader_name = shader_name or mat["m_Shader"].get("Name")
     if not shader_name:
         raise PlanError("Shader name is missing; supply its resolved dependency name")
     keywords = sorted((mat.get("m_ShaderKeywords") or "").split())
-    variants = sorted(V.variant_dir(shader_name, keywords).glob("Shader/*.shader"))
-    if len(variants) != 1:
-        raise PlanError("Expected one existing shader variant for %s %s, found %d at %s"
-                        % (shader_name, keywords, len(variants), V.variant_dir(shader_name, keywords)))
-    shader_file = variants[0]
-    shader = T.parse_shader(Path(shader_file).read_text(encoding="utf-8", errors="replace"))
+    source_selection = None
+    if native_source is not None:
+        if output_contract != "color":
+            raise PlanError("Native program preview currently requires the color output contract")
+        from zzz_fx_native_shader import select_native
+        shader, source_selection = select_native(native_source["shader_entry"], mat,
+                                                  native_source["material_pid"], native_source["selection"])
+        shader_file = Path(source_selection["native_json"])
+    else:
+        variants = sorted(V.variant_dir(shader_name, keywords).glob("Shader/*.shader"))
+        if len(variants) != 1:
+            raise PlanError("Expected one existing shader variant for %s %s, found %d at %s"
+                            % (shader_name, keywords, len(variants), V.variant_dir(shader_name, keywords)))
+        shader_file = variants[0]
+        shader = T.parse_shader(Path(shader_file).read_text(encoding="utf-8", errors="replace"))
     if output_contract == "distortion_field":
         if shader_name != "miHoYo/Particles/Distortion UVMove":
             raise PlanError("Unverified distortion producer: " + shader_name)
@@ -382,6 +392,8 @@ def plan(material_path, renderer, tex_assets, shader_name=None, output_contract=
     cull = flag(floats, "Cull", " ".join(p["state"]))
     zwrite = flag(floats, "ZWrite", " ".join(p["state"]))
     ztest = flag(floats, "ZTest", " ".join(p["state"]))
+    if "resolved_state" in p:
+        cull, zwrite, ztest = (p["resolved_state"][k] for k in ("cull", "zwrite", "ztest"))
     if zwrite not in (None, 0.0):
         raise PlanError("ZWrite=%r 的半透明特效未实现" % zwrite)
     if ztest not in (None, 4.0, 8.0, 0.0):
@@ -422,10 +434,16 @@ def plan(material_path, renderer, tex_assets, shader_name=None, output_contract=
             raise PlanError("贴图 %s（PathID %s）没有导入到 UE" % (name, pid))
         tex_params[name] = tex_assets[pid]
 
-    key_src = json.dumps({"generator": 2, "renderer_kind": renderer["kind"], "mesh": renderer.get("mesh", False),
+    key_data = {"generator": 2, "renderer_kind": renderer["kind"], "mesh": renderer.get("mesh", False),
                           "output_contract": output_contract,
                           "code": body, "params": sorted(params), "tex": sorted(tex_params), "blend": blend,
-                          "two_sided": cull == 0.0, "builtins": sorted(builtins)}, sort_keys=True)
+                          "two_sided": cull == 0.0, "builtins": sorted(builtins)}
+    if source_selection is not None:
+        source_selection["runtime_global_values"] = "unverified_existing_preview_provider"
+        source_selection["global_provider"] = str(GLOBALS_PATH)
+        source_selection["global_provider_sha256"] = hashlib.sha256(GLOBALS_PATH.read_bytes()).hexdigest()
+        key_data["source_selection"] = source_selection
+    key_src = json.dumps(key_data, sort_keys=True)
     key = hashlib.md5(key_src.encode()).hexdigest()[:8]
     short = shader_name.split("/")[-1].replace(" ", "")
     return {
@@ -436,7 +454,9 @@ def plan(material_path, renderer, tex_assets, shader_name=None, output_contract=
         "renderer_kind": renderer["kind"], "mesh": renderer.get("mesh", False),
         "output_contract": output_contract, "output_register": output_register,
         "source_variant": str(shader_file),
-        "source_variant_sha256": hashlib.sha256(shader_file.read_bytes()).hexdigest(),
+        "source_variant_sha256": source_selection["native_sha256"] if source_selection else
+                                 hashlib.sha256(shader_file.read_bytes()).hexdigest(),
+        **({"source_selection": source_selection} if source_selection else {}),
         "disabled_passes": mat.get("m_DisabledShaderPasses") or [], "warnings": ctx["warnings"],
         "skipped_passes": [q["lightmode"] for q in shader["passes"]
                            if q is not p and q["lightmode"] not in (mat.get("m_DisabledShaderPasses") or [])],

@@ -70,15 +70,20 @@ def uv_count(deps, mesh_pid):
     return max(channels) + 1 if channels else 0
 
 
-def material_plan(deps, mpid, renderer, assets):
+def material_plan(deps, mpid, renderer, assets, native_selection=None):
     source = dependency_file(deps, mpid, ".json")
     shader_id = str(read_json(source)["m_Shader"]["m_PathID"])
     shader = deps.get(shader_id)
     if shader is None or shader["type"] != "Shader":
         raise ValueError("Missing Shader dependency " + shader_id)
     if shader.get("nativeJson") and shader.get("cab"):
-        raise FM.PlanError("Native Shader %s in %s requires exact subprogram/global keyword selection; "
-                           "the legacy variant directory will not be used" % (shader_id, shader["cab"]))
+        if native_selection is None:
+            raise FM.PlanError("Native Shader %s in %s requires exact subprogram/global keyword selection; "
+                               "the legacy variant directory will not be used" % (shader_id, shader["cab"]))
+        return FM.plan(source, renderer, assets, shader_name=shader["name"], native_source={
+            "shader_entry": shader, "material_pid": mpid, "selection": native_selection})
+    if native_selection is not None:
+        raise FM.PlanError("Native preview selection requires its exact native Shader dependency")
     return FM.plan(source, renderer, assets, shader_name=shader["name"])
 
 
@@ -87,7 +92,9 @@ def mi_name(plan, revision=""):
                         "params": plan["params"], "textures": plan["textures"], "revision": revision})
 
 
-def preflight(fx_path, *, assets=None, revision="", preview_node=None, deps_path=None):
+def preflight(fx_path, *, assets=None, revision="", preview_node=None, deps_path=None, native_selections=None):
+    if native_selections is not None and (not isinstance(native_selections, dict) or preview_node is None):
+        raise ValueError("Explicit native candidate selections are restricted to a source subtree preview")
     fx = read_json(fx_path)
     deps = read_json(dependency_path(fx_path, fx, deps_path))
     assets = assets if assets is not None else read_json(Path(fx_path).with_name("ue_assets.json"))
@@ -170,7 +177,8 @@ def preflight(fx_path, *, assets=None, revision="", preview_node=None, deps_path
                        "custom_streams": renderer["m_UseCustomVertexStreams"],
                        "mesh": renderer["m_RenderMode"] == 4,
                        "uv_count": uv_count(deps, mesh_pid) if renderer["m_RenderMode"] == 4 else 1}
-            plan = material_plan(deps, mpid, context, assets)
+            plan = material_plan(deps, mpid, context, assets,
+                                 native_selections.get(mpid) if native_selections is not None else None)
             if revision:
                 plan["master"] = version_name(plan["master"], revision)
             mi = "%s/%s" % (MI_DIR, mi_name(plan, revision))
@@ -193,6 +201,11 @@ def preflight(fx_path, *, assets=None, revision="", preview_node=None, deps_path
                        "source_prefab_restore": "incomplete", "action_integration": "outside preview scope"})
     if blocked:
         raise PreflightError(report)
+    if native_selections is not None:
+        used = {p["source_selection"]["material_pid"] for p in materials.values() if "source_selection" in p}
+        if set(native_selections) != used:
+            raise ValueError("Native selections must exactly match selected source materials")
+        report["source_shader_selection"] = "explicit_preview_candidates_runtime_unverified"
     base = "NS_" + fx["name"] if preview_node is None else "NS_PREVIEW_" + fx["name"] + "_" + preview_node
     system = "%s/%s" % (SYSTEM_DIR, version_name(base, {"specs": specs, "revision": revision}))
     targets = sorted({system, *materials, *(MASTER_DIR + "/" + p["master"] for p in materials.values())})
