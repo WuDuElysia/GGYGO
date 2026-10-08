@@ -19,7 +19,7 @@
 
 | 唯一负责人 | 本轮范围与权限 | 依赖／交付 |
 | --- | --- | --- |
-| 地编（唯一离线工具作者） | 仅 `AAADocs/Scripts/import_bh3_stages.py` 明确完整Editor宿主及精确自有P3空图接续；沿原生单一import_scene链，section／slot／层级与new-only断言保持。目录为Stage根SceneImport＋StaticMeshes／Materials／Textures／Collision，地图仍Map/BH3；不创建第二执行器／C++宿主 | P3两次Commandlet均保存前失败，无网格落盘，f67／a88报告与6387字节空图备份保留。完整Editor只读probe PID99492实际getter通过、exit0，日志1845；尚未生产导入。地编无UE／MCP／CLI／资产／Git权，冻结后统筹标准原生CLI执行。P1失败空图／SceneImport现场保持，不覆盖未知／用户资产；材质／碰撞／视觉／可玩未验 |
+| 地编（工具冻结，下一P1接续只读） | 唯一 `AAADocs/Scripts/import_bh3_stages.py` 冻结619ABA0C...33B274；原生完整Editor与单一import_scene链，section／slot／层级和new-only断言保持，重复材质按源Material对象出现次数精确映射。目录为Stage根SceneImport＋StaticMeshes／Materials／Textures／Collision，地图仍Map/BH3 | P3实际97网格＋1SceneImport精确保存，120源节点地图312021字节；ac546报告／1910日志通过，主MCP独立98包与120源N节点、地图已打开未脏。原截图仍黑，材质／灯光／碰撞／视觉／可玩未验。f67／a88／53ce失败及空图备份保留，六保护文件未变；P1保持现场，地编仅只读核本次报告与下一接续范围，无UE／CLI／资产／源码／笔记／Git权 |
 | 资源解包（配对） | 在已有BH3来源／索引中查找地编给出的具体贴图、Shader、灯光／碰撞数据缺项，CLI导出；唯一补充写入为上述两套Stage源目录下此前不存在的补充文件，可在 `F:/AnimeStudio/_work/bh3_stage_supplement_20261008/**` 新建工作文件 | 保留旧FBX／PNG／JSON和Kevin Audio成果，不覆盖工具或原导出。当前Boss音效继续执行；地编先自行审计，资源只接受有定位依据的具体缺项，避免另一轮无目标全库扫描 |
 
 两组在本用户批准场景需求内可直接沟通。P1碰撞Null、P3反射引用、原Shader与灯光缺口以现有清点为线索重新核实；不得凭名字制造完整碰撞／原游戏视觉证据。源信息未取得时明确区分不可还原部分和本项目显式预览配置，不悄悄换材质或默认参数冒称成功。未知／脏／已有资产不覆盖，无SaveAll、默认启动地图修改或C++／引擎／Boss／Pyrios资产写权，不放开美术Git忽略范围，不建子代理。完整导入与约定必要冒烟后集中同步局部记录，缺项未解仍可交付已验证部分但不能标整场景完整还原；Git由统筹安排。
@@ -61,7 +61,9 @@ FX九包独立窗口已因真实崩溃停止，创建／保存权限关闭：六
 
 ## 当前批次：大角度转向手感修正与Pyrios攻击／技能／闪避特效（2026-10-07）
 
-### 当前权限：UE归统筹；共享bfi与FX输出环境离线并行（2026-10-08）
+### 当前权限：UE归统筹；FX完整粒子链离线整改（2026-10-08）
+
+用户已澄清本轮不似原作的是粒子，非身体材质。FX现为唯一作者，可直接修改既有 `AAADocs/Scripts/zzz_fx_{asset_session,build,distortion,import_assets,material,material_ue,niagara,niagara_ue,preview,preview_apply,native_shader}.py`、既有 `tests/test_zzz_fx_{batch_safety,curves,native_shader}.py` 及必要新增同前缀专用helper／专项。由组长自主拆分实施完整prefab、标准粒子类型／运动模块及Renderer pivot／flip／sort语义，先闭合普通攻击／闪避；不逐方法过目，不用调亮度或隐式近似替代源语义。共享DXBC转换器、Rendering七文件、C++／蓝图／Montage／当前UE资产与局部笔记保持只读，无UE／MCP／CLI／PIE／Git权；新资产精确范围和真实跨模块接口另交统筹排窗。允许与本需求资源／Animation资产／Combat长期组长直接协商，双方不互取文件写权，无子代理。完整可运行链验证后一次集中说明／Git，身体缺口单独保留。
 
 Front02七包已正式停写归还，根核实际创建／保存清单、编译与完整读回：Code／83输入／67参数／3贴图及绑定0差异，16执行源未变；非PIE／原地图／仅root observer_1，11相关目标dirty=false。真实活／死帧未取得，视觉仍unverified，global_dirty=not_queried、NS_factory_atomic_no_overwrite=not_provided保留，不据编译标完整还原。实际证据在 `Saved/AutomationReports/GGYGO_FX_Front02_{Preview,Validation}_20261008.json`；资产窗口关闭，UE／MCP／UI归统筹。
 
