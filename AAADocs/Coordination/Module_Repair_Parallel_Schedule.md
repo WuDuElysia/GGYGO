@@ -2,6 +2,63 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
+## 最新窗口与冻结状态（2026-10-09，覆盖下文历史交接）
+
+- 77088／8000现由统筹收回，无在途调用／PIE；FX和Rendering均已归还原只读窗口，不得再连接。辅助原生Editor由统筹保持至多一条工作进程并排队，CLI成功以真实marker／读回／像素核验而非exit0判断。完整侧倾原warm→Held与四图通过，不再扩大矩阵；Movement／Camera已交回局部图文冻结，Animation运行时仅完成原五件图文后冻结，统筹独占三个全局笔记入口及进度／Git。
+- Normal01首段7色FX链由FX牵头独立设计／协商：FX唯一新`Source/GGYGO/FX/Tasks/GGYGOAbilityTask_PlayNiagaraEffect.h/.cpp`；PlayerCombat唯一原`AbilitySystem/Abilities/GGYGOComboTypes.h`、`GGYGOPlayerComboAbility.h/.cpp`；System唯一`System/GGYGOGameplayTags.h/.cpp`补必要通用native事件；Animation运行时唯一`Animation/Notifies/GGYGOAnimNotifyState_GameplayEventWindow.h`补作者配置Tag只读getter。均不改UE/GAS库、另建执行链或强加FX完成门。四作者完全冻结后才批量编译，不边写边编。正式GA／AM资产仅准备，不授本轮UE保存；首链窗为明确项目测试，不称原作时序。闪避实际GA／输入为空已核，按键行为等真实用户选择，不拖普攻链。
+- FX唯一`capture_pyrios_fx.py`短修已冻结，RHI2真实Front激活／四层SimCache和图已取得，但销毁Python API未暴露导致Back未跑；原失败保留。RHI3仅诊断原20包、无资产保存。Rendering唯一`capture_pyrios_toon.py`已冻结R2截图接缝，尚无有效同姿态Lit/Wire，待统筹排独立RHI；不扩CPP／材质／UI控制。两脚本作者无CLI／8000权限。
+- P3几何10引用已由统筹真实保存并独立冷读，原restore脚本冻结；地图新基准为71350837…65A85A，旧43E092E6仅属备份。不重跑替换、不改原97网格。Stage渲染／碰撞政策待选，各相关脚本／资产冻结。Kevin原骨架Slot／StandBy及Ice01配对XYZ保存／冷读通过，基准yaw=-90／R60H125已冻结；装配R2三包实际保存但BossDefinition失败，仅Boss原wire脚本短修。Montage／Socket／战斗／P3摆放继续由统筹逐资产批次安排；原Kevin CPP和配置冻结。以下历史状态不覆盖这些最新权限与结果。
+- 77088／8000由统筹收回。FX已保存完整20包、两NS原生UpToDate并正式停用；Rendering随后完成原Body只读窗口、停止自有PIE并恢复原视口／选择，图和七目标clean，但没有有效同姿态对照。两组均无当前UE／资产／源码写权。统筹辅助Editor均已结束，不存在在途构建／CLI；全部C++继续冻结。
+- Ground三工具冻结，`restore_bh3_stage_environment.py`为BBAF7C7B…B6B7F36B。原P3精确10个SourceAffine新网格已保存且独立冷读585顶点／绑定／section通过；原97网格／SceneImport／地图只读，地图仍未替换引用。场景等效渲染／碰撞政策待真实用户答复，不提前执行map／materials／lighting／collision；局部图文及Git待整需求约定门禁。
+- FX原11工具批次及两项适配短修均已停写；`zzz_fx_niagara_ue.py`为3107088F…D2982268、原batch专项6DEA2EAC…2EB3AB23，根81项离线实跑通过。完整20新包生成检查点关闭，旧资产、Body、GA及源文件未改；真实动作接线和视觉仍未验，不从已归还窗口推导新权限。
+- Movement原观察器Shot接缝93C642BD…A1C4D54A继续冻结。真实截图运行失败、仅有裁脚直行图；本轮不盲跑／放宽Held测试或扩截图C++。无Shot的原R2运行成功独立保留，最终左右内倾画面仍未验。
+- Boss原作者仅可在 `AAADocs/Scripts/wire_bh3_kevin_combat.py` 单件中定位实际CPU蒙皮复制失败的环境／公开API前置；R4已清理唯一临时Actor且无asset／map保存。不是授权修改配置、CPP、Mesh CPUAccess、降低Body／Surface断言或另建成功路径；实际RHI宿主变更由统筹安排。其余Kevin工具／配置／资产冻结，骨点／LOD局部通过不表示整体基准确认。
+
+## 当前需求修正：运动偏移为身体线性侧倾（2026-10-08）
+
+最新执行事实：FX原组长在下述独占窗口已保存Back M／MI及Front NS，Front原生编译UpToDate，共19／20新包实际保存；Back NS未保存，SpawnPerUnit原生输入不存在的失败交该作者在原两件短修范围内自主处理，不跳过距离发射，其余保存包只读。用户最新答复明确先完成Pyrios烟雾UE等效版再视觉校准，不扩Stage政策或闪避玩法。
+
+地编只读仿射R2已结束：原模块导入接缝短修有效，真实结果为required native affine API unavailable，未验证顶点、无资产／Actor／地图保存。仅重授原地编作者 `AAADocs/Scripts/restore_bh3_stage_environment.py` 一件真实SDK适配与具体缺失方法诊断；其余source／test／原导入器／配置及所有场景资产冻结，无8000窗口，待停写后统筹另排独立只读复测。原失败结果与日志保留，不据exit0称通过。
+
+当前公共执行交接（覆盖下文早期窗口）：Camera五件及Kevin prepare-slot一件统一构建Succeeded（14 actions／78.80秒），新Camera.ModeObservation单叶Success／0E0W。Pyrios原RHI真实Held＋冻结观察脚本R2为Success／0E5W，17覆盖、237内部采样和原释放／PIE清理通过；最终身体画面仍待最小左右转弯确认。Kevin单Skeleton原件有备份，Slot精确保存、独立冷读和already-present只读通过；正式待机ABP一包创建保存及独立原姿态图审核通过。Boss仅重授原作者 `AAADocs/Scripts/wire_bh3_kevin_combat.py` 一件：实际enum／公开父类接口短修及真实待机Body分区／骨点的调用局部只读基准校准，临时对象定点清理，不保存／自动确认候选，不改其余C++／配置。
+
+FX剩四包公共窗口正式交原FX唯一组长执行：统筹已停止全部该Editor的MCP写入，无在途CLI；PID77088、MCP8000、原移动测试图、非PIE。原Front四M／四MI与八Texture已保存，原生材质模式／用途／深度及MI父链／全部源参数／贴图读回一致，原图和八材质包clean；第三次失败的自有未保存Front NS已精确清除、磁盘原不存在，可按原spec重建。仅可新建／编译／精确保存原清单内Back M3160cded、MI Others71b5及Front／Back两NS，其他16包和全部旧资产／源只读；不重导、覆盖、换revision、SaveAll或改图／Body／GA／项目配置。复用原完整七层预检、八Texture实际映射、原Builder／NiagaraBuilder及只含剩四目标的AssetSession，不新增resume框架。第三处FName修正已冻结；原Niagara适配器及原batch专项两件只在真实新反例时由该作者短修，其他源码不写。允许在同一窗口只读检查完成状态及局部预览，不启动PIE／其他需求；完成或失败交回实际保存集、编译与剩余问题后停用窗口。统筹仍独占统一构建、其他Editor窗口、全局入口与Git；其他组长不得连接8000。地编三新工具已冻结，统筹可另开不带MCP的独立只读仿射预检，资产／接口无重叠。
+
+用户纠正旧方案：不额外横移摄像机，而是角色在平滑转弯时向内侧地面倾斜；方向偏差越大倾角越大，逐渐减小则等比例减小，倾角映射为线性。保留已验真实轨迹／胶囊Yaw平滑、方向误差响应角速度曲线、大角快小角慢和Walk弱／Run强；不转斜胶囊、不恢复曲线DA或新增状态机。当前接口已有 `FGGYGOLocomotionSteeringSnapshot::DesiredDirectionError`，Movement核实际已准入目标方向与胶囊朝向语义，Animation只读映射，角色差异和最大幅度／比例在Tuning／ABP配置。现有按速度YawRate加指数响应的倾身不是本轮线性要求；旧Camera构图政策仅为历史，不再作为当前需求。
+
+| 唯一负责人 | 当前范围 | 责任及依赖 |
+| --- | --- | --- |
+| Movement牵头 | 优先只读确认原夹角接口；确需实现时仅CMC h/.cpp、SteeringTypes.h、SteeringEvaluation h/.cpp及原SteeringTest.cpp六件 | 与Animation直接收敛接口，能复用则零源码，不改已验角速度／速度／输入／动作政策，不建第二方向权威 |
+| Animation运行时 | 唯一 `Animation/zzzAnim/ZZZAnimInstance.h/.cpp`、`Data/ZZZAnimTuning.h`、原 `Animation/Tests/GGYGOAnimationLifecycleTest.cpp`／Types.h五件 | 实施线性倾身、原身份清理及合法阶段恢复；旧degrees/s不得偷换为degrees，正式配置迁移另给准确资产清单。Frame／Capture只读，必要扩围先协调 |
+| Camera | 只读原专用CameraMode及 `bEnableWalkRunSteeringOffset` 配置关闭方案 | 不全局禁GA Offset／跟随／碰撞／FOV，无源码／资产／UE写权；实际配置关闭由统筹排窗口 |
+| Animation资产 | Kevin四件继续冻结；Pyrios原ABP／骨轴／Tuning迁移只读准备 | 不抢写运行时／Camera资产，不因新需求遗失Kevin生产；新DLL和准确目标清单就绪才开资产窗口 |
+
+上述三组及原Boss／FX／地编／资源组长均已实际成功派发 `gpt-6.1-sol / xhigh`、Fast关闭和无子代理。组长自主拆分实施／自审，相关参与者可直接沟通；统筹只协调范围、资产依赖和验收。全部C++作者冻结后统一构建已成功，十项必要烟8Success／2Fail；线性映射、动画生命周期及原转向已通过。整条需求仍待正式两包迁移和角色观察，完成后一次同步笔记／Git，当前不更新模块图文。
+
+当前唯一写入窗口补充（覆盖表中及下文较早交接状态，不扩大其他范围）：全部C++已冻结，两失败夹具短修已统一构建且定向复测均Success／0Error／0Warning，证据 `Saved/AutomationReports/Kevin_TwoFixtures_Smoke_20261008_222220/index.json`。Animation资产迁移工具 SHA256 `03AFF990B263F0CB010A7BDD022335FA78437E620F32224EF12367F4BA36283E` 已正式冻结，统筹两包apply及独立新PID冷读均success，原件备份／完整配置保护／脏包空；不重新打开资产迁移。完整RHI观察首轮因Camera内部字段Python保护而0样本失败，原报告保留；只重授原Movement作者 `Saved/ValidationRecords/observe_pyrios_walkrun_steering_gate106.py` 单件短修，与Camera只读协商合法live模式观察，必要共享接口先协调，不能删除身份／线性／来源／清理断言，当前无C++写权。地编原导入脚本5E7EEC01…86FBF0冻结，P1实跑78对象／78精确保存／146节点／221 sections通过；下一批三件离线工具租约见下段。FX此前七件66项实跑OK，新11件生产工具批次继续实施。没有任何组长UE／资产／编译／Git写权；统筹独占公共执行及全局入口。
+
+P3环境还原离线生产租约：原地编作者唯一新增 `AAADocs/Scripts/bh3_stage_environment_source.py`、`restore_bh3_stage_environment.py`、`test_bh3_stage_environment.py` 三件；原导入器、Rendering／资源／FX作者文件只读。以已取证97 Renderer／99槽、10材质／14 PNG／3 Cubemap／5灯／2探针恢复真实映射，核十个非均匀父缩放节点实际差异，不以默认材质／假光／隐形平面兜底未知来源。水／雾／GI／多Pass未闭合部分明确列差异并给实际选择；源两碰撞原禁用，用户选择前不默开，材质灯光继续。整批冻结交回机器消费目标清单后统筹另排精确资产／地图窗口，当前无UE、资产、源码、全局文档、笔记及Git写权，无子代理。资源解包原作者另获唯一新输出 `F:/AnimeStudio/_work/bh3_stage_p3_texture_metadata_20261008/**`，仅地编真实CAB/PID清单中14 Texture2D的原色彩／采样／格式字段；CLI定向补证，不改原导出／工具／GGYGO，直接交地编，不按后缀猜测。
+
+新DLL最薄接缝租约：Camera原作者唯一五件 `Camera/GGYGOCameraComponent.h/.cpp`、`GGYGOCameraMode.h/.cpp`、原 `Tests/GGYGOCameraLifecycleTest.cpp`，提供同次GT只读live模式身份／原池和active资格查询，调用局部结果，无新成员状态、数组公开、访问flags修改、创建／求值／重启；不扩ThirdPerson私有epoch等额外公开诊断。Movement仅消费原观察脚本，PCOwner改既有公开Owner关联。Animation资产原作者唯一重开 `Source/GGYGOEditor/Private/KevinCombatAssetBuilder.cpp` 显式prepare-slot：真实只读audit发现原Kevin Skeleton缺DefaultSlot，仅经原USkeleton登记并精确单包保存，前后保护／原Report复用，已有名只读，不改骨／Socket／原75动画。其余C++冻结；两作者冻结且下述FX当前RHI窗口安全归还后才统一构建，不边写边编译。
+
+FX资产窗口由统筹独占：原11件生产工具已整批冻结，根77项离线实跑OK；完整Front4／Back3精确20个create-only目标已批准，名单 `Saved/ValidationRecords/pyrios_fx_ue_equivalent_approved_targets_20261008.json`。实际八Texture已保存并原生读回一致；首次native引脚错误修正后78项离线通过，但剩余12包续建又在WPO Custom的Inputs扩容／元素同时修改被SDK拒绝，未创建MI或NS、未编译保存材质。当前仅原FX作者重开 `zzz_fx_material_ue.py` 与 `tests/test_zzz_fx_ue_equivalent.py` 两件短修，其他九件、import／session及旧资产只读；无UE、资产、构建或Git权。两次owned未保存材质草稿由统筹精确清除，八已保存贴图保留。自建PID98848在非PIE、原地图及八贴图clean和四用户文件保持后停止，并非正常关闭成功。Camera五件及Kevin prepare-slot一件均已交回冻结，统筹正在统一构建；新DLL和两件FX适配器冻结后再开剩余12包窗口，复用真实八Texture映射而不重导或换revision。完整资产／动作接线／视觉仍未通过，不以离线或计划complete称完成。
+
+Kevin正向图夹具短修新租约：原Animation资产作者唯一取得 `Source/GGYGOEditor/Private/KevinCombatAssetBuilder.cpp` 一件写权，修正原测试在建图前手写UpToDate并用native Guard冒充编译GeneratedClass的夹具；真实Factory／Compile产生有效AnimBP，保作者注释／合法额外节点、正向只读不dirty、断图反向与原Montage保留断言。生产姿态合同不放宽，其他原文件仍冻结。当前Pyrios辅助Editor只加载已成功构建的DLL，不构建／热重载；此单件和Boss短修均正式冻结后才批量增量编译、定向复测两失败叶。Pyrios工具SHA256 `988753CBBA49948C99514D807619FF74BD78058EBC81CE728D8DC6C85113CAF9` 已统筹实核匹配，仅ABP及专用CameraMode两包精确保存窗口，首次CLI参数错误没有执行迁移，失败日志保留，不据进程存在称保存成功。
+
+FX完整七层UE等效生产租约（2026-10-08）：唯一作者为原FX组长，整批可写 `AAADocs/Scripts/zzz_fx_build.py`、`zzz_fx_material.py`、`zzz_fx_material_ue.py`、`zzz_fx_native_shader.py`、`zzz_fx_niagara_ue.py`；新增 `zzz_fx_ue_equivalent.py`、`AAADocs/Assets/Shared/FX/ZZZ_FX_EvadeSmokes_UEEquivalent.json`；既有 `Scripts/tests/test_zzz_fx_batch_safety.py`、`test_zzz_fx_native_shader.py`、`test_zzz_fx_particle_modules.py` 与新增 `test_zzz_fx_ue_equivalent.py`，共11件。原运动／UV／renderer内核、import/session/shared DXBC converter、源导出与全局配置只读。FX牵头直接与Rendering收敛原生受光材质契约；派生实现和原Shader身份分开，保留原program/keywords/RT与已知贴图发射曲线，HalfRes／深度／shadow颜色和Alpha差异明确标UE等效。禁止默认globals／常量阴影冒充原程序、不改Body或全局透明百分比、不建第二GA时钟。作者自主拆分实现自审，整批冻结并生成完整真实manifest后由统筹安排精确create-only资产窗口，不因目录或临时revision推导未核资产写权。该机器JSON为实际消费配置，不是任务报告；完整需求测试后一次笔记与Git，无子代理。
+
+Kevin生产真实依赖短修：Boss只读发现原审计强求RootT/Q最后key等于stop2.0，但真实RootT末支撑key2.0166667，尚未进入生产。仅重授Animation资产作者 `audit_kevin_action_motion.py` 与 `KevinMotionAssetBuilder.cpp` 两件必要有效域／支撑采样合同修正，另外两件继续冻结；不得把clip长度变成max key、截原动作或修改源JSON／75原AS。同原安全叶验证首偏移／真实有效末区间／覆盖，作者自审停写后参与同次构建；无UE／资产／笔记／Git权。Boss组织首次四包保存前真实装配基准校准，正式Mesh-only Socket／窗口另登记准确资产窗口，不放松new-only或默改已有包。
+
+牵头确认既有DesiredDirectionError直接满足新线性语义，当前Movement预计零生产源码，Camera无需源码；只重授原Movement观察作者既有 `Saved/ValidationRecords/observe_pyrios_walkrun_steering_gate106.py` 离线适配，换掉旧camera_outside需求断言，保原有界／同原来源／清理与无关断言，不执行或建新业务输入／时钟。新Camera实际目标仅专用Mode的bool=false，新PIE／冷载实例验证，不把正常跟随／GA／碰撞世界位置变化要求为零。此阶段仍无Pyrios资产写权。
+
+## 公共UE排程：按资产与依赖隔离并行（2026-10-08）
+
+用户提出不涉及重复文件的UE任务分开多开执行。统筹按真实资产写集合及依赖评估，不再把所有UE任务机械限制为单窗口串行。主编辑器负责交互／PIE／视觉验收；独立标准完整Editor／受支持Commandlet处理各自已冻结工具和互斥资产批次，先同时安排两条工作线。不同进程使用不同日志／报告／临时输出；源素材与共享资产明确只读，相关生产包逐项冷读，不拿另一实例的旧内存缓存证明新落盘结果。DDC正常共享不等于自动禁止并发；真实原生失败保留并停止涉事批次，不盲目重跑。
+
+同一地图、Skeleton、共享Master/配置等存在写冲突，或存在未冻结的生产者→消费者依赖时仍按唯一写入者交接；不同路径不自动意味着独立。所有C++写入者冻结，统一编译／替换项目DLL时先正常关闭所有会加载这些DLL的UE进程，编译完成后才开资产工作进程。Git由统筹统一提交，不与其它Git写操作并发。现有组长无UE权限的范围不因本节自动扩大，实际执行仍由统筹明确窗口。
+
+当前候选为P1场景接续（77新StaticMesh＋自有SceneImport＋P1地图）与Kevin待机／派生动画／内嵌XYZ曲线生产；两批资产集合分开，P3摆放／正式视觉联测待各自产物就绪后整合。Kevin生成依赖本批新项目DLL，须先统一构建；P1工具仅消费既有原生Interchange接口，不必因这批DLL而等待，可由统筹先启动独立完整Editor生产，脚本066A0575…E0D28及原空图／SceneImport／备份指纹已实核，主Editor未打开P1资产，地编作者整文件停写。该进程正常退出前不启动DLL构建。已有MCP只连接主8000；若增加可视编辑器必须独立端口并核对进程／项目归属，不宣称8001/8002已接通。无子代理、无额外引擎改动、无全部美术入库。
+
 ## 当前角色渲染需求：重复受光核因与组件完善（2026-10-08）
 
 用户授权解决角色疑似Toon与UE光照叠加，并完善现有渲染组件；既有Character Rendering组长牵头自主核因及实施。本授权解除此前“未授权受光”对本需求的限制，不授权NTE迁移、整场景灯光／后处理重建或FX还原扩围。脚本静态事实为 `M_Pyrois_Toon` 已设置Unlit／Emissive，组件仍采集场景主光强度／颜色及粗遮挡；当前资产、实际MID、BP配置与画面尚待核实，不能先宣布UE重复BRDF是根因。
@@ -19,10 +76,16 @@
 
 | 唯一负责人 | 本轮范围与权限 | 依赖／交付 |
 | --- | --- | --- |
-| 地编（工具冻结，下一P1接续只读） | 唯一 `AAADocs/Scripts/import_bh3_stages.py` 冻结619ABA0C...33B274；原生完整Editor与单一import_scene链，section／slot／层级和new-only断言保持，重复材质按源Material对象出现次数精确映射。目录为Stage根SceneImport＋StaticMeshes／Materials／Textures／Collision，地图仍Map/BH3 | P3实际97网格＋1SceneImport精确保存，120源节点地图312021字节；ac546报告／1910日志通过，主MCP独立98包与120源N节点、地图已打开未脏。原截图仍黑，材质／灯光／碰撞／视觉／可玩未验。f67／a88／53ce失败及空图备份保留，六保护文件未变；P1保持现场，地编仅只读核本次报告与下一接续范围，无UE／CLI／资产／源码／笔记／Git权 |
+| 地编（P1工具D43D版本已冻结） | 唯一脚本整文件停写、无在途写入，统筹实际hash为 `D43DB1D2…04DEFB88`。原生translator缓存非序列化，旧None合法；当前四设置和factory有效设置仍保存前严格校验，原归属／图／备份／new-only不变，无默认兜底或新runner。统筹安排独立完整Editor的唯一P1生产重跑 | 上次PID100828／203330日志exit0但Python失败保留，无旧资产字节变化；修正版尚未执行成功。新运行只可保存原77新网格＋自有Scene／P1地图，验证146源节点／221实际section／78包／有效设置及正确完成阶段，不能用进程exit0作成功。作者无UE／MCP／CLI／资产／C++／笔记／Git权；P3材质／灯光／碰撞／视觉仍未验 |
 | 资源解包（配对） | 在已有BH3来源／索引中查找地编给出的具体贴图、Shader、灯光／碰撞数据缺项，CLI导出；唯一补充写入为上述两套Stage源目录下此前不存在的补充文件，可在 `F:/AnimeStudio/_work/bh3_stage_supplement_20261008/**` 新建工作文件 | 保留旧FBX／PNG／JSON和Kevin Audio成果，不覆盖工具或原导出。当前Boss音效继续执行；地编先自行审计，资源只接受有定位依据的具体缺项，避免另一轮无目标全库扫描 |
 
 两组在本用户批准场景需求内可直接沟通。P1碰撞Null、P3反射引用、原Shader与灯光缺口以现有清点为线索重新核实；不得凭名字制造完整碰撞／原游戏视觉证据。源信息未取得时明确区分不可还原部分和本项目显式预览配置，不悄悄换材质或默认参数冒称成功。未知／脏／已有资产不覆盖，无SaveAll、默认启动地图修改或C++／引擎／Boss／Pyrios资产写权，不放开美术Git忽略范围，不建子代理。完整导入与约定必要冒烟后集中同步局部记录，缺项未解仍可交付已验证部分但不能标整场景完整还原；Git由统筹安排。
+
+临时公共窗口已归还关闭（2026-10-08）：地编通过现有8000原生MCP实读当前图P3、未按预期类型过滤的98包＝97StaticMesh＋1InterchangeSceneImportAsset、120唯一源N节点／128总Actor；98资产及地图dirty=false，非PIE，视口截图黑。未切图／移动视角／创建／导入／保存／PIE／CLI；这次只证几何实存，不关闭材质／灯光／碰撞／视觉与可玩缺口。统筹恢复公共窗口安排，地编全部MCP停用，仍仅继续P1只读脚本离线租约。
+
+P1原生只读预检未通过：独立完整Editor PID98744／1935日志，进程exit0但Python在脚本955行读取`InterchangeSceneImportAsset.asset_user_data`失败，最终预检marker未发布；没有导入／保存，原图／场景／备份及四用户文件和执行脚本八项进程后指纹保持。同一脚本的只读接缝已交原作者修正真实原生类/API适用性，不以异常后空数组冒称已验证无数据；重跑通过前不授权P1生产续接。
+
+P1原生只读修正后重测通过：完整Editor PID80764／`BH3_Stage_P1_Editor_SavedScene_Preflight_20261008_194255.log:2084`有完整marker，无Python错误、exit0，八保护项进程后保持。真实stored graph为CommonPipelineDataFactoryNode与SceneImportAssetFactoryNode两个节点，后者依赖前者一次；不是旧sole factory／0deps。metadata为空，原生AssetUserData基类查询无非null条目，但完整数组／null槽未读，不把它记录为空数组。原P1图Actor0，dirty maps/content为空，SceneImport干净；资产写入／保存／再导入验证均false。已授同一脚本的生产接续适配，无实际资产执行窗口；只读通过不等于P1导入完成。
 
 ## 当前资产需求：Kevin DemonBattle 与按动作导出音效（2026-10-08）
 
@@ -35,6 +98,19 @@
 | Audio（资产导入已验证，脚本冻结） | 唯一脚本 `AAADocs/Scripts/import_bh3_kevin_demonbattle_audio.py` 显式editor／commandlet宿主，冻结SHA `AE0E2329...F2D5465`；六动作精确46SoundWave已保存至原批准目录。无公共UE／MCP／UI／CLI／资产权 | 统筹标准CLI首件／首件冷读／余45导入／全46独立冷读均真实exit0，源／格式／时长／显式默认值逐份通过；日志见进度入口。四用户文件与P1失败两文件磁盘指纹前后相同；主8000仍P1，未启动第二MCP。既有P1非预期保存原证据及备份保留，GUI输入仍停用。设备播放／时序／混音／全部原音效未验，不改Montage／Notify／GA；本检查点后集中局部说明，Git归统筹 |
 
 各组直接分析执行，可在本需求范围互相沟通；不创建子代理或临时会话。未知声音、STOP事件及共享／多动作事件须分别表达，不以默认音效代替。统筹维护本条、安排资产执行及最终验收／Git；外部导出遵守真实写入审批，美术资源仍按既有忽略政策，不放开整个角色目录。开发中只保留必要映射与简短状态，完整需求约定门禁完成后集中同步文档。
+
+### Kevin后续生产链：待机与原Montage XYZ（已授离线实施，未生产资产）
+
+BossAI牵头，与Animation资产组长直接冻结实际mesh→actor尺度／朝向及现source／Task／CMC合同。先闭合正式Encounter→外置BossState／ASC→Pawn→Guard ABP→StandBy待机；原Montage XYZ消费机制和小子集成对资产工具可以独立实现。用户已确认：P3（`/Game/Map/BH3/L_KevinBoss_P3`）作为首个演示场景，先待机可见，攻击仅由自动化测试明确触发；首招为Ice01，先验证真实XYZ胶囊位移与命中，不增加自动寻敌／追击／仇恨／自动攻击。三项已实际同步BossAI、Animation资产及地编组长，不再列为待决；历史暂定伤害／半径／判定窗口不因首招选择而视为确认，Ice01无已证明音效仍保留缺口。P3材质／灯光／碰撞／视觉与可玩验收仍未完成，当前离线租约不扩为UE／资产／地图写权。Character与Combat查询运行时零写入；不改GAS／CMC／原75动画或通用Test包，不造第二执行器／时钟，不恢复新Kevin CV／DA。资产目录按角色内Blueprints／Data／Animation（Derived／Montage）／Abilities／AI区分，旧150素材不迁移。
+
+| 唯一源码／工具作者 | 精确可写范围 | 门禁 |
+| --- | --- | --- |
+| BossAI（六件已冻结，写权关闭） | `Source/GGYGO/AI/Boss/Abilities/GGYGOBossMeleeAbility.h/.cpp`、`AI/Boss/Tests/GGYGOBossMeleeLifecycleTestAbility.h`、`GGYGOBossMeleeEndReentryTest.cpp`；`AAADocs/Scripts/wire_bh3_kevin_combat.py`、`AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Wiring_Config.json` | Ready后提交原Montage XYZ，保留合法Profile／无位移显式互斥模式、原身份／末帧与清理；真实Task完成与CMC末帧分别观察。assembly四包与combat两新包分开，技术测试初值显式临时配置。只完成自审／源码交接，编译、原严格复现／新增XYZ叶、生产资产／P3烟均未运行；不扩历史矩阵 |
+| Animation资产（四件已冻结，写权关闭） | `Source/GGYGOEditor/Private/KevinCombatAssetBuilder.cpp`、`KevinMotionAssetBuilder.cpp`；`AAADocs/Scripts/audit_kevin_action_motion.py`、`AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Montage_Config.json`，四交接hash已统筹实核匹配、diffcheck通过 | Guard待机ABP与仅Ice01原地骨轨＋同源完整XYZ曲线成对生产器；保留首偏移／末帧／其他骨轨／原Q/S，尺度仅CMC一次应用；新链CV/DA、默认55、Skeleton与Socket保存退役。只有自审／静态交回，编译、两既有资产安全夹具、正式基准／窗口／资产及P3烟均未运行；等待BossAI也冻结后统一完整Editor构建 |
+
+两作者自主拆分实施和自审，不逐方法过目；新增跨模块／共享范围或真实业务政策才协调。所有源码写入者冻结后统筹一次完整Editor构建（包含Rendering此前已冻结改动），然后另排精确资产和必要真实链冒烟。当前无UE／MCP／CLI／资产／Mesh socket／Skeleton／地图／构建／Markdown／Obsidian／Git权；不是源码交回即完成。完整需求通过约定门禁后一次集中图文和中文Git，无子代理。
+
+当前所有C++作者已冻结（BossAI四件、Animation Editor两件、Rendering此前三件），由统筹接统一构建窗口；Stage／FX仅互斥离线工具，不写C++。用户反馈Boss动作缺曲线后，原生MCP实核Ice01 populated模型的floatCurves／transformCurves为空、curve metadata为空，Sequence干净；Kevin Animation仍仅75原AS，Derived／Montage零。源同名JSON实际有RootT.xyz非零数据，因此当前缺口是派生内嵌XYZ资产尚未生成与接线，不能称曲线驱动已落地，也不恢复CV/DA或盲批修改原75。
 
 ## 当前C++批次：复杂度审核整改（2026-10-08）
 
@@ -64,6 +140,12 @@ FX九包独立窗口已因真实崩溃停止，创建／保存权限关闭：六
 ### 当前权限：UE归统筹；FX完整粒子链离线整改（2026-10-08）
 
 用户已澄清本轮不似原作的是粒子，非身体材质。FX现为唯一作者，可直接修改既有 `AAADocs/Scripts/zzz_fx_{asset_session,build,distortion,import_assets,material,material_ue,niagara,niagara_ue,preview,preview_apply,native_shader}.py`、既有 `tests/test_zzz_fx_{batch_safety,curves,native_shader}.py` 及必要新增同前缀专用helper／专项。由组长自主拆分实施完整prefab、标准粒子类型／运动模块及Renderer pivot／flip／sort语义，先闭合普通攻击／闪避；不逐方法过目，不用调亮度或隐式近似替代源语义。共享DXBC转换器、Rendering七文件、C++／蓝图／Montage／当前UE资产与局部笔记保持只读，无UE／MCP／CLI／PIE／Git权；新资产精确范围和真实跨模块接口另交统筹排窗。允许与本需求资源／Animation资产／Combat长期组长直接协商，双方不互取文件写权，无子代理。完整可运行链验证后一次集中说明／Git，身体缺口单独保留。
+
+最新FX范围／决策（2026-10-08）：用户允许仅对确实无法取证的原生运算细节采用显式、可调的UE等效实现，完成后按原游戏参考画面对照；已知贴图／曲线／发射配置仍按源恢复，不把等效称精确复刻，不在失败时自动替代。原十一件现已作者自审、整文件冻结并关闭写权：`zzz_fx_{build,niagara,niagara_ue,material,material_ue}.py`、`tests/test_zzz_fx_batch_safety.py`、`zzz_fx_particle_{renderer,motion,uv}.py`及`tests/test_zzz_fx_particle_{renderer,modules}.py`。统筹实际重跑完整FX离线62项通过、既有六件diff空白检查通过；首轮沙箱Path.resolve读取拒绝，未改代码绕过，批准后原命令重跑成功。Front4／Back3源粒子支持显式Dampen／viewport等效、null灯正常模式；距离发射余数仍由原生SpawnPerUnit持有，FX只存源节点上一帧位置。原生SpawnSpacing／Velocity模板输入、WPO材质编译、尾迹与近镜视觉未验；非Cap Shader源依赖未齐，暂无真正完整prefab生成清单，不生成占位或冒称生产完成。未知业务挂点／触发、signed distortion／RGB／身体渲染仍分开，不扩大既有政策；后继源接入需要准确文件范围再协调，不作逐方法审批。无UE／资产／子代理／笔记／Git权。
+
+首链烟雾Shader源依赖（2026-10-08）：资源解包组长独立定向核对非Cap Shader `-8861675102675100451`／`CAB-3f3bc03f15709ec085bef31f4953663b`及五材质 `-8628735267290221435`、`4815780514172297095`、`54218374060949528`、`6221463485550019036`、`-8783148842178813392`，用既有CLI／索引取实际subprogram与关键字源证据，直接交FX。优先只读既有导出；确可补导出的唯一新增范围为 `F:/AnimeStudio/_work/zzz_fx_smoke_20261008/**`，不覆盖原导出／工具，不全库重解包或借Body／Cap替换，不取得GGYGO脚本／资产／UE／Git写权。FX现有11件继续独立实施；七粒子离线检查点不等于原生SpawnPerUnit输入、运行态global选择或视觉已验。未知原生数学按已批准的显式等效边界，不再无目标等PDB。
+
+Shader接入当前七件短修：FX已明确撤回“全部材质可直用FullRes Pass0”的初判；完整原local关键字只在Pass1 HalfRes匹配，不能删DITHER／shadow或把转换preview升生产。现只重授 `zzz_fx_build.py`、`zzz_fx_material.py`、`zzz_fx_material_ue.py`、`zzz_fx_native_shader.py`、`tests/test_zzz_fx_batch_safety.py`、`test_zzz_fx_native_shader.py`、`test_zzz_fx_particle_modules.py`，由原FX作者闭合源glow实际_ZTest=8 Always状态及真实候选／缺项审核，不执行未确认的像素转换／global默认。其他粒子／Niagara／UV／renderer和共享DXBC继续冻结；无UE／资产／笔记／Git权。首链在现UE支持下真正涉及可见取舍时，组长给具体烟雾边缘／近镜／阴影场景与推荐，不为形式技术过目停工。
 
 Front02七包已正式停写归还，根核实际创建／保存清单、编译与完整读回：Code／83输入／67参数／3贴图及绑定0差异，16执行源未变；非PIE／原地图／仅root observer_1，11相关目标dirty=false。真实活／死帧未取得，视觉仍unverified，global_dirty=not_queried、NS_factory_atomic_no_overwrite=not_provided保留，不据编译标完整还原。实际证据在 `Saved/AutomationReports/GGYGO_FX_Front02_{Preview,Validation}_20261008.json`；资产窗口关闭，UE／MCP／UI归统筹。
 
