@@ -2,6 +2,40 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
+## 当前角色渲染需求：重复受光核因与组件完善（2026-10-08）
+
+用户授权解决角色疑似Toon与UE光照叠加，并完善现有渲染组件；既有Character Rendering组长牵头自主核因及实施。本授权解除此前“未授权受光”对本需求的限制，不授权NTE迁移、整场景灯光／后处理重建或FX还原扩围。脚本静态事实为 `M_Pyrois_Toon` 已设置Unlit／Emissive，组件仍采集场景主光强度／颜色及粗遮挡；当前资产、实际MID、BP配置与画面尚待核实，不能先宣布UE重复BRDF是根因。
+
+| 唯一作者 | 当前授予范围 | 依赖及检查点 |
+| --- | --- | --- |
+| Character Rendering（七件已冻结） | 实际修改为模块内 `Character/Components/GGYGOCharacterRenderComponent.h/.cpp`、既有 `Character/Tests/GGYGOCharacterRenderTest.cpp`；离线工具 `AAADocs/Scripts/build_pyrios_materials.py`、`verify_pyrios_renderer.py`、`pyrios_material_plan.py`、`tests/test_character_render_tools.py`。HLSL／Globals／set工具未改，原写权关闭 | 完整绑定预检Unlit／四typed输入及唯一槽，非法活跃配置明确停用并归还自有MID／描边，正常光强策略及精确资源恢复保持；25项离线通过，统筹实际diff核对完成。尚未编译／三项Rendering烟／UE只读verify或有限画面对照；原视觉根因未关闭。等待公共窗口空闲统一加载新DLL，不新建调度器／风格政策，不提前笔记或Git |
+| Character Rendering（公共窗口，已归还） | 自有PIE已停止且全部MCP停用；真实Master Unlit／Custom→Emissive、四编辑器槽引用和Body1运行MID输入已核，三MID存在但Body2／Weapon父链完整读回未取得。无灯／动画／参数写入或有限对比，7目标dirty前后false（非全局dirty） | 非PIE、原L_Movement_Test；基线PNG离线补存后根已实际查看，但背面／MessageLog遮挡，不作为严格同姿态对比。画面根因未关闭；Rendering继续已授离线实施，不恢复UE。地编接唯一几何窗口，Audio等待实际源；另排构建与修复对比 |
+
+保留Toon唯一表面光照责任：组件提供明确配置的外部输入，不再次做表面着色，不把Toon输出再送Lit BRDF。不能未经核因关闭UE整场景灯光、曝光／Bloom／后处理或替换无关身体FX。真正的外观选择／原场景光色是否参与等歧义须用具体场景交用户决策；纯技术根因修正直接执行，不逐方法过目。补原问题必要对比及有效／缺失配置、启停／换Mesh／自有材质归还检查，不扩大矩阵。完整需求验收后集中同步受影响的现有Rendering文档／模块图文，当前无笔记／Git写权；只需新增或跨模块共享范围时先交实际依赖及唯一作者，不恢复子代理。
+
+## 当前场景需求：BH3 Stage导入（2026-10-08）
+
+用户明确由既有地编组长导入 `F:/AnimeStudio/Exports/BH3/Stage`，缺项直接找资源解包组长补齐；范围为 `Stage_KevinBoss_P1`、`Stage_KevinBoss_P3` 两套，不替换现有主／移动测试地图。地编牵头独立制定方案及内部步骤，资源负责真实源文件和缺项取证，统筹只安排公共UE窗口及最终验收。
+
+| 唯一负责人 | 本轮范围与权限 | 依赖／交付 |
+| --- | --- | --- |
+| 地编（唯一离线工具作者） | 仅 `AAADocs/Scripts/import_bh3_stages.py` 明确完整Editor宿主及精确自有P3空图接续；沿原生单一import_scene链，section／slot／层级与new-only断言保持。目录为Stage根SceneImport＋StaticMeshes／Materials／Textures／Collision，地图仍Map/BH3；不创建第二执行器／C++宿主 | P3两次Commandlet均保存前失败，无网格落盘，f67／a88报告与6387字节空图备份保留。完整Editor只读probe PID99492实际getter通过、exit0，日志1845；尚未生产导入。地编无UE／MCP／CLI／资产／Git权，冻结后统筹标准原生CLI执行。P1失败空图／SceneImport现场保持，不覆盖未知／用户资产；材质／碰撞／视觉／可玩未验 |
+| 资源解包（配对） | 在已有BH3来源／索引中查找地编给出的具体贴图、Shader、灯光／碰撞数据缺项，CLI导出；唯一补充写入为上述两套Stage源目录下此前不存在的补充文件，可在 `F:/AnimeStudio/_work/bh3_stage_supplement_20261008/**` 新建工作文件 | 保留旧FBX／PNG／JSON和Kevin Audio成果，不覆盖工具或原导出。当前Boss音效继续执行；地编先自行审计，资源只接受有定位依据的具体缺项，避免另一轮无目标全库扫描 |
+
+两组在本用户批准场景需求内可直接沟通。P1碰撞Null、P3反射引用、原Shader与灯光缺口以现有清点为线索重新核实；不得凭名字制造完整碰撞／原游戏视觉证据。源信息未取得时明确区分不可还原部分和本项目显式预览配置，不悄悄换材质或默认参数冒称成功。未知／脏／已有资产不覆盖，无SaveAll、默认启动地图修改或C++／引擎／Boss／Pyrios资产写权，不放开美术Git忽略范围，不建子代理。完整导入与约定必要冒烟后集中同步局部记录，缺项未解仍可交付已验证部分但不能标整场景完整还原；Git由统筹安排。
+
+## 当前资产需求：Kevin DemonBattle 与按动作导出音效（2026-10-08）
+
+用户指定 `F:/AnimeStudio/Exports/BH3/Animator/Kevin/05_BOSS_411_DemonBattle` 为本轮 Boss 来源，并授权资源组长参照 Pyrios 音效流程提取、按动作分目录，缺项继续查找。BossAI 牵头；既有模型／75动画先核实，不重复导入或覆盖。没有授予新形态、玩法／伤害重构或猜测音效触发帧的范围。
+
+| 唯一负责人 | 本轮范围与当前权限 | 交付／公共窗口 |
+| --- | --- | --- |
+| BossAI（牵头，短只读窗口已归还） | 当前Kevin目录150资产＝104原模型／动画／材质＋46SoundWave；75动画原来源与独立骨架已核。仅既有导入说明集中同步，本次原生包引用已查，候选Montage／ABP／GA仍未执行 | 模型直接引用方仅Skeleton，Skeleton引用方为75动画＋Mesh；未出现Pawn／ABP／Montage／Map包。未读关卡Actor／动态装配，不扩大为全场景不存在证明。无UE／MCP／资产／关卡／PIE写权；实际玩法／视觉仍未验 |
+| 资源解包（Kevin已冻结） | 指定Boss源 `Audio/**` 已发布79动作目录／6动作46WAV，真实两语言Bank各171事件／229嵌入媒体；完整来源与实际输出集已核，旧素材未覆盖。Kevin停写，Stage补充接力 | 73动作无可证明关联、143Bank事件未分配，无原Notify／帧，7缺播放节点搜索无命中不造WAV；只交真实媒体与名字关联。无UE／GGYGO源码／Git写权，Stage补证仍按上述独立范围 |
+| Audio（资产导入已验证，脚本冻结） | 唯一脚本 `AAADocs/Scripts/import_bh3_kevin_demonbattle_audio.py` 显式editor／commandlet宿主，冻结SHA `AE0E2329...F2D5465`；六动作精确46SoundWave已保存至原批准目录。无公共UE／MCP／UI／CLI／资产权 | 统筹标准CLI首件／首件冷读／余45导入／全46独立冷读均真实exit0，源／格式／时长／显式默认值逐份通过；日志见进度入口。四用户文件与P1失败两文件磁盘指纹前后相同；主8000仍P1，未启动第二MCP。既有P1非预期保存原证据及备份保留，GUI输入仍停用。设备播放／时序／混音／全部原音效未验，不改Montage／Notify／GA；本检查点后集中局部说明，Git归统筹 |
+
+各组直接分析执行，可在本需求范围互相沟通；不创建子代理或临时会话。未知声音、STOP事件及共享／多动作事件须分别表达，不以默认音效代替。统筹维护本条、安排资产执行及最终验收／Git；外部导出遵守真实写入审批，美术资源仍按既有忽略政策，不放开整个角色目录。开发中只保留必要映射与简短状态，完整需求约定门禁完成后集中同步文档。
+
 ## 当前C++批次：复杂度审核整改（2026-10-08）
 
 本批已获用户明确执行授权，审核规则见[代码规范](../Architecture/CodeConventions.md)，问题与后继范围见[清单](Module_Audit_Repair_Ledger.md#当前整改复杂度收口与审核机制2026-10-08)。源码全部冻结，最终Editor构建3 Succeeded／exit0（7 actions、24.12秒），五项定向复测全部Success／0Error／8Warning；首轮17项13成功／4失败的原报告保留。源码46件已中文提交并push `45de80f`。当前只有下列集中图文窗口，统筹独占全局入口与Git；无源码／资产／UE写权，不重开矩阵。X1由AbilitySystem牵头，Input／Character／Combatants实际配对：ASC唯一等待／许可，Hero精确原输入资源归还，Extension发布原H关闭事实，Host在真实外调后重取原端点。Receive／End／Queue签名保持，不新建ASCH协议／全量清Input／validator。Animation来源配置继续只读，不建子代理、不逐方法过目。用户允许退出后旧编辑器AnimationEditor析构访问违规记录保留；确认旧进程结束才构建3，普通编辑器8000复测后非PIE。

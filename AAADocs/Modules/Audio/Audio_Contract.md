@@ -4,7 +4,9 @@
 
 Audio 负责动作、脚步、命中及持续音效的配置、播放资源生命周期与清理。首批 Pyrois `Attack_Normal_01` 一次性动作声已完成素材导入、唯一原生 PlaySound Notify 接线、预览及 R1 语义回读。2026-10-06 正式 GA 必要冒烟中，R2 已观察固定 Sound／原 Owner／primary Mesh 的唯一新候选实际 Playing，随后候选退出并从原 Owner 组件列表移除，观察回调成功注销。该有限结果不证明 Notify 源关联、创建时刻、自然结束原因、AutoDestroy 动态值或 GC 完成；人工听感、持续 Cue 与网络仍未验证，全 Audio 未完成。
 
-原严格冷读的 `EndTriggerTimeOffset` 原始差异及失败保留；资产 R1 语义通过不等于原始记录完全一致。独立手动组件的自然结束／重播／Stop／自身归还与正式 GA 的 R2 观察分别记账。正式观察 R1 的 protected `bAutoDestroy` 读取失败也保留；R2 通过合法公开属性读取修正观察边界，没有改声音、时机或一次性退出政策。原游戏音频触发帧、混音及空间参数仍未知。本轮集中同步本文档与外部 Audio 四图文，不授予源码、脚本、资产、UE / MCP、编译或 Git 写权。
+原严格冷读的 `EndTriggerTimeOffset` 原始差异及失败保留；资产 R1 语义通过不等于原始记录完全一致。独立手动组件的自然结束／重播／Stop／自身归还与正式 GA 的 R2 观察分别记账。正式观察 R1 的 protected `bAutoDestroy` 读取失败也保留；R2 通过合法公开属性读取修正观察边界，没有改声音、时机或一次性退出政策。原游戏音频触发帧、混音及空间参数仍未知。2026-10-06 Pyrios 检查点集中同步本文档与外部 Audio 四图文，不授予源码、脚本、资产、UE / MCP、编译或 Git 写权。
+
+2026-10-08 Kevin DemonBattle 的按动作素材检查点已完成：六个真实动作目录的 46 个 SoundWave 已导入、精确保存，并经独立新 Commandlet 逐份冷加载回读。这里只完成素材准备；实际设备播放、动作接线、原触发帧和混音仍未验证。该检查点仅集中更新本文档，不改变上述 Pyrios 结论或运行时职责，不据此重画 Canvas。
 
 ## 职责与接口边界
 
@@ -66,15 +68,60 @@ Pyrois `Run_Loop` 的 11 个装备声及 22 个脚步来源、`Walk_Loop` 的 5 
 
 这些声音是 one-shot 随机短片段，动画目录名中的 `Loop` 不表示音频无限循环。地面材质名称、另一组 Switch 的业务含义、触发帧和混音未确认，配置留空；Audio 不另建走跑时钟或脚步碰撞查询。
 
-Kevin 来源由统筹转交，PCK 为 `F:/Honkai Impact 3rd Game/BH3_Data/StreamingAssets/Audio/GeneratedSoundBanks/Windows/AUDIO_Vanilla_Default_2.pck`；名称索引为 `F:/AnimeStudio/_work/wwise_validation/bh3_wwise_names.json`，115 个实际 Bank 事件未另存为映射清单。`BK_BOSS_411` 的 Bank ID 为 `2366159711`，报告含 115 个事件、229 个内嵌 WEM；中文 Bank 起始偏移 `344246085`、长度 `8745260`，日文起始 `335360224`、长度 `8885861`。本会话未独立核验这些统计或解码文件。
+### Kevin DemonBattle 按动作素材（2026-10-08）
 
-| 统筹转交事件 / ID | 中文 WEM 来源（绝对 PCK 偏移 / 字节长度） | 当前边界 |
-| --- | --- | --- |
-| `BOSS_411_ANI_FIRE_ATTACK_01` / `230747614` | `908108476`：`351210565` / `40175`；`1036581940`：`352498197` / `41097` | RIFF WEM、双声道、44.1kHz；尚未单独提取或 UE 导入 |
-| `FX_EVADE` / `3188014124` | `113223230`：`345293669` / `20575`；`682134181`：`349605413` / `19206` | RIFF WEM、双声道、44.1kHz；尚未单独提取或 UE 导入 |
-| 对应 `_STOP` / `4062489817` | 停止节点 `618847005`，`Stop_E_O`；无独立结束音频 | 是停止操作，不能制造为结束 SoundWave |
+来源根目录为 `F:/AnimeStudio/Exports/BH3/Animator/Kevin/05_BOSS_411_DemonBattle/Audio/`，按 `<真实源动作>/mapping.json` 声明的实际 WAV 导入。源 `manifest.json` 用于定位与冻结交接，冻结 SHA256 为 `cfd02e6c73aa7c2c899a03436fb5a0ecf16c1689f71359771bc6343561384557`；事件归属、操作分类和缺项仍以各动作 mapping 为准。资源组长交回的两语言 `BK_BOSS_411`（Bank ID `2366159711`）各有 171 个事件、229 个内嵌媒体；此前转交的 115 事件统计只是旧检查点，不能代表当前完整 Bank。
 
-精确动画映射、触发帧、解码输出路径与播放可用性仍未知；不阻塞 Pyrois 首批，也不据此导入 Kevin。
+79 个真实源动作均有目录与 mapping；其中六个动作有 46 个 PCM16 WAV，另 73 个动作没有可导入 WAV，不制造占位音效。46 份均为 `name_associated`，媒体图解析依据为 `original_graph_resolved`，`sourceNotifyVerified=false`、`animationTriggerSeconds=null`。名称和媒体图关联不能证明动画触发帧。`shared` 保留已核实的 ja／zh_CN 同源字节关系，不伪造两套语言音效；42 份唯一媒体按动作组织为 46 份文件，跨动作复用保留各动作副本。
+
+UE 根目录为 `/Game/Characters/Boss/Kevin/DemonBattle/Audio/`，磁盘对应 `F:/ue_project/GGYGO/Content/Characters/Boss/Kevin/DemonBattle/Audio/`。每个动作目录仅新增 `SW_<WAV文件名主干>` SoundWave；不导入控制操作，不新增 SoundCue、Montage、Notify 或 GA 接线。
+
+| 真实动作／根目录下子目录 | 已保存 SoundWave 数 |
+| --- | ---: |
+| `BOS_411_Ani_Counter` | 7 |
+| `BOSS_411_Ani_Fire_Attack_01` | 5 |
+| `BOSS_411_Ani_Fire_Attack_02` | 15 |
+| `BOSS_411_Ani_Fire_Attack_04` | 6 |
+| `BOSS_411_Ani_Fly_Attack_01` | 7 |
+| `BOSS_411_Ani_Fly_Attack_02` | 6 |
+
+整体模型／动画与资产导入状态见 [Kevin DemonBattle 导入核对](../../Assets/BH3/BH3_Kevin_DemonBattle_Import.md)；本文维护 Audio 配置、工具和验收边界，不重复维护逐件资产清单。
+
+#### 固定来源、显式宿主与保存契约
+
+工具为 [import_bh3_kevin_demonbattle_audio.py](../../Scripts/import_bh3_kevin_demonbattle_audio.py)，冻结 SHA256 `AE0E232919AFA6DF87319052347A282F3E2169BC6224CDE4C6027B360F2D5465`。离线 `build_plan(actions)`／`--mode plan` 只读实际 mapping、FBX 身份与 WAV；拒绝目录越界、未映射文件、计数／命名冲突及无效 PCM，不写资产或报告。
+
+原生入口为 `run(mode, actions, expected_targets, host="editor")`，CLI 对应 `--mode import|readback --actions <明确动作集合> --expect-targets <已复核目标集合> --host editor|commandlet`。目标集合必须是本次 plan 的显式非空子集；首件与余 45 件分批均由统筹指定，已有目标不会自动跳过、覆盖或重导入。
+
+- `editor` 是 GUI 调用的默认宿主，要求无 `-run` Commandlet、存在 `LevelEditorSubsystem` 且非 PIE。`commandlet` 必须显式选择并验证原生 `-run=PythonScript`，通过公开 PIE World 查询确认本进程非 PIE；不调用 Commandlet 中缺少 GUI 引擎上下文的 PIE 接口，也不因 API 缺失回落为“安全”。原生 `-Script="脚本绝对路径及全部Python参数"` 须将全部脚本参数放在同一引号内。
+- 两宿主均核对固定项目、选定目标不脏；导入另要求目标在本进程磁盘、注册表与内存中均不存在。源／mapping 的 size、mtime 快照只在本次调用有效，真实原生导入／保存／加载回调后复核，不建立长期来源缓存。
+- `SoundFactory` 关闭自动 Cue 与附带衰减／循环／调制节点，`AssetImportTask` 禁止覆盖且 `save=False`。返回必须是唯一计划 SoundWave，才显式设置非循环、Volume／Pitch=1；这些是本项目素材默认值，不表示已还原原事件循环、增益或音高。
+- 保存前核对来源、采样率、声道、时长与默认值，并限制本进程新增脏包仅为自身目标；只调用该对象的 `save_loaded_asset`。保存后核对非空磁盘包和必需属性，Content／Map 脏包集合须保持入口事实；不 SaveAll，不保存或清除其他工作。
+- `readback` 只加载已保存且不脏的精确目标并读取属性，不含 setter、导入或保存。来源使用命名 `AssetImportData` 子对象的 `extract_filenames()`，采样率使用公开 `ImportedSampleRate` 注册表 tag；不绕过 protected 属性。
+- 原生失败明确传播并记录当前目标及此前已保存列表，不自动重试、删除或回滚，也不声称整批原子提交。Commandlet 的注册表／内存／脏包基线只描述自身进程；主编辑器与既有用户工作由统筹独立保护，不能据此声称 GUI 全局无修改。
+
+实际执行由统筹独占标准 CLI 窗口，Audio 仅离线核对。统筹在执行期间禁用第二 MCP 自动启动并保留主编辑器；普通 Saved 日志／DDC 不计为受保护业务资产。统筹交回四份用户文件与 P1 两份文件的写轮前后磁盘指纹相同；此前 GUI 输入引发的 P1 非预期保存证据与备份仍保留，不改判为“从未保存”。本检查点结束后脚本、资产及执行窗口继续冻结。
+
+#### 真实导入与独立冷读证据
+
+以下原日志均位于 `F:/ue_project/GGYGO/Saved/Logs/`，由统筹执行；各原生进程退出码均为 0。Audio 已只读解析导入及全量冷读日志，与冻结 plan 逐份核对目标、来源、格式、时长和磁盘文件。
+
+| 实际步骤 | 原始日志／结果位置 |
+| --- | --- |
+| 首件导入（PID 100472） | `KevinAudio_Commandlet_FirstImport_20261008_1740.log`：2047 行实际 1 件，2073 行原生 Python 成功 |
+| 首件独立冷读（PID 95116） | `KevinAudio_Commandlet_FirstReadback_20261008_1746.log`：2035 行实际 1 件，2059 行原生 Python 成功 |
+| 剩余 45 件导入（PID 82708） | `KevinAudio_Commandlet_Remaining45_20261008_1758.log`：2448 行实际 45 件，3001 行原生 Python 成功 |
+| 全 46 件独立冷读（PID 79444） | `KevinAudio_Commandlet_All46Readback_20261008_1801.log`：2035 行实际 46 件，2552 行原生 Python 成功；`saved=[]` |
+
+首件为 `BOSS_411_Ani_Fire_Attack_01/SW_ANI_FIRE_ATTACK_01__shared__wem_1036581940`；余 45 件与其互斥，合计正好 46 个非空磁盘资产。全量冷读的 36 份 44100Hz、4 份 32000Hz、6 份 36000Hz，以及 41 份双声道、5 份单声道均与 WAV 相同；最大时长差约 `1.11e-7` 秒，在原严格容差内。原生 `inspect_asset` 对每份非循环、Volume／Pitch=1 的断言通过；返回 JSON 未逐项列出这些默认值，不把它描述为独立 JSON 字段证据。
+
+剩余 45 件导入日志的 2036、2158、2285、2304 行分别对以下 SoundWave 报告起始 DC 偏移大于 100：Counter 的 `SW_FX_COUNTER_WIN_P1__shared__wem_243896595`（2 声道）、Fire02 的 `SW_FX_FIRE_ATTACK_02_00__shared__wem_355178717`（1 声道）、Fire04 的 `SW_FX_FIRE_ATTACK_04_GROUND_CRACK_BOOM__shared__wem_355178717`（1 声道）、Fire04 的 `SW_FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_710904726`（2 声道）。原警告提示可能爆音或不宜循环；没有修改源、归一化或重导入掩盖警告，实际听感未验证。
+
+六动作 mapping 中另有六条无 WAV 的事件记录，包含控制／STOP 操作，不能统称为六个缺失音频。Fire04 的 `BOSS_411_FX_FIRE_ATTACK_04_FLY_DOWN_FOLLOW`（播放节点 `615330980`）与 `BOSS_411_FX_FIRE_ATTACK_04_HOLD_ENV`（`61986963`）仍为资源交回的真实未解析播放来源，不以固定声音或默认成功补齐。73 个无 WAV 动作、未分配 Bank 事件与其他来源缺项均未因本次导入关闭。
+
+本检查点证明按动作素材导入、精确保存和独立新进程冷加载属性回读；`playback_tested=false`、`timing_mixing_verified=false`。设备发声／人工听感、原 Notify、触发帧、原增益／音高／路由／随机／材质／叠层／循环及最终混音、动作与命中接线、Cook 与网络均未验证，不称 Kevin 全部音效或战斗音效接入完成。
+
+按代码规范六项自审，来源计划、显式执行宿主与单资产导入／回读有明确边界；只持本次来源和脏包快照，唯一资产提交仍由原生保存入口执行，失败如实传播。外调后的来源／脏包保护必要保留，未引入运行时状态、第二套播放／帧调度、循环依赖或通用角色业务分支；本次只改 Python 素材工具与已授权说明，不需要新增 C++ 构建。实际 Commandlet 导入和冷读验证已完成，未验证播放边界保留。
 
 ## 实施顺序、验收与停止点
 
@@ -157,6 +204,6 @@ R1 脚本本身 `fresh_reload_performed_by_script=false`，没有主动冷卸载
 | 观察分类与清理 | 198 样本，最大采样间隔 0.032 秒，`reason=playing_then_exit_in_duration_window_observed`，`callback_removed=true`。分类使用脚本 0.10 秒比较余量；不是精确时长吻合、自然完成／AutoDestroy／GC 原因证明 |
 | 原生产叶与五叶整体 | ProductionNativeHeld 为 Success／0 Error／4 Warning；End 剩余 0.494577 秒发生正常策略中断，资源恢复，真实 Run 778.427 cm/s、位移 1021.141 cm。整体 3 Success／2 Fail：OriginalEndAfterSameBindingRefresh 的 Completed 断言失败、RequiredTreeRejectsInvalidRoot 的两条原生产 Error 均保留，不称整批全绿 |
 
-首批正式 GA 的实际播放与有限退出必要烟已完成，一次性声音不承诺 GA／Montage 取消即停的政策保持。完整 protected Section 数据、人工听感、自然完成原因、可取消／持续 Cue、动作专用命中选择、其他动作、脚步材质与时机、Kevin 解码接线、换 Pawn／EndPlay 和网络仍未完成。原游戏触发帧和混音仍未知，不以项目第 2 帧声称还原。
+首批正式 GA 的实际播放与有限退出必要烟已完成，一次性声音不承诺 GA／Montage 取消即停的政策保持。完整 protected Section 数据、人工听感、自然完成原因、可取消／持续 Cue、动作专用命中选择、其他动作、脚步材质与时机、Kevin 动作音效接线、换 Pawn／EndPlay 和网络仍未完成。原游戏触发帧和混音仍未知，不以项目第 2 帧声称还原。
 
-SoundWave、Montage 和所有脚本保持冻结；本轮仅同步五份现有契约／Audio 图文，全局入口由统筹维护。当前未新增循环依赖、第二套生产状态／执行链或跨模块内部状态访问；一次性与持续音效退出责任不变。
+SoundWave、Montage 和所有脚本保持冻结；上述 Pyrios 检查点仅同步五份现有契约／Audio 图文，全局入口由统筹维护。当前未新增循环依赖、第二套生产状态／执行链或跨模块内部状态访问；一次性与持续音效退出责任不变。
