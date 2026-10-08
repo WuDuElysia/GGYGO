@@ -16,6 +16,9 @@ class NativeShaderError(ValueError):
     pass
 
 
+TRANSMITTANCE_PREVIEW = "ue_fullres_transmittance_fragment_preview"
+
+
 def read_json(path):
     return json.loads(Path(path).read_text(encoding="utf-8-sig"))
 
@@ -60,11 +63,22 @@ def state_value(value, floats, props):
     return number
 
 
-def render_state(state, floats, props):
+def render_state(state, floats, props, execution_environment=None):
+    if execution_environment not in (None, TRANSMITTANCE_PREVIEW):
+        raise NativeShaderError("Unknown native preview execution environment: " + str(execution_environment))
     value = lambda item: state_value(item, floats, props)
     blend = state["rtBlend"][0]
-    if state["rtSeparateBlend"] or value(blend["blendOp"]) != 0 or value(blend["colMask"]) != 15:
-        raise NativeShaderError("Separate alpha blend, blend operation or color mask requires its native output contract")
+    if execution_environment is None:
+        if state["rtSeparateBlend"] or value(blend["blendOp"]) != 0 or value(blend["colMask"]) != 15:
+            raise NativeShaderError("Independent RT blend, blend operation or color mask requires an explicit output environment")
+    else:
+        expected = {"srcBlend": 1, "destBlend": 5, "srcBlendAlpha": 7, "destBlendAlpha": 0,
+                    "blendOp": 0, "blendOpAlpha": 0, "colMask": 15}
+        if any(k not in blend for k in expected):
+            raise NativeShaderError("Transmittance preview requires complete native Target0 blend state")
+        actual = {k: value(blend[k]) for k in expected}
+        if actual != expected:
+            raise NativeShaderError("Transmittance preview requires One/SrcAlpha, DstAlpha/Zero, Add/Add, RGBA: " + repr(actual))
     for stencil in ("stencilOp", "stencilOpFront", "stencilOpBack"):
         item = state[stencil]
         if value(item["comp"]) not in (0, 8) or any(value(item[k]) != 0 for k in ("pass", "fail", "zFail")):
@@ -83,7 +97,33 @@ def render_state(state, floats, props):
     src, dst = value(blend["srcBlend"]), value(blend["destBlend"])
     if src not in factors or dst not in factors:
         raise NativeShaderError("Unsupported native blend factors: " + repr((src, dst)))
-    return ["Blend " + factors[src] + " " + factors[dst]], resolved
+    line = "Blend " + factors[src] + " " + factors[dst]
+    if execution_environment is not None:
+        line += ", DstAlpha Zero"
+    return [line], resolved
+
+
+def fragment_environment(identifier, program):
+    """转换输出解释，不改原程序；这里只声明单 Target0 的逐片元 RGB 预览。"""
+    if identifier != TRANSMITTANCE_PREVIEW:
+        raise NativeShaderError("Unknown native preview execution environment: " + str(identifier))
+    outputs = program["out"]
+    if len(outputs) != 1 or any(outputs[0].get(k) != v for k, v in
+                              {"name": "SV_Target", "index": 0, "reg": 0, "mask": "xyzw"}.items()):
+        raise NativeShaderError("Transmittance preview requires exactly one SV_Target0 xyzw output in o0")
+    declarations = [line for line in program["asm"] if line.startswith("dcl_output")]
+    if declarations != ["dcl_output o0.xyzw"]:
+        raise NativeShaderError("Transmittance preview cannot execute extra native output declarations")
+    return {"name": identifier, "blend": "BLEND_AlphaComposite", "output_conversion": "rgb,1-alpha",
+            "fragment_rgb_equation": "native.rgb + destination.rgb * native.a",
+            "native_alpha_role": "transmittance", "ue_opacity": "1 - native.a",
+            "rgb_equivalence_domain": "finite native.a in [0,1], same ordered fragments and background",
+            "requested_render_resolution": "UE full resolution", "actual_ue_render_resolution": "unverified",
+            "sv_position_xy": "UE viewport pixels",
+            "destination_alpha_equivalence": "not_implemented",
+            "source_halfres_pipeline": "unverified_not_implemented",
+            "source_halfres_clear_resolve_depth_ordering": "unverified_not_implemented",
+            "source_screen_coordinates_and_runtime_globals": "unverified"}
 
 
 def program_from_audit(audit, stage, pass_index, globals_, locals_):
@@ -151,7 +191,8 @@ def select_native(shader_entry, material, material_pid, configuration):
     if state["m_Name"] in disabled or lightmode in disabled:
         raise NativeShaderError("Explicit native pass is disabled by source material")
     props = properties(native)
-    lines, resolved = render_state(state, material["m_SavedProperties"]["m_Floats"], props)
+    environment = configuration.get("execution_environment")
+    lines, resolved = render_state(state, material["m_SavedProperties"]["m_Floats"], props, environment)
     selected = {"name": state["m_Name"], "lightmode": lightmode, "state": lines, "resolved_state": resolved}
     programs = {}
     for stage in ("vp", "fp"):
@@ -164,4 +205,10 @@ def select_native(shader_entry, material, material_pid, configuration):
                 "block": shader_entry["block"], "cab": shader_entry["cab"],
                 "native_json": str(native_path), "native_sha256": file_hash(native_path),
                 "audit": str(audit_path), "audit_sha256": file_hash(audit_path), "programs": programs}
+    if environment is not None:
+        selected["execution_environment"] = fragment_environment(environment, selected["fp"])
+        evidence["execution_environment"] = selected["execution_environment"]
+        evidence["render_state"] = {"native": state, "resolved_target0": {
+            k: state_value(v, material["m_SavedProperties"]["m_Floats"], props)
+            for k, v in state["rtBlend"][0].items()}}
     return {"props": props, "passes": [selected]}, evidence

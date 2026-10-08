@@ -386,9 +386,13 @@ def plan(material_path, renderer, tex_assets, shader_name=None, output_contract=
                 raise PlanError("全局量 %s 取无效果值的前提是 %s=%s，材质里是 %r" % (name, prop, required, floats.get(prop)))
 
     src, dst = blend_of(p, floats)
-    if (src, dst) not in BLEND_MAP:
+    environment = p.get("execution_environment")
+    if environment is not None:
+        blend, out_conv = environment["blend"], environment["output_conversion"]
+    elif (src, dst) not in BLEND_MAP:
         raise PlanError("混合 %s %s 没有对应的 UE 混合模式" % (src, dst))
-    blend, out_conv = BLEND_MAP[(src, dst)]
+    else:
+        blend, out_conv = BLEND_MAP[(src, dst)]
     cull = flag(floats, "Cull", " ".join(p["state"]))
     zwrite = flag(floats, "ZWrite", " ".join(p["state"]))
     ztest = flag(floats, "ZTest", " ".join(p["state"]))
@@ -411,10 +415,14 @@ def plan(material_path, renderer, tex_assets, shader_name=None, output_contract=
         pre_pos = "float3 PosU = F.U(WorldPos) * 0.01;\n"
     else:
         pre_pos = ""
+    returns = {"rgb": "return c;", "rgb*a": "return float4(c.rgb * c.a, c.a);",
+               "rgb,1-alpha": "return float4(c.rgb, 1.0 - c.a);"}
+    if out_conv not in returns:
+        raise PlanError("Unknown material output conversion: " + out_conv)
     body = (PRELUDE % {"shader": shader_name, "pass": p["name"], "keywords": " ".join(keywords) or "无"}
             + pre_pos + "\n".join(av) + "\n" + vs["code"] + "\n" + "\n".join(link + ps_special) + "\n"
             + ps["code"] + "\n    float4 c = asfloat(bo%d);\n" % output_register
-            + ("    return float4(c.rgb * c.a, c.a);\n" if out_conv == "rgb*a" else "    return c;\n"))
+            + "    " + returns[out_conv] + "\n")
     # Custom 节点函数体里不需要缩进；去掉 4 空格前缀便于阅读
     body = "\n".join(l[4:] if l.startswith("    ") else l for l in body.split("\n"))
 

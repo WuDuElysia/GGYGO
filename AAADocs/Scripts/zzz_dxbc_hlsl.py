@@ -508,8 +508,11 @@ def translate_ins(ctx, op, sat, ops):
             rhs = expr_u
         return "%s = %s;" % (name, rhs)
 
+    if op == "bfi" and len(ops) != 5:
+        raise TranslateError("bfi 需要一个目标和四个源操作数")
+
     if op in ("mov", "movc", "swapc") or op in FLOAT_UNARY or op in FLOAT_BINARY or op in FLOAT_CMP \
-            or op in INT_BINARY or op in INT_CMP or op in CONV or op in ("mad", "not", "ineg", "dp2", "dp3", "dp4"):
+            or op in INT_BINARY or op in INT_CMP or op in CONV or op in ("mad", "not", "ineg", "dp2", "dp3", "dp4", "bfi"):
         d = ops[0]
         _, pos = ctx.dest(d)
         n = len(pos)
@@ -558,6 +561,18 @@ def translate_ins(ctx, op, sat, ops):
                 t, f = INT_BINARY[op]
                 a, b = ctx.read(ops[1], pos, t)[0], ctx.read(ops[2], pos, t)[0]
                 text = wr(d, expr_u=convert(f.format(a=a, b=b), t, "u", n))
+            elif op == "bfi":
+                # SM5 bfi uses the low five bits of width/offset and uint32
+                # truncation, including fields that extend beyond bit 31.
+                # Build scalar lanes, then assign once: aliased swizzles must
+                # all read the old register before any destination is changed.
+                lanes = []
+                for p in pos:
+                    width, offset, insert, base = [ctx.read(s, [p], "u")[0] for s in ops[1:]]
+                    shift = "(%s & 31u)" % offset
+                    mask = "(((1u << (%s & 31u)) - 1u) << %s)" % (width, shift)
+                    lanes.append("(((%s << %s) & %s) | (%s & ~%s))" % (insert, shift, mask, base, mask))
+                text = wr(d, expr_u=lanes[0] if n == 1 else "uint%d(%s)" % (n, ", ".join(lanes)))
             elif op in INT_CMP:
                 t, cmpop = INT_CMP[op]
                 a, b = ctx.read(ops[1], pos, t)[0], ctx.read(ops[2], pos, t)[0]

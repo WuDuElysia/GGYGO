@@ -1,4 +1,7 @@
 """DXBC value/address dependencies must survive output-driven pruning."""
+import ast
+import re
+import struct
 import sys
 import unittest
 from pathlib import Path
@@ -244,6 +247,185 @@ class LoopAddressTests(TranslationCase):
         for jump in ("break", "continue", "breakc_nz v11.x", "continuec_z v11.x"):
             with self.subTest(jump=jump), self.assertRaisesRegex(T.TranslateError, "loop"):
                 self.translated(jump, "mov o0.x, l(1.000000)")
+
+
+def bfi_reference(width, offset, insert, base):
+    """Independent bit-by-bit oracle; do not reuse the emitted mask formula."""
+    result = base & 0xFFFFFFFF
+    for bit in range(32):
+        if (offset & 31) <= bit < (offset & 31) + (width & 31):
+            value = (insert >> (bit - (offset & 31))) & 1
+            result = (result & ~(1 << bit)) | (value << bit)
+    return result
+
+
+def emitted_uint_rhs(text, registers=None):
+    """Evaluate only the emitted bfi expression's unsigned HLSL subset."""
+    expression = text.split(" = ", 1)[1].removesuffix(";")
+    expression = re.sub(r"\b(\d+)u\b", r"\1", expression)
+    registers = registers or {}
+
+    def visit(node):
+        if isinstance(node, ast.Constant) and type(node.value) in (int, float):
+            return node.value
+        if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
+            return registers[node.value.id]["xyzw".index(node.attr)]
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            values = [visit(arg) for arg in node.args]
+            if re.fullmatch(r"uint[234]", node.func.id) and len(values) == int(node.func.id[-1]):
+                return tuple(values)
+            if node.func.id == "asuint" and len(values) == 1:
+                return struct.unpack("<I", struct.pack("<f", values[0]))[0]
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Invert):
+            return ~visit(node.operand) & 0xFFFFFFFF
+        if isinstance(node, ast.BinOp):
+            left, right = visit(node.left), visit(node.right)
+            if isinstance(node.op, ast.BitAnd):
+                value = left & right
+            elif isinstance(node.op, ast.BitOr):
+                value = left | right
+            elif isinstance(node.op, ast.LShift):
+                if not 0 <= right < 32:
+                    raise ValueError("emitted shift count is outside uint32")
+                value = left << right
+            elif isinstance(node.op, ast.Sub):
+                value = left - right
+            else:
+                raise ValueError("unsupported emitted operator")
+            return value & 0xFFFFFFFF
+        raise ValueError("unsupported emitted expression: " + ast.dump(node))
+
+    return visit(ast.parse(expression, mode="eval").body)
+
+
+class BfiTests(TranslationCase):
+    def instruction(self, text):
+        return T.translate_ins(T.Ctx(program(), "b", {}), *T.split_instr(text))
+
+    def test_original_aura_dither_pair_keeps_pixel_and_icb_chain(self):
+        pair = ("bfi r2.y, l(2), l(2), r2.y, l(0)",
+                "bfi r2.y, l(2), l(0), r2.z, r2.y")
+        source = program("ftou r2.yz, v0.xxyx", *pair,
+                         "add r2.y, v1.x, -icb[r2.y + 4].x",
+                         "lt r2.y, r2.y, l(0.000000)", "discard_nz r2.y",
+                         "mov o0.x, v2.x")
+        rows = ", ".join("{0, 0, 0, 0}" for _ in range(20))
+        source["asm"].insert(1, "dcl_immediateConstantBuffer { " + rows + " }")
+        result = T.translate(source, "b", {}, {0: "x"})
+        self.assertIn("br2.yz = (uint2)(asfloat(bv0.xy));", result["code"])
+        self.assertIn("bicb[br2.y + 4].x", result["code"])
+        self.assertIn("if (br2.y != 0u) { clip(-1.0); }", result["code"])
+        self.assertEqual(set(result["live_inputs"]),
+                         {("v0", "x"), ("v0", "y"), ("v1", "x"), ("v2", "x")})
+        lines = [self.instruction(text).text for text in pair]
+        for x in range(8):
+            for y in range(8):
+                with self.subTest(x=x, y=y):
+                    first = emitted_uint_rhs(lines[0], {"br2": (0, x, y, 0)})
+                    final = emitted_uint_rhs(lines[1], {"br2": (0, first, y, 0)})
+                    self.assertEqual(final, (x % 4) * 4 + y % 4)
+        self.assertTrue(all(line in result["code"] for line in lines))
+
+    def test_uint32_boundaries_and_raw_literal_bits(self):
+        cases = [(0, 7, 0xFFFFFFFF, 0xA5A5A5A5),
+                 (32, 7, 0xFFFFFFFF, 0xA5A5A5A5), (33, 0, 1, 0),
+                 (31, 1, 0xFFFFFFFF, 1), (31, 31, 1, 0),
+                 (31, 31, 0, 0xFFFFFFFF), (2, 32, 3, 0),
+                 (0xFFFFFFFF, 0xFFFFFFFF, 1, 0), (31, 0, 0, 0xFFFFFFFF)]
+        for values in cases:
+            with self.subTest(values=values):
+                text = "bfi r0.x, " + ", ".join("l(0x%08x)" % v for v in values)
+                actual = emitted_uint_rhs(self.instruction(text).text)
+                self.assertEqual(actual, bfi_reference(*values))
+        actual = emitted_uint_rhs(self.instruction(
+            "bfi r0.x, l(31), l(0), l(1.000000), l(-1)").text)
+        self.assertEqual(actual, bfi_reference(31, 0, 0x3F800000, 0xFFFFFFFF))
+
+    def test_masked_swizzles_and_scalar_broadcast(self):
+        registers = {"bv1": (0, 31, 33, 2), "bv2": (31, 0, 32, 1),
+                     "bv3": (0xFFFFFFFF, 3, 1, 0), "bv4": (0, 1, 2, 0xA5A5A5A5)}
+        for mask in ("x", "yw", "xyz", "xyzw"):
+            with self.subTest(mask=mask):
+                ins = self.instruction("bfi r0." + mask + ", v1.wzyx, v2.zwxy, v3.yxxx, v4.w")
+                expected, uses = [], set()
+                for c in mask:
+                    p = "xyzw".index(c)
+                    components = ("wzyx"[p], "zwxy"[p], "yxxx"[p], "w")
+                    values = [registers["bv%d" % i]["xyzw".index(s)]
+                              for i, s in enumerate(components, 1)]
+                    expected.append(bfi_reference(*values))
+                    uses.update(("v%d" % i, s) for i, s in enumerate(components, 1))
+                self.assertEqual(emitted_uint_rhs(ins.text, registers),
+                                 expected[0] if len(mask) == 1 else tuple(expected))
+                self.assertEqual(ins.uses, uses)
+                self.assertEqual(ins.defs, [("r0", c, True) for c in mask])
+
+    def test_aliased_swizzle_reads_all_old_components_before_one_write(self):
+        ins = self.instruction("bfi r0.xy, l(2), l(0), r0.yxxx, r0.zwxx")
+        old = (2, 1, 0xA5A5A5A5, 0x5A5A5A5A)
+        self.assertEqual(ins.text.count(" = "), 1)
+        self.assertEqual(ins.text.count(";"), 1)
+        self.assertEqual(emitted_uint_rhs(ins.text, {"br0": old}),
+                         (bfi_reference(2, 0, old[1], old[2]),
+                          bfi_reference(2, 0, old[0], old[3])))
+        self.assertEqual(ins.uses, {("r0", c) for c in "xyzw"})
+        result = self.translated("mov r0.xyzw, v1.xyzw",
+                                 "bfi r0.xy, l(2), l(0), r0.yxxx, r0.zwxx",
+                                 "mov o0.xy, r0.xyxx", outputs={0: "xy"})
+        self.assertEqual(set(result["live_inputs"]), {("v1", c) for c in "xyzw"})
+
+    def test_dynamic_destination_address_stays_live_and_undefined_is_rejected(self):
+        text = "bfi x0[r0.y + 0].x, l(2), l(0), v8.y, v3.z"
+        result = self.translated("ftou r0.y, cb1[64].y", text, "mov o0.x, x0[4].x")
+        self.assert_index_definition(result)
+        self.assertEqual(set(result["live_inputs"]), {("v8", "y"), ("v3", "z")})
+        with self.assertRaisesRegex(T.TranslateError, "写入前被读取"):
+            self.translated(text, "mov o0.x, x0[4].x")
+
+    def test_each_of_four_sources_is_a_live_read(self):
+        for i in range(4):
+            operands = ["l(2)", "l(0)", "l(3)", "l(0)"]
+            operands[i] = "r1.y"
+            text = "bfi r0.x, " + ", ".join(operands)
+            with self.subTest(source=i):
+                result = self.translated("mov r1.y, v1.z", text, "mov o0.x, r0.x")
+                self.assertEqual(result["live_inputs"], [("v1", "z")])
+                with self.assertRaisesRegex(T.TranslateError, "写入前被读取"):
+                    self.translated(text, "mov o0.x, r0.x")
+
+    def test_dead_bfi_prunes_source_address_and_missing_globals(self):
+        source = program("ftou r1.y, cb1[64].y",
+                         "bfi r0.x, cb2[0].x, l(0), x0[r1.y + 0].x, v3.w",
+                         "mov o0.x, r0.x")
+        source["bind"]["cbbind"][2] = "Globals"
+        source["bind"]["cb"]["Globals"] = {"size": 16, "params": [
+            {"kind": "V", "name": "Width", "offset": 0, "dim": 1, "arr": 0, "type": 0}]}
+        with self.assertRaisesRegex(T.TranslateError, "没有提供方"):
+            T.translate(source, "b", {}, {0: "x"})
+        source["asm"][-2] = "mov o0.x, l(1.000000)"
+        result = T.translate(source, "b", {}, {0: "x"})
+        self.assertEqual(result["missing"], [])
+        self.assertEqual(result["live_inputs"], [])
+        self.assertEqual(dict(result["mat_params"]), {})
+        self.assertNotIn("<<", result["code"])
+        self.assertNotIn("bx0[br1.y]", result["code"])
+
+    def test_live_source_array_address_and_vs_path(self):
+        result = self.translated("ftou r1.y, cb1[64].y",
+                                 "bfi o0.x, l(2), l(0), x0[r1.y + 0].x, v3.w",
+                                 profile="vs_5_0")
+        self.assertIn("br1.y = (uint)(_Index);", result["code"])
+        self.assertEqual(result["live_inputs"], [("v3", "w")])
+        with self.assertRaisesRegex(T.TranslateError, "写入前被读取"):
+            self.translated("bfi o0.x, l(2), l(0), x0[r1.y + 0].x, v3.w")
+
+    def test_invalid_saturate_or_arity_is_rejected(self):
+        for text, message in (("bfi_sat r0.x, l(2), l(0), l(3), l(0)", "_sat"),
+                              ("bfi", "四个源"),
+                              ("bfi r0.x, l(2), l(0), l(3)", "四个源"),
+                              ("bfi r0.x, l(2), l(0), l(3), l(0), l(1)", "四个源")):
+            with self.subTest(text=text), self.assertRaisesRegex(T.TranslateError, message):
+                self.instruction(text)
 
 
 if __name__ == "__main__":
