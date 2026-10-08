@@ -1,463 +1,73 @@
-# GGYGO 代码规范
-
-本文档整理自现有代码风格，用于保持项目代码一致性。
-
----
-
-## 一、注释规范（强制 Doxygen 风格）
-
-### 1.1 文件头注释
-
-每个 `.h` 和 `.cpp` 文件开头必须有：
-
-```cpp
-/**
- * @file FileName.h
- * @brief 一句话描述这个文件是干什么的
- *
- * 详细说明（可选，多行）。
- */
-```
-
-示例（单行 brief）：
-```cpp
-/**
- * @file InputPipeline.cpp
- * @brief 输入管线实现
- */
-```
-
-示例（带详细说明）：
-```cpp
-/**
- * @file RuntimeData.h
- * @brief 运行时黑板 - 全局帧级共享数据中枢
- * 
- * 所有子系统通过 RuntimeData 共享数据，不直接互相引用。
- * 每个字段只有一个系统写入，多个系统读取。
- * 帧级意图在帧末由 ResetFrameIntents() 清零。
- */
-```
-
-### 1.2 类/结构体注释
-
-```cpp
-/**
- * 运行时黑板
- * 管线中所有系统的数据交换中心
- */
-struct FRuntimeData
-{
-```
-
-```cpp
-/**
- * 后处理输入数据
- * 经过防抖缓冲和动作按键缓冲后的输入状态
- */
-struct FProcessedInput
-{
-```
-
-### 1.3 函数注释
-
-```cpp
-/**
- * 每帧调用，处理输入
- * 在 BaseCharacter::Tick 的第 2 步调用
- * @param DeltaTime 帧间隔
- */
-void Process(float DeltaTime);
-```
-
-```cpp
-/**
- * 初始化所有处理器，注入外部依赖
- * @param InOwner 角色指针（ViewRotationProcessor 需要）
- * @param InMesh  骨骼网格体（RootMotionParameterProcessor 需要）
- */
-void Init(ACharacter* InOwner, USkeletalMeshComponent* InMesh);
-```
-
-带 @return 的：
-```cpp
-/**
- * 尝试切换到目标状态
- * @return 是否切换成功
- */
-bool TryTransitionTo(ECharacterStateType NewState, FRuntimeData& RuntimeData);
-```
-
-### 1.4 成员变量注释
-
-```cpp
-/** 移动输入原始值（WASD / 左摇杆） */
-FVector2D MoveInput = FVector2D::ZeroVector;
-
-/** 输入数据容器（不拥有，由 BaseCharacter 管理生命周期） */
-FInputData& InputData;
-```
-
-### 1.5 行内注释
-
-用 `//`，放在代码上方或同行的右侧：
-```cpp
-// 1. 推进双缓冲
-InputData.AdvanceFrame();
-```
-
-### 1.6 函数内部块注释
-
-用 `//`，放在逻辑块上方：
-```cpp
-// 约束 Health 在 0 ~ MaxHealth 之间
-void ClampHealth(float& NewValue);
-```
-
-### 1.7 分隔线（section 分隔）
-
-```cpp
-// ============================================================
-// 输入状态（由 InputPipeline 写入）
-// ============================================================
-```
-
-### 1.8 TODO 标记
-
-```cpp
-// TODO: 阶段五做完 MotionDriver 后删除以下代码
-// TODO: 阶段六仲裁管线完成后启用
-```
-
-### 1.9 注释必须准确描述当前代码（强制）
-
-**原则：注释描述的是"这段代码现在在做什么"，而不是"它以前是什么样的"或"它将来会变成什么"。**
-
-#### 错误示例（不要这样写）
-
-```cpp
-/**
- * ★ 数据驱动（v2 升级）：
- *   - 动画资产：优先从 UCharConfigData 读取，回退到自身 EditAnywhere 属性
- *   - 混合时间：每对状态转换独立控制（Config.PerStateBlendOverrides），
- *     替代旧版全局固定 0.2s          ← ❌ "替代旧版"是在讲历史，读者不需要知道
- *   - 新增 InAir/Attack/Dodge/HitStun/Stunned/Dead 共 11 态完整支持  ← ❌ "新增"暗示以前没有
- */
-```
-
-问题：
-- 提到 `v2 升级`、`旧版`、`新增` — 这些都是**版本历史信息**，不是当前代码行为的描述
-- 新来读代码的人不知道 v1 长什么样，这些注释对他没有帮助
-- 代码重构后这些注释会变得过时但没人去更新
-
-#### 正确示例（应该这样写）
-
-```cpp
-/**
- * @file GGYGOAnimInstance.cpp
- * @brief Config 驱动动画实例实现
- *
- * 动画播放策略：
- *   循环动画（Idle/RunLoop/InAir/Stunned）：启动时预创建 UAnimMontage 缓存复用
- *   非循环动画（RunStart/RunEnd/Attack/Dodge/HitStun/Dead）：动态 Montage 播一次
- *
- * 数据来源优先级：
- *   1. UCharConfigData（角色 DataAsset，11 态完整映射 + 独立混合时间）
- *   2. AnimInstance 自身 EditAnywhere 属性（4 基础状态，向后兼容）
- *   3. 默认值（LegacyBlendDuration = 0.2s）
- */
-```
-
-#### 具体规则
-
-| 规则 | 说明 | 示例 |
-|------|------|------|
-| **不写版本号** | 注释里不要出现 v1/v2/升级/旧版/新增/重构 等词汇 | 用"Config 驱动"代替"v2 升级后的 Config 驱动" |
-| **不写变更历史** | 代码变更记录放 Git commit 和文档，不放注释 | 删除"原来是用 xxx，现在改成 yyy" |
-| **描述当前行为** | 注释回答"这段代码现在做什么"，不回答"它经历了什么" | 写"从 Config 读取混合时间"代替"替代了原来的固定 0.2s" |
-| **文件头 @brief 只写功能** | 不写迭代历史 | 用"数据驱动的动画播放系统"代替"v2: 从硬编码改为数据驱动" |
-| **删除过时注释** | 重构代码时同步清理引用旧逻辑的注释 | 如果一个 if 分支被删了，对应的"兼容旧版xxx"注释也要删 |
-
-#### 唯一例外
-
-只有一种情况允许提到"以前"：**TODO/FIXME 标记中说明需要删除的遗留代码**：
-
-```cpp
-// TODO: 以下硬编码路径将在全部角色迁移到 Config 后删除
-if (!CachedConfig) { /* ... */ }
-```
-
----
-
-## 二、命名规范
-
-### 2.1 类型前缀
-
-| 前缀 | 类型 | 示例 |
-|------|------|------|
-| `F` | 纯 C++ 结构体 / 类 | `FRuntimeData`, `FInputPipeline` |
-| `U` | UObject 子类 | `UGGYGOAttributeSet` |
-| `A` | Actor 子类 | `ABaseCharacter`, `APlayerCharacter` |
-| `I` | 接口类 | `IIntentProcessor`, `IParameterProcessor` |
-| `E` | 枚举 | `ECharacterStateType` |
-| `T` | 模板 / 容器 | `TArray`, `TUniquePtr`, `TMap` |
-
-### 2.2 大小写
-
-| 类型 | 风格 | 示例 |
-|------|------|------|
-| 类名 / 结构体名 | PascalCase | `FInputPipeline`, `FRuntimeData` |
-| 函数 / 方法 | PascalCase | `Process()`, `SetMoveInput()`, `ResetFrameIntents()` |
-| 成员变量 | PascalCase（无前缀） | `CurrentFrame`, `DesiredWorldMoveDir` |
-| 布尔变量 | `b` + PascalCase | `bWantsToJump`, `bHasRootMotion`, `bIsMoving` |
-| 局部变量 | PascalCase | `Forward`, `WorldDir`, `RootMotion` |
-| 参数 | `In`/`Out` + PascalCase | `InInputData`, `InOwner`, `DeltaTime` |
-| 常量 | `k` 或全大写（UE 风格） | `ActionBufferTime`（static constexpr） |
-
-### 2.3 文件名
-
-- 文件名 = 类名（去掉前缀）
-- 例如：`FInputPipeline` → `InputPipeline.h` / `InputPipeline.cpp`
-
----
-
-## 三、代码结构
+# GGYGO 代码规范与复杂度审核机制
 
-### 3.1 `#include` 顺序
-
-```cpp
-// 1. 本文件对应的头文件
-#include "Pipeline/InputPipeline.h"
-
-// 2. 项目内部头文件（按目录分组）
-#include "Pipeline/Intents/ViewRotationProcessor.h"
-#include "Pipeline/Parameters/MovementParameterProcessor.h"
-#include "Data/InputData.h"
-#include "Data/RuntimeData.h"
+适用于项目 C++、蓝图及资产工具。项目协作权限、写入交接和用户决策以 [AGENTS.md](../../AGENTS.md) 为准；本文规定代码表达与审核方法，不引入另一套审批、帧调度或状态管理机制。
 
-// 3. 引擎头文件
-#include "GameFramework/Character.h"
-#include "Components/SkeletalMeshComponent.h"
-```
-
-路径写法：使用 `"Public/xxx"` 风格（不带 `Public/` 前缀，因为 IncludePath 已配置）。
+## 代码表达
 
-### 3.2 头文件结构
-
-```cpp
-/**
- * @file Xxx.h
- * @brief xxx
- */
+- 类型采用 UE 前缀 U／A／F／I／E，布尔量用 b 前缀；接口、变量和文件名使用清楚的职责名称。
+- 文件头用 Doxygen 的 @file、@brief 说明当前功能。对外接口写清输入、作用、结果、状态所有者及必要的清理责任；有意义的参数／返回值使用 @param／@return。不为显而易见的私有赋值逐行补注释。
+- 注释描述当前契约和必要原因，不写改动批次、构建次数或版本历史；待退役代码可用 TODO 指向实际任务。删除分支时同步清理不再成立的注释。
+- .cpp 首先包含对应头文件，其次项目依赖，最后引擎依赖；头文件优先前向声明，反射头的 .generated.h 保持最后一个 include。
+- 当前运行时按 Source/GGYGO/所属职责/ 组织，头文件与实现可并列；不要求建立 Public／Private 镜像目录。仅编辑器使用的宿主与工具进入 GGYGOEditor 或明确的测试模块。
+- 仅需组合或纯计算的职责优先使用普通 C++ 类型；确需反射、引擎组件或蓝图接口才使用 UObject。跨调用持有 UObject 时明确采用受 GC 追踪的强引用或弱引用，不靠裸指针假定异步生命周期。
+- 纯计算不持有当前玩法状态；私有执行资源由原模块拥有，不因拆分类而建立第二套 Tick、计时器、Issuer、Ready、Held 或播放归属。
+- C++ 承担稳定机制与权限／生命周期；常改的角色差异、招式组合、时序窗口、曲线和表现参数放在蓝图、Montage 或配置资产，不硬编码具体角色。
 
-#pragma once                           // 只用 #pragma once
+## 错误、暂态与防御边界
 
-#include "CoreMinimal.h"              // 必须第一个
-// ... 其他 include ...
+- 必需配置或来源失效，应明确拒绝／中止对应请求并诊断，不以零输出、正常 Finished、固定速度、默认资源或另一能力掩盖失败。
+- 引擎规定的合法暂态、资源退役和幂等清理可正常无操作；与业务失败区分。已显式配置的正常模式不因“禁止兜底”而被误删。
+- Busy、NotHeld、NotApplicable、Failed 等结果表达不同事实，调用方必须按契约消费；不能先拒绝提交，再由外层发布成功结果。
+- 不使用异常／catch 把无效依赖转为成功。诊断包含模块、对象／资源和原因，按资源或失败生命周期抑制重复，不无限每帧刷屏。
+- 外部回调、同步重入、原生返栈及真实生命周期改变前后，重新确认原资源可能必要。同一无外调的纯执行段不要反复完整验证同一来源。
+- 核验结果不影响后续行为、也不承担必要诊断时，应去除无效检查。若承担断言／诊断，明确其目的；不把所有函数尾部检查一律视为冗余。
+- 允许同次调用栈内复用已验证输入；不能为减少检查建立未经失效管理的跨帧 Valid 缓存，或把不同生命周期的序号、快照合成一个“当前有效”布尔量。
 
-// 前向声明（减少编译依赖）
-class ACharacter;
-struct FRuntimeData;
-enum class ECharacterStateType : uint8;
+## 复杂度审核机制
 
-// 类定义
-class FMyClass
-{
-public:
-    // 构造/析构
-    // 公共方法
-    // 公共成员（几乎没有，尽量用 private）
+### 触发与范围
 
-private:
-    // 私有成员
-};
-```
-
-### 3.3 类内成员的排列顺序
-
-1. `public` 方法（构造 → Init → 核心逻辑 → 访问器）
-2. `private` 方法
-3. `private` 成员
-
-分组用注释分隔线：
-```cpp
-public:
-    void Init(...);
-    void Process(float DeltaTime);
-
-    // ============================================================
-    // 数据写入接口
-    // ============================================================
-
-    void SetXxx(...);
+在完整需求交付前执行一次；新增长期状态／缓存／身份协议、修改回调生命周期、迁移旧接口或出现明显职责混杂时，在实现前先核对相关边界。小修改只检查受影响调用链，不每次重新全项目审计。
 
-private:
-    // ============================================================
-    // 内部状态
-    // ============================================================
-```
-
-### 3.4 `.cpp` 文件结构
+行数、分支数和测试体积只用于发现热点，不作为强制拆文件、删除测试或完成百分比。审核覆盖实际调用方、状态写入点、失败与清理路径；未发现 C++ 调用不等于反射／蓝图／序列化使用不存在。
 
-```cpp
-/**
- * @file Xxx.cpp
- * @brief xxx 实现
- */
-
-#include "Xxx.h"                      // 对应头文件
-// ... 其他 include ...
-
-// 构造函数实现（简短的可直接在 .h 里写）
-FMyClass::FMyClass() ...
+### 六项必查
 
-// 方法实现（按头文件中声明的顺序）
-void FMyClass::Init(...) ...
-```
+| 审核项 | 必须回答的问题 | 常见整改方向 |
+| --- | --- | --- |
+| 职责与依赖 | 哪些变化原因混在一起？谁请求、执行、表现？是否新增循环依赖？ | 按输入／输出、生命周期与所有权拆分，保留原权威入口 |
+| 状态与提交 | 谁拥有每项事实？是否多处写同一完成／失败转换，或拒绝后仍发布成功？ | 唯一提交与明确结果；只读快照保留真实来源和有效期 |
+| 防御依据 | 检查防止什么失效？此处是否有外调／返栈／网络边界？结果有何用途？ | 保留真实边界保护；合并同次纯路径重复验证，删除无效尾部检查 |
+| 迁移残留 | 新旧链是否同时运行？旧 API 谁仍使用？是否有恒失败分支或未迁移的派生发布？ | 先接回必要行为与调用方，再退役旧入口；不直接删反射字段 |
+| 业务与扩展 | 是否把角色业务写进通用机制？是否为无实际接入场景维护第二套协议？ | 配置／组合／扩展点；只实现真实需求，不预建通用框架 |
+| 测试与构建 | 哪些是生产、测试、编辑器宿主？是否只为夹具保留第二条生产写链？ | 测试适配真实入口，隔离环境宿主；保留原复现与语义断言 |
 
----
-
-## 四、纯 C++ 类 vs UObject 的约定
+不同 serial、Origin／Input／Prepared、活动资源／原生末次贡献不凭名字相似就合并。先说明各自的事实、寿命和消费者，再决定是否重复。
 
-### 4.1 纯 C++ 类（`F` 前缀）
+### 审核结论与留痕
 
-- 不需要反射、不需要蓝图访问 → 用纯 C++ 类
-- 在 BaseCharacter 里用 `TUniquePtr<T>` 持有
-- 依赖的外部对象（ACharacter、USkeletalMeshComponent）通过 Init() 注入原始指针
-- 不拥有 UObject（只管用不管生命周期，GC 管理）
+每个重要问题归入：**必要保留、可合并、可拆分、可退役、待验证、需用户决策**。在现有模块任务或[修复清单](../Coordination/Module_Audit_Repair_Ledger.md)中简述：
 
-示例：
-```cpp
-// BaseCharacter.h
-TUniquePtr<FInputPipeline> InputPipeline;
-
-// 构造函数里
-InputPipeline = MakeUnique<FInputPipeline>(*InputData);
-
-// UObject 注入用原始指针
-void Init(ACharacter* InOwner, USkeletalMeshComponent* InMesh);
-```
-
-### 4.2 UObject 子类（`U` 前缀）
-
-- ASC、AttributeSet、Ability 等
-- 用 `CreateDefaultSubobject<>()` 在构造函数里创建
-- 成员变量必须标记 `UPROPERTY()` 防止被 GC 回收
-- 不暴露给纯 C++ 管线的内部类（只暴露接口引用的）
-
----
-
-## 五、接口规范
-
-```cpp
-/**
- * @file IIntentProcessor.h
- * @brief 意图处理器接口
- */
-#pragma once
-
-#include "CoreMinimal.h"
-
-class FInputData;
-struct FRuntimeData;
-
-class IIntentProcessor
-{
-public:
-    virtual ~IIntentProcessor() = default;
-
-    /**
-     * 每帧处理意图
-     * @param InputData  输入数据（只读，由 InputPipeline 写入）
-     * @param RuntimeData 运行时黑板（写入意图字段）
-     */
-    virtual void Process(const FInputData& InputData, FRuntimeData& RuntimeData) = 0;
-};
-```
-
-关键点：
-- 接口类名以 `I` 开头
-- 虚析构用 `= default`
-- 只声明纯虚函数（`= 0`）
-- 不要放数据成员
-- 前向声明依赖，不 include 具体结构体头文件（在接口这里只是声明用，实际 include 放在 `.cpp` 里）
-
----
-
-## 六、模板方法 vs 接口
-
-状态机中有一些行为是固定的（PerformTransition、IsTransitionAllowed），
-另一些是变化的（状态的 Enter/Update/Exit）。
-
-| 固定的 → | 在基类/主类里实现 |
-| 变化的 → | 虚函数，子类重写 |
-
-```cpp
-// 状态机主类（FCharacterStateMachine）：处理固定的转换逻辑
-void PerformTransition(...);
-bool IsTransitionAllowed(...) const;
-
-// 状态基类（FCharacterState）：声明虚函数
-virtual void Enter(FRuntimeData& RuntimeData);
-virtual void Update(float DeltaTime, FRuntimeData& RuntimeData, FCharacterStateMachine& SM);
-virtual void Exit(FRuntimeData& RuntimeData);
-
-// 具体状态：重写
-void FIdleState::Update(float DeltaTime, FRuntimeData& RuntimeData, FCharacterStateMachine& SM) override;
-```
-
----
-
-## 七、错误处理
-
-当前阶段不抛异常，用静默返回：
-```cpp
-if (!InputData) return;
-if (!Owner) return;
-if (!ASC) return;
-```
-
----
-
-## 八、目录结构约定
-
-```
-Source/GGYGO/
-├── Public/
-│   ├── Data/                    # struct，纯数据，无逻辑
-│   ├── Pipeline/                # 管线主类和接口
-│   │   ├── Interfaces/          # IIntentProcessor, IParameterProcessor 等
-│   │   ├── Intents/             # 意图处理器
-│   │   └── Parameters/          # 参数处理器
-│   ├── StateMachine/            # 状态机
-│   │   └── States/              # 具体状态
-│   ├── Drivers/                 # 驱动层（未来）
-│   ├── Movement/                # 旧版移动系统（临时）
-│   ├── Attributes/              # GAS 属性
-│   ├── Abilities/               # GAS 技能
-│   └── Camera/                  # 摄像机
-├── Private/
-│   └── （镜像目录结构）
-```
-
-`Public` 和 `Private` 目录结构镜像一致。
-
----
-
-## 九、检查清单
-
-写代码前自查：
-
-- [ ] 文件头有 `@file` `@brief` 注释
-- [ ] 每个类/结构体有注释
-- [ ] 每个 public 函数有 `@param` 注释
-- [ ] 每个成员变量有注释
-- [ ] 类名前缀正确（F/U/A/I/E）
-- [ ] 布尔变量以 `b` 开头
-- [ ] include 顺序：自己 → 项目 → 引擎
-- [ ] 用 `TUniquePtr` 持有纯 C++ 对象
-- [ ] 用原始指针引用 UObject（不拥有）
-- [ ] 虚函数有 `override`
-- [ ] Section 用了分隔线
-- [ ] 构造函数里空代码块不要干放着（要么有用，要么让编译器默认生成）
-- [ ] **注释描述当前代码行为，不含版本号/变更历史/新旧对比（见 1.9）**
+- 具体代码／调用链依据与根因；确认事实和风险推测分开。
+- 推荐职责／状态归属、影响的生产调用方与清理责任。
+- 实际实现、编译／必要冒烟结果及未验证边界。
+
+不为每个判空、函数或内部步骤新增 JSON、全项目哈希、重复交接报告或 Canvas。新问题只有构建／失败复现／机器消费确需时才追加机器证据；相同事实引用原记录，不多份抄写。
+
+### 执行与验收
+
+1. 组长先检索现有实现，独立制定职责内方案与步骤；跨模块需求指定牵头，相关组长共同收敛接口。统筹确认文件唯一写入者与公共窗口，不逐方法代拟设计。
+2. 优先关闭真实遗漏、错误成功结果及迁移残留，再合并重复规则和拆分独立职责。拆分后的每部分须能说明输入、输出、依赖、状态所有者和清理责任；仅搬代码段落不算职责重构完成。
+3. 不改变已确认语义的技术整改直接实施。玩法／输入／镜头政策、实质兼容性、反射或资产丢失风险、引擎源码修改仍交用户决定；只有相关工作线等待。
+4. 同文件始终一个写入者；接口与原写入者冻结后交接。所有 C++ 写入者冻结，再按完整可运行链安排批量编译与必要冒烟。
+5. 保留原问题的最小严格复现／原断言，验证受影响生产链；不扩历史全量矩阵，不降低断言或排除失败场景制造成功。未测联机、Cook、视觉、性能分别明示，不以普通冒烟代替。
+6. 验收同时检查依赖、状态／执行唯一、失败传播、清理路径和旧 API 消费者。通过编译不等于这些项目全部关闭。
+7. 完整需求开发和约定测试完成后，集中同步模块 Markdown／Canvas、进度及中文 Git 交付；实现中只保留协作必需状态，不逐步骤改笔记。
+
+### 不以瘦身名义进行的改动
+
+- 不删除真正外调后的身份保护、引擎规定的暂态或合法末帧贡献。
+- 不将网络输入证明、请求序列、执行准入与播放身份强行合成一个状态。
+- 不删测试／失败证据来缩减数字，不为测试继续保留无生产需要的旧状态写链。
+- 不凭无 C++ 引用直接删除 UFUNCTION、UPROPERTY、UCLASS 或既有资产。
+- 不新增泛用事件总线、统一全模块状态机、守护管理器或另一个帧调度器来解决局部复杂度。

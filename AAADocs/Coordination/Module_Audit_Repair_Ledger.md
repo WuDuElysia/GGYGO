@@ -1,5 +1,27 @@
 # 全模块自查修复执行清单
 
+## 当前整改：复杂度收口与审核机制（2026-10-08）
+
+用户已明确“执行，并且这次任务需要整理成审核机制”。源码审查基线为Source `b80a80c`；Movement、Input、Character、AbilitySystem审查均已交回，非动态验收。审核机制已写入[代码规范](../Architecture/CodeConventions.md)与AGENTS.md，后续完整需求交付时执行，不新增逐函数审批／人工JSON／历史全量矩阵。有效文件作者与公共窗口仍只见[排程](Module_Repair_Parallel_Schedule.md)。
+
+| 项目 | 负责人／整改结果 | 当前状态与验收边界 |
+| --- | --- | --- |
+| M1 | Movement：旧Stop／TurnBack安装迁移残留、TurnBack派生发布、Prepared消费／完成唯一提交 | 开发冻结、统一构建及AuthorityAndMapping有限烟通过；Prepared拒绝Stale／空结果、完成唯一提交与派生发布。真实联机复制／全部TurnBack表现未验 |
+| M2 | Movement：同次完整验证去重、无调用非反射入口退役、Prediction与私有动作资源职责拆分 | 十二件冻结、统一构建及两Movement既有叶通过；CMC权威及原生RMS时间保持，无新Tick。wire／反射保持为静态证据，完整网络／Cook未验 |
+| I1 | Input：旧Tag接线模板退役、纯执行段重复映射核验收口 | 开发冻结、统一构建及LocalSessionReady／RetryIdentity有限烟通过；同次完整映射检查4→2，真实外调及Cold／Rearm／Held保留，无性能结论 |
+| C1 | Character：Health无作用尾部检查、PawnExtension旧通知链及原测试调用方迁移 | 开发冻结、统一构建及LocalResources／Boss／Host有限叶通过；四原夹具typed通知迁移、Stale及原身份／后继断言保留，不宣称全生命周期覆盖 |
+| A1 | AbilitySystem：Notify重复认证、GA来源字段搬运与ASC不同职责单元收口 | 十二件冻结、统一构建及原ActorInfo／Health／Origin有限烟通过；同栈认证3→1、来源值／纯数值／私有元数据分责，原End／播放／ActorInfo政策保持；完整网络未验 |
+| X1 | AbilitySystem牵头，Input／Character／Combatants配对：重试等待、原输入会话及关闭清理 | 四作者冻结、生产配对／统一构建／原诊断与Closing生产叶通过。ASC唯一等待，Hero真实Action／原H关联，Closing不冒称Released；Host真实外调后重取原端点。partial-installed只有静态保护 |
+| C2 | Input唯一写Hero，Character只读配对：相机重复初始化与会话资源职责 | 已随X1开发／整链必要门禁交付，不另开Hero作者或Camera第二执行链；保留可见行为，完整镜头／输入关闭组合未验 |
+| X2 | Input：Editor输入宿主／夹具与运行时构建隔离 | 后继范围待必要反射／跨测试依赖核对；不删除原失败证据／语义断言 |
+| M3 | Movement／BossAI：两种ActionMotion的显式失败传播 | producer及Boss消费者冻结，统一构建、TimingAndOwnership与NormalLifecycle有限烟通过；真实RMS故障／Cancelled／晚回调后继断言保留，不强制统一资产，正式Kevin实战未验 |
+
+先关闭已确认遗漏／重复转换与残留，再去重和拆分独立职责。真实玩法／兼容／资产风险仍由用户决定，纯技术项不为形式过目停工。每个完整链路统一编译＋必要原问题冒烟后，集中更新相关笔记、进度及中文Git；下方为历史修复记录，不授予本批范围外写权。
+
+最终统一构建3 Succeeded／exit0（7 actions、24.12秒）；构建2 Succeeded／exit0（12 actions、43.70秒），构建1真实Failed／exit1（68.03秒）原样保留。首轮必要冒烟17项、13成功／4失败、44.263847秒，修正后仅定向复测五项，全部Success／0Error／8Warning、3.329581秒。上表为本轮实际验收，后文旧门禁是历史；M1／M2／I1／C1／A1／X1／C2／M3完成约定开发与有限门禁，不等于未测边界关闭。日志`Saved/Logs/ComplexityAuditBuild_20261008_{1,2,3}.log`、两报告`Saved/AutomationReports/ComplexityAuditSmoke_20261008_{1,2}/index.json`保留。X2反射夹具隔离／Host partial-installed直接动态覆盖／联机／Cook／视觉／性能仍为后继或未验，不扩全量矩阵。
+
+四个失败的整改已冻结并通过复测：Origin／Retry普通占用技能的夹具改走真实受控激活边界，保留被测raw重入请求及原来源／零激活断言；LocalResources显式核验DestroyComponent发生于原生End内时的Failed／TerminationNotCompleted／ActivationChanged及原BlockingSpec，仅精确预期一次该主动负向诊断。CharacterBase明确消费合法Closing，不伪造Released或清理其他资源；ProductionNativeHeld验证不再出现Closing的InvalidLocalNoticeKind。八条Warning保留，原失败不改绿。用户允许QUIT_EDITOR后，旧编辑器在AnimationEditor析构访问违规，确认进程结束再构建并重开测试，不称正常退出成功。源码46件中文提交push `45de80f`；集中图文34件已校验、冻结并中文提交push `57b5e8a`，本轮约定验收完成，模块写权全部关闭，不重开源码租约。后继范围仍见上表X2及未验边界；父仓规范／清单／排程通过本次精确中文Git交付。
+
 更新：2026-10-03。用户已授权修复全部明确问题并同步架构笔记。候选优化不等于必须新增框架。
 
 历史模型设置保留：此前向原19组长发送ultra成功。本轮用户提供规则指定gpt-6.1-sol／xhigh，实际后继任务显式遵循xhigh；当前路由含新增Audio共20会话，未向闲置会话重复派设置任务。取消子代理、精确范围、唯一作者及统筹门禁不变。

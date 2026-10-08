@@ -2,9 +2,70 @@
 
 更新：2026-10-03。用户批准提高效率，取代全批次串行；问题编号仍见 Module_Audit_Repair_Ledger.md。本表为有效写入范围，不能从历史派发推导额外权限。
 
+## 当前C++批次：复杂度审核整改（2026-10-08）
+
+本批已获用户明确执行授权，审核规则见[代码规范](../Architecture/CodeConventions.md)，问题与后继范围见[清单](Module_Audit_Repair_Ledger.md#当前整改复杂度收口与审核机制2026-10-08)。源码全部冻结，最终Editor构建3 Succeeded／exit0（7 actions、24.12秒），五项定向复测全部Success／0Error／8Warning；首轮17项13成功／4失败的原报告保留。源码46件已中文提交并push `45de80f`。当前只有下列集中图文窗口，统筹独占全局入口与Git；无源码／资产／UE写权，不重开矩阵。X1由AbilitySystem牵头，Input／Character／Combatants实际配对：ASC唯一等待／许可，Hero精确原输入资源归还，Extension发布原H关闭事实，Host在真实外调后重取原端点。Receive／End／Queue签名保持，不新建ASCH协议／全量清Input／validator。Animation来源配置继续只读，不建子代理、不逐方法过目。用户允许退出后旧编辑器AnimationEditor析构访问违规记录保留；确认旧进程结束才构建3，普通编辑器8000复测后非PIE。
+
+| 唯一写入者 | 本批冻结源码范围（均相对Source/GGYGO） | 作者实施交回时记录／保留边界（当前验收见清单） |
+| --- | --- | --- |
+| Movement（已冻结） | 实际十二件：CMC h/.cpp、ActionCurveRMS cpp、LocomotionEvaluation cpp、ActionMotionEvaluation cpp、MovementTestTypes h、LocomotionMovementTest cpp、ActionMotionTest cpp；新增MovementPrediction h/.cpp、ActionMotionExecution h/.cpp | M1／M2及M3 producer已落盘，整文件停写。原wire／反射／玩法阈值保持为静态证据；建议必要烟仅AuthorityAndMapping、TimingAndOwnership两既有叶。未编译／动态，真实网络与独立反射兼容仍未验；Boss消费者由下方独立作者接力 |
+| Character（C1已冻结） | 实际七件：PawnExtension h/.cpp、Health cpp、两BossEncounter及两CombatantBinding测试cpp；Health h／LocalResources测试／Hero未改，原写权关闭 | 无用尾检及旧通知退役、原消费者迁移已落盘，原Stale与后继断言保留，未编译／动态。Hero已交Input唯一写；Character仅提供Released／Ready／Refresh／Closing与相机资源只读协商 |
+| Input（I1已冻结） | 三件实际修改为 `Input/GGYGOInputComponent.h`、`GGYGOPlayerInput.h/.cpp`；TestTypes及所有测试未改，原写权关闭 | 旧模板已退役，私有物理提交段两次重复映射核验已收口，实际新请求完整重建4→2次，无性能实测。原外调／Cold／Rearm／事实次序保留，未编译／冒烟；X1／X2仅只读协商 |
+| AbilitySystem（A1／X1已冻结） | 实际十二件：ASC h/.cpp、GA cpp、Task h/.cpp、OriginDiagnostic cpp；新增ActorInfoSource h、AttributeBaseCalculationTypes h、AttributeCalculation h/.cpp、Private/AvatarBindingProtocol h/.cpp | 来源值、纯数值和ASC私有绑定元数据已拆出；ASC唯一许可／有限等待／GroupFreed唤醒，保留原首次notice次序及一次整批消费。原End／播放／ActorInfo政策保持；两诊断保留原问题断言，未编译／动态 |
+| Input（X1／C2已冻结） | 实际五件：Hero h/.cpp、InputTestTypes h/.cpp、InputRetryIdentityDiagnostic cpp；未新增helper文件 | Hero只保留原native会话／Action观察／H关联与精确清理，等待权威归ASC；首绝对deadline不重发延期，Closing只退原关联／ID且保留native绑定／IMC。相机同栈重复初始化收口，Camera执行归属不变；未编译／烟 |
+| Character（X1关闭事实已冻结） | PawnExtension h/.cpp、既有PawnExtensionLocalResourcesTest cpp三件 | 原H一次Closing空Context先于可失败的Host释放，不冒称Released／Ready成功；EndPlay捕原H、返栈重取，不改Teams／GA政策或全量清ASC。原一叶补真实GA结束内DestroyComponent／释放失败／独立ID保持场景；组件base native BeginPlay覆盖，不称完整World／Feature生命周期，未编译／动态 |
+| Combatants（X1消费者已冻结） | 实际仅CombatantState cpp；两CombatantBinding测试cpp保留C1迁移，X1未追加改动 | Withdraw／native Clear返栈及普通Release发布前重取原弱端点，清理历史保留Init失败，发布用实际Clear receipt；无自动回滚／新协议。partial-installed分支无合法直接最短复现，只有静态保护，不以普通ExpectedASCAndEndPlay叶通过冒称该分支动态覆盖 |
+| BossAI（M3已冻结） | `AI/Boss/Abilities/GGYGOBossMeleeAbility.h/.cpp`、既有`Tests/GGYGOBossMeleeEndReentryTest.cpp`、`GGYGOBossMeleeLifecycleTestAbility.h`四件实际保存并停写 | 已消费ObserveActionMotionFailure、复用原FailOriginalAction／Cancelled；新增既有NormalLifecycle叶内真实Profile RMS失败／先退役／后继保护断言，两条主动负向Error精确预期一次，原严格及A／B断言保持；未编译／烟，不改其它模块／资产 |
+
+首轮冒烟后四处接缝的唯一修正范围已交回冻结：AbilitySystem仅OriginDiagnostic cpp，Input仅RetryIdentityDiagnostic cpp，Character仅LocalResourcesTest cpp及CharacterBase cpp；没有重开其他生产文件写权。上表保留原实施交回证据，当前统一门禁结果以本节首段与清单最新检查点为准。
+
+集中笔记已完成并关闭全部模块写权：Movement六件（结构、结构图、主流程、动作曲线执行说明／子图、计划）；Input四件（结构／结构图／流程／计划）；Character四件（结构／结构图／初始化流程／计划，不含Rendering）；AbilitySystem六件（结构／结构图／主流程／仲裁／原请求终止／计划，不含Cues）；BossAI四件（结构／结构图／流程／Kevin接入计划）；Combatants两件（结构／结构图）。加四统筹入口及此前授权Cues四件，共34件已静态校验并中文提交push `57b5e8a`；无JSON／ID／边／链接错误或节点重叠，原生Obsidian渲染未验。其余七份既有脏笔记、原四份用户配置／资产保持，不纳入此次Git。当前只有统筹父仓精确Git窗口；本次需求验收完成，不从旧交回记录恢复写权。
+
+组长在自身范围自主规划、实现、自审，交回可审查diff、原问题最小复现／必要冒烟建议及尚未覆盖边界后整文件冻结；不每步更新架构笔记。所有可能进入目标的C++写入者冻结后，统筹正常关闭UE、批量构建与必要冒烟，禁止边写边编译。构建、UE、资产与Git仍由统筹安排。AS后继工作线在源码位释放后接力，不因首批实施而归档或停掉。
+
+FX九包独立窗口已因真实崩溃停止，创建／保存权限关闭：六网格贴图已精确保存，master构建但未保存、MI／NS未创建。根核实际UE进程0；最新Gate106_R3编辑器日志04:17:32首个断言为引擎DevHttp/CurlHttpClient:780的Zen DDC HTTP请求非idle重置，随后缓存线程崩溃；不称Shader错误已定位或编译通过。原机器失败保留`Saved/AutomationReports/GGYGO_FX_Normal03_08_Pass1_Preview_20261008.json`（created7／saved6／执行源变更空），未保存master随进程丢失。原五脚本继续冻结，无重跑／覆盖六包、引擎或缓存配置写权。C++三线继续离线，全部冻结后统筹统一构建／再开UE；后继FX续建另安排。原new-only权限、fullres预览非HalfRes／完整还原边界与未授权受光／NTE／RGB政策保持。
+
 ## 当前批次：大角度转向手感修正与Pyrios攻击／技能／闪避特效（2026-10-07）
 
-### 当前公共窗口：FX112已归还，UE／MCP归统筹（2026-10-08）
+### 当前权限：UE归统筹；共享bfi与FX输出环境离线并行（2026-10-08）
+
+Front02七包已正式停写归还，根核实际创建／保存清单、编译与完整读回：Code／83输入／67参数／3贴图及绑定0差异，16执行源未变；非PIE／原地图／仅root observer_1，11相关目标dirty=false。真实活／死帧未取得，视觉仍unverified，global_dirty=not_queried、NS_factory_atomic_no_overwrite=not_provided保留，不据编译标完整还原。实际证据在 `Saved/AutomationReports/GGYGO_FX_Front02_{Preview,Validation}_20261008.json`；资产窗口关闭，UE／MCP／UI归统筹。
+
+Rendering唯一离线写权为 `AAADocs/Scripts/zzz_dxbc_hlsl.py` 与 `AAADocs/Scripts/tests/test_zzz_dxbc_liveness.py`，完成通用SM5 bfi原语与必要同组专项，公共translate接口／原Shader不改；整文件冻结后交FX消费。FX恢复前述自有脚本／专项离线范围，推进Pass1显式输出环境；共享依赖修改期间不运行完整生成／源预检，不抢写共享文件。两线无UE／资产／C++／引擎／笔记／Git写权，无新光照／NTE权限，不新增普通人工JSON或逐方法过目。
+
+前序源码只读审查均已交回，现由上方“当前C++批次”接替；旧只读范围不授予额外写权，不中止独立FX实施线。
+
+### Front02七包非PIE资产批次（已归还；以下为执行历史）
+
+Rendering斗篷只读已正式归还，根复核非PIE／仅root observer_1。实际LOD0四section、FX槽／MI／BP默认Mesh引用及三层SoftCfg均读回，七目标dirty=false；Computer Use app approval timed out，未取得同姿态图／线框／骨权重，没有任何输入／编辑／保存，因此几何与透明分流仍开放。旧手写身体层所借FX02同族Cap属性及源关键字缺证，现接线正确不证明源Shader等价；无body写权，不默认关soft或修改参数，视觉后继受真实观察能力限制，不重复界面重试。
+
+FX Front02单子树离线完整plan_preview通过，源exact三local／Pass0／global[]及22file_bytes已核；根独立核两证书摘要、七目标磁盘缺席、执行源码零改与原生非PIE。现交FX唯一非PIE资产窗口，仅以下七new-only包创建／精确保存／编译与原材质必要预览，旧23包不复用／覆盖。写前实际执行相关脚本整文件冻结并读回摘要、完整plan/imports/approved_targets精确相等、源证书与registry/memory/disk不存在及全局dirty核对全部通过，失败拒绝整批写入；不增加逐方法审批。裸Code24201与实际Custom须精确读回，编译与真实可见分别验收；仅支持的原生资产预览接口或有效授权UI，不能绕过Computer Use改Slate输入或猜坐标，无法取活帧如实未验而非假绿。不改亮度／原Shader／关闭soft；无C++／GA／Montage／body／地图／Actor／PIE／构建／Git写权。实际执行源码期间冻结，Pass1仅只读数学／环境评估；收尾清自身观察引用／UI状态并核非PIE／dirty后立即归还，统筹停止并行UE。
+
+上述写前检查的当前技术收束：原生MCP未提供全局dirty／UObject枚举，旧全局查询来自当时已授权UI控制台，不能沿用或伪造本轮global=[]。七new-only限定批次采用唯一写入者＋完整新目标清单＋registry／disk全缺席＋完整UObject路径解析探测（与既有对象作有效接口对照，接口错误不当not-found）＋每次创建紧邻存在复核；不要求无关全局包全干净，不SaveAll／修改用户脏包。六依赖创建／导入API已核拒同名／replace_existing=false；原生NS的StaticDuplicateObject入口没有原子拒覆盖保证，统筹接受本轮受控单写入前置核对模式，不冒称该API一般并发安全，也不允许覆盖。任一目标出现／接口无法判定有效／其它写入者介入立即拒写，返回必须成功且精确目标，失败不标owned／save，不自动确认覆盖弹窗。此处是纠正过宽而不可执行的验证契约，原材料与源语义严格门禁不降低，不引入额外执行框架或修改UE插件。
+
+- `/Game/Characters/Player/Pyrios/FX/Skill/NS_PREVIEW_Eff_Pyrois_Evade_Front_02_Trail_root__1__Particle_System__4__df19ed9a42cb`
+- `/Game/Characters/Shared/FX/ZZZ/MaterialInstances/MI_Eff_Objects_MSH_GUID415f47867e42ca14ca7cf7eb767ec2a1_f39e34ae730e`
+- `/Game/Characters/Shared/FX/ZZZ/Materials/M_ZZZFX_Particles_Dissolve_CustomColor_Mask_49a2a5ec_ecf6f789ff2d`
+- `/Game/Characters/Shared/FX/ZZZ/Meshes/null4_9bc0235ac553`
+- `/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Color_158_53f550176c7e`
+- `/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Mask_029_fe596123a68f`
+- `/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Trail_139_f7c5475688e9`
+
+资源两材质新增证据已全部冻住归还：Front02 Pass0候选／22文件证书；攻击exact五local只在Pass1，原Pass0拒绝保持，另追加独立Pass1／17文件证书。RGB One/SrcAlpha、Alpha DstAlpha/Zero是实际工具执行环境缺口，不能冒作普通AlphaComposite或素材不存在；FX在自有范围内自主评估通用支持，必要新渲染/跨模块/可见政策再协调，不选近似变体／更名Pass。Animation资产与Combat只读结论已交FX并冻结：复用现事件桥／表现轨道与配置，GA核原播放身份并在换段／取消／结束／校正／Avatar失效归还FX句柄；FX尾粒子不是第三完成门，不破坏当前用户Montage时序。源动作触发／挂点／Follow规则仍缺，完整技能／闪避入口不自行扩建。
+
+### 前序窗口与授权过程（历史；当前权限以上方Front02批次为准）
+
+FX113已停止UE／UI并归还；实际preview component可见／主通道／变换／localspace读回正常，原生Lit图仍近空白。线框因UI坐标／窗口报告不可靠未确认，保留失败，不把Alt+2或点击当作生效；无资产／参数／引用写入，九个目标脏标志false，根复核非PIE／仅root observer_1。该步未重新取粒子快照或全局dirty，不冒称新增这些证明。
+
+现独占非PIE只读窗口交Rendering：只核 `/Game/Characters/Player/Pyrios/Avatar_Male_Size03_Pyrois_Model` LOD0上沿、实际FX槽／`Materials/Generated/MI_Pyrois_Body_FX` 引用，原 `/Game/BP/Character/Player/BP_PC_Pyrios` CDO/返回组件只读且不打开／compile/save BP；必要仅原 `Avatar_Male_Size03_Pyrois_Ani_Idle_Loop` 一循环复现固定姿态，同相机Lit／Wireframe分流。原生Bone Weight诊断显示的临时组件材质替换／CPU skinning可用，须完整恢复；不进入权重编辑或手工替换材质。MI/原Master/纹理仅追真实引用读，不改／编译／保存。最多必要2–3图；先核真实窗口／dirty，不复用失效坐标，不绕过电脑使用边界；无法安全观察即说明限制归还，不扩动画／场景矩阵。无PIE／map／Actor／源码／配置／Shader／参数／资产／Git写权，证据可保存在已有Saved目录。自身引用／观察器和预览状态恢复、非PIE／dirty核对后立即归还；FX／统筹停止并行UE操作。受光／NTE不在本窗。
+
+FX113归还后，FX恢复自有离线管线唯一写权：`AAADocs/Scripts/zzz_fx_{asset_session,build,distortion,import_assets,material,material_ue,niagara,niagara_ue,preview,preview_apply,native_shader}.py`，现有三个 `tests/test_zzz_fx_{batch_safety,curves,native_shader}.py` 及必要新同前缀专用helper／专项。由组长自主分析、拆分、实现与自审，不逐方法申请；优先完整可见普通攻击／闪避分支，独立Back03的缺失观测另提出最薄诊断范围，不能以跳过原分支冒充完整。共享转换器及其他共享依赖只读，源码／业务接口／原资产／局部笔记／UE／Git无写权，新资产批次仍精确清单后统一窗口。未决定RGB政策不实施，原效果与诊断副本分开，禁止默认参数／改亮度／关闭soft淡出来伪造恢复。无需因单烟雾、形式过目或新人工JSON停工，完整链路交回必要证据后集中验收／笔记。
+
+FX已筛出两个不依赖Back03／RGB政策的独立颜色候选：`Eff_Pyrois_Attack_Normal_03_08_MeleeTrailAura` 的单启用粒子整根、`Eff_Pyrois_Evade_Front_02_Trail` 的 `root (1)/Particle System (4)` 单子树。资源组现为唯一导出证据写入者，只可在既有 `F:/AnimeStudio/Exports/ZZZ/Pyrois_SkillFX_Evidence/Review/` 下追加这两个exact材质／Shader的显式Pass0/global[] source_program_preview程序和落盘字节证书，旧导出／候选／证书不覆盖。仅范围内CLI与只读现有触发／Follow字段索引，不扩30根矩阵或受光／NTE新任务；资料位置／真实SHA直接交FX消费。显式候选不证明原游戏runtime选择，PS出生延迟不能冒作Montage触发帧，Front02整prefab／技能入口仍有缺口。FX主导独立可运行预检，必要原始机器证据可追加，不新增人工任务JSON或频繁说明。
+
+实战接线的并行只读参与：复用Animation资产与Combat玩家动作既有会话，分别核当前三段Montage／表现Notify／真实Socket证据和GA生命周期／表现资源清理接口，直接向FX交已有事实及最短接线建议。只读自身源码／已有资产读回，不操作当前Rendering独占UE，不改源码／Montage／蓝图／笔记、不新增通用框架或人工JSON。缺失的蓝图实读须后续统一窗口，静态未发现不当作全工程不存在；技能／闪避缺入口不暗中扩建玩法。FX仍牵头方案，参与组长独立思考，不由统筹逐方法定稿；只在真实共享接口／文件冲突或可见业务选择处协调。
+
+FX112五件确认产物已中文提交并push `ae2875c`，原四份用户改动保持、Source clean。现交FX唯一非PIE只读窗口：仅打开既有FX112 `NS_PREVIEW_Eff_Pyrois_Evade_Back_03_Trail_root_smoke_flow_2c5515eed71b` 及其既有依赖，原材质／同相机暂停.25秒，Lit→Wireframe对照真正preview component的visible／hidden／localspace、屏幕覆盖与必要原生图。无代码／参数／binding／材质／资产写权，不新建诊断资产、推进／回放缓存、PIE、map／Actor／保存或Git；不以线框替代实际透明度／源视觉验收。自身UI开关／观察引用清理、恢复Lit及原相机／暂停状态并核脏包／非PIE后立即归还。统筹及Rendering停止并行UE操作；斗篷另排，FX普通分支可仅离线只读评估，不依赖此单分流停工。
 
 FX112整批已结束并明确停写归还，模块现无UE操作权。批准八包new-only创建、精确保存、材质recompile与Niagara UpToDate／0E0W通过；实际Custom Code28665字符与冻结生成Code逐字符／摘要相等，目的下标依赖和_CustomData1Z/W=0节点／MI已读回。有效瞬态快照仍为一帧／一存活粒子，核心绑定正确；原材质存活／消亡图像的实际ROI差异>8像素为0、最大6，故仅关闭转换器缺陷，不关闭烟雾可见性。补充报告 `Saved/AutomationReports/GGYGO_FX_Back03_DxbcFixValidation_20261008_FX112.json` 保留 `asset_build_passed_shader_dependency_fixed_visual_unconfirmed`，旧失败不覆盖。
 

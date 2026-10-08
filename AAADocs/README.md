@@ -7,7 +7,7 @@
 | 目录 | 放什么 | 主要入口 |
 | --- | --- | --- |
 | `Coordination` | 统筹排程、问题清单、长期会话路由和全局诊断 | [有效排程](Coordination/Module_Repair_Parallel_Schedule.md)、[修复清单](Coordination/Module_Audit_Repair_Ledger.md)、[会话路由](Coordination/Module_Conversation_Routing.md) |
-| `Architecture` | 代码规范与整体实施路线 | [代码规范](Architecture/CodeConventions.md)、[实施路线](Architecture/Implementation_Roadmap.md) |
+| `Architecture` | 代码规范、复杂度审核机制与整体实施路线 | [代码规范与审核机制](Architecture/CodeConventions.md)、[实施路线](Architecture/Implementation_Roadmap.md) |
 | `Architecture/Interactions` | 跨模块接口、组件协作和共同生命周期契约 | [移动输入来源](Architecture/Interactions/Module_Repair_MovementInput_Contract.md)、[Avatar事务](Architecture/Interactions/Module_Repair_K4_ActorInfoTransaction.md)、[动画与移动接线](Architecture/Interactions/Locomotion_AnimBP_Wiring_Audit.md) |
 | `Modules` | 按所属模块存放实现、原子范围与专项验收记录 | AbilitySystem、Animation、Camera、CombatActions、Combat、Combatants、Input、Movement、Teams、GameFeature、Messages、BossAI、System、Character；新增[Audio契约](Modules/Audio/Audio_Contract.md) |
 | `Assets` | 导入盘点、角色／Boss素材配置与素材侧验收 | BH3、Pyrios |
