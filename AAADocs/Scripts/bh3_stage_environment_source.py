@@ -22,6 +22,12 @@ SOURCE = Path('F:/AnimeStudio/Exports/BH3/Stage')
 TEXTURE_METADATA = Path('F:/AnimeStudio/_work/bh3_stage_p3_texture_metadata_20261008/native_texture_metadata_index.json')
 OWNER = 'GGYGO.BH3.Stage.Environment.v1'
 SCHEMA = 1
+DATA_TEXTURE_SLOTS = {'_BumpMap', '_Normal01', '_Normal02', '_MaskTex', '_CausticTex'}
+STAGE_COUNTS = {'P3': (10, 97, 99, 17, 5, 2), 'P1': (40, 77, 221, 75, 27, 1)}
+P1_SOURCE_BINDING_DIFFERENCES = [{
+    'model': '1580589350160', 'source_slot_index': 0,
+    'fbx_material': ['cab-dfd24118d86338857f9dee1f0229a58d', '-4043112573400099215'],
+    'native_material': ['cab-349b1a4abf79b9f9cabcee577f6f672a', '7290915914611696892']}]
 
 
 class SourceError(ValueError):
@@ -123,8 +129,9 @@ def map_nodes(components, audit, actors):
     """Map native identity using its actual parent graph and calibrated positions.
 
     Display paths are nonunique in this prefab. A unique parent/name/position
-    match establishes correspondence, while full affine equality is checked as
-    a separate geometry contract; it must not be used to hide a failed match.
+    match establishes correspondence. Coincident siblings also require their
+    authored local rotation/scale to disambiguate identity. Full world affine
+    equality remains a separate geometry contract.
     """
     transforms = {str(c['source']['pathID']): c for c in components if c['source']['type'] == 'Transform'}
     objects = {str(c['source']['pathID']): c for c in components if c['source']['type'] == 'GameObject'}
@@ -146,6 +153,9 @@ def map_nodes(components, audit, actors):
                       if m['parent'] == parent and m['name'] == go['fields']['m_Name']
                       and (parent == '0' or max(abs(x-y) for x, y in zip(
                           converted['translation'], actors[mid]['local_transform']['translation'])) < .03)]
+        if len(candidates) > 1:
+            candidates = [mid for mid in candidates if difference(matrix(converted),
+                          matrix(actors[mid]['local_transform'])) < .03]
         require(len(candidates) == 1, f"native {identity(go['source'])} has {len(candidates)} FBX matches")
         mid = candidates[0]
         require(mid not in mapping.values(), 'two source identities map to FBX node ' + mid)
@@ -299,7 +309,7 @@ def native_fragment_dependencies(shader, pass_index, keywords):
 
 
 def build_plan(stage, geometry_report, source_root=SOURCE, texture_metadata=TEXTURE_METADATA):
-    require(stage == 'P3', 'current production lease covers P3 only')
+    require(stage in STAGE_COUNTS, 'unsupported Stage environment: ' + stage)
     audit = geometry.audit_stage(stage, Path(source_root))
     report = read_json(geometry_report)
     require(report['stage'] == stage and report['geometry_import_verified'] and report['map_saved']
@@ -318,7 +328,7 @@ def build_plan(stage, geometry_report, source_root=SOURCE, texture_metadata=TEXT
     components = component_doc['components']
     mapping, poses, objects = map_nodes(components, audit, actors)
     native_materials = {identity(m['source']): m for m in index['materials']}
-    require(len(native_materials) == 10, 'P3 native material count differs')
+    require(len(native_materials) == STAGE_COUNTS[stage][0], stage + ' native material count differs')
     exports = {}
     for ident, m in native_materials.items():
         file = child_file(base, m['originalExportRelativeFile'])
@@ -326,11 +336,28 @@ def build_plan(stage, geometry_report, source_root=SOURCE, texture_metadata=TEXT
         exports[m['fields']['m_Name']] = ident
     externals = {e['fileID']: e['cab'].lower() for e in component_doc['sourceFile']['externals']}
     own_cab = component_doc['sourceFile']['cab'].lower()
+    fbx_material_names = {m['name'] for m in audit['materials'].values()}
+    native_used_materials = {(own_cab if ref['m_FileID'] == 0 else externals[ref['m_FileID']], str(ref['m_PathID']))
+                            for c in components if c['source']['type'] == 'MeshRenderer' for ref in c['fields']['m_Materials']}
+    require(native_used_materials <= set(native_materials), 'native renderer material identity is unresolved')
+    unbound_materials = [m for key, m in native_materials.items() if key not in native_used_materials]
+    require(set(exports) >= fbx_material_names, 'FBX material is absent from native source')
+    objects_by_model = {mid: objects[go] for go, mid in mapping.items()}
+    active_states = {}
+    def hierarchy_active(mid):
+        if mid not in active_states:
+            parent = audit['models'][mid]['parent']
+            active_states[mid] = bool(objects_by_model[mid]['fields']['m_IsActive']) and (
+                parent == '0' or hierarchy_active(parent))
+        return active_states[mid]
     textures, materials, renderers, lights, probes, colliders = {}, {}, [], [], [], []
+    binding_differences = []
     shaders = {tuple(identity(s['source'])): shader_passes(s, supplement) for s in index['shaders']}
     for ident, m in native_materials.items():
         require(tuple(identity({'cab': m['shaderReference']['cab'], 'pathID': m['shaderReference']['pathID']})) in shaders,
                 'material shader dependency is absent')
+        if ident not in native_used_materials:
+            continue
         key = '/'.join(ident)
         bindings = {}
         for t in m['textureReferences']:
@@ -344,14 +371,33 @@ def build_plan(stage, geometry_report, source_root=SOURCE, texture_metadata=TEXT
             else:
                 found = [c for c in index['textures'] if identity(c['source']) == ti]
                 require(len(found) == 1, 'unresolved non-null texture ' + tk)
-                cube = found[0]
-                meta = read_json(child_file(supplement, cube['metadataFile']))
-                file = child_file(supplement, cube['ddsFile'])
-                require(evidence(file)['sha256'] == meta['ddsSha256'] and not meta['hdrConvertedTo8Bit'],
-                        'cubemap payload was changed/downconverted')
-                tex = {'identity': list(ti), 'class': 'TextureCube', 'file': evidence(file),
-                       'native_settings': meta['fields'], 'layout': meta['ddsLayout'],
-                       'interpretation_verified': False}
+                extra = found[0]
+                metadata_file = child_file(supplement, extra['metadataFile'])
+                meta = read_json(metadata_file)
+                require(identity(meta['source']) == ti, 'supplement texture metadata identity differs: ' + tk)
+                if extra['source']['type'] == 'Texture2D':
+                    file = child_file(supplement, extra['pngFile'])
+                    raw = child_file(supplement, meta['source']['rawFile'])
+                    require(evidence(raw)['sha256'] == meta['source']['rawSha256']
+                            and raw.stat().st_size == meta['source']['byteSize']
+                            and max(span[1] for span in meta['fieldByteSpans'].values()) == raw.stat().st_size,
+                            'supplement Texture2D raw/layout changed: ' + tk)
+                    png = file.read_bytes()
+                    require(png[:8] == b'\x89PNG\r\n\x1a\n' and struct.unpack('>II', png[16:24])
+                            == (meta['fields']['m_Width'], meta['fields']['m_Height'])
+                            and meta['fields']['m_ImageCount'] == 1 and not meta['hdrConvertedTo8Bit'],
+                            'supplement Texture2D PNG dimensions/type differ: ' + tk)
+                    tex = {'identity': list(ti), 'class': 'Texture2D', 'file': evidence(file),
+                           'native_settings': meta['fields'], 'native_metadata': evidence(metadata_file),
+                           'interpretation_verified': False}
+                else:
+                    require(extra['source']['type'] == 'Cubemap', 'unsupported supplement texture type: ' + tk)
+                    file = child_file(supplement, extra['ddsFile'])
+                    require(evidence(file)['sha256'] == meta['ddsSha256'] and not meta['hdrConvertedTo8Bit'],
+                            'cubemap payload was changed/downconverted')
+                    tex = {'identity': list(ti), 'class': 'TextureCube', 'file': evidence(file),
+                           'native_settings': meta['fields'], 'layout': meta['ddsLayout'],
+                           'interpretation_verified': False}
             tex['package'] = audit['asset_root']+'/Textures/T_'+safe_name(file.stem)
             if tk in textures:
                 require(textures[tk] == tex, 'one texture identity has conflicting evidence')
@@ -368,19 +414,30 @@ def build_plan(stage, geometry_report, source_root=SOURCE, texture_metadata=TEXT
         row = {'identity': list(identity(c['source'])), 'model': mid, 'actor': actors[mid]['actor'],
                'fields': f, 'owner_active': bool(objects[str(c['gameObjectPathID'])]['fields']['m_IsActive']),
                'source_path': c['nodePath'], 'source_evidence': c['source']}
+        if stage == 'P1':
+            row['hierarchy_active'] = hierarchy_active(mid)
         if typ == 'MeshRenderer':
             refs, slots = f['m_Materials'], actors[mid]['material_slot_sources']
             require(len(refs) == len(slots), 'native renderer / imported material slot cardinality differs')
-            bindings = []
+            bindings, fbx_bindings = [], []
             for slot in slots:
                 ref = refs[slot['source_slot_index']]
                 ident = (own_cab if ref['m_FileID'] == 0 else externals[ref['m_FileID']], str(ref['m_PathID']))
                 require(ident in native_materials, 'renderer material identity is unresolved')
-                require(exports[audit['materials'][slot['material_id']]['name']] == ident,
-                        'renderer pointer differs from FBX material provenance')
+                fbx_identity = exports[audit['materials'][slot['material_id']]['name']]
+                fbx_bindings.append('/'.join(fbx_identity))
+                if fbx_identity != ident:
+                    difference_row = {'model': mid, 'source_slot_index': slot['source_slot_index'],
+                                      'fbx_material': list(fbx_identity), 'native_material': list(ident)}
+                    require(stage == 'P1' and difference_row in P1_SOURCE_BINDING_DIFFERENCES,
+                            'renderer pointer differs from FBX material provenance: ' + row['source_path']
+                            + ' slot=' + str(slot['source_slot_index']) + ' FBX=' + str(fbx_identity) + ' native=' + str(ident))
+                    binding_differences.append(difference_row)
                 bindings.append('/'.join(ident))
             row.update(mesh=actors[mid]['mesh'], materials=bindings, slots=slots,
                        sections=actors[mid]['section_material_slots'])
+            if stage == 'P1':
+                row.update(fbx_materials=fbx_bindings, material_binding_authority='native_renderer')
             renderers.append(row)
         elif typ == 'Light':
             require(f['m_Type'] in (0, 1, 2) and f['m_Cookie']['m_PathID'] == f['m_Flare']['m_PathID'] == 0,
@@ -407,15 +464,16 @@ def build_plan(stage, geometry_report, source_root=SOURCE, texture_metadata=TEXT
             row['cooking_settings_verified'] = bool(c.get('convexOrCookingSettingsInferred'))
             colliders.append(row)
     require((len(renderers), sum(len(r['materials']) for r in renderers), len(textures), len(lights), len(probes))
-            == (97, 99, 17, 5, 2), 'P3 environment cardinality differs from accepted source')
+            == STAGE_COUNTS[stage][1:], stage + ' environment cardinality differs from accepted source')
     metadata_index = read_json(texture_metadata)
     require(evidence(supplement/'source_supplement.json')['sha256'] == metadata_index['sourceMaterialIndexSha256'],
             'Texture2D metadata was extracted for another material index')
     metadata_rows = {identity(t): t for t in metadata_index['textures']}
-    require(set(metadata_rows) == {tuple(t['identity']) for t in textures.values() if t['class'] == 'Texture2D'},
-            'Texture2D metadata does not cover the exact 14 PNG identities')
+    require(set(metadata_rows) == {tuple(t['identity']) for t in textures.values()
+                                  if t['class'] == 'Texture2D' and 'native_metadata' not in t},
+            'Texture2D metadata does not cover the exact source PNG identities')
     for t in textures.values():
-        if t['class'] != 'Texture2D':
+        if t['class'] != 'Texture2D' or 'native_metadata' in t:
             continue
         row = metadata_rows[tuple(t['identity'])]
         proof = evidence(row['metadataFile'])
@@ -452,6 +510,11 @@ def build_plan(stage, geometry_report, source_root=SOURCE, texture_metadata=TEXT
                           'cubemap face orientation/color calibration', 'Unity light units to UE calibration',
                           'source-disabled collider activation policy', 'visual/landing/movement/camera smoke'],
             'restoration_complete': False}
+    if stage == 'P1':
+        require(binding_differences == P1_SOURCE_BINDING_DIFFERENCES, 'P1 source/FBX binding differences changed')
+        plan['source_index'] = evidence(supplement / 'source_supplement.json')
+        plan['unbound_materials'] = unbound_materials
+        plan['fbx_binding_differences'] = binding_differences
     targets = [t['package'] for t in textures.values()]+[m['package'] for m in materials.values()]+[m['package'] for m in affine]
     require(len(set(targets)) == len(targets), 'two source identities would share a target package')
     plan['digest'] = digest(plan)
@@ -459,10 +522,18 @@ def build_plan(stage, geometry_report, source_root=SOURCE, texture_metadata=TEXT
 
 
 def validate_plan(plan):
-    require(plan.get('schema') == SCHEMA and plan.get('owner') == OWNER and plan.get('stage') == 'P3', 'foreign plan')
+    require(plan.get('schema') == SCHEMA and plan.get('owner') == OWNER and plan.get('stage') in STAGE_COUNTS, 'foreign plan')
     unsigned = {k: v for k, v in plan.items() if k != 'digest'}
     require(plan.get('digest') == digest(unsigned), 'plan content changed')
     proofs = [plan['geometry_report'], plan['source_components'], plan['source_fbx'], plan['texture_metadata_index']]
+    if plan['stage'] == 'P1':
+        proofs.append(plan['source_index'])
+        require(plan['fbx_binding_differences'] == P1_SOURCE_BINDING_DIFFERENCES
+                and all(row.get('material_binding_authority') == 'native_renderer' for row in plan['renderers']),
+                'P1 explicit native renderer binding contract differs')
+        require(all(type(row.get('hierarchy_active')) is bool for rows in
+                    ('renderers', 'lights', 'probes', 'colliders') for row in plan[rows]),
+                'P1 component hierarchy activation is absent')
     proofs += [t['file'] for t in plan['textures'].values()]
     proofs += [t['native_metadata'] for t in plan['textures'].values() if 'native_metadata' in t]
     proofs += [s['fields'] for s in plan['shaders'].values()]
@@ -470,6 +541,11 @@ def validate_plan(plan):
         require(evidence(item['path']) == item, 'consumed source changed: ' + item['path'])
     require(not plan['restoration_complete'], 'source plan falsely claims complete restoration')
     return plan
+
+
+def component_enabled(row):
+    """原生 Owner／组件启用状态；P1 同时检查源父节点。"""
+    return row['owner_active'] and ('hierarchy_active' not in row or row['hierarchy_active']) and bool(row['fields']['m_Enabled'])
 
 
 def equivalent_settings(plan):
@@ -483,14 +559,15 @@ def equivalent_settings(plan):
     for material in plan['materials'].values():
         for slot, key in material['textures'].items():
             roles[key].add(slot)
-    data_slots = {'_BumpMap', '_Normal01', '_Normal02', '_MaskTex', '_CausticTex'}
+    data_slots = DATA_TEXTURE_SLOTS
     configs = {}
     for key, texture in plan['textures'].items():
         native = texture['native_settings']['m_TextureSettings']
         cube = texture['class'] == 'TextureCube'
         hdr = cube and texture['layout']['formatName'] == 'BC6H_UF16'
-        require(not (roles[key] & data_slots and roles[key] - data_slots),
-                'one texture has conflicting color/data roles: ' + key)
+        mixed = bool(roles[key] & data_slots and roles[key] - data_slots)
+        require(not mixed or (plan['stage'] == 'P1' and roles[key] == {'_MainTex', '_BumpMap'}),
+                'one texture has unresolved color/data roles: ' + key)
         srgb = not hdr and not bool(roles[key] & data_slots)
         configs[key] = {'srgb': srgb, 'compression': 'TC_HDR' if hdr else 'TC_DEFAULT',
                         'filter': {0: 'TF_NEAREST', 1: 'TF_BILINEAR', 2: 'TF_TRILINEAR'}[native['m_FilterMode']],
@@ -498,11 +575,16 @@ def equivalent_settings(plan):
                         'interpretation_authority': 'Selected UE equivalent: color slots sRGB, data slots linear; '
                             'native m_ColorSpace is retained as evidence, not interpreted as an importer flag.',
                         'source_roles': sorted(roles[key])}
+        if mixed:
+            configs[key]['color_decode_slots'] = ['_MainTex']
+            configs[key]['interpretation_authority'] = ('Selected UE equivalent: keep the one native texture identity '
+                'linear for BumpMap; explicitly decode MainTex RGB from sRGB in the material. '
+                'The source DA reference is retained; original normal/importer semantics remain unverified.')
         if not cube:
             wrap = {0: 'TA_WRAP', 1: 'TA_CLAMP', 2: 'TA_MIRROR'}
             configs[key].update(address_x=wrap[native['m_WrapU']], address_y=wrap[native['m_WrapV']])
     graphs = {key: equivalent_graph(plan, material, configs) for key, material in plan['materials'].items()}
-    return {'plan_digest': plan['digest'], 'policy': 'P3_UE_Equivalent',
+    return {'plan_digest': plan['digest'], 'policy': plan['stage'] + '_UE_Equivalent',
             'source_runtime_verified': False, 'textures': configs,
             'rendering': {'purpose': 'ue_equivalent_stage', 'materials': graphs},
             'lighting': {'purpose': 'source_numeric_ue_calibration', 'color_space': 'srgb',
@@ -521,11 +603,12 @@ def equivalent_settings(plan):
 
 
 def equivalent_graph(plan, material, texture_configs):
-    """Build the five actual Stage shader families using native UE expressions."""
+    """Build evidenced Stage shader families using explicitly selected UE expressions."""
     props = material['fields']['m_SavedProperties']
     family = plan['shaders'][material['shader']]['name'].rsplit('/', 1)[-1]
     require(family in {'Scene_Base', 'Water_Base', 'FogEffect_Texture_Additive_Soft',
-                       'AirEffect_LightMap', 'Additive'}, 'unsupported Stage shader family: ' + family)
+                       'AirEffect_LightMap', 'Additive', 'FogEffect_Texture_Additive',
+                       'AirEffect_SkyBox', 'Scene_Air_LightMap_Matcap'}, 'unsupported Stage shader family: ' + family)
     graph = {'source_material': material['identity'],
              'source_shader_sha256': plan['shaders'][material['shader']]['fields']['sha256'],
              'family': family, 'nodes': [], 'edges': [], 'outputs': [], 'two_sided': False,
@@ -596,9 +679,22 @@ def equivalent_graph(plan, material, texture_configs):
         coord = custom('UV' + slot, code, pins, 2)
         graph['edges'].append({'from': coord, 'output': '', 'to': sample, 'input': 'UVs'})
 
+    def color_sample(slot):
+        cfg = texture_configs[material['textures'][slot]]
+        if slot not in cfg.get('color_decode_slots', []):
+            return ref(samples[slot], 'RGB')
+        require(not cfg['srgb'], 'explicit color decode requires a linear texture sample')
+        node = custom('UEColorDecode' + slot,
+                      'return lerp(RGB / 12.92, pow((RGB + 0.055) / 1.055, 2.4), step(0.04045, RGB));',
+                      {'RGB': ref(samples[slot], 'RGB')})
+        graph['differences'].append('Mixed color/BumpMap source identity uses raw linear sampling plus '
+                                  'explicit MainTex sRGB decoding; DA pixels are not replaced by another normal resource.')
+        return ref(node)
+
     if family == 'Scene_Base':
+        main_color = color_sample('_MainTex')
         base = custom('UEBaseColor', 'return Main.rgb * Color.rgb;',
-                      {'Main': ref(samples['_MainTex'], 'RGB'), 'Color': ref(vector('Color', native='_Color'))})
+                      {'Main': main_color, 'Color': ref(vector('Color', native='_Color'))})
         output(base, 'BASE_COLOR')
         normal = custom('UENormal', 'float3 n = Normal.rgb * 2.0 - 1.0; '
                         'return normalize(float3(n.xy * Strength, max(n.z, 0.01)));',
@@ -616,7 +712,7 @@ def equivalent_graph(plan, material, texture_configs):
         mask_slot = '_MaskTex' if props['m_Floats']['_UseMaskAsEmission'] else '_MainTex'
         require(mask_slot in samples, 'enabled source emission texture is missing')
         glow = custom('UEEmission', 'return Main.rgb * Color.rgb * Strength * Mask * Gain;',
-                      {'Main': ref(samples['_MainTex'], 'RGB'), 'Color': ref(vector('EmissionColor', native='_EmissionColor')),
+                      {'Main': main_color, 'Color': ref(vector('EmissionColor', native='_EmissionColor')),
                        'Strength': ref(scalar('EmissionStrength', native='_EmissionStrength')),
                        'Mask': ref(samples[mask_slot], 'R' if mask_slot == '_MaskTex' else 'A'),
                        'Gain': ref(scalar('UE_EmissionGain', 1.0))})
@@ -630,6 +726,20 @@ def equivalent_graph(plan, material, texture_configs):
         output(glow, 'EMISSIVE_COLOR')
         graph['differences'].append('RGB tangent normal decoding and BumpMap alpha smoothness are explicit UE interpretations; '
                                    'UE lighting/reflection replaces source GI; emission and rim gains remain editable.')
+    elif family == 'Scene_Air_LightMap_Matcap':
+        require(not props['m_Floats']['_EnableMatcapSpecular'] and not props['m_Floats']['_AlphaClip']
+                and not props['m_Floats']['_AlphaDither'], 'enabled Matcap/alpha mode requires its own evidenced UE recipe')
+        base = custom('UEBaseColor', 'return Main.rgb * Color.rgb;',
+                      {'Main': color_sample('_MainTex'), 'Color': ref(vector('Color', native='_Color'))})
+        output(base, 'BASE_COLOR')
+        normal = custom('UENormal', 'return normalize(Normal.rgb * 2.0 - 1.0);',
+                        {'Normal': ref(samples['_BumpMap'], 'RGB')})
+        output(normal, 'NORMAL')
+        output(scalar('Roughness', native='_Roughness'), 'ROUGHNESS')
+        output(scalar('Metallic', native='_MetalRef'), 'METALLIC')
+        output(scalar('Specular', native='_SpecularIntensity'), 'SPECULAR')
+        graph['differences'].append('UE Lit source color/normal/roughness replaces Unity air lightmap/GI shading; '
+                                   'disabled Matcap has no substituted texture, and no emission is inferred from the material name.')
     elif family == 'Water_Base':
         graph['shading_model'] = 'MSM_SINGLE_LAYER_WATER'
         fresnel = add('UEWaterFresnel', 'Fresnel', properties={'base_reflect_fraction': 0.0})
@@ -669,7 +779,16 @@ def equivalent_graph(plan, material, texture_configs):
                                    'RGB/RG wave decode, per-cm volume density, opacity, roughness and cube gain are UE calibration parameters.')
     else:
         graph['shading_model'] = 'MSM_UNLIT'
-        if family == 'AirEffect_LightMap':
+        if family == 'AirEffect_SkyBox':
+            require(not props['m_Floats']['_EnableTintMask'] and not props['m_Floats']['_EnableSkyDissolve'],
+                    'enabled sky tint mask/dissolve requires its own evidenced UE recipe')
+            sky = custom('UESkyColor', 'return Main.rgb * Color.rgb;',
+                         {'Main': color_sample('_MainTex'), 'Color': ref(vector('SkyColor', native='_MainColor'))})
+            output(sky, 'EMISSIVE_COLOR')
+            graph.update(two_sided=True)
+            graph['differences'].append('Opaque unlit two-sided UE sky retains source MainTex/MainColor and disabled '
+                                       'tint/dissolve modes; original stencil/depth/global sky processing is not claimed.')
+        elif family == 'AirEffect_LightMap':
             cloud = custom('UECloudColor', 'return Main.rgb * lerp(float3(1,1,1), Shadow.rgb, saturate(Intensity));',
                            {'Main': ref(samples['_MainTex'], 'RGB'), 'Shadow': ref(samples['_ShadowTex'], 'RGB'),
                             'Intensity': ref(scalar('CloudIntensity', native='_LightMapIntensity'))})
@@ -679,7 +798,7 @@ def equivalent_graph(plan, material, texture_configs):
                                        'and a source-intensity color blend replace native fog/lightmap/SkyVisibility passes.')
         else:
             graph.update(blend_mode='BLEND_ADDITIVE', two_sided=True)
-            color_key = '_MainColor' if family == 'FogEffect_Texture_Additive_Soft' else '_TintColor'
+            color_key = '_MainColor' if family in ('FogEffect_Texture_Additive_Soft', 'FogEffect_Texture_Additive') else '_TintColor'
             color = vector('SourceTint', native=color_key)
             emit = custom('UEAdditiveColor', 'return Main.rgb * Color.rgb * Strength * Gain;',
                           {'Main': ref(samples['_MainTex'], 'RGB'), 'Color': ref(color),
@@ -803,15 +922,17 @@ def prepare_cube_transports(plan, settings, decoder_root, cache_root, scope):
     decoder.bcdec_bc6h_half.argtypes=[ctypes.c_void_p,ctypes.c_void_p,ctypes.c_int,ctypes.c_int]
     decoder.bcdec_bc1.restype=decoder.bcdec_bc6h_half.restype=None
     probes={r['texture'] for r in plan['probes']}
-    require(scope in ('probes','surface'),'Cube conversion scope is not selected')
+    scopes = {'P3': {'probes': 2, 'surface': 1}, 'P1': {'probes': 1}}[plan['stage']]
+    require(scope in scopes,'Cube conversion scope is absent from this Stage')
     selected=probes if scope=='probes' else {k for k,v in plan['textures'].items() if v['class']=='TextureCube' and k not in probes}
-    require(len(selected)==(2 if scope=='probes' else 1),'Cube conversion scope differs from the accepted source plan')
+    require(len(selected)==scopes[scope],'Cube conversion scope differs from the accepted source plan')
     updated=json.loads(json.dumps(settings));cache_root.mkdir(parents=True)
     for key,row in plan['textures'].items():
         if key not in selected:continue
         require('decoded_cube' not in updated['textures'][key],'Cube conversion input is already derived')
         raw=Path(row['file']['path']).read_bytes();layout=row['layout']
-        require(layout['faces']==6 and len(layout['mipLayout'])==layout['mips']==9,'unexpected source Cube layout')
+        require(layout['faces']==6 and len(layout['mipLayout'])==layout['mips']==(9 if plan['stage']=='P3' else 11),
+                'unexpected source Cube layout')
         hdr=layout['formatName']=='BC6H_UF16'
         require(layout['formatName'] in ('BC1_UNORM','BC6H_UF16'),'unsupported Cube source format')
         first=layout['mipLayout'][0];payload=bytearray()
@@ -877,7 +998,8 @@ def lighting_generation_digest(plan, settings):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--stage', choices=['P3'])
+    parser.add_argument('--stage', choices=['P1', 'P3'])
+    parser.add_argument('--texture-metadata', default=str(TEXTURE_METADATA), help='exact native Texture2D metadata index for the selected source supplement')
     parser.add_argument('--geometry-report')
     parser.add_argument('--settings-for-plan', help='consume an existing accepted plan; --output writes only its UE equivalent settings')
     parser.add_argument('--prepare-cubes', help='existing settings, explicitly decode the selected source Cube scope')
@@ -906,7 +1028,7 @@ def main():
         print(json.dumps({'settings': args.output, 'plan_digest': plan['digest'], 'purpose': 'ue_equivalent_stage'}))
         return
     require(args.stage is not None and args.geometry_report is not None, 'plan generation requires stage and geometry report')
-    plan = build_plan(args.stage, args.geometry_report)
+    plan = build_plan(args.stage, args.geometry_report, texture_metadata=args.texture_metadata)
     write_machine(args.output, plan)
     if args.equivalent_settings_output:
         write_machine(args.equivalent_settings_output, equivalent_settings(plan))

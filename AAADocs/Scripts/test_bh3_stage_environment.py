@@ -9,6 +9,7 @@ import json
 import math
 import struct
 from pathlib import Path
+from types import SimpleNamespace
 import unittest
 from unittest import mock
 
@@ -455,6 +456,155 @@ class StageEquivalentContracts(unittest.TestCase):
         self.assertTrue(capture.finished)
         capture.editor.set_level_viewport_camera_info.assert_called_once_with('original_location','original_rotation')
         capture.u.EditorPythonScripting.set_keep_python_script_alive.assert_called_once_with(False)
+
+
+class StageP1Contracts(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.plan = source.validate_plan(source.read_json(source.PROJECT/'Saved/BH3StageEnvironment/P1_Source_Plan_20261009.json'))
+        cls.settings = source.equivalent_settings(cls.plan)
+        cls.audit = source.geometry.audit_stage('P1')
+        cls.components = source.read_json(cls.plan['source_components']['path'])['components']
+
+    def test_coincident_props_require_authored_rotation_identity(self):
+        mapping, _, _ = source.map_nodes(self.components, self.audit, self.plan['geometry_actors'])
+        self.assertEqual(len(set(mapping.values())), 146)
+        self.assertEqual(mapping['2114235041343653701'], '1580591275680')
+        bad = copy.deepcopy(self.components)
+        transform = next(c for c in bad if c['source']['type'] == 'Transform'
+                         and str(c['fields']['m_GameObject']['m_PathID']) == '2114235041343653701')
+        transform['fields']['m_LocalRotation'] = {'x': 0., 'y': 0., 'z': 0., 'w': 1.}
+        with self.assertRaisesRegex(source.SourceError, 'FBX matches'):
+            source.map_nodes(bad, self.audit, self.plan['geometry_actors'])
+
+    def test_exact_scene_targets_record_the_one_native_fbx_binding_difference(self):
+        self.assertEqual((len(self.plan['renderers']), sum(len(r['materials']) for r in self.plan['renderers'])), (77, 221))
+        self.assertEqual((len(self.plan['materials']), len(self.plan['textures']), len(self.plan['lights']), len(self.plan['probes'])), (40, 75, 27, 1))
+        self.assertEqual(self.plan['affine_meshes'], [])
+        self.assertEqual(self.plan['unbound_materials'], [])
+        self.assertIn('Stage_NewSpaceship_Fan_PropsA_Star', {m['name'] for m in self.plan['materials'].values()})
+        self.assertEqual(self.plan['fbx_binding_differences'], source.P1_SOURCE_BINDING_DIFFERENCES)
+        self.assertEqual(len(restore.targets(self.plan, 'textures')), 75)
+        self.assertEqual(len(restore.targets(self.plan, 'materials')), 40)
+        bad = copy.deepcopy(self.plan)
+        bad['fbx_binding_differences'] = []
+        bad['digest'] = source.digest({k: v for k, v in bad.items() if k != 'digest'})
+        with self.assertRaisesRegex(source.SourceError, 'native renderer binding contract'):
+            source.validate_plan(bad)
+        restore.validate_settings(self.plan, self.settings, 'materials')
+        old = source.read_json(source.PROJECT/'Saved/BH3StageEnvironment/P3_Source_Plan_20261008_233000.json')
+        self.assertEqual(source.build_plan('P3', old['geometry_report']['path'])['digest'], old['digest'])
+
+    def test_disabled_ancestors_hide_seven_enabled_renderers(self):
+        inherited = [r for r in self.plan['renderers'] if r['owner_active'] and not r['hierarchy_active']]
+        self.assertEqual(len(inherited), 7)
+        self.assertTrue(all(not source.component_enabled(r) for r in inherited))
+        self.assertEqual(sum(source.component_enabled(r) for r in self.plan['renderers']), 69)
+        bad = copy.deepcopy(self.plan)
+        bad['renderers'][0].pop('hierarchy_active')
+        bad['digest'] = source.digest({k: v for k, v in bad.items() if k != 'digest'})
+        with self.assertRaisesRegex(source.SourceError, 'hierarchy activation'):
+            source.validate_plan(bad)
+
+    def test_same_da_identity_keeps_raw_bump_and_explicit_color_decode(self):
+        material = next(m for m in self.plan['materials'].values() if m['name'] == 'Stage_KevinbossP1_Fan_PropsA_01_1003')
+        key = material['textures']['_MainTex']
+        self.assertEqual(key, material['textures']['_BumpMap'])
+        cfg = self.settings['textures'][key]
+        self.assertFalse(cfg['srgb'])
+        self.assertEqual(cfg['color_decode_slots'], ['_MainTex'])
+        graph = self.settings['rendering']['materials']['/'.join(material['identity'])]
+        self.assertIn({'from': 'UEColorDecode_MainTex', 'output': '', 'to': 'UEBaseColor', 'input': 'Main'}, graph['edges'])
+        self.assertIn({'from': 'Texture_BumpMap', 'output': 'RGB', 'to': 'UENormal', 'input': 'Normal'}, graph['edges'])
+        bad = copy.deepcopy(self.settings)
+        bad['textures'][key].pop('color_decode_slots')
+        with self.assertRaisesRegex(source.SourceError, 'mixed source color/BumpMap'):
+            restore.validate_settings(self.plan, bad, 'textures')
+
+    def test_readonly_geometry_checkpoint_never_claims_a_map_save(self):
+        u = mock.Mock()
+        u.EditorLoadingAndSavingUtils.get_dirty_map_packages.return_value = []
+        u.EditorLoadingAndSavingUtils.get_dirty_content_packages.return_value = []
+        baseline = {'actors': {'original_actor': {'preserved': True}}}
+        result = {'phase': 'geometry_baseline_passed', 'plan_digest': self.plan['digest'],
+                  'map_saved': False, 'saved_assets': [], 'created_actors': []}
+        with mock.patch.object(restore, 'map_actors', return_value=(None, {'original_actor': None}, {'original_actor': None})), \
+             mock.patch.object(restore, 'map_geometry_state', return_value=baseline):
+            restore.read_geometry_baseline(u, self.plan, result)
+        self.assertFalse(result['map_saved'])
+        u.EditorAssetLibrary.save_loaded_asset.assert_not_called()
+        u.get_editor_subsystem.assert_not_called()
+        with mock.patch.object(source, 'read_json', return_value=result):
+            self.assertEqual(restore.accepted_map_baseline(self.plan, self.settings, 'unused', result['map_file'], False), (baseline, []))
+            stale = dict(result['map_file'], sha256='different-current-map')
+            with self.assertRaisesRegex(source.SourceError, 'failed/stale/foreign'):
+                restore.accepted_map_baseline(self.plan, self.settings, 'unused', stale, False)
+            result['phase'] = 'lighting_passed'
+            with self.assertRaisesRegex(source.SourceError, 'failed/stale/foreign'):
+                restore.accepted_map_baseline(self.plan, self.settings, 'unused', result['map_file'], False)
+
+    def test_normal_autodetection_original_failure_and_explicit_color_commit(self):
+        row = next(t for t in self.plan['textures'].values() if t['package'].endswith('_Crystal_DA'))
+        key = '/'.join(row['identity'])
+        cfg = self.settings['textures'][key]
+        self.assertTrue(cfg['srgb'])
+        default, normal = SimpleNamespace(name='TC_DEFAULT'), SimpleNamespace(name='TC_Normalmap')
+
+        class AutoNormalTexture:
+            def __init__(self):
+                self.props = {'compression_settings': normal, 'srgb': False,
+                              'asset_import_data': SimpleNamespace(extract_filenames=lambda: [row['file']['path']])}
+            def set_editor_property(self, name, value):
+                self.props[name] = value
+                # UE Texture.cpp 的真实限制：Normal 压缩期间提交 sRGB 会被清零。
+                if self.props['compression_settings'] is normal:
+                    self.props['srgb'] = False
+            def get_editor_property(self, name):return self.props[name]
+            def get_path_name(self):return row['package']+'.'+row['package'].rsplit('/', 1)[1]
+            def get_class(self):return SimpleNamespace(get_name=lambda: 'Texture2D')
+
+        original = AutoNormalTexture()
+        original.set_editor_property('srgb', True)
+        original.set_editor_property('compression_settings', default)
+        self.assertFalse(original.get_editor_property('srgb'))
+        current = AutoNormalTexture()
+        task = mock.Mock()
+        task.get_editor_property.return_value = [current.get_path_name()]
+        u = mock.Mock()
+        u.AssetImportTask.return_value = task
+        u.EditorAssetLibrary.load_asset.return_value = current
+        u.EditorAssetLibrary.find_asset_data.return_value.get_tag_value.return_value = '512x512'
+        u.TextureCompressionSettings = SimpleNamespace(TC_DEFAULT=default)
+        u.TextureFilter = SimpleNamespace(TF_BILINEAR=SimpleNamespace(name='TF_BILINEAR'))
+        u.TextureMipGenSettings = SimpleNamespace(TMGS_FROM_TEXTURE_GROUP=SimpleNamespace(name='TMGS_FROM_TEXTURE_GROUP'))
+        u.TextureAddress = SimpleNamespace(TA_WRAP=SimpleNamespace(name='TA_WRAP'))
+        plan = dict(self.plan, textures={key: row})
+        with mock.patch.object(restore, 'absent_targets'), mock.patch.object(restore, 'stamp_save') as save:
+            restore.create_textures(u, plan, self.settings, {})
+        self.assertTrue(current.get_editor_property('srgb'))
+        self.assertIs(current.get_editor_property('compression_settings'), default)
+        save.assert_called_once_with(u, current, plan, row['identity'], {})
+
+    def test_texture_resume_requires_exact_failure_and_rejects_unrecorded_existing(self):
+        previous = source.read_json(source.PROJECT/'Saved/BH3StageEnvironment/P1_Textures_Create_20261009.json')
+        settings = source.read_json(source.PROJECT/'Saved/BH3StageEnvironment/P1_UE_Equivalent_Settings_20261009.json')
+        recorded = restore.texture_resume_packages(self.plan, settings, previous, 'textures')
+        self.assertEqual(len(recorded), 60)
+        for field, value in [('phase', 'textures_passed'), ('settings_digest', 'old-settings'),
+                             ('plan_digest', 'foreign-plan'), ('mode', 'surface_textures')]:
+            bad = dict(previous, **{field: value})
+            with self.assertRaisesRegex(source.SourceError, 'plan/settings/phase'):
+                restore.texture_resume_packages(self.plan, settings, bad, 'textures')
+        for packages in [recorded + [recorded[0]], recorded + ['/Game/Foreign/Texture']]:
+            with self.assertRaisesRegex(source.SourceError, 'invalid/duplicate packages'):
+                restore.texture_resume_packages(self.plan, settings, dict(previous, saved_assets=packages), 'textures')
+        remaining = set(restore.targets(self.plan, 'textures')) - set(recorded)
+        self.assertEqual(len(remaining), 15)
+        u = mock.Mock()
+        u.EditorAssetLibrary.does_asset_exist.side_effect = lambda package: package in remaining
+        with mock.patch.object(Path, 'exists', return_value=False):
+            with self.assertRaisesRegex(source.SourceError, 'already exists'):
+                restore.absent_targets(u, self.plan, 'textures', recorded)
 
 
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -14,6 +14,8 @@ all required assets and the source-affine geometry are ready. Collision policy
 is intentionally not executed by this tool while its user decision is pending.
 map_geometry requires --map-backup of the exact original map in Saved.
 map_geometry_readback consumes that phase's --geometry-result in a fresh Editor.
+geometry_baseline reads an already exact saved scene without a redundant map save;
+its successful result can be consumed by lighting/map when no affine correction is needed.
 """
 
 import argparse
@@ -48,11 +50,22 @@ def validate_settings(plan, settings, mode):
     if 'preserved_lighting' in settings:source.lighting_generation_digest(plan,settings)
     if mode in ('textures','probe_textures','surface_textures','surface_textures_readback','probe_textures_readback', 'preflight', 'map', 'readback', 'assets_readback', 'lighting', 'lighting_readback'):
         configs = settings.get('textures', {})
-        source.require(set(configs) == set(plan['textures']), 'all 17 texture interpretations must be explicit')
+        source.require(set(configs) == set(plan['textures']), 'all source texture interpretations must be explicit')
+        roles = {key: set() for key in plan['textures']}
+        for material in plan['materials'].values():
+            for slot, key in material['textures'].items():
+                roles[key].add(slot)
         for key, row in plan['textures'].items():
             cfg = configs[key]
             source.require(type(cfg.get('srgb')) is bool and cfg.get('interpretation_authority'),
                            'texture color interpretation is not evidenced: '+key)
+            mixed = bool(roles[key] & source.DATA_TEXTURE_SLOTS and roles[key] - source.DATA_TEXTURE_SLOTS)
+            if mixed:
+                source.require(plan['stage'] == 'P1' and roles[key] == {'_MainTex', '_BumpMap'}
+                               and not cfg['srgb'] and cfg.get('color_decode_slots') == ['_MainTex'],
+                               'mixed source color/BumpMap sampling policy is absent: ' + key)
+            else:
+                source.require(not cfg.get('color_decode_slots'), 'unexpected explicit texture color decode: ' + key)
             native = row['native_settings']
             if native is None:
                 proof = cfg.get('native_metadata')
@@ -82,7 +95,7 @@ def validate_settings(plan, settings, mode):
         source.require(rendering.get('purpose') == 'ue_equivalent_stage',
                        'Stage UE adaptation is not selected; original runtime providers remain unimplemented')
         graphs = rendering.get('materials', {})
-        source.require(set(graphs) == set(plan['materials']), 'material graphs do not cover exactly 10 source identities')
+        source.require(set(graphs) == set(plan['materials']), 'material graphs do not cover exact source identities')
         for key, material in plan['materials'].items():
             graph = graphs[key]
             shader = plan['shaders'][material['shader']]
@@ -210,12 +223,47 @@ def stamp_save(u, obj, plan, ident, result):
     result['saved_assets'].append(package)
 
 
-def create_textures(u, plan, settings, result, mode='textures'):
-    absent_targets(u, plan, mode)
+def texture_resume_packages(plan, settings, previous, mode):
+    """仅已记录的同计划、同配置、同阶段失败保存可授权只读续接。"""
+    source.require(mode in ('textures', 'probe_textures', 'surface_textures')
+                   and previous.get('mode') == mode and previous.get('phase') == 'failed'
+                   and previous.get('failure_phase') == mode and previous.get('plan_digest') == plan['digest']
+                   and previous.get('settings_digest') == source.digest(settings)
+                   and previous.get('map_saved') is False and previous.get('created_actors') == [],
+                   'texture resume is not a failed asset-only result from this plan/settings/phase')
+    saved, resumed = previous.get('saved_assets'), previous.get('resumed_assets', [])
+    source.require(type(saved) is list and type(resumed) is list, 'texture resume package records are invalid')
+    packages = resumed + saved
+    source.require(packages and all(type(p) is str for p in packages)
+                   and len(packages) == len(set(packages)) and set(packages) <= set(targets(plan, mode)),
+                   'texture resume lists invalid/duplicate packages')
+    return packages
+
+
+def create_textures(u, plan, settings, result, mode='textures', previous_result=None):
+    resumed = []
+    if previous_result is not None:
+        previous_path = Path(previous_result).resolve()
+        source.require(previous_path.is_relative_to(source.PROJECT/'Saved'), 'texture resume result is outside project Saved')
+        resumed = texture_resume_packages(plan, settings, source.read_json(previous_path), mode)
+        for key, row in plan['textures'].items():
+            if row['package'] not in resumed:
+                continue
+            obj = exact_asset(u, row['package'], row['class'], True, plan)
+            cfg = settings['textures'][key]
+            source.require(u.EditorAssetLibrary.get_metadata_tag(obj, 'BH3.TextureInterpretation') == source.digest(cfg),
+                           'resumed texture interpretation differs: ' + row['package'])
+            verify_texture(u, obj, row, cfg)
+        source.require(not u.EditorLoadingAndSavingUtils.get_dirty_content_packages()
+                       and not u.EditorLoadingAndSavingUtils.get_dirty_map_packages(),
+                       'texture resume unexpectedly dirtied existing packages')
+        result['resumed_assets'] = resumed
+        result['texture_resume_result'] = source.evidence(previous_path)
+    absent_targets(u, plan, mode, resumed)
     selected=targets(plan,mode)
     for key, row in plan['textures'].items():
         package = row['package']
-        if package not in selected:continue
+        if package not in selected or package in resumed:continue
         cfg = settings['textures'][key]
         import_file=cfg['decoded_cube']['file'] if 'decoded_cube' in cfg else row['file']
         task = u.AssetImportTask()
@@ -228,8 +276,9 @@ def create_textures(u, plan, settings, result, mode='textures'):
         source.require(paths == [package+'.'+package.rsplit('/',1)[1]],
                        'texture import failed/wrong objects: '+package+' source='+import_file['path']+' returned='+repr(paths))
         obj = exact_asset(u, package, row['class'])
-        obj.set_editor_property('srgb', cfg['srgb'])
+        # 法线自动识别期间 UE 会清零 sRGB；先退出其压缩模式，再提交显式颜色策略。
         obj.set_editor_property('compression_settings', getattr(u.TextureCompressionSettings, cfg['compression']))
+        obj.set_editor_property('srgb', cfg['srgb'])
         obj.set_editor_property('filter', getattr(u.TextureFilter, cfg['filter']))
         obj.set_editor_property('mip_gen_settings', getattr(u.TextureMipGenSettings, cfg['mip_gen_settings']))
         if row['class'] == 'Texture2D':
@@ -825,6 +874,19 @@ def read_map_geometry(u, plan, result, applied_path):
                   apply_result=source.evidence(applied_path))
 
 
+def read_geometry_baseline(u, plan, result):
+    """只读核对已保存几何，不重复保存地图或网格。"""
+    source.require(not plan['affine_meshes'], 'geometry baseline requires no pending source-affine correction')
+    _, actors, all_actors = map_actors(u, plan, True)
+    baseline = map_geometry_state(u)
+    source.require(not u.EditorLoadingAndSavingUtils.get_dirty_map_packages()
+                   and not u.EditorLoadingAndSavingUtils.get_dirty_content_packages(),
+                   'saved geometry baseline has dirty map/content packages')
+    result.update(map_file=source.evidence(package_file(plan['map'], '.umap')),
+                  map_geometry_baseline=baseline, geometry_binding_changes=[], geometry_bindings_verified=True,
+                  source_actor_count=len(actors), total_actor_count=len(all_actors))
+
+
 def light_values(row, settings):
     f, policy = row['fields'], settings['lighting']
     colors = [f['m_Color'][name] for name in ('r','g','b')]
@@ -834,7 +896,7 @@ def light_values(row, settings):
     color=[int(math.floor(v*255+.5)) for v in colors]+[255]
     scale=policy['directional_lux_scale'] if f['m_Type']==1 else policy['local_intensity_scale']
     return {'light_color':color,'intensity':f['m_Intensity']*scale,'cast_shadows':bool(f['m_Shadows']['m_Type']),
-            'affects_world':row['owner_active'] and bool(f['m_Enabled']),
+            'affects_world':source.component_enabled(row),
             'indirect_lighting_intensity':policy['indirect_lighting_intensity'],
             'volumetric_scattering_intensity':policy['volumetric_scattering_intensity']}
 
@@ -864,7 +926,7 @@ def spawn_environment(u,plan,settings,actors,result,created):
         source.require(comp is not None,'environment native component is absent')
         if light:comp.set_mobility(u.ComponentMobility.MOVABLE)
         actor.set_actor_relative_transform(ue_pose(u,environment_pose(row,light)),False,False)
-        enabled=row['owner_active'] and bool(f['m_Enabled'])
+        enabled=source.component_enabled(row)
         actor.set_actor_hidden_in_game(not enabled)
         if light:
             values=light_values(row,settings)
@@ -894,7 +956,7 @@ def verify_environment(u,plan,settings,actors,all_actors):
     owned=[a for a in all_actors.values() if source.OWNER in [str(t) for t in a.get_editor_property('tags')]]
     labels={a.get_actor_label(False):a for a in owned}
     settings_digest=source.lighting_generation_digest(plan,settings)
-    source.require(len(owned)==len(labels)==7 and set(labels)==expected_labels,'environment actor set differs from source')
+    source.require(len(owned)==len(labels)==len(rows) and set(labels)==expected_labels,'environment actor set differs from source')
     for row in rows:
         f=row['fields'];light='m_Shadows' in f
         actor=labels['BH3_Env_'+row['identity'][1]]
@@ -908,7 +970,7 @@ def verify_environment(u,plan,settings,actors,all_actors):
         local=pose_of(component.get_relative_transform())
         source.require(source.difference(source.matrix(local),source.matrix(environment_pose(row,light)))<.02,
                        'environment source-relative pose/volume differs: '+row['source_path'])
-        enabled=row['owner_active'] and bool(f['m_Enabled'])
+        enabled=source.component_enabled(row)
         source.require(bool(actor.get_editor_property('hidden'))==(not enabled),'environment enabled state differs')
         if light:
             source.require(component.get_editor_property('mobility')==u.ComponentMobility.MOVABLE,'light is not movable')
@@ -951,7 +1013,7 @@ def environment_expected_state(baseline,plan,materials):
             component=components[0]
             component['override_materials']=[plan['materials'][key]['package']+'.'+plan['materials'][key]['package'].rsplit('/',1)[1]
                                              for key in row['materials']]
-            enabled=row['owner_active'] and bool(row['fields']['m_Enabled'])
+            enabled=source.component_enabled(row)
             component.update(visible=enabled,hidden_in_game=not enabled,cast_shadow=bool(row['fields']['m_CastShadows']))
     return expected
 
@@ -966,13 +1028,19 @@ def preserved_environment_state(u,expected,created_paths):
 def accepted_map_baseline(plan,settings,result_path,current_file,lighting_exists):
     source.require(result_path is not None,'environment apply requires its accepted geometry/lighting result')
     previous=source.read_json(result_path)
-    source.require(previous['plan_digest']==plan['digest'] and previous['map_saved']
+    saved_geometry = previous['phase'] == 'geometry_baseline_passed' and not previous['map_saved']
+    source.require(previous['plan_digest']==plan['digest'] and (previous['map_saved'] or saved_geometry)
                    and previous['map_file']==current_file,'accepted map result is failed/stale/foreign')
     if lighting_exists:
         source.require(previous['phase']=='lighting_passed' and previous['settings_digest']==source.lighting_generation_digest(plan,settings)
                        and ('preserved_lighting' not in settings or settings['preserved_lighting']['apply_result']==source.evidence(result_path)),
                        'material apply requires this policy\'s accepted lighting checkpoint')
         return environment_expected_state(previous['environment_baseline'],plan,False),previous['created_actors']
+    if saved_geometry:
+        source.require(not plan['affine_meshes'] and previous['geometry_bindings_verified']
+                       and not previous['geometry_binding_changes'] and not previous['saved_assets']
+                       and not previous['created_actors'], 'saved geometry baseline contains unexpected mutations')
+        return previous['map_geometry_baseline'], []
     source.require(previous['phase']=='map_geometry_passed' and previous['geometry_bindings_verified'],
                    'environment apply requires the saved affine geometry checkpoint')
     return geometry_expected_state(previous['map_geometry_baseline'],previous['geometry_binding_changes']),[]
@@ -1008,7 +1076,7 @@ def apply_map(u,plan,settings,result,map_sha,backup_path,previous_path,materials
                 changed.append((component,copy.deepcopy(baseline['actors'][row['actor']]['components'][component.get_path_name()])))
                 component.modify(True)
                 for slot,key in enumerate(row['materials']):component.set_material(slot,mats[key])
-                enabled=row['owner_active'] and bool(row['fields']['m_Enabled'])
+                enabled=source.component_enabled(row)
                 component.set_visibility(enabled,False);component.set_hidden_in_game(not enabled,False)
                 component.set_editor_property('cast_shadow',bool(row['fields']['m_CastShadows']))
         if not owned:spawn_environment(u,plan,settings,actors,result,created)
@@ -1054,7 +1122,7 @@ def verify_map(u,plan,settings,materials=True,load=True):
             for slot,key in enumerate(row['materials']):
                 source.require(comp.get_material(slot)==mats[key],
                                'renderer override does not match native source slot')
-            enabled=row['owner_active'] and bool(row['fields']['m_Enabled'])
+            enabled=source.component_enabled(row)
             source.require(comp.get_editor_property('visible')==enabled and comp.get_editor_property('hidden_in_game')==(not enabled)
                            and comp.get_editor_property('cast_shadow')==bool(row['fields']['m_CastShadows']), 'renderer source flags differ')
     return {'source_renderers':len(plan['renderers']),'material_slots':sum(len(r['materials']) for r in plan['renderers']) if materials else 0,
@@ -1093,7 +1161,7 @@ class StageCapture:
         self.editor=u.get_editor_subsystem(u.UnrealEditorSubsystem)
         world,actors,_=map_actors(u,plan,True,False)
         self.world=world
-        rows=[r for r in plan['renderers'] if r['owner_active'] and r['fields']['m_Enabled']
+        rows=[r for r in plan['renderers'] if source.component_enabled(r)
               and plan['shaders'][plan['materials'][r['materials'][0]]['shader']]['name'].endswith('/Scene_Base')]
         if focus_model is not None:
             rows=[r for r in rows if r['model']==focus_model]
@@ -1197,7 +1265,7 @@ def require_api(u,mode):
         required+=['GeometryScript_AssetUtils','GeometryScript_MeshQueries','DynamicMesh','StaticMeshEditorSubsystem',
                    'StaticMesh','GeometryScriptCopyMeshFromAssetOptions','GeometryScriptMeshReadLOD',
                    'GeometryScriptLODType','GeometryScriptOutcomePins']
-    if mode in ('map_geometry','map_geometry_readback','map','readback','lighting','lighting_readback','capture'):
+    if mode in ('map_geometry','map_geometry_readback','geometry_baseline','map','readback','lighting','lighting_readback','capture'):
         required+=['Actor','ActorComponent','SceneComponent','PrimitiveComponent','StaticMeshComponent',
                    'LightComponentBase','ReflectionCaptureComponent']
     if mode in ('map','readback','lighting','lighting_readback','capture'):
@@ -1256,7 +1324,7 @@ def require_recipe_api(u,plan,settings,mode):
                                'native affine readback method unavailable: unreal.'+cls_name+'.'+name)
         source.require(hasattr(u.GeometryScriptLODType,'SOURCE_MODEL') and hasattr(u.GeometryScriptOutcomePins,'SUCCESS'),
                        'native affine readback source LOD/outcome enum unavailable')
-    if mode in ('map_geometry','map_geometry_readback'):
+    if mode in ('map_geometry','map_geometry_readback','geometry_baseline'):
         methods=[('Actor',['get_actor_enable_collision','get_actor_label','get_components_by_class']),
                  ('SceneComponent',['get_attach_parent','get_relative_transform'])]
         if mode=='map_geometry':methods.append(('StaticMeshComponent',['set_static_mesh','modify']))
@@ -1277,7 +1345,7 @@ def require_recipe_api(u,plan,settings,mode):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode',choices=['inspect','preflight','probe_preflight','textures','probe_textures','surface_textures','surface_textures_readback','probe_textures_readback','affine_preflight','affine','affine_readback',
-                                       'map_geometry','map_geometry_readback','materials','map','readback',
+                                       'map_geometry','map_geometry_readback','geometry_baseline','materials','map','readback',
                                        'lighting','lighting_readback','assets_readback','capture'])
     parser.add_argument('--plan',required=True)
     parser.add_argument('--settings')
@@ -1286,6 +1354,7 @@ def main():
     parser.add_argument('--geometry-result')
     parser.add_argument('--environment-result', help='accepted lighting checkpoint, or successful map result for cold read')
     parser.add_argument('--materials-result', help='explicit failed material result; verify its saved graphs read-only and create only the remaining assets')
+    parser.add_argument('--textures-result', help='explicit failed result from this texture phase/settings; verify recorded saved textures read-only and create only the remainder')
     parser.add_argument('--screenshot', help='capture mode: fresh Saved PNG, native viewport RHI screenshot')
     parser.add_argument('--capture-materials',action='store_true',help='capture the accepted full material map checkpoint')
     parser.add_argument('--capture-focus-model',help='capture only: use one active source Scene_Base model bounds for the observation camera')
@@ -1293,10 +1362,12 @@ def main():
     parser.add_argument('--output')
     args=parser.parse_args()
     source.require(args.materials_result is None or args.mode=='materials','material resume is only valid for material creation')
+    source.require(args.textures_result is None or args.mode in ('textures','probe_textures','surface_textures'),
+                   'texture resume is only valid for texture creation')
     source.require(args.capture_focus_model is None or args.mode=='capture','capture focus is only valid for observation')
     plan=source.validate_plan(source.read_json(args.plan))
     source.require(args.settings is not None or args.mode in ('inspect','affine','affine_preflight','affine_readback',
-                                                             'map_geometry','map_geometry_readback'),
+                                                             'map_geometry','map_geometry_readback','geometry_baseline'),
                    'this phase requires explicit texture/rendering input')
     settings=source.read_json(args.settings) if args.settings else {'plan_digest':plan['digest']}
     if args.mode!='inspect':
@@ -1304,7 +1375,7 @@ def main():
         validate_settings(plan,settings,validation_mode)
     if args.mode=='inspect':
         print(json.dumps({'create_only':{m:targets(plan,m) for m in ['textures','materials','affine']},
-                          'existing_map':plan['map'],'existing_source_actor_count':120,'collision_activated':False}))
+                          'existing_map':plan['map'],'existing_source_actor_count':len(plan['geometry_actors']),'collision_activated':False}))
         return
     source.require(args.output is not None,'native execution requires a fresh Saved result')
     output=Path(args.output).resolve()
@@ -1317,15 +1388,19 @@ def main():
         require_recipe_api(u,plan,settings,args.mode)
         editor=u.get_editor_subsystem(u.UnrealEditorSubsystem)
         levels=u.get_editor_subsystem(u.LevelEditorSubsystem)
-        source.geometry._require_editor_process_host(u,'P3',editor,levels,editor.get_editor_world())
+        source.geometry._require_editor_process_host(u,plan['stage'],editor,levels,editor.get_editor_world())
         result['phase']=args.mode
-        if args.mode in ('textures','probe_textures','surface_textures'):create_textures(u,plan,settings,result,args.mode)
+        if args.mode in ('textures','probe_textures','surface_textures'):create_textures(u,plan,settings,result,args.mode,args.textures_result)
         elif args.mode in ('affine','affine_preflight','affine_readback'):
             source.require(args.map_sha256 is not None and source.evidence(package_file(plan['map'],'.umap'))['sha256'].lower()
                            == args.map_sha256.lower(),'affine phase requires the exact source map baseline')
             if args.mode=='affine_readback':affine_readback(u,plan,result)
             else:affine_assets(u,plan,result,args.mode=='affine_preflight')
         elif args.mode=='materials':create_materials(u,plan,settings,result,args.materials_result)
+        elif args.mode=='geometry_baseline':
+            source.require(args.map_sha256 is not None and source.evidence(package_file(plan['map'],'.umap'))['sha256'].lower()
+                           == args.map_sha256.lower(),'geometry baseline requires the exact saved map SHA256')
+            read_geometry_baseline(u,plan,result)
         elif args.mode in ('map_geometry','map_geometry_readback'):
             source.require(args.map_sha256 is not None and source.evidence(package_file(plan['map'],'.umap'))['sha256'].lower()
                            == args.map_sha256.lower(),'map geometry requires the exact current map baseline')
