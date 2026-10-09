@@ -1,5 +1,7 @@
 # BH3 Stage 导出目录清点
 
+> 当前检查点（2026-10-09）：P1/P3 的 FBX 几何已保存为 UE 资产；P3 已完成本轮等效材质、灯光、99 槽关卡接线、独立冷读和内场取图。原作光照校准、探针运行时处理与可玩碰撞仍未验收。实际入口与证据见[本轮 P3 交付](#本轮-p3-ue-等效场景交付2026-10-09)。以下原清点正文保留 2026-09-29 的范围和当时结论，不能作为当前未导入的判断。
+
 清点日期：2026-09-29。范围：`F:\AnimeStudio\Exports\BH3\Stage`，递归读取全部文件；本轮仅生成本报告，未导入资产、操作 UE、修改关卡或架构笔记，未提交或推送。
 
 ## 结论与分类
@@ -130,3 +132,72 @@ P1 JSON 有 175 个显式空纹理槽，P3 有 25 个；`IsNull=true` 表示原�
 - FBX 按对象记录及 Connections 读取，解码 PolygonVertexIndex 统计面数；实际核对了 Collision 节点的直接 Geometry 和后代 Mesh，未将 Null 名称视作几何。
 - PNG 尺寸来自 PNG 文件头；未逐图进行完整像素解码、通道语义验证或画面质量评估。
 - 未渲染两组场景，未进行 UE 导入、材质编译、物理/导航验证；“Kevin Boss 阶段”“建筑/岩石/天空用途”等语义只在名称支持的范围内作为推断。
+
+## 本轮 P3 UE 等效场景交付（2026-10-09）
+
+### UE 入口与实际范围
+
+FBX 导入后显示为 `.uasset`，不会在 Content Browser 中继续以 `.fbx` 文件显示。几何入口如下；本轮材质与灯光工作只覆盖 P3。
+
+| 场景 | 网格目录 | 关卡与已验证范围 |
+| --- | --- | --- |
+| P1 | `/Game/Environments/BH3/Stage/Stage_KevinBoss_P1/StaticMeshes/`，77 个原网格 | `/Game/Map/BH3/L_KevinBoss_P1`；[几何保存报告](../../../Saved/AutomationReports/BH3_Stage_P1_Geometry_e3574626d5e64eed9070f76230ab9a18.json)确认保存与 Registry，材质、灯光和运行冒烟未完成 |
+| P3 | `/Game/Environments/BH3/Stage/Stage_KevinBoss_P3/StaticMeshes/`，97 个原网格 | `/Game/Map/BH3/L_KevinBoss_P3`；[原几何保存报告](../../../Saved/AutomationReports/BH3_Stage_P3_Geometry_ac54612cec8243a0a6bdf86a5ae94f5d.json)与以下实际材质／灯光检查点共同描述当前状态 |
+
+P3 当前包含 120 个源 Actor、导入根 Actor 与 7 个新环境 Actor，共 128 个。源 97 个 Renderer 的 99 个槽逐源身份绑定，95 个启用 Renderer 可见，2 个源停用碰撞 Renderer 按源标志隐藏。隐藏 Renderer 不代表已关闭其 Body／查询碰撞：本轮保留原导入碰撞状态，没有执行源 Collider 政策。
+
+P3 `Textures/` 当前有 14 个 Texture2D、3 个 TextureCube，`Materials/` 有 10 个 Material。新增 5 个实际灯光组件（1 Directional、2 Point、2 Spot）和 2 个 Box Reflection Capture，挂在各自原源节点下。先保存的 2 个 Probe Cube 与 7 个环境 Actor，在后续表面材质阶段全部只读保持；本轮没有额外 SkyLight、正式相机、PlayerStart、Boss、GameMode 或 Experience 接线。
+
+### 来源、适配与状态归属
+
+原 FBX 只有几何与 Null 节点；后续 `F:/AnimeStudio/Exports/BH3/Stage/Stage_KevinBoss_P3/SourceSupplement` 提供了原生 Renderer、Light、ReflectionProbe、材质与 shader 证据。以 CAB／PathID 定位源身份，未用重复显示名推断引用。原无名 `_ReflectionCube` 已按真实身份解析为独立水面 Cube；即使它与另一个 Probe 的像素相同，仍保留各自来源与资产身份。
+
+- [不可变源计划](../../../Saved/BH3StageEnvironment/P3_Source_Plan_20261008_233000.json)记录 97 Renderer／99 槽、17 纹理、10 材质、5 shader 家族、5 灯与 2 Probe，digest 为 `c63267d0124107931cc369f921d52b4d5ce15b5260b8ea5ad54e2b7ab7d2bebf`。
+- [实际消费的等效配置](../../../Saved/BH3StageEnvironment/P3_UE_Equivalent_Settings_20261009_Materials_R2.json)明确选择 UE 等效表现，并保留源贴图槽、UV、参数及每张图的颜色／采样规则。Scene_Base 使用 UE Lit，Water 使用 Single Layer Water，天空与 Fog／Additive 使用各自等效图；源 RGB 单位法线不走 UE 压缩法线重建。源为空或关闭的功能仍按源语义处理，没有补另一张资源或默认动作。
+- 灯光强度单位转换、局部衰减、Spot 内锥角、水面反射增益与软深度淡出等 UE 参数显式可调。它们是已选等效策略，未当作原游戏运行时数值。后续材质配置继续引用原灯光生成检查点，未重写灯光身份标签或建第二套灯光状态。
+- 原父子非均匀缩放与 UE TRS 不能可靠表达全部源仿射变换。10 个受影响网格用 `SourceAffine/` 中独立修正资产表达源几何，原 97 网格与 Actor 层级／变换保持；[几何冷读](../../../Saved/BH3StageEnvironment/P3_Map_Geometry_Cold_20261009_Resume.json)验证了 585 个相关顶点。没有用 Actor 位置特判掩盖几何差异。
+- UE 5.8 原生 DDS TextureFactory 拒绝压缩 DXGI 输入，故明确使用固定版本 bcdec 的受控解码适配。BC1 解码为 RGBA8，BC6H 保留 RGB half 位并补 alpha=1；6 面 × 9 mip 的 54 个子资源按源顺序保留，无色调映射、8-bit HDR 量化、旋转或重建 mip。3 Cube 的 UE Source 原生 DDS 导出逐像素通过，两个 HDR 源均保留最大值 2.2109375 和 365 个大于 1 的 RGB 分量。Source 像素一致尚不证明运行时方向、反射卷积与原作一致。固定解码器源及 MIT 许可保留在 `Saved/BH3StageEnvironment/BCDecoder_20261009/`。
+
+离线源解析／数学与配置生成由 [bh3_stage_environment_source.py](../../Scripts/bh3_stage_environment_source.py)负责；[restore_bh3_stage_environment.py](../../Scripts/restore_bh3_stage_environment.py)执行 UE 原生导入、严格资产读回、指定地图提交及有截止的只读取图；[test_bh3_stage_environment.py](../../Scripts/test_bh3_stage_environment.py)保留原仿射失败复现和有限契约测试。原 [import_bh3_stages.py](../../Scripts/import_bh3_stages.py)保持冻结，未建立第二套通用 FBX 导入器或运行时调度器。
+
+### 实际保存、冷读与取图证据
+
+各轮均使用完整独立 Editor／RHI，运行结果以机器报告中的 phase 为准；Editor exit0 本身不代表脚本成功。所有下列成功窗口均已正常退出。表面阶段只创建原缺失包，不重导已保存的 Probe 或纹理；地图阶段仅保存 P3 一次，冷读和取图均 0 保存／0 新 Actor。
+
+| 实际检查点 | 结果与证据 |
+| --- | --- |
+| 2 个 Probe Cube 保存／独立 Source 冷读 | [创建 R2](../../../Saved/BH3StageEnvironment/P3_Probe_Textures_Create_20261009_R2.json)与[冷读](../../../Saved/BH3StageEnvironment/P3_Probe_Textures_Cold_20261009.json)通过，2 Cube 的全部 54 子资源严格一致 |
+| 5 灯／2 Probe 关卡保存／冷读 | [灯光保存 R2](../../../Saved/BH3StageEnvironment/P3_Lighting_Apply_20261009_R2.json)与[灯光冷读](../../../Saved/BH3StageEnvironment/P3_Lighting_Cold_20261009.json)通过，源挂接、姿态、颜色和显式 UE 参数读回 |
+| 剩余 15 纹理保存／Source 冷读 | [表面创建](../../../Saved/BH3StageEnvironment/P3_Surface_Textures_Create_20261009.json)与[表面冷读 R2](../../../Saved/BH3StageEnvironment/P3_Surface_Textures_Cold_20261009_R2.json)通过，14 Texture2D Source 尺寸／采样／来源及水面 HDR Cube 全子资源核验 |
+| 10 材质保存／独立资产冷读 | [材质 R3](../../../Saved/BH3StageEnvironment/P3_Materials_Create_20261009_R3.json)严格只读续接先存 4 个、编译并精确新存剩余 6 个；[资产冷读](../../../Saved/BH3StageEnvironment/P3_Materials_Assets_Cold_20261009.json)核 17 纹理／10 材质的实际图、HLSL、参数、源纹理、逐输入通道与最终输出 |
+| 97 Renderer／99 槽保存／独立地图冷读 | [地图保存 R2](../../../Saved/BH3StageEnvironment/P3_Materials_Map_Apply_20261009_R2.json)与[地图冷读](../../../Saved/BH3StageEnvironment/P3_Materials_Map_Cold_20261009.json)通过，源可见／hidden／cast_shadow 与完整保护状态保持；PID29704／2236 均正常退出 |
+| 单张内场实际画面 | [取图 R2](../../../Saved/BH3StageEnvironment/P3_Materials_Capture_20261009_R2.json)，PID14268，`capture_passed`／cleanup=[]，原 camera／selection 实读恢复，无 dirty；已人工打开下图，确认岩环、漂浮岩石、纹理、星空与发光可见 |
+
+![P3 当前 UE 等效内场截图](F:/ue_project/GGYGO/Saved/BH3StageEnvironment/P3_Materials_Arena_View_20261009.png)
+
+内场取景只选择真实源 model `1934927135424`，路径 `Stage_KevinBoss_P3/Stage_KevinBossP3_Fan_Stone_04/Rocks` 的原生 Actor bounds 作为观察相机依据；其他 Actor、可见性、材质和灯光保持。相机位置 cm 为 `(-35848.671619, -26769.311032, 34175.634044)`，看向 `(-387.639891, 508.405682, 3079.036991)`。未保存正式地图相机，也未假定这是源游戏镜头。此前[壳外截图](../../../Saved/BH3StageEnvironment/P3_Materials_View_20261009.png)保留；它只显示大型外壳，不能替代内场检查。
+
+当前 P3 地图为 342185 B，SHA256 `5CCF56324720B5B011FAC20473E37FECCCB0C4802D50662493D1B2CB65782F84`。材质接线前的[精确备份](../../../Saved/BH3StageEnvironment/P3_Before_Materials_20261009.umap)保留 333361 B／SHA256 `8B678B02A4AC218F7D3E3506A4B815F6CA83C14C26A7994F18D93A315CC376C1`。独立内场 PNG 为 1286533 B／SHA256 `1CD52C8F3353EAB203537214D6E77E02994E94DB300211D084DB07DBDDC9EB49`。
+
+### 原失败与根因收口
+
+原失败结果保留，没有降低断言或改成成功。压缩 DDS 导入拒绝后采用上述明确格式适配；[首次表面冷读](../../../Saved/BH3StageEnvironment/P3_Surface_Textures_Cold_20261009.json)误查运行时 GPU／LOD 尺寸后，改读引擎以 Texture Source 生成的 Registry Dimensions，R2 原源尺寸严格通过。[首次材质](../../../Saved/BH3StageEnvironment/P3_Materials_Create_20261009.json)因 Python 不能读受保护 CustomInput.Input 而 0 保存；改为标准 StructBase.export_text，逐命名输入核实际 OutputIndex 和 Mask，分别处理同一贴图 RGB／A 双输入。[材质 R2](../../../Saved/BH3StageEnvironment/P3_Materials_Create_20261009_R2.json)已存 4 个后，Fog DepthFade 接线误用成员名 InOpacity；按原生公开 pin 名 Opacity 修正，R3 通过显式失败报告续接，严格核 owner／plan／源身份／实际图后只读使用 4 个旧资产。
+
+[首次材质地图保存](../../../Saved/BH3StageEnvironment/P3_Materials_Map_Apply_20261009.json)的 99 槽内存验证通过，但 Windows Error32 阻止落盘。原主 Editor PID38784 持有 P3 文件；统筹通过 MCP 确认 P3 干净、非 PIE 后正常切到 `L_Movement_Test` 释放句柄，没有强停或丢弃用户工作。磁盘与原备份完整，失败清理 errors=[]；新编号 R2 才实际保存成功。没有绕过 UE 保存、替换文件或借首次内存结果宣称接线已保存。
+
+### 复杂度审核与剩余边界
+
+按 [CodeConventions](../../Architecture/CodeConventions.md) 对本次实际调用链自审：
+
+| 审核项 | 结论 |
+| --- | --- |
+| 职责／依赖 | 必要保留：源解析／纯数学、原生编辑器执行、有限契约测试分开；未改运行时模块或新增循环依赖。源配置与 shader 差异通过显式输入表达 |
+| 状态／提交 | 必要保留：源计划唯一描述来源，UE 资产／地图保存结果描述实际落盘；失败报告不会发布完成。局部句柄与只读快照按当前进程生命周期清理，旧灯光身份来源不被表面新配置覆盖 |
+| 防御依据 | 必要保留：create-only、精确 owner／source、提交前后 dirty 与地图 SHA、外调后状态保护和全部通道核验。取图有 120 秒截止，恢复观察 camera／selection／节流并释放 callback／keepAlive |
+| 迁移残留 | 已收口：GPU 代理尺寸查询、受保护字段直接访问及错误 DepthFade pin 已替换；不存在两套同时提交的材质／地图入口。显式失败续接只读复核，未知或未列出的旧包仍拒绝 |
+| 业务／扩展 | 必要保留：UE 等效策略、原灯光身份与精确 Source Cube；待验证：原作 GI／曝光、动态 shader 变体、Probe 运行时卷积与方向。没有资源缺失时的默认材质／另一 Cube 兜底 |
+| 测试／构建 | 30 项离线契约通过，原仿射失败与失败清理断言保留；实际 Material 编译、资产／地图冷读和单张内场 RHI 取图通过。本轮未改项目 C++／引擎源码，未做新的项目 C++ 构建／PIE／联机／Cook／性能验收 |
+
+当前图中的粉紫大面与较亮高光是本轮 UE 等效参数下的实际表现。人工看图只证明有用视角中的主体结构和材质可见，尚未与原作逐项校准。原游戏 GI、曝光、运行时参数提供者、SSR／Stencil 等差异及 Probe 处理仍开放；不写 `restoration_complete=true`。
+
+源停用碰撞网格与现有导入 Body／查询碰撞是不同事实。可行走地面、Pawn／相机阻挡、PlayerStart、Boss／战斗接入及移动／镜头 PIE 冒烟仍待明确政策与独立验收；P1 材质／灯光同样不由本轮 P3 成功关闭。没有扩展历史回归矩阵，也没有把素材入库称为完整可运行关卡。

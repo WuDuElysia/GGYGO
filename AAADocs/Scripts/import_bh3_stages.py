@@ -5,12 +5,12 @@ UE Python, only in the coordinator's exclusive window:
     import import_bh3_stages as stages
     stages.import_geometry('P1')
     # Or execute this file with: geometry --stage P1
-    # An approved saved empty result uses continue_geometry with its exact
-    # failed manifest, verified empty-map SHA256 and independent scene backup.
 Standard full Editor, only in the coordinator's isolated process window:
     -ExecutePythonScript=".../import_bh3_stages.py editor_api_preflight --stage P3"
+    -ExecutePythonScript=".../import_bh3_stages.py editor_p1_preflight --stage P1 --failed-manifest ... --empty-map-sha256 ... --saved-scene-backup ..."
     -ExecutePythonScript=".../import_bh3_stages.py editor_continue_geometry --stage P3 --failed-report ... --empty-map-backup ..."
-Both require -unattended -nowrite and
+    -ExecutePythonScript=".../import_bh3_stages.py continue_geometry --stage P1 --failed-manifest ... --empty-map-sha256 ... --saved-scene-backup ..."
+These Editor entries require -unattended -nowrite and
     -DisablePlugins=ModelContextProtocol,MCPClientToolset,AllToolsets
 The native PythonScript Commandlet does not provide the required static mesh
 editor subsystem; it is not an asset execution mode for this importer.
@@ -575,24 +575,24 @@ def _load_owned_p3_map(unreal, audit, evidence, editor, levels):
     return world, level
 
 
-def _require_empty_resume(unreal, audit, evidence, world, import_level):
-    """Adopt only this unchanged empty map and backed-up saved scene asset.
+def _scene_source_binding(unreal, scene, source):
+    """Read the native import data across the scene reimport boundary."""
+    require(scene is not None and scene.get_class().get_name() == 'InterchangeSceneImportAsset',
+            'scene source query requires InterchangeSceneImportAsset')
+    data = scene.get_editor_property('asset_import_data')
+    require(isinstance(data, unreal.InterchangeAssetImportData), 'scene has no Interchange import data')
+    filenames = [str(Path(path).resolve()) for path in data.extract_filenames()]
+    require(filenames == [str(Path(source).resolve())], 'scene source binding differs: ' + str(filenames))
+    node_uid = data.get_editor_property('node_unique_id')
+    require(node_uid == 'Factory_SceneImport_' + Path(source).resolve().as_posix(),
+            'scene node UID differs from its source binding: ' + str(node_uid))
+    return data, {'scene_object': scene.get_path_name(), 'scene_class': scene.get_class().get_path_name(),
+                  'import_data_class': data.get_class().get_path_name(), 'source_filenames': filenames,
+                  'node_uid': node_uid}
 
-    Public import data and its empty factory graph establish the scene artifact's
-    identity. Missing data is a refusal, even if its name or metadata matches.
-    """
-    require(world is not None and world.get_path_name() == audit['map'] + '.' + audit['map'].rsplit('/', 1)[1],
-            'resume requires the original empty map to be the editor world')
-    require(import_level is not None and import_level.get_outer() == world
-            and import_level.get_path_name() == world.get_path_name() + ':PersistentLevel',
-            'resume current level is not the original map persistent level')
-    map_file = _package_file(audit['map'], '.umap')
-    require(map_file.is_file() and file_hash(map_file) == evidence['empty_map_sha256'],
-            'owned empty map changed on disk: ' + str(map_file))
-    require(not unreal.EditorLoadingAndSavingUtils.get_dirty_map_packages(),
-            'dirty maps must be preserved; empty Stage resume refused')
-    require(not unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors(),
-            'resume map contains actors; refusing to adopt changed content')
+
+def _read_saved_p1_scene(unreal, audit, evidence):
+    """Read only the protected P1 partial and require all new targets absent."""
     root = audit['asset_root']
     packages = _expected_packages(audit)
     scene_package = evidence['saved_scene_package']
@@ -608,44 +608,97 @@ def _require_empty_resume(unreal, audit, evidence, world, import_level):
     actual = {str(a.package_name) for a in registry.get_assets_by_path(
         root, recursive=True, include_only_on_disk_assets=False)}
     require(actual == {scene_package}, 'resume namespace differs from the sole failed scene asset: ' + str(actual))
-    scene_name = scene_package.rsplit('/', 1)[1]
-    scene = unreal.find_object(None, scene_package + '.' + scene_name)
-    require(scene is not None and scene.get_class().get_name() == 'InterchangeSceneImportAsset',
-            'source-bound failed scene object is missing or has another class')
-    dirty_stage = {p.get_path_name() for p in unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages()
-                   if p.get_path_name().startswith(root + '/')}
-    require(dirty_stage == {scene_package}, 'resume failed scene package dirty state changed')
-    require(not scene.get_editor_property('asset_user_data')
-            and not unreal.EditorAssetLibrary.get_metadata_tag_values(scene),
-            'failed scene user data or metadata changed; resume refused')
-    data = scene.get_editor_property('asset_import_data')
-    require(isinstance(data, unreal.InterchangeAssetImportData),
-            'failed scene has no public Interchange import data; ownership cannot be verified')
-    filenames = [Path(p).resolve() for p in data.extract_filenames()]
-    require(filenames == [Path(evidence['failed_source'])],
-            'failed scene source binding differs: ' + str(filenames))
-    node_uid = data.get_editor_property('node_unique_id')
-    require(node_uid == 'Factory_SceneImport_' + Path(evidence['failed_source']).as_posix(),
-            'failed scene node UID differs from its original source binding: ' + str(node_uid))
-    nodes = data.get_node_container()
-    require(nodes is not None, 'failed scene has no public stored node container')
-    node_ids = list(nodes.get_nodes(unreal.InterchangeBaseNode.static_class()))
-    require(node_ids == [node_uid],
-            'failed scene complete graph is not its sole scene import node: ' + str(node_ids))
-    factory = nodes.get_factory_node(node_ids[0])
-    require(isinstance(factory, unreal.InterchangeSceneImportAssetFactoryNode)
-            and factory.get_factory_dependencies_count() == 0,
-            'failed scene factory graph has other results or dependencies')
-    return scene
+    scene = unreal.EditorAssetLibrary.load_asset(scene_package)
+    data, state = _scene_source_binding(unreal, scene, evidence['failed_source'])
+    require(state['scene_object'] == scene_package + '.' + scene_package.rsplit('/', 1)[1],
+            'saved P1 scene loaded from another object path')
+    container = data.get_node_container()
+    require(container is not None, 'saved P1 scene has no public stored node container')
+    node_ids = sorted(str(uid) for uid in container.get_nodes(unreal.InterchangeBaseNode.static_class()))
+    graph = []
+    for uid in node_ids:
+        node = container.get_node(uid)
+        require(node is not None and node.get_unique_id() == uid, 'stored P1 graph node cannot be read: ' + uid)
+        row = {'uid': uid, 'class': node.get_class().get_path_name(), 'display_label': node.get_display_label()}
+        if isinstance(node, unreal.InterchangeFactoryBaseNode):
+            dependencies = sorted(str(dep) for dep in node.get_factory_dependencies())
+            dependency_count = node.get_factory_dependencies_count()
+            require(len(dependencies) == dependency_count, 'stored P1 dependency query disagrees at ' + uid)
+            row.update(factory_dependencies=dependencies, factory_dependency_count=dependency_count)
+        graph.append(row)
+    require(state['node_uid'] in node_ids, 'saved P1 graph is missing its source-bound import node')
+    metadata = {str(key): str(value) for key, value in unreal.EditorAssetLibrary.get_metadata_tag_values(scene).items()}
+    # The non-editable array is not exposed to Python. The reflected interface
+    # finds a non-null entry; it cannot enumerate the array or its null slots.
+    require(callable(getattr(scene, 'get_asset_user_data_of_class', None)),
+            'saved P1 scene has no reflected AssetUserData query interface')
+    user_data_class = unreal.AssetUserData.static_class()
+    first_user_data = scene.get_asset_user_data_of_class(user_data_class)
+    state.update(stored_graph=graph, metadata=metadata, asset_user_data={
+        'read_api': 'IInterface_AssetUserData.GetAssetUserDataOfClass',
+        'query_class': user_data_class.get_path_name(),
+        'non_null_entry_present': first_user_data is not None,
+        'first_non_null_entry': (None if first_user_data is None else {
+            'object': first_user_data.get_path_name(), 'class': first_user_data.get_class().get_path_name()}),
+        'complete_array_readback': False,
+    })
+    return scene, data, state
+
+
+def _load_owned_p1_result(unreal, audit, evidence, editor, levels):
+    """Adopt the clean saved failure whose two-node graph was read natively."""
+    map_file = _package_file(audit['map'], '.umap')
+    require(map_file.is_file() and file_hash(map_file) == evidence['empty_map_sha256'],
+            'owned empty P1 map changed before load')
+    scene, data, state = _read_saved_p1_scene(unreal, audit, evidence)
+    common_uid = 'CommonPipelineDataFactoryNode'
+    expected_graph = [
+        {'uid': common_uid, 'class': '/Script/InterchangeFactoryNodes.InterchangeCommonPipelineDataFactoryNode',
+         'display_label': common_uid, 'factory_dependencies': [], 'factory_dependency_count': 0},
+        {'uid': state['node_uid'], 'class': '/Script/InterchangeFactoryNodes.InterchangeSceneImportAssetFactoryNode',
+         'display_label': 'SceneImport_' + STAGES['P1'],
+         'factory_dependencies': [common_uid], 'factory_dependency_count': 1},
+    ]
+    require(state['stored_graph'] == expected_graph, 'saved P1 graph differs from the actual two-node failed import')
+    require(not state['metadata'] and not state['asset_user_data']['non_null_entry_present'],
+            'saved P1 scene metadata or non-null user data changed')
+    # UE does not serialize this translator cache with the scene package. A
+    # cold load legitimately has no cache; native reimport then loads the
+    # current project settings. Validate those before import and the factory's
+    # actual effective settings before saving the result.
+    stored_settings = data.get_translator_settings()
+    state['stored_translator_settings'] = (None if stored_settings is None
+                                           else _translator_convention(stored_settings))
+    state['translator_settings_validation'] = 'current_native_preflight_and_factory_effective_settings_before_save'
+    require(levels.load_level(audit['map']), 'cannot load the approved owned empty P1 map')
+    world = editor.get_editor_world()
+    level = levels.get_current_level()
+    map_object = audit['map'] + '.' + audit['map'].rsplit('/', 1)[1]
+    require(world is not None and world.get_path_name() == map_object
+            and level is not None and level.get_outer() == world
+            and level.get_path_name() == map_object + ':PersistentLevel',
+            'owned P1 map/current persistent level differs after load')
+    require(not unreal.EditorLoadingAndSavingUtils.get_dirty_map_packages()
+            and not unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages()
+            and not unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors(),
+            'owned P1 result is dirty or contains actors; preserve it and refuse continuation')
+    _require_saved_scene_files(evidence)
+    require(file_hash(map_file) == evidence['empty_map_sha256'], 'owned empty P1 map changed during native load')
+    return world, level, scene, state
 
 
 def _translator_settings(unreal, manager, source_data):
     translator = manager.get_translator_for_source_data(source_data)
     require(isinstance(translator, unreal.InterchangeFbxTranslator), 'native FBX translator unavailable')
     settings = translator.get_settings()
-    require(settings is not None, 'FBX translator settings unavailable')
-    # Read the same persisted settings loaded by the actual import translator.
+    return _translator_convention(settings)
+
+
+def _translator_convention(settings):
+    # Read native settings, including the project's explicit axes/unit policy.
     # Reject a different convention without rewriting project/editor settings.
+    require(settings is not None and settings.get_class().get_name() == 'InterchangeFbxTranslatorSettings',
+            'native FBX translator settings unavailable or wrong class')
     expected = {'convert_scene': True, 'force_front_x_axis': False, 'convert_scene_unit': True,
                 'using_luf_coordinate_system': False}
     actual = {key: settings.get_editor_property(key) for key in expected}
@@ -681,7 +734,24 @@ def _material_slot_contract(audit, model):
     return slots
 
 
-def _geometry_readback(unreal, audit, import_level, baseline_actors):
+def _native_asset_result(audit, imported_objects):
+    """Validate this synchronous call's OnAssetDone results before any save."""
+    expected = _expected_packages(audit)
+    result = {}
+    for obj in imported_objects:
+        require(obj is not None, 'native import reported a null asset')
+        path = obj.get_path_name()
+        package = path.split('.')[0]
+        require(package in expected and path == package + '.' + package.rsplit('/', 1)[1],
+                'native import returned an unexpected object: ' + path)
+        require(package not in result, 'native import reported a duplicate package: ' + package)
+        require(obj.get_class().get_name() == expected[package], 'native import returned another class: ' + path)
+        result[package] = obj
+    require(set(result) == set(expected), 'native import asset result differs from the source manifest')
+    return result
+
+
+def _geometry_readback(unreal, audit, import_level, baseline_actors, native_assets=None):
     actor_editor = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
     mesh_editor = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem)
     require(actor_editor is not None and mesh_editor is not None,
@@ -722,6 +792,8 @@ def _geometry_readback(unreal, audit, import_level, baseline_actors):
             package = _mesh_package(audit, geometry)
             require(mesh is not None and mesh.get_path_name().split('.')[0] == package,
                     f'model {model_id} references a different geometry')
+            if native_assets is not None:
+                require(mesh == native_assets[package], f'model {model_id} does not reference its native import result')
             slot_names = [str(s.get_editor_property('imported_material_slot_name'))
                           for s in mesh.get_editor_property('static_materials')]
             slot_contract = _material_slot_contract(audit, model)
@@ -741,11 +813,18 @@ def _geometry_readback(unreal, audit, import_level, baseline_actors):
     assets = unreal.EditorAssetLibrary.list_assets(audit['asset_root'], recursive=True, include_folder=False)
     packages = {p.split('.')[0] for p in assets}
     expected_packages = _expected_packages(audit)
-    require(packages == set(expected_packages), 'imported package set differs from the source manifest')
-    for package, class_name in expected_packages.items():
-        obj = unreal.EditorAssetLibrary.load_asset(package)
-        require(obj is not None and obj.get_class().get_name() == class_name,
-                'unexpected imported class at ' + package)
+    if native_assets is None:
+        require(packages == set(expected_packages), 'imported package set differs from the source manifest')
+        for package, class_name in expected_packages.items():
+            obj = unreal.EditorAssetLibrary.load_asset(package)
+            require(obj is not None and obj.get_class().get_name() == class_name,
+                    'unexpected imported class at ' + package)
+    else:
+        # Scene reimport does not emit AssetCreated for its new meshes. Their
+        # exact result set was validated through OnAssetDone; the registry may
+        # omit them until the explicit package saves and disk scan below.
+        require(set(assets) <= {obj.get_path_name() for obj in native_assets.values()},
+                'registered assets outside the native source result')
     return rows
 
 
@@ -759,10 +838,20 @@ def _save_geometry_asset(unreal, obj, audit, report, resume_scene, evidence):
         _require_saved_scene_files(evidence)
     else:
         require(not _package_file(package, '.uasset').exists(), 'refusing to replace disk package ' + package)
+    if resume_scene is not None:
+        outer = obj.get_outer()
+        require(outer.get_class().get_name() == 'Package' and outer.get_path_name() == package,
+                'native result has another package outer: ' + package)
     unreal.EditorAssetLibrary.set_metadata_tag(obj, 'BH3.ImportOwner', OWNER)
     unreal.EditorAssetLibrary.set_metadata_tag(obj, 'BH3.SourceSHA256', audit['source_sha256'])
     unreal.EditorAssetLibrary.set_metadata_tag(obj, 'BH3.StagePhase', 'GeometryOnly')
-    require(unreal.EditorAssetLibrary.save_loaded_asset(obj, only_if_is_dirty=False), 'save failed: ' + package)
+    if resume_scene is None:
+        require(unreal.EditorAssetLibrary.save_loaded_asset(obj, only_if_is_dirty=False), 'save failed: ' + package)
+    else:
+        # SaveLoadedAsset requires registry membership, which native Scene
+        # reimport does not publish for newly created meshes. Save exactly the
+        # verified native UObject's package, then index its actual disk file.
+        require(unreal.EditorLoadingAndSavingUtils.save_packages([outer], False), 'package save failed: ' + package)
     require(_package_file(package, '.uasset').is_file(), 'saved package missing from disk: ' + package)
     require(obj.get_outer() not in unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages(),
             'saved package still dirty: ' + package)
@@ -843,7 +932,7 @@ def _require_geometry_api(unreal):
 
 def _require_editor_process_host(unreal, stage, editor, levels, world):
     """Accept the verified standard Editor runner and preserve its startup map."""
-    require(stage == 'P3', 'isolated Editor process is approved only for P3')
+    require(stage in STAGES, 'isolated Editor host requires an explicit approved Stage')
     parameters = _process_parameters(unreal)
     require(not parameters.get('run') and parameters.get('executepythonscript'),
             'isolated Editor requires -ExecutePythonScript, never a Commandlet')
@@ -866,6 +955,7 @@ def _require_editor_process_host(unreal, stage, editor, levels, world):
 
 def editor_api_preflight(stage):
     """Read capabilities in the native fully initialized Editor Python runner."""
+    require(stage == 'P3', 'new-target Editor API preflight is P3 only')
     import unreal
     editor = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
     levels = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
@@ -888,6 +978,60 @@ def editor_api_preflight(stage):
     return report
 
 
+def editor_p1_preflight(stage, failed_manifest, empty_map_sha256, saved_scene_backup):
+    """Inspect the exact saved P1 failure in a separate native Editor; write nothing.
+
+    Graph shape, metadata and dirty state are observations, not assumed empty
+    values or a reimport authorization. This does not inspect another process's
+    loaded UObject or replace the production continuation's ownership gate.
+    """
+    require(stage == 'P1' and all(value is not None for value in
+            (failed_manifest, empty_map_sha256, saved_scene_backup)),
+            'P1 read-only preflight requires its exact manifest, map SHA256 and scene backup')
+    audit = audit_stage(stage)
+    evidence = _empty_resume_evidence(audit, failed_manifest, empty_map_sha256, saved_scene_backup)
+    map_file = _package_file(audit['map'], '.umap')
+    require(map_file.is_file() and file_hash(map_file) == evidence['empty_map_sha256'],
+            'approved empty P1 map changed before read-only preflight')
+    import unreal
+    editor = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
+    levels = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+    world = editor.get_editor_world() if editor is not None else None
+    host = _require_editor_process_host(unreal, stage, editor, levels, world)
+    require(not unreal.EditorLevelLibrary.get_pie_worlds(False), 'PIE must be stopped')
+    manager = unreal.InterchangeManager.get_interchange_manager_scripted()
+    require(not manager.is_interchange_active(), 'another Interchange import/export is active')
+    api = _require_geometry_api(unreal)
+    scene_package = evidence['saved_scene_package']
+    scene, _, scene_state = _read_saved_p1_scene(unreal, audit, evidence)
+    require(levels.load_level(audit['map']), 'cannot read the approved saved P1 map')
+    world = editor.get_editor_world()
+    level = levels.get_current_level()
+    map_object = audit['map'] + '.' + audit['map'].rsplit('/', 1)[1]
+    require(world is not None and world.get_path_name() == map_object
+            and level is not None and level.get_outer() == world
+            and level.get_path_name() == map_object + ':PersistentLevel',
+            'read-only P1 load returned another world/current level')
+    actors = unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors()
+    dirty_maps = [p.get_path_name() for p in unreal.EditorLoadingAndSavingUtils.get_dirty_map_packages()]
+    dirty_content = [p.get_path_name() for p in unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages()]
+    # Recheck protected bytes after native load/cache getters, before returning
+    # to the standard runner's automatic exit. The coordinator checks again
+    # after process exit; this probe never calls a save or a dirty-state setter.
+    _require_saved_scene_files(evidence)
+    require(file_hash(map_file) == evidence['empty_map_sha256'], 'P1 map bytes changed during read-only preflight')
+    report = {'stage': stage, 'phase': 'editor_p1_saved_scene_preflight', 'editor_pid': os.getpid(),
+              'host': host, 'geometry_api': api, 'evidence': evidence,
+              **scene_state,
+              'world': world.get_path_name(), 'level': level.get_path_name(),
+              'user_actor_count': len(actors), 'actors': [actor.get_path_name() for actor in actors],
+              'dirty_maps': dirty_maps, 'dirty_content': dirty_content,
+              'scene_package_dirty': scene_package in dirty_content,
+              'asset_writes': False, 'save_executed': False, 'reimport_validated': False}
+    unreal.log('BH3_STAGE_P1_SAVED_SCENE_PREFLIGHT ' + json.dumps(report, ensure_ascii=False))
+    return report
+
+
 def import_geometry(stage):
     """Synchronous new-only geometry batch. Never auto-run PIE or SaveAll.
 
@@ -898,14 +1042,14 @@ def import_geometry(stage):
 
 
 def continue_geometry(stage, failed_manifest, empty_map_sha256, saved_scene_backup):
-    """Resume the approved saved P1 empty result using its precise scene backup.
+    """Resume the protected P1 failure in the standard complete Editor process.
 
     This is not an automatic recovery path. The ordinary import entry still
     rejects every existing target, including this failed scene artifact.
     """
-    require(failed_manifest is not None and empty_map_sha256 is not None and saved_scene_backup is not None,
+    require(stage == 'P1' and failed_manifest is not None and empty_map_sha256 is not None and saved_scene_backup is not None,
             'explicit continuation requires its failed manifest, empty-map SHA256 and scene backup')
-    return _run_geometry(stage, failed_manifest, empty_map_sha256, saved_scene_backup)
+    return _run_geometry(stage, failed_manifest, empty_map_sha256, saved_scene_backup, editor_process=True)
 
 
 def continue_editor_geometry(stage, failed_report, empty_map_backup):
@@ -920,13 +1064,15 @@ def _run_geometry(stage, failed_manifest=None, empty_map_sha256=None, saved_scen
     resume_inputs = (failed_manifest, empty_map_sha256, saved_scene_backup)
     require(all(p is None for p in resume_inputs) or all(p is not None for p in resume_inputs),
             'continuation evidence is incomplete; normal import cannot substitute for it')
-    require(not editor_process or stage == 'P3' and failed_manifest is None
-            and failed_report is not None and empty_map_backup is not None,
-            'isolated Editor requires explicit known P3 empty-map continuation evidence')
+    require(failed_manifest is None or (stage == 'P1' and editor_process
+            and failed_report is None and empty_map_backup is None),
+            'saved P1 continuation requires the complete Editor and cannot mix P3 evidence')
     require((failed_report is None and empty_map_backup is None)
             or (failed_report is not None and empty_map_backup is not None
                 and editor_process and stage == 'P3' and failed_manifest is None),
             'owned P3 map continuation evidence is incomplete or mixed with another mode')
+    require(not editor_process or failed_manifest is not None or failed_report is not None,
+            'isolated Editor requires explicit owned P1 or P3 continuation evidence')
     import unreal
     audit = audit_stage(stage)
     evidence = (_empty_resume_evidence(audit, failed_manifest, empty_map_sha256, saved_scene_backup)
@@ -951,6 +1097,12 @@ def _run_geometry(stage, failed_manifest=None, empty_map_sha256=None, saved_scen
         previous_map = old_world.get_path_name().split('.')[0]
         require(_package_file(previous_map, '.umap').is_file(), 'current map has no saved disk package')
     geometry_api = _require_geometry_api(unreal)
+    p1_result = (_load_owned_p1_result(unreal, audit, evidence, editor, levels)
+                 if evidence is not None else None)
+    if p1_result is not None:
+        require(callable(getattr(unreal.EditorLoadingAndSavingUtils, 'save_packages', None))
+                and callable(getattr(unreal.AssetRegistryHelpers.get_asset_registry(), 'scan_modified_asset_files', None)),
+                'required native P1 package save / exact disk scan API unavailable')
     pipelines = _pipelines(unreal)
     source_data = manager.create_source_data(audit['source'])
     settings = _translator_settings(unreal, manager, source_data)
@@ -976,10 +1128,8 @@ def _run_geometry(stage, failed_manifest=None, empty_map_sha256=None, saved_scen
         require(file_hash(audit['source']) == audit['source_sha256'], 'FBX source changed before import')
         resume_scene = None
         if evidence is not None:
-            world = editor.get_editor_world()
-            import_level = levels.get_current_level()
-            resume_scene = _require_empty_resume(unreal, audit, evidence, world, import_level)
-            report['resume_evidence'] = dict(evidence, scene_object=resume_scene.get_path_name())
+            world, import_level, resume_scene, scene_state = p1_result
+            report['resume_evidence'] = dict(evidence, **scene_state)
             report['adopted_empty_map'] = audit['map']
         elif p3_map_evidence is not None:
             report['phase'] = 'load_owned_empty_map'
@@ -1012,13 +1162,39 @@ def _run_geometry(stage, failed_manifest=None, empty_map_sha256=None, saved_scen
                         override_pipelines=pipelines[2].get_editor_property('override_pipelines'))
         if resume_scene is not None:
             _set_properties(parameters, reimport_asset=resume_scene)
-        require(not manager.is_interchange_active(), 'another Interchange operation started before scene import')
+        imported_objects = []
+        asset_done = None
         report['phase'] = 'native_scene_import'
-        require(manager.import_scene(audit['asset_root'], source_data, parameters),
-                'Interchange scene import failed; partial assets preserved')
+        try:
+            if resume_scene is not None:
+                delegate = parameters.get_editor_property('on_asset_done')
+                require(callable(getattr(delegate, 'bind_callable', None))
+                        and callable(getattr(delegate, 'unbind', None)), 'native OnAssetDone binding unavailable')
+                asset_done = delegate
+                asset_done.bind_callable(lambda obj: imported_objects.append(obj))
+                parameters.set_editor_property('on_asset_done', asset_done)
+                require(bool(parameters.get_editor_property('on_asset_done')), 'native OnAssetDone was not bound')
+            require(not manager.is_interchange_active(), 'another Interchange operation started before scene import')
+            require(manager.import_scene(audit['asset_root'], source_data, parameters),
+                    'Interchange scene import failed; partial assets preserved')
+        finally:
+            if asset_done is not None:
+                asset_done.unbind()
+                parameters.set_editor_property('on_asset_done', asset_done)
         require(not manager.is_interchange_active(), 'synchronous scene import is still active')
         report['phase'] = 'readback'
-        report['actors'] = _geometry_readback(unreal, audit, import_level, baseline)
+        native_assets = (_native_asset_result(audit, imported_objects) if resume_scene is not None else None)
+        if native_assets is not None:
+            require(native_assets[evidence['saved_scene_package']] == resume_scene,
+                    'native P1 asset result replaced its adopted SceneImport identity')
+            report['native_asset_result'] = {'read_api': 'ImportAssetParameters.OnAssetDone',
+                                           'objects': sorted(obj.get_path_name() for obj in native_assets.values())}
+        report['actors'] = _geometry_readback(unreal, audit, import_level, baseline, native_assets)
+        if resume_scene is not None:
+            require(unreal.EditorAssetLibrary.load_asset(evidence['saved_scene_package']) == resume_scene,
+                    'P1 reimport replaced its adopted SceneImport UObject identity')
+            data, report['reimport_source_binding'] = _scene_source_binding(unreal, resume_scene, audit['import_source'])
+            report['effective_translator_settings'] = _translator_convention(data.get_translator_settings())
         for row in report['actors'].values():
             actor = unreal.find_object(None, row['actor'])
             require(actor is not None, 'imported actor disappeared: ' + row['actor'])
@@ -1028,8 +1204,17 @@ def _run_geometry(stage, failed_manifest=None, empty_map_sha256=None, saved_scen
             actor.set_folder_path(unreal.Name('BH3/' + STAGES[stage]))
         report['phase'] = 'exact_asset_saves'
         for package in sorted(_expected_packages(audit)):
-            _save_geometry_asset(unreal, unreal.EditorAssetLibrary.load_asset(package),
+            obj = native_assets[package] if native_assets is not None else unreal.EditorAssetLibrary.load_asset(package)
+            _save_geometry_asset(unreal, obj,
                                  audit, report, resume_scene, evidence)
+        if native_assets is not None:
+            report['phase'] = 'saved_asset_registry_readback'
+            unreal.AssetRegistryHelpers.get_asset_registry().scan_modified_asset_files(
+                [str(_package_file(package, '.uasset')) for package in sorted(native_assets)])
+            registered = unreal.EditorAssetLibrary.list_assets(audit['asset_root'], recursive=True, include_folder=False)
+            require(set(registered) == {obj.get_path_name() for obj in native_assets.values()},
+                    'saved native asset registry result differs from the exact source objects')
+            report['saved_asset_registry_verified'] = True
         report['phase'] = 'exact_map_save'
         if evidence is not None:
             require(file_hash(_package_file(audit['map'], '.umap')) == evidence['empty_map_sha256'],
@@ -1068,7 +1253,8 @@ def _run_geometry(stage, failed_manifest=None, empty_map_sha256=None, saved_scen
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command', choices=[
-        'audit', 'geometry', 'continue_geometry', 'editor_continue_geometry', 'editor_api_preflight'])
+        'audit', 'geometry', 'continue_geometry', 'editor_continue_geometry', 'editor_api_preflight',
+        'editor_p1_preflight'])
     parser.add_argument('--stage', choices=['P1', 'P3', 'all'], default='all')
     parser.add_argument('--failed-manifest')
     parser.add_argument('--empty-map-sha256')
@@ -1076,6 +1262,11 @@ def main():
     parser.add_argument('--failed-report')
     parser.add_argument('--empty-map-backup')
     args = parser.parse_args()
+    if args.command == 'editor_p1_preflight':
+        require(args.failed_report is None and args.empty_map_backup is None,
+                'P1 saved-scene preflight cannot accept P3 owned-map evidence')
+        editor_p1_preflight(args.stage, args.failed_manifest, args.empty_map_sha256, args.saved_scene_backup)
+        return
     if args.command == 'editor_api_preflight':
         require(all(value is None for value in (args.failed_manifest, args.empty_map_sha256,
                 args.saved_scene_backup, args.failed_report, args.empty_map_backup)),
