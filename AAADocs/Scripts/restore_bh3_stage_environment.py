@@ -11,7 +11,8 @@ Settings contain explicit texture interpretation and material expression graphs.
 No missing recipe, source, sampler or rendering policy gets a replacement.
 Texture creation is an independent saved phase. The environment map phase starts only after
 all required assets and the source-affine geometry are ready. Collision policy
-is intentionally not executed by this tool while its user decision is pending.
+is separate from the environment checkpoint. pawn_support_preflight reads the
+selected original floor/Collision and player configuration without saving or PIE.
 map_geometry requires --map-backup of the exact original map in Saved.
 map_geometry_readback consumes that phase's --geometry-result in a fresh Editor.
 geometry_baseline reads an already exact saved scene without a redundant map save;
@@ -24,7 +25,9 @@ import json
 from pathlib import Path
 import math
 import re
+import runpy
 import sys
+import struct
 import time
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -47,7 +50,8 @@ def targets(plan, mode):
 
 def validate_settings(plan, settings, mode):
     source.require(settings.get('plan_digest') == plan['digest'], 'settings belong to another source plan')
-    if 'preserved_lighting' in settings:source.lighting_generation_digest(plan,settings)
+    if 'preserved_lighting' in settings or 'lighting_calibration' in settings:
+        source.lighting_generation_digest(plan,settings)
     if mode in ('textures','probe_textures','surface_textures','surface_textures_readback','probe_textures_readback', 'preflight', 'map', 'readback', 'assets_readback', 'lighting', 'lighting_readback'):
         configs = settings.get('textures', {})
         source.require(set(configs) == set(plan['textures']), 'all source texture interpretations must be explicit')
@@ -1145,6 +1149,1049 @@ def read_environment(u,plan,settings,result,applied_path,materials):
     result['apply_result']=source.evidence(applied_path)
 
 
+def support_dynamic_mesh(u, spec, saved_mesh=None):
+    """原 Floor OBJ 只换一次局部帧；P3 读取原 SourceModel0，不经过新导入器。"""
+    dm = u.DynamicMesh()
+    if saved_mesh is None and spec['stage'] == 'P1':
+        for index, point in enumerate(spec['vertices']):
+            value, actual = u.GeometryScript_MeshEdits.add_vertex_to_mesh(dm, u.Vector(*point), True)
+            source.require(value == dm and actual == index, 'PawnSupport native vertex append identity differs')
+        for index, triangle in enumerate(spec['native_triangles'] if 'native_winding_policy' in spec else spec['triangles']):
+            value, actual = u.GeometryScript_MeshEdits.add_triangle_to_mesh(dm, u.IntVector(*triangle), 0, True)
+            source.require(value == dm and actual == index, 'PawnSupport native triangle append failed: '+str(index))
+    else:
+        mesh = saved_mesh if saved_mesh is not None else exact_asset(u, spec['source_mesh'], 'StaticMesh')
+        value, outcome = u.GeometryScript_AssetUtils.copy_mesh_from_static_mesh_v2(
+            mesh, dm, u.GeometryScriptCopyMeshFromAssetOptions(),
+            u.GeometryScriptMeshReadLOD(lod_type=u.GeometryScriptLODType.SOURCE_MODEL, lod_index=0), False)
+        source.require(value == dm and outcome == u.GeometryScriptOutcomePins.SUCCESS,
+                       'PawnSupport original SourceModel0 copy failed')
+    query = u.GeometryScript_MeshQueries
+    vertices, triangles = {}, {}
+    for index in range(query.get_num_vertex_i_ds(dm)):
+        p, valid = query.get_vertex_position(dm, index)
+        if valid:
+            point = [p.x, p.y, p.z]
+            source.require(all(math.isfinite(v) for v in point), 'PawnSupport native vertex is non-finite')
+            vertices[index] = point
+    for index in range(query.get_num_triangle_i_ds(dm)):
+        face, valid = query.get_triangle_indices(dm, index)
+        if valid:
+            triangles[index] = [face.x, face.y, face.z]
+            source.require(len(set(triangles[index])) == 3 and all(v in vertices for v in triangles[index]),
+                           'PawnSupport native triangle connectivity differs')
+    source.require(len(vertices) == query.get_vertex_count(dm) == spec['vertices_expected']
+                   and len(triangles) == dm.get_triangle_count() == spec['triangles_expected'],
+                   'PawnSupport native source topology cardinality differs')
+    if spec['stage'] == 'P1' and saved_mesh is None:
+        native = spec['native_triangles'] if 'native_winding_policy' in spec else spec['triangles']
+        source.require(list(triangles.values()) == native, 'PawnSupport native OBJ winding conversion differs')
+        for index, expected in enumerate(spec['vertices']):
+            source.require(max(abs(a-b) for a, b in zip(vertices[index], expected)) < .002,
+                           'PawnSupport native OBJ frame differs: '+str(index))
+    return dm, {'vertices': vertices, 'triangles': triangles}
+
+
+def support_capsule_cdo(u, pawn_class):
+    """只读真实角色 CDO；角色尺寸与正常重力不从另一角色借用。"""
+    source.require(pawn_class is not None, 'PawnSupport configured PawnClass is missing')
+    pawn = u.get_default_object(pawn_class)
+    source.require(isinstance(pawn, u.Character), 'PawnSupport configured PawnClass is not a Character')
+    capsule = pawn.get_editor_property('CapsuleComponent')
+    movement = pawn.get_editor_property('CharacterMovement')
+    source.require(capsule is not None and movement is not None, 'PawnSupport configured capsule/CMC is missing')
+    radius = float(capsule.get_unscaled_capsule_radius())
+    half_height = float(capsule.get_unscaled_capsule_half_height())
+    gravity = float(movement.get_editor_property('GravityScale'))
+    direction = movement.get_gravity_direction()
+    source.require(math.isfinite(radius) and math.isfinite(half_height) and 0 < radius <= half_height
+                   and math.isfinite(gravity) and gravity > 0 and [direction.x, direction.y, direction.z] == [0., 0., -1.],
+                   'PawnSupport selected capsule/normal downward gravity contract differs')
+    return movement, {'class': object_path(pawn_class), 'radius_cm': radius, 'half_height_cm': half_height,
+                      'gravity_scale': gravity, 'gravity_direction': [direction.x, direction.y, direction.z],
+                      'profile': str(capsule.get_collision_profile_name()),
+                      'trace_complex_on_move': bool(capsule.get_editor_property('bTraceComplexOnMove')),
+                      'walkable_floor_z': float(movement.get_walkable_floor_z()),
+                      'capsule_body_native_text': capsule.get_editor_property('body_instance').export_text(),
+                      'capsule_relative_transform': capsule.get_relative_transform().export_text()}
+
+
+def support_player_configuration(u, world, plan):
+    """关卡覆盖与项目缺省按引擎入口读取；默认名单只是运行前候选。"""
+    world_settings = u.GameplayStatics.get_all_actors_of_class(world, u.WorldSettings)
+    source.require(len(world_settings) == 1, 'PawnSupport exact WorldSettings is missing/ambiguous')
+    world_settings = world_settings[0]
+    game_maps = u.GameMapsSettings.get_game_maps_settings()
+    native_default = game_maps.get_editor_property('global_default_game_mode').export_text()
+    prefixes = list(game_maps.get_editor_property('game_mode_map_prefixes'))
+    game_mode_class = world_settings.get_editor_property('default_game_mode')
+    origin = 'WorldSettings.DefaultGameMode'
+    if game_mode_class is None:
+        short_name = plan['map'].rsplit('/', 1)[1]
+        matched = [p for p in prefixes if short_name.startswith(str(p.get_editor_property('name')))]
+        source.require(not matched, 'PawnSupport map has a GameMode prefix override requiring explicit resolution')
+        paths = re.findall(r'/[A-Za-z0-9_/]+\.[A-Za-z0-9_]+', native_default)
+        source.require(len(paths) == 1 and paths[0].endswith('_C'),
+                       'PawnSupport native project default GameMode path is missing/ambiguous: '+native_default)
+        game_mode_class = u.load_class(None, paths[0])
+        origin = 'GameMapsSettings.GlobalDefaultGameMode'
+    source.require(game_mode_class is not None, 'PawnSupport selected GameMode class failed to load')
+    cdo = u.get_default_object(game_mode_class)
+    source.require(callable(getattr(cdo, 'get_experience', None)), 'PawnSupport configured GameMode has no Experience interface')
+    experience = cdo.get_experience()
+    source.require(experience is not None, 'PawnSupport configured GameMode Experience is missing')
+    roster = list(experience.get_editor_property('SquadMembers'))
+    roots = [str(v) for v in experience.get_editor_property('GameFeaturesToEnable')]
+    declarations = [v.export_text() for v in experience.get_editor_property('GameFeatureSources')]
+    result = {'world_settings': world_settings.get_path_name(), 'map_game_mode_override':
+              object_path(world_settings.get_editor_property('default_game_mode')),
+              'native_project_default': native_default, 'prefixes_native': [p.export_text() for p in prefixes],
+              'game_mode_class': object_path(game_mode_class), 'selection_source': origin,
+              'experience': object_path(experience), 'game_feature_roots': roots,
+              'game_feature_declarations_native': declarations, 'default_roster': [],
+              'default_roster_is_runtime_selection': False, 'runtime_game_feature_session_verified': False,
+              'runtime_possession_verified': False}
+    movements = []
+    for data in roster:
+        source.require(data is not None, 'PawnSupport Experience default roster contains a null entry')
+        movement, capsule = support_capsule_cdo(u, data.get_editor_property('PawnClass'))
+        row = {'pawn_data': object_path(data), 'capsule': capsule}
+        for prop in ('MovementSet', 'InputConfig', 'DefaultCameraMode'):
+            row[prop] = object_path(data.get_editor_property(prop))
+        row['ability_sets'] = [object_path(a) for a in data.get_editor_property('AbilitySets')]
+        source.require(row['MovementSet'] is not None and row['InputConfig'] is not None,
+                       'PawnSupport default player MovementSet/InputConfig is missing: '+row['pawn_data'])
+        result['default_roster'].append(row)
+        movements.append(movement)
+    result['default_roster_has_player_candidate'] = bool(roster)
+    result['player_starts'] = [{'actor': a.get_path_name(), 'pose': pose_of(a.get_actor_transform())}
+                               for a in u.GameplayStatics.get_all_actors_of_class(world, u.PlayerStart)]
+    return result, movements
+
+
+def support_body_state(u, actor):
+    """保留来源和相机层的实际配置，不改 BodySetup 或碰撞响应。"""
+    subsystem = u.get_editor_subsystem(u.StaticMeshEditorSubsystem)
+    rows = []
+    for comp in actor.get_components_by_class(u.StaticMeshComponent):
+        mesh = comp.get_editor_property('static_mesh')
+        source.require(mesh is not None, 'PawnSupport original collision component mesh is missing')
+        simple = subsystem.get_simple_collision_count(mesh)
+        convex = subsystem.get_convex_collision_count(mesh)
+        complexity = subsystem.get_collision_complexity(mesh)
+        body = mesh.get_editor_property('BodySetup')
+        rows.append({'actor': actor.get_path_name(), 'component': comp.get_path_name(), 'mesh': object_path(mesh),
+                     'body_setup': object_path(body), 'simple_collision_count': simple, 'convex_collision_count': convex,
+                     'complexity': str(complexity), 'agg_geom': body.get_editor_property('AggGeom').export_text() if body else None,
+                     'actor_collision': actor.get_actor_enable_collision(),
+                     'collision_enabled': str(comp.get_collision_enabled()), 'profile': str(comp.get_collision_profile_name()),
+                     'pawn_response': str(comp.get_collision_response_to_channel(u.CollisionChannel.ECC_PAWN)),
+                     'camera_response': str(comp.get_collision_response_to_channel(u.CollisionChannel.ECC_CAMERA)),
+                     'body_instance': comp.get_editor_property('body_instance').export_text()})
+    return rows
+
+
+def support_sweep(u, world, capsule, movement, start, end, complex_trace=False, ignored_actors=()):
+    """复用真实 profile 的原生查询；未命中不制造命中法线或支撑成功。"""
+    hit = u.SystemLibrary.capsule_trace_single_by_profile(world, u.Vector(*start), u.Vector(*end),
+        capsule['radius_cm'], capsule['half_height_cm'], capsule['profile'], complex_trace,
+        list(ignored_actors), u.DrawDebugTrace.NONE, False)
+    query = {'profile': capsule['profile'], 'complex': complex_trace, 'start_cm': start, 'end_cm': end, 'hit': None}
+    if hit is not None:
+        source.require(isinstance(hit, u.HitResult), 'PawnSupport native sweep return differs')
+        fields = hit.to_tuple()
+        source.require(len(fields) == 18 and fields[0], 'PawnSupport native HitResult signature differs')
+        text = hit.export_text()
+        depths = re.findall(r'(?:^|[,\(])PenetrationDepth=([^,\)]+)', text)
+        source.require(len(depths) == 1 and math.isfinite(float(depths[0])), 'PawnSupport penetration depth unavailable')
+        query['hit'] = {'native_text': text, 'initial_penetration': bool(fields[1]),
+                        'penetration_depth_cm': float(depths[0]), 'actor': object_path(fields[9]),
+                        'component': object_path(fields[10]), 'location_cm': [fields[4].x, fields[4].y, fields[4].z],
+                        'impact_normal': [fields[7].x, fields[7].y, fields[7].z],
+                        'native_cmc_is_walkable': bool(movement.is_walkable(hit))}
+    return query
+
+
+def loaded_stage_actors(u, plan):
+    """环境校验已核原件；同次只提取所需对象，不再完整验证每个 Renderer。"""
+    world = u.get_editor_subsystem(u.UnrealEditorSubsystem).get_editor_world()
+    by_path = {a.get_path_name(): a for a in u.get_editor_subsystem(u.EditorActorSubsystem).get_all_level_actors()}
+    return world, {mid: by_path[row['actor']] for mid, row in plan['geometry_actors'].items()}, by_path
+
+
+def support_visible_surface_check(u, plan, spec, actors):
+    """源到 native 顶点帧先核准，再测原 Floor 到真实可见三角面的距离。"""
+    surfaces, verified = [], []
+    for row in spec['visual_surfaces']:
+        source_vertices, source_triangles = source.parse_support_obj(
+            Path(row['source_obj']['path']).read_text(encoding='utf-8-sig'),
+            '# Original Unity coordinates / units / winding; no axis conversion.')
+        mesh = exact_asset(u, row['package'], 'StaticMesh')
+        dm = u.DynamicMesh()
+        value, outcome = u.GeometryScript_AssetUtils.copy_mesh_from_static_mesh_v2(
+            mesh, dm, u.GeometryScriptCopyMeshFromAssetOptions(),
+            u.GeometryScriptMeshReadLOD(lod_type=u.GeometryScriptLODType.SOURCE_MODEL, lod_index=0), False)
+        source.require(value == dm and outcome == u.GeometryScriptOutcomePins.SUCCESS,
+                       'P2 region visible native SourceModel0 copy failed')
+        query = u.GeometryScript_MeshQueries
+        vertices = {}
+        for i in range(query.get_num_vertex_i_ds(dm)):
+            p, valid = query.get_vertex_position(dm, i)
+            if valid:vertices[i] = [p.x, p.y, p.z]
+        source.require(len(vertices) == query.get_vertex_count(dm) == row['vertex_count']
+                       and dm.get_triangle_count() == row['triangle_count'], 'P2 region visible native topology counts differ')
+        maximum = 0.
+        for p in vertices.values():
+            distance = min(max(abs(a-b) for a, b in zip(p, expected)) for expected in source_vertices)
+            maximum = max(maximum, distance)
+        source.require(maximum < .02, 'P2 region source visible mesh local frame differs from native import')
+        transform = source.matrix(pose_of(actors[row['model']].get_actor_transform()))
+        native_world = {i: source.point(transform, p) for i, p in vertices.items()}
+        for i in range(query.get_num_triangle_i_ds(dm)):
+            face, valid = query.get_triangle_indices(dm, i)
+            if valid:surfaces.append([native_world[j] for j in (face.x, face.y, face.z)])
+        verified.append({'model': row['model'], 'mesh': row['package'], 'native_vertices': len(vertices),
+                         'native_triangles': dm.get_triangle_count(), 'maximum_source_local_error_cm': maximum})
+    begin, end = spec['floor_vertex_range']
+    transform = source.matrix(spec['source_world_pose'])
+    distances = [min(source.point_triangle_distance(source.point(transform, p), *face) for face in surfaces)
+                 for p in spec['vertices'][begin:end]]
+    source.require(len(distances) == 41 and max(distances) < .1,
+                   'P2 region original Floor does not match the actual P1 visible triangle surfaces')
+    return {'native_visible_meshes': verified, 'floor_vertex_distances_cm': distances,
+            'maximum_floor_surface_distance_cm': max(distances), 'runtime_world_registration_verified': False}
+
+
+def pawn_support_preflight(u, plan, settings, result, environment_result, p1_source_manifest=None, asset_result=None):
+    """只读原场景和瞬态几何；不建资产/Actor，不 PIE，不保存。"""
+    source.require(plan['stage'] != 'P1' or p1_source_manifest is not None, 'P1 preflight needs its selected P2 source manifest')
+    spec = source.pawn_support_spec(plan, p1_source_manifest)
+    if asset_result is None:
+        source.require(not package_file(spec['package']).exists() and not u.EditorAssetLibrary.does_asset_exist(spec['package']),
+                       'PawnSupport create-only target already exists')
+    read_environment(u, plan, settings, result, environment_result, True)
+    world, actors, _ = loaded_stage_actors(u, plan)
+    baseline = map_geometry_state(u)
+    camera_mid = {'P1': '1580554021824', 'P3': '1934927154112'}[plan['stage']]
+    protected_packages = {plan['map']: '.umap'}
+    for mid in (spec['source_model'], camera_mid):
+        if 'mesh' in plan['geometry_actors'][mid]:
+            protected_packages[plan['geometry_actors'][mid]['mesh']] = '.uasset'
+    for surface in spec.get('visual_surfaces', []):protected_packages[surface['package']] = '.uasset'
+    protected = {p: source.evidence(package_file(p, ext)) for p, ext in protected_packages.items()}
+    result.update(support_spec=spec, protected_packages=protected, source_scene_baseline=baseline,
+                  pie_started=False, legal_spawn_verified=False, actual_cmc_landing_verified=False,
+                  original_camera_preserved=False)
+    try:
+        result['phase'] = 'pawn_support_native_geometry'
+        dm, topology = support_dynamic_mesh(u, spec)
+        world_vertices = {i: source.point(source.matrix(spec['source_world_pose']), p)
+                          for i, p in topology['vertices'].items()}
+        bounds = {'min': [min(p[i] for p in world_vertices.values()) for i in range(3)],
+                  'max': [max(p[i] for p in world_vertices.values()) for i in range(3)]}
+        result.update(native_source_topology=topology, native_source_topology_digest=source.digest(topology),
+                      source_world_bounds_cm=bounds,
+                      original_source_body=support_body_state(u, actors[spec['source_model']]),
+                      original_camera_body=support_body_state(u, actors[camera_mid]))
+        if asset_result is not None:
+            failed, evidence = support_asset_resume(spec, dict(result, phase='pawn_support_preflight_passed'), protected[plan['map']], asset_result)
+            source.require(failed['phase'] == 'pawn_support_asset_repair_passed', 'PawnSupport existing-target preflight requires explicit asset repair')
+            verify_support_asset(u, spec, topology)
+            result['asset_repair_result'] = evidence
+        floor_vertices = world_vertices.values()
+        if 'floor_vertex_range' in spec:
+            begin, end = spec['floor_vertex_range']
+            floor_vertices = [world_vertices[i] for i in range(begin, end)]
+            result['native_visible_surface_check'] = support_visible_surface_check(u, plan, spec, actors)
+        result['floor_query_bounds_cm'] = {'min': [min(p[i] for p in floor_vertices) for i in range(3)],
+                                         'max': [max(p[i] for p in floor_vertices) for i in range(3)]}
+        result['phase'] = 'pawn_support_player_configuration'
+        config, movements = support_player_configuration(u, world, plan)
+        result['player_configuration'] = config
+        result['native_queries'] = []
+        for row, movement in zip(config['default_roster'], movements):
+            capsule = row['capsule']
+            center = [(bounds['min'][i]+bounds['max'][i])*.5 for i in range(2)]
+            start = center+[bounds['max'][2]+capsule['half_height_cm']*3]
+            end = center+[bounds['min'][2]-capsule['half_height_cm']*3]
+            for complex_trace in (False, True):
+                query = support_sweep(u, world, capsule, movement, start, end, complex_trace)
+                query['pawn_data'] = row['pawn_data']
+                result['native_queries'].append(query)
+    finally:
+        verify_geometry_state(map_geometry_state(u), baseline)
+        source.require({p: source.evidence(package_file(p, ext)) for p, ext in protected_packages.items()} == protected,
+                       'PawnSupport preflight changed protected source/map packages')
+        source.require(not u.EditorLoadingAndSavingUtils.get_dirty_map_packages()
+                       and not u.EditorLoadingAndSavingUtils.get_dirty_content_packages(),
+                       'PawnSupport preflight left dirty packages')
+        result['original_camera_preserved'] = True
+
+
+def verify_support_asset(u, spec, expected_topology):
+    """同一 SourceModel0 入口读派生包；元数据不代替实际拓扑和碰撞模式。"""
+    mesh = exact_asset(u, spec['package'], 'StaticMesh')
+    for key, expected in {'Owner': spec['owner'], 'SourceSpec': source.digest(spec),
+                          'Policy': spec['policy'], 'CameraPolicy': spec['camera_policy']}.items():
+        source.require(u.EditorAssetLibrary.get_metadata_tag(mesh, 'BH3.PawnSupport.'+key) == expected,
+                       'PawnSupport asset metadata differs: '+key)
+    _, topology = support_dynamic_mesh(u, spec, mesh)
+    expected = json.loads(json.dumps(expected_topology))
+    actual = json.loads(json.dumps(topology))
+    source.require(actual['triangles'] == expected['triangles'] and actual['vertices'].keys() == expected['vertices'].keys(),
+                   'PawnSupport saved source topology identities/connectivity differ')
+    # MeshDescriptionBuilder 明确将位置写为 FVector3f；按这个原生存储契约逐位核对。
+    for vertex, point in expected['vertices'].items():
+        canonical = [struct.unpack('<f', struct.pack('<f', value))[0] for value in point]
+        source.require(actual['vertices'][vertex] == canonical, 'PawnSupport saved Float32 source position differs: '+vertex)
+    complexity = u.get_editor_subsystem(u.StaticMeshEditorSubsystem).get_collision_complexity(mesh)
+    source.require(complexity == u.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE,
+                   'PawnSupport saved collision complexity differs')
+    source.require(mesh.get_editor_property('BodySetup') is not None, 'PawnSupport saved BodySetup is missing')
+    return mesh
+
+
+def configure_support_component(u, comp):
+    """碰撞专用组件只参与 Pawn 查询，不参与编辑器或游戏渲染。"""
+    comp.set_collision_profile_name('Custom', False)
+    comp.set_collision_enabled(u.CollisionEnabled.QUERY_ONLY)
+    comp.set_collision_object_type(u.CollisionChannel.ECC_WORLD_STATIC)
+    comp.set_collision_response_to_all_channels(u.CollisionResponseType.ECR_IGNORE)
+    comp.set_collision_response_to_channel(u.CollisionChannel.ECC_PAWN, u.CollisionResponseType.ECR_BLOCK)
+    comp.generate_overlap_events = False
+    comp.set_visibility(False, False)
+    comp.set_hidden_in_game(True, False)
+
+
+def support_actor_state(u, actor, spec, diagnostic=None, require_collision=True, require_hidden_render=True):
+    """派生体只有明确的 Pawn 查询职责；原相机层由原场景保护快照核验。"""
+    components = actor.get_components_by_class(u.StaticMeshComponent)
+    source.require(isinstance(actor, u.StaticMeshActor) and len(components) == 1,
+                   'PawnSupport owned Actor/component identity differs')
+    comp = components[0]
+    mesh = comp.get_editor_property('static_mesh')
+    if diagnostic is not None:
+        diagnostic.update(mesh=object_path(mesh), actor_collision=actor.get_actor_enable_collision(),
+            actor_hidden=bool(actor.get_editor_property('hidden')), collision_enabled=str(comp.get_collision_enabled()),
+            object_type=str(comp.get_collision_object_type()),
+            pawn_response=str(comp.get_collision_response_to_channel(u.CollisionChannel.ECC_PAWN)),
+            camera_response=str(comp.get_collision_response_to_channel(u.CollisionChannel.ECC_CAMERA)),
+            generate_overlap_events=bool(comp.generate_overlap_events),
+            component_visible=bool(comp.get_editor_property('visible')),
+            component_hidden_in_game=bool(comp.get_editor_property('hidden_in_game')),
+            use_default_collision=bool(comp.get_editor_property('use_default_collision')),
+            body_instance=comp.get_editor_property('body_instance').export_text())
+    source.require(mesh is not None and mesh.get_path_name().split('.')[0] == spec['package']
+                   and actor.get_actor_enable_collision() and bool(actor.get_editor_property('hidden')),
+                   'PawnSupport owned component mesh/Actor identity differs')
+    source.require(not require_hidden_render or not comp.get_editor_property('visible')
+                   and comp.get_editor_property('hidden_in_game'),
+                   'PawnSupport collision-only component is exposed to rendering')
+    source.require(not require_collision or not comp.get_editor_property('use_default_collision')
+                   and comp.get_collision_enabled() == u.CollisionEnabled.QUERY_ONLY
+                   and comp.get_collision_object_type() == u.CollisionChannel.ECC_WORLD_STATIC
+                   and comp.get_collision_response_to_channel(u.CollisionChannel.ECC_PAWN) == u.CollisionResponseType.ECR_BLOCK
+                   and comp.get_collision_response_to_channel(u.CollisionChannel.ECC_CAMERA) == u.CollisionResponseType.ECR_IGNORE
+                   and not comp.generate_overlap_events,
+                   'PawnSupport owned component Pawn/Camera contract differs')
+    source.require(object_path(actor.get_attach_parent_actor()) == spec['source_actor']
+                   and source.difference(source.matrix(pose_of(actor.get_actor_transform())),
+                                         source.matrix(spec['source_world_pose'])) < .002,
+                   'PawnSupport owned source attachment/frame differs')
+    expected_tags = [spec['owner'], source.digest(spec), spec['source_plan_digest'], 'PawnQuery']
+    source.require([str(t) for t in actor.get_editor_property('tags')] == expected_tags,
+                   'PawnSupport owned Actor tags differ')
+    return {'actor': actor.get_path_name(), 'component': comp.get_path_name(), 'mesh': mesh.get_path_name(),
+            'parent': object_path(actor.get_attach_parent_actor()), 'world_pose': pose_of(actor.get_actor_transform()),
+            'body_instance': comp.get_editor_property('body_instance').export_text(), 'tags': expected_tags}
+
+
+def support_spawn_candidate(u, world, support, capsule, movement, xy, bounds, diagnostic=None):
+    """出生候选由真实胶囊扫地和净空得出，不使用来源 AABB 的 Z 充当接触面。"""
+    start = list(xy)+[bounds['max'][2]+capsule['half_height_cm']*3]
+    end = list(xy)+[bounds['min'][2]-capsule['half_height_cm']*3]
+    sweep = support_sweep(u, world, capsule, movement, start, end)
+    if diagnostic is not None:
+        diagnostic.update(expected_component=support['component'], capsule=capsule, floor_sweep=sweep)
+    hit = sweep['hit']
+    source.require(hit is not None and hit['component'] == support['component']
+                   and not hit['initial_penetration'] and hit['penetration_depth_cm'] == 0
+                   and hit['native_cmc_is_walkable'], 'PawnSupport spawn sweep lacks the exact walkable owned support')
+    location = list(hit['location_cm'])
+    location[2] += capsule['radius_cm']*.1
+    clearance = support_sweep(u, world, capsule, movement, location, location)
+    if diagnostic is not None:diagnostic.update(location_cm=location, clearance=clearance)
+    source.require(clearance['hit'] is None, 'PawnSupport queried spawn capsule has no clearance')
+    return {'location_cm': location, 'capsule': capsule, 'floor_sweep': sweep, 'clearance': clearance,
+            'actual_spawn_verified': False}
+
+
+def support_region_boundary_queries(u, world, spec, support, candidate, movement):
+    """从围栏内部横扫原壁、向上扫原顶；反面顶面不充当出生地面。"""
+    pose = source.matrix(spec['source_world_pose'])
+    vertices = [source.point(pose, p) for p in spec['vertices']]
+    wall = next(row for row in spec['source_instances'] if row['role'] == 'wall')
+    wall_begin, wall_end = wall['vertex_range']
+    face = next(f for f in spec['triangles'] if all(wall_begin <= i < wall_end for i in f))
+    xy = [sum(vertices[i][axis] for i in face)/3 for axis in range(2)]
+    center = candidate['location_cm']
+    inward = [center[i]-xy[i] for i in range(2)]
+    length = math.hypot(*inward)
+    source.require(length > candidate['capsule']['radius_cm']*4, 'P2 region wall crossing is too close to the spawn candidate')
+    offset = [v/length*candidate['capsule']['radius_cm']*4 for v in inward]
+    start = [xy[i]+offset[i] for i in range(2)]+[center[2]]
+    end = [xy[i]-offset[i] for i in range(2)]+[center[2]]
+    wall_query = support_sweep(u, world, candidate['capsule'], movement, start, end)
+    hit = wall_query['hit']
+    source.require(hit is not None and hit['component'] == support['component'] and not hit['initial_penetration']
+                   and not hit['native_cmc_is_walkable'] and abs(hit['impact_normal'][2]) < .1,
+                   'P2 region original wall does not block the native inside-to-outside Pawn query')
+    top = next(row for row in spec['source_instances'] if row['role'] == 'top')
+    begin, end = top['vertex_range']
+    top_z = max(p[2] for p in vertices[begin:end])
+    roof_end = center[:2]+[top_z+candidate['capsule']['half_height_cm']*3]
+    roof_query = support_sweep(u, world, candidate['capsule'], movement, center, roof_end)
+    hit = roof_query['hit']
+    source.require(hit is not None and hit['component'] == support['component'] and not hit['initial_penetration']
+                   and not hit['native_cmc_is_walkable'] and hit['impact_normal'][2] < -.7,
+                   'P2 region original downward top does not block the native upward Pawn query')
+    return {'inside_to_outside_wall': wall_query, 'inside_upward_top': roof_query,
+            'actual_cmc_edge_traversal_verified': False}
+
+
+def support_asset_resume(spec, preflight, before_file, failed_path):
+    """只接收地图未提交且已清理的真实失败；包内容仍由原生读回验证。"""
+    failed_path = Path(failed_path).resolve()
+    source.require(failed_path.is_relative_to(source.PROJECT/'Saved'), 'PawnSupport resume report is outside Saved')
+    failed = source.read_json(failed_path)
+    admissible = (failed.get('mode') == 'pawn_support' and failed.get('phase') == 'failed'
+                   and failed.get('failure_phase') in ('pawn_support_asset', 'pawn_support_spawn_queries')
+                   and failed.get('cleanup_errors') == []) or (failed.get('mode') == 'pawn_support_asset_repair'
+                   and failed.get('phase') == 'pawn_support_asset_repair_passed')
+    source.require(admissible
+                   and failed.get('map_saved') is False and not failed.get('map_save_attempted')
+                   and failed.get('saved_assets') == [spec['package']]
+                   and failed.get('support_spec') == spec
+                   and failed.get('plan_digest') == preflight['plan_digest']
+                   and failed.get('settings_digest') == preflight['settings_digest']
+                   and failed.get('map_before') == before_file
+                   and failed.get('source_scene_baseline') == preflight['source_scene_baseline']
+                   and failed.get('protected_packages') == preflight['protected_packages']
+                   and failed.get('native_source_topology') == json.loads(json.dumps(preflight['native_source_topology'])),
+                   'PawnSupport resume checkpoint is failed/foreign or has a map commit/cleanup risk')
+    source.require(failed.get('support_package') == source.evidence(package_file(spec['package'])),
+                   'PawnSupport resume saved package changed')
+    return failed, source.evidence(failed_path)
+
+
+def repair_support_asset(u, plan, settings, result, preflight_path, failed_path, environment_result,
+                         p1_source_manifest, map_sha, asset_backup):
+    """仅修正确切 P1 自有失败包的绕序；原始索引、坐标和失败证据保留。"""
+    source.require(plan['stage'] == 'P1' and all(v is not None for v in
+                   (preflight_path, failed_path, environment_result, p1_source_manifest, map_sha, asset_backup)),
+                   'PawnSupport winding repair requires its exact P1 source/failure/map/backup inputs')
+    spec = source.pawn_support_spec(plan, p1_source_manifest)
+    legacy = {k: v for k, v in spec.items() if k not in ('native_winding_policy', 'native_triangles')}
+    preflight = source.read_json(preflight_path)
+    before = source.evidence(package_file(plan['map'], '.umap'))
+    source.require(preflight['phase'] == 'pawn_support_preflight_passed' and preflight['support_spec'] == legacy
+                   and before == preflight['protected_packages'][plan['map']] and before['sha256'].lower() == map_sha.lower(),
+                   'PawnSupport winding repair source preflight/map baseline differs')
+    failed, failed_evidence = support_asset_resume(legacy, preflight, before, failed_path)
+    package = source.evidence(package_file(spec['package']))
+    backup = Path(asset_backup).resolve()
+    source.require(package['sha256'] == 'd22893c25e3944f6050f1511529625936312de6ec02b69727464fa05e1d4c1a7'
+                   and backup.is_relative_to(source.PROJECT/'Saved') and backup.is_file()
+                   and source.evidence(backup)['sha256'] == package['sha256'],
+                   'PawnSupport winding repair exact owned failed package/backup differs')
+    read_environment(u, plan, settings, result, environment_result, True)
+    source.require(map_geometry_state(u) == preflight['source_scene_baseline'], 'PawnSupport winding repair source scene changed')
+    mesh = verify_support_asset(u, legacy, preflight['native_source_topology'])
+    body = mesh.get_editor_property('BodySetup')
+    source.require(not body.get_editor_property('double_sided_geometry'), 'PawnSupport failed asset is unexpectedly double-sided')
+    result.update(support_spec=spec, source_scene_baseline=preflight['source_scene_baseline'],
+                  protected_packages=preflight['protected_packages'], map_before=before,
+                  asset_before=package, asset_backup=source.evidence(backup), original_failure=failed_evidence)
+    dm, topology = support_dynamic_mesh(u, spec)
+    result['native_source_topology'] = topology
+    result['phase'] = 'pawn_support_asset_winding'
+    options = u.GeometryScriptCopyMeshToAssetOptions(enable_recompute_normals=True, enable_recompute_tangents=False,
+        enable_remove_degenerates=False, replace_materials=False, use_original_vertex_order=True)
+    value, outcome = u.GeometryScript_AssetUtils.copy_mesh_to_static_mesh(dm, mesh, options, u.GeometryScriptMeshWriteLOD(lod_index=0), False)
+    source.require(value == dm and outcome == u.GeometryScriptOutcomePins.SUCCESS, 'PawnSupport native winding repair failed')
+    u.EditorAssetLibrary.set_metadata_tag(mesh, 'BH3.PawnSupport.SourceSpec', source.digest(spec))
+    verify_support_asset(u, spec, topology)
+    source.require(not mesh.get_editor_property('BodySetup').get_editor_property('double_sided_geometry'),
+                   'PawnSupport winding repair changed sidedness')
+    source.require(u.EditorAssetLibrary.save_loaded_asset(mesh, only_if_is_dirty=False), 'PawnSupport exact winding asset save failed')
+    result['saved_assets'].append(spec['package'])
+    result['support_package'] = source.evidence(package_file(spec['package']))
+    source.require(all(source.evidence(package_file(p, '.umap' if p == plan['map'] else '.uasset')) == ev
+                       for p, ev in preflight['protected_packages'].items())
+                   and map_geometry_state(u) == preflight['source_scene_baseline']
+                   and not u.EditorLoadingAndSavingUtils.get_dirty_content_packages()
+                   and not u.EditorLoadingAndSavingUtils.get_dirty_map_packages(),
+                   'PawnSupport winding repair changed source/map or left dirty packages')
+    result['original_camera_preserved'] = True
+
+
+def apply_pawn_support(u, plan, settings, result, preflight_path, environment_result, map_sha, backup_path, p1_source_manifest=None,
+                       asset_result=None):
+    """一个派生包和一个地图提交；失败只清理本次 Actor，原件不保存或替换。"""
+    source.require(plan['stage'] != 'P1' or p1_source_manifest is not None, 'P1 production needs its selected P2 source closure')
+    source.require(preflight_path is not None and backup_path is not None and map_sha is not None,
+                   'PawnSupport apply needs its exact preflight/map backup/SHA')
+    preflight = source.read_json(preflight_path)
+    spec = source.pawn_support_spec(plan, p1_source_manifest)
+    source.require(preflight['phase'] == 'pawn_support_preflight_passed'
+                   and preflight['plan_digest'] == plan['digest'] and preflight['settings_digest'] == source.digest(settings)
+                   and preflight['support_spec'] == spec and preflight['original_camera_preserved']
+                   and not preflight['map_saved'] and not preflight['saved_assets'] and not preflight['created_actors'],
+                   'PawnSupport apply preflight is failed/foreign')
+    map_file = package_file(plan['map'], '.umap')
+    before_file = source.evidence(map_file)
+    backup = Path(backup_path).resolve()
+    source.require(before_file == preflight['protected_packages'][plan['map']]
+                   and before_file['sha256'].lower() == map_sha.lower()
+                   and backup.is_relative_to(source.PROJECT/'Saved') and backup.is_file()
+                   and source.evidence(backup)['sha256'] == before_file['sha256'],
+                   'PawnSupport map baseline/backup differs')
+    resume = support_asset_resume(spec, preflight, before_file, asset_result) if asset_result is not None else None
+    if resume is None:
+        source.require(not package_file(spec['package']).exists() and not u.EditorAssetLibrary.does_asset_exist(spec['package']),
+                       'PawnSupport create-only package exists')
+    read_environment(u, plan, settings, result, environment_result, True)
+    world, actors, _ = loaded_stage_actors(u, plan)
+    baseline = map_geometry_state(u)
+    source.require(baseline == preflight['source_scene_baseline'], 'PawnSupport preflight source scene changed')
+    player_config, player_movements = support_player_configuration(u, world, plan)
+    source.require(player_config == preflight['player_configuration'] and player_config['default_roster']
+                   and not player_config['player_starts'], 'PawnSupport player configuration/PlayerStart differs')
+    result.update(support_spec=spec, source_scene_baseline=baseline, map_before=before_file,
+                  map_backup=source.evidence(backup), preflight=source.evidence(preflight_path),
+                  protected_packages=preflight['protected_packages'], player_configuration=player_config,
+                  actual_cmc_landing_verified=False, legal_spawn_verified=False)
+    dm, topology = support_dynamic_mesh(u, spec)
+    source.require(json.loads(json.dumps(topology)) == preflight['native_source_topology'],
+                   'PawnSupport original topology differs from native preflight')
+    result['native_source_topology'] = topology
+    created = []
+    try:
+        result['phase'] = 'pawn_support_asset'
+        if resume is not None:
+            mesh = verify_support_asset(u, spec, topology)
+            result.update(asset_resume_result=resume[1], reused_assets=[spec['package']])
+        else:
+            options = u.GeometryScriptCreateNewStaticMeshAssetOptions(enable_recompute_normals=True,
+                enable_recompute_tangents=False, enable_nanite=False, enable_collision=True,
+                collision_mode=u.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE, use_original_vertex_order=True)
+            mesh, outcome = u.GeometryScript_NewAssetUtils.create_new_static_mesh_asset_from_mesh(dm, spec['package'], options)
+            source.require(mesh is not None and outcome == u.GeometryScriptOutcomePins.SUCCESS
+                           and mesh.get_path_name() == spec['package']+'.'+spec['package'].rsplit('/', 1)[1],
+                           'PawnSupport native create-only asset failed')
+            for key, value in {'Owner': spec['owner'], 'SourceSpec': source.digest(spec), 'Policy': spec['policy'],
+                               'CameraPolicy': spec['camera_policy']}.items():
+                u.EditorAssetLibrary.set_metadata_tag(mesh, 'BH3.PawnSupport.'+key, value)
+            verify_support_asset(u, spec, topology)
+            source.require(u.EditorAssetLibrary.save_loaded_asset(mesh, only_if_is_dirty=False), 'PawnSupport exact asset save failed')
+            result['saved_assets'].append(spec['package'])
+        result['support_package'] = source.evidence(package_file(spec['package']))
+        source.require(not u.EditorLoadingAndSavingUtils.get_dirty_content_packages(), 'PawnSupport asset save left dirty content')
+        editor = u.get_editor_subsystem(u.EditorActorSubsystem)
+        support_actor = editor.spawn_actor_from_class(u.StaticMeshActor, u.Vector(0, 0, 0), u.Rotator(0, 0, 0), False)
+        source.require(support_actor is not None, 'PawnSupport native Actor creation failed')
+        created.append(support_actor)
+        support_actor.set_actor_label('BH3_'+plan['stage']+'_PawnSupport')
+        support_actor.set_editor_property('tags', [spec['owner'], source.digest(spec), plan['digest'], 'PawnQuery'])
+        source.require(support_actor.attach_to_actor(actors[spec['source_model']], '', u.AttachmentRule.KEEP_RELATIVE,
+                       u.AttachmentRule.KEEP_RELATIVE, u.AttachmentRule.KEEP_RELATIVE, False), 'PawnSupport attachment failed')
+        support_actor.set_actor_relative_transform(ue_pose(u, {'translation': [0., 0., 0.],
+                     'quaternion': [0., 0., 0., 1.], 'scale': [1., 1., 1.]}), False, False)
+        support_actor.set_actor_hidden_in_game(True)
+        support_actor.set_actor_enable_collision(True)
+        comp = support_actor.get_component_by_class(u.StaticMeshComponent)
+        source.require(comp.set_static_mesh(mesh), 'PawnSupport mesh assignment failed')
+        configure_support_component(u, comp)
+        result['support_contract_readback'] = {}
+        result['support_actor'] = support_actor_state(u, support_actor, spec, result['support_contract_readback'])
+        result['phase'] = 'pawn_support_spawn_queries'
+        bounds = preflight['floor_query_bounds_cm']
+        center = [(bounds['min'][i]+bounds['max'][i])*.5 for i in range(2)]
+        player = player_config['default_roster'][0]['capsule']
+        definition = None
+        boss = None
+        if plan['stage'] == 'P3':
+            definition_path = '/Game/Characters/Boss/Kevin/DemonBattle/Data/DA_Boss_Kevin_DemonBattle'
+            definition = exact_asset(u, definition_path, 'GGYGOBossDefinition')
+            boss_class = u.EditorAssetLibrary.load_blueprint_class('/Game/Characters/Boss/Kevin/DemonBattle/Blueprints/BP_Kevin_DemonBattle')
+            boss_movement, boss = support_capsule_cdo(u, boss_class)
+        separation = (player['radius_cm']+boss['radius_cm'])*4 if boss is not None else 0.
+        result['native_spawn_queries'] = {'player': {}}
+        player_candidate = support_spawn_candidate(u, world, result['support_actor'], player, player_movements[0],
+                                                  [center[0]-separation, center[1]], bounds, result['native_spawn_queries']['player'])
+        result['player_spawn_candidate'] = player_candidate
+        if plan['stage'] == 'P1':
+            result['native_region_boundary_queries'] = support_region_boundary_queries(
+                u, world, spec, result['support_actor'], player_candidate, player_movements[0])
+        spawn_points = [(u.PlayerStart, 'BH3_'+plan['stage']+'_PlayerStart', 'PlayerStart', player_candidate)]
+        if boss is not None:
+            result['native_spawn_queries']['boss'] = {}
+            boss_candidate = support_spawn_candidate(u, world, result['support_actor'], boss, boss_movement,
+                                                    [center[0]+separation, center[1]], bounds, result['native_spawn_queries']['boss'])
+            result['boss_spawn_candidate'] = boss_candidate
+            spawn_points.append((u.GGYGOBossEncounter, 'BH3_P3_KevinEncounter', 'KevinEncounter', boss_candidate))
+        for cls, label, kind, candidate in spawn_points:
+            actor = editor.spawn_actor_from_class(cls, u.Vector(*candidate['location_cm']), u.Rotator(0, 0, 0), False)
+            source.require(actor is not None, 'PawnSupport native spawn point creation failed: '+kind)
+            created.append(actor)
+            actor.set_actor_label(label)
+            actor.set_editor_property('tags', [spec['owner'], source.digest(spec), plan['digest'], kind])
+            if kind == 'KevinEncounter':
+                actor.set_editor_property('BossDefinition', definition)
+                actor.set_editor_property('bSpawnOnBeginPlay', True)
+                actor.set_editor_property('EncounterSeed', 1337)
+            result[kind] = {'actor': actor.get_path_name(), 'class': actor.get_class().get_path_name(),
+                            'world_pose': pose_of(actor.get_actor_transform()), 'tags': [str(t) for t in actor.get_editor_property('tags')]}
+        result['created_actors'] = [a.get_path_name() for a in created]
+        preserved_environment_state(u, baseline, result['created_actors'])
+        source.require(all(source.evidence(package_file(p)) == ev for p, ev in preflight['protected_packages'].items()
+                           if p != plan['map']), 'PawnSupport changed original source/Camera assets')
+        levels = u.get_editor_subsystem(u.LevelEditorSubsystem)
+        source.require(not u.EditorLoadingAndSavingUtils.get_dirty_content_packages()
+                       and all(p == world.get_outer() for p in u.EditorLoadingAndSavingUtils.get_dirty_map_packages()),
+                       'PawnSupport map commit has foreign dirty packages')
+        result['phase'] = 'pawn_support_map_commit'
+        result['map_save_attempted'] = True
+        result['map_saved'] = bool(levels.save_current_level())
+        source.require(result['map_saved'] and not u.EditorLoadingAndSavingUtils.get_dirty_map_packages(),
+                       'PawnSupport exact map save failed')
+        result['map_file'] = source.evidence(map_file)
+        result['original_camera_preserved'] = True
+    except Exception:
+        result['created_actors'] = [a.get_path_name() for a in created]
+        result['cleanup_errors'] = []
+        for actor in reversed(created):
+            try:
+                source.require(u.get_editor_subsystem(u.EditorActorSubsystem).destroy_actor(actor),
+                               'PawnSupport owned Actor cleanup refused')
+            except Exception as cleanup_error:
+                result['cleanup_errors'].append(str(cleanup_error))
+        preserved_environment_state(u, baseline, [])
+        raise
+
+
+def load_support_checkpoint(u, plan, settings, result, applied_path, p1_source_manifest=None, collision_repair=False,
+                            visibility_repair=False):
+    """验证提交身份和全部原件；显式修正入口只放开自有组件的目标字段。"""
+    source.require(applied_path is not None, 'PawnSupport cold read needs its saved apply result')
+    applied = source.read_json(applied_path)
+    source.require(plan['stage'] != 'P1' or p1_source_manifest is not None, 'P1 support read needs its selected P2 source manifest')
+    spec = source.pawn_support_spec(plan, p1_source_manifest)
+    source.require(applied['phase'] in ('pawn_support_passed', 'pawn_support_collision_passed', 'pawn_support_visibility_passed') and applied['map_saved']
+                   and applied['support_spec'] == spec and applied['plan_digest'] == plan['digest']
+                   and applied['settings_digest'] == source.digest(settings)
+                   and applied['map_file'] == source.evidence(package_file(plan['map'], '.umap'))
+                   and applied['support_package'] == source.evidence(package_file(spec['package'])),
+                   'PawnSupport cold read apply checkpoint is stale/failed/foreign')
+    verify_assets(u, plan, settings)
+    verify_map(u, plan, settings, True, True)
+    world, actors, all_actors = loaded_stage_actors(u, plan)
+    owned = applied['created_actors'] if applied['phase'] == 'pawn_support_passed' else applied['owned_actors']
+    preserved_environment_state(u, applied['source_scene_baseline'], owned)
+    mesh = verify_support_asset(u, spec, applied['native_source_topology'])
+    actor = all_actors.get(applied['support_actor']['actor'])
+    source.require(actor is not None, 'PawnSupport saved owned Actor is missing')
+    result['support_contract_readback'] = {}
+    state = support_actor_state(u, actor, spec, result['support_contract_readback'], require_collision=not collision_repair,
+                                require_hidden_render=not (collision_repair or visibility_repair))
+    expected = applied['support_actor']
+    source.require(({k: v for k, v in state.items() if k != 'body_instance'} ==
+                    {k: v for k, v in expected.items() if k != 'body_instance'}) if collision_repair else state == expected,
+                   'PawnSupport saved owned Actor state differs')
+    for kind in (('PlayerStart', 'KevinEncounter') if plan['stage'] == 'P3' else ('PlayerStart',)):
+        saved = applied[kind]
+        point = all_actors.get(saved['actor'])
+        source.require(point is not None and point.get_class().get_path_name() == saved['class']
+                       and pose_of(point.get_actor_transform()) == saved['world_pose']
+                       and [str(t) for t in point.get_editor_property('tags')] == saved['tags'],
+                       'PawnSupport saved spawn point differs: '+kind)
+        if kind == 'KevinEncounter':
+            source.require(object_path(point.get_editor_property('BossDefinition')) ==
+                           '/Game/Characters/Boss/Kevin/DemonBattle/Data/DA_Boss_Kevin_DemonBattle.DA_Boss_Kevin_DemonBattle'
+                           and point.get_editor_property('bSpawnOnBeginPlay') and point.get_editor_property('EncounterSeed') == 1337,
+                           'PawnSupport saved Encounter properties differ')
+    for package, ev in applied['protected_packages'].items():
+        if package != plan['map']:
+            source.require(source.evidence(package_file(package)) == ev, 'PawnSupport original source/Camera package changed')
+    player_config, movements = support_player_configuration(u, world, plan)
+    original_config = {k: v for k, v in applied['player_configuration'].items() if k != 'player_starts'}
+    source.require({k: v for k, v in player_config.items() if k != 'player_starts'} == original_config
+                   and len(player_config['player_starts']) == 1
+                   and player_config['player_starts'][0]['actor'] == applied['PlayerStart']['actor'],
+                   'PawnSupport cold read selected player configuration/PlayerStart differs')
+    preflight = source.read_json(applied['preflight']['path'])
+    source.require(source.evidence(applied['preflight']['path']) == applied['preflight'],
+                   'PawnSupport original native preflight evidence changed')
+    return {'world': world, 'actors': actors, 'actor': actor, 'spec': spec, 'applied': applied, 'owned': owned,
+            'player_configuration': player_config, 'movements': movements, 'preflight': preflight}
+
+
+def query_support_checkpoint(u, plan, result, context):
+    """在已验证的同次提交上复用真实胶囊查询，不另建角色执行链。"""
+    world, actors, spec, applied = (context[k] for k in ('world', 'actors', 'spec', 'applied'))
+    player_config, movements, preflight = (context[k] for k in ('player_configuration', 'movements', 'preflight'))
+    result['cold_native_spawn_queries'] = {}
+    candidates = [('player_spawn_candidate', player_config['default_roster'][0]['capsule'], movements[0])]
+    if plan['stage'] == 'P3':
+        boss_class = u.EditorAssetLibrary.load_blueprint_class('/Game/Characters/Boss/Kevin/DemonBattle/Blueprints/BP_Kevin_DemonBattle')
+        boss_movement, boss_capsule = support_capsule_cdo(u, boss_class)
+        candidates.append(('boss_spawn_candidate', boss_capsule, boss_movement))
+    for key, capsule, movement in candidates:
+        previous = applied[key]
+        source.require(capsule == previous['capsule'], 'PawnSupport queried original capsule changed: '+key)
+        current = support_spawn_candidate(u, world, applied['support_actor'], capsule, movement,
+                                          previous['location_cm'][:2], preflight['floor_query_bounds_cm'])
+        source.require(max(abs(a-b) for a, b in zip(current['location_cm'], previous['location_cm'])) < .02,
+                       'PawnSupport cold native queried spawn contact differs: '+key)
+        result['cold_native_spawn_queries'][key] = current
+    if plan['stage'] == 'P1':
+        result['native_region_boundary_queries'] = support_region_boundary_queries(
+            u, world, spec, applied['support_actor'], result['cold_native_spawn_queries']['player_spawn_candidate'], movements[0])
+        result['native_visible_surface_check'] = support_visible_surface_check(u, plan, spec, actors)
+
+
+def read_pawn_support(u, plan, settings, result, applied_path, p1_source_manifest=None):
+    """新进程读取真实支持包、出生点和原件保护；不重复保存。"""
+    context = load_support_checkpoint(u, plan, settings, result, applied_path, p1_source_manifest)
+    applied = context['applied']
+    query_support_checkpoint(u, plan, result, context)
+    source.require(not u.EditorLoadingAndSavingUtils.get_dirty_content_packages()
+                   and not u.EditorLoadingAndSavingUtils.get_dirty_map_packages(), 'PawnSupport cold read left dirty packages')
+    result.update(apply_result=source.evidence(applied_path), support_actor=applied['support_actor'],
+                  PlayerStart=applied['PlayerStart'],
+                  map_file=applied['map_file'], support_package=applied['support_package'],
+                  original_camera_preserved=True, actual_cmc_landing_verified=False, legal_spawn_verified=False)
+    if plan['stage'] == 'P3':result['KevinEncounter'] = applied['KevinEncounter']
+    return applied
+
+
+def repair_support_component(u, plan, settings, result, applied_path, map_sha, backup_path, p1_source_manifest=None,
+                             repair_kind='collision'):
+    """消费确切已保存提交，显式修正自有组件的碰撞模式或渲染遗漏。"""
+    source.require(repair_kind in ('collision', 'visibility'), 'PawnSupport component repair kind is invalid')
+    source.require(map_sha is not None and backup_path is not None, 'PawnSupport component repair needs exact map SHA/backup')
+    context = load_support_checkpoint(u, plan, settings, result, applied_path, p1_source_manifest,
+                                      collision_repair=repair_kind == 'collision', visibility_repair=repair_kind == 'visibility')
+    applied, actor, world = (context[k] for k in ('applied', 'actor', 'world'))
+    before = source.evidence(package_file(plan['map'], '.umap'))
+    backup = Path(backup_path).resolve()
+    source.require(before['sha256'].lower() == map_sha.lower() and backup.is_relative_to(source.PROJECT/'Saved')
+                   and backup.is_file() and source.evidence(backup)['sha256'] == before['sha256'],
+                   'PawnSupport component repair map baseline/backup differs')
+    comp = actor.get_component_by_class(u.StaticMeshComponent)
+    if repair_kind == 'collision':
+        source.require(comp.get_editor_property('use_default_collision')
+                       and comp.get_collision_enabled() == u.CollisionEnabled.QUERY_AND_PHYSICS
+                       and comp.get_collision_response_to_channel(u.CollisionChannel.ECC_PAWN) == u.CollisionResponseType.ECR_BLOCK
+                       and comp.get_collision_response_to_channel(u.CollisionChannel.ECC_CAMERA) == u.CollisionResponseType.ECR_BLOCK,
+                       'PawnSupport collision repair does not match the reproduced asset-default override')
+    else:
+        source.require(comp.get_editor_property('visible') and not comp.get_editor_property('hidden_in_game'),
+                       'PawnSupport visibility repair does not match the reproduced rendering omission')
+    result['render_before'] = {'visible': bool(comp.get_editor_property('visible')),
+                               'hidden_in_game': bool(comp.get_editor_property('hidden_in_game'))}
+    result['phase'] = 'pawn_support_'+repair_kind+'_configuration'
+    actor.modify()
+    comp.modify()
+    configure_support_component(u, comp)
+    context['applied'] = dict(applied, support_actor=support_actor_state(u, actor, context['spec']))
+    source.require(repair_kind != 'visibility' or context['applied']['support_actor'] == applied['support_actor'],
+                   'PawnSupport visibility repair changed collision, attachment or owned Actor identity')
+    result['support_contract_readback'] = {}
+    support_actor_state(u, actor, context['spec'], result['support_contract_readback'])
+    query_support_checkpoint(u, plan, result, context)
+    preserved_environment_state(u, applied['source_scene_baseline'], context['owned'])
+    source.require(all(source.evidence(package_file(p)) == ev for p, ev in applied['protected_packages'].items()
+                       if p != plan['map']) and source.evidence(package_file(context['spec']['package'])) == applied['support_package'],
+                   'PawnSupport component repair changed an original or owned mesh package')
+    source.require(not u.EditorLoadingAndSavingUtils.get_dirty_content_packages()
+                   and all(p == world.get_outer() for p in u.EditorLoadingAndSavingUtils.get_dirty_map_packages()),
+                   'PawnSupport component repair has foreign dirty packages')
+    result.update(previous_apply_result=source.evidence(applied_path), map_before=before, map_backup=source.evidence(backup))
+    result['phase'] = 'pawn_support_'+repair_kind+'_map_commit'
+    result['map_save_attempted'] = True
+    result['map_saved'] = bool(u.get_editor_subsystem(u.LevelEditorSubsystem).save_current_level())
+    source.require(result['map_saved'] and not u.EditorLoadingAndSavingUtils.get_dirty_map_packages(),
+                   'PawnSupport component repair exact map save failed')
+    for key in ('support_spec', 'source_scene_baseline', 'protected_packages', 'native_source_topology',
+                'player_configuration', 'preflight', 'support_package', 'PlayerStart', 'player_spawn_candidate'):
+        result[key] = applied[key]
+    if plan['stage'] == 'P3':
+        for key in ('KevinEncounter', 'boss_spawn_candidate'):result[key] = applied[key]
+    result.update(owned_actors=context['owned'], support_actor=context['applied']['support_actor'],
+                  map_file=source.evidence(package_file(plan['map'], '.umap')), original_camera_preserved=True,
+                  actual_cmc_landing_verified=False, legal_spawn_verified=False)
+
+
+class StageSupportPlay:
+    """有限 PIE 验证宿主；实际装配/输入/地面仍由原 GameMode、Hero 与 CMC 执行。"""
+    def __init__(self, u, plan, settings, result, applied, output, image, standby_sha):
+        self.u, self.plan, self.result, self.applied, self.output = u, plan, result, applied, output
+        self.editor = u.get_editor_subsystem(u.UnrealEditorSubsystem)
+        self.levels = u.get_editor_subsystem(u.LevelEditorSubsystem)
+        self.baseline = map_geometry_state(u)
+        self.image = Path(image).resolve()
+        source.require(self.image.is_relative_to(source.PROJECT/'Saved') and self.image.suffix == '.png'
+                       and not self.image.exists(), 'PawnSupport PIE screenshot must be a fresh Saved PNG')
+        self.handle = self.world = self.pc = self.pawn = self.boss = self.encounter = self.input = self.action = self.task = None
+        self.standby = None
+        self.finished = self.advancing = False
+        self.stage = 'bind'
+        self.started = time.monotonic()
+        self.game_stage_start = self.grounded_since = None
+        self.error = None
+        self.standby_api = None
+        if plan['stage'] == 'P3':
+            observer = SCRIPT_DIR/'observe_bh3_kevin_combat.py'
+            source.require(standby_sha is not None and source.evidence(observer)['sha256'].lower() == standby_sha.lower(),
+                           'PawnSupport PIE needs the exact frozen Boss observer tool')
+            self.standby_api = runpy.run_path(str(observer))
+            source.require(callable(self.standby_api.get('start_standby')), 'PawnSupport public Boss standby observer is unavailable')
+        self.result.update(pie_requested=False, pie_started=False, samples=[], input_injection='original EnhancedInput IA_Move, finite action values',
+                           physical_keyboard_verified=False, actual_cmc_landing_verified=False,
+                           runtime_game_feature_session_verified=False, legal_spawn_verified=False)
+        source.require(not self.levels.is_in_play_in_editor(), 'PawnSupport PIE observer refuses another existing PIE')
+        try:
+            self.u.EditorPythonScripting.set_keep_python_script_alive(True)
+            self.handle = self.u.register_slate_post_tick_callback(self.tick)
+            source.require(self.handle is not None, 'PawnSupport PIE callback registration failed')
+            self.result['pie_requested'] = True
+            self.levels.editor_request_begin_play()
+        except Exception:
+            if self.handle is not None:
+                self.u.unregister_slate_post_tick_callback(self.handle)
+            self.u.EditorPythonScripting.set_keep_python_script_alive(False)
+            raise
+
+    @staticmethod
+    def source_path(obj):
+        return re.sub(r'UEDPIE_\d+_', '', object_path(obj)) if obj is not None else None
+
+    def ground_sample(self, pawn):
+        u = self.u
+        movement = pawn.get_editor_property('CharacterMovement')
+        capsule = pawn.get_editor_property('CapsuleComponent')
+        floor = movement.get_editor_property('CurrentFloor')
+        hit = floor.get_editor_property('HitResult')
+        fields = hit.to_tuple()
+        source.require(len(fields) == 18, 'PawnSupport PIE native CurrentFloor HitResult signature differs')
+        gravity = float(movement.get_editor_property('GravityScale'))
+        direction = movement.get_gravity_direction()
+        source.require(math.isfinite(gravity) and gravity > 0 and [direction.x, direction.y, direction.z] == [0., 0., -1.],
+                       'PawnSupport PIE normal gravity changed')
+        location, velocity = pawn.get_actor_location(), pawn.get_velocity()
+        actual_capsule = {'radius_cm': float(capsule.get_scaled_capsule_radius()),
+                          'half_height_cm': float(capsule.get_scaled_capsule_half_height()),
+                          'profile': str(capsule.get_collision_profile_name())}
+        current_position = [location.x, location.y, location.z]
+        clearance = support_sweep(u, self.world, actual_capsule, movement,
+                                  current_position, current_position, ignored_actors=[pawn])
+        extension = pawn.get_component_by_class(u.GGYGOPawnExtensionComponent)
+        asc = extension.get_ggygo_ability_system_component() if extension is not None else None
+        grounded = bool(movement.is_moving_on_ground())
+        exact_floor = grounded and bool(floor.get_editor_property('bBlockingHit')) and bool(floor.get_editor_property('bWalkableFloor')) \
+                      and fields[0] and not fields[1] and self.source_path(fields[10]) == self.applied['support_actor']['component'] \
+                      and bool(movement.is_walkable(hit))
+        return {'pawn': pawn.get_path_name(), 'class': pawn.get_class().get_path_name(), 'ready_asc': object_path(asc),
+                'pawn_data': object_path(extension.get_editor_property('PawnData')) if extension else None,
+                'location_cm': [location.x, location.y, location.z], 'velocity_cm_s': [velocity.x, velocity.y, velocity.z],
+                'radius_cm': actual_capsule['radius_cm'], 'half_height_cm': actual_capsule['half_height_cm'],
+                'capsule_clearance_free': clearance['hit'] is None, 'capsule_clearance_query': clearance,
+                'gravity_scale': gravity, 'movement_mode': str(movement.get_editor_property('MovementMode')),
+                'moving_on_ground': grounded, 'exact_owned_walkable_floor': bool(exact_floor),
+                'floor_component': object_path(fields[10]), 'floor_distance_cm': float(floor.get_editor_property('FloorDist')),
+                'floor_native_text': floor.export_text()}
+
+    def bind(self):
+        u = self.u
+        world = self.editor.get_game_world()
+        if world is None:
+            return False
+        source.require(self.source_path(world).split('.')[0] == self.plan['map'], 'PawnSupport PIE world differs')
+        if self.world is None:
+            self.world = world
+            self.result['pie_started'] = True
+        source.require(world == self.world, 'PawnSupport original PIE world was replaced')
+        pc = u.GameplayStatics.get_player_controller(world, 0)
+        if pc is None or pc.get_controlled_pawn() is None:
+            return False
+        pawn = pc.get_controlled_pawn()
+        source.require(pawn.get_controller() == pc and pawn.has_authority(), 'PawnSupport native possession/authority differs')
+        sample = self.ground_sample(pawn)
+        if sample['ready_asc'] is None:
+            return False
+        candidate = self.applied['player_configuration']['default_roster'][0]
+        source.require(sample['pawn_data'] == candidate['pawn_data'] and sample['class'] == candidate['capsule']['class'],
+                       'PawnSupport runtime selected player differs from queried spawn configuration')
+        game_mode = u.GameplayStatics.get_game_mode(world)
+        source.require(game_mode is not None and object_path(game_mode.get_experience()) ==
+                       self.applied['player_configuration']['experience'], 'PawnSupport runtime Experience differs')
+        boss, boss_sample = None, None
+        if self.plan['stage'] == 'P3':
+            encounters = u.GameplayStatics.get_all_actors_of_class(world, u.GGYGOBossEncounter)
+            selected = [a for a in encounters if self.source_path(a) == self.applied['KevinEncounter']['actor']]
+            source.require(len(selected) == 1, 'PawnSupport runtime exact Encounter is missing/ambiguous')
+            self.encounter = selected[0]
+            boss = self.encounter.get_boss_avatar()
+            if boss is None:
+                return False
+            boss_sample = self.ground_sample(boss)
+            if boss_sample['ready_asc'] is None:
+                return False
+        self.pc, self.pawn, self.boss = pc, pawn, boss
+        # 内部蓝图库不生成 Python 类型；直接消费其原生反射 getter，不读取 Controller 私有 Player。
+        library = u.load_object(None, '/Script/Engine.Default__SubsystemBlueprintLibrary')
+        source.require(library is not None, 'PawnSupport native local-player subsystem getter object is missing')
+        self.input = library.call_method('GetLocalPlayerSubSystemFromPlayerController', (pc, u.EnhancedInputLocalPlayerSubsystem))
+        source.require(isinstance(self.input, u.EnhancedInputLocalPlayerSubsystem),
+                       'PawnSupport actual Controller has no native EnhancedInput local-player subsystem')
+        input_config = u.load_asset(candidate['InputConfig'])
+        native = list(input_config.get_editor_property('NativeInputActions'))
+        actions = [a.get_editor_property('InputAction') for a in native
+                   if 'InputTag.Move' in a.get_editor_property('InputTag').export_text()]
+        source.require(len(actions) == 1 and actions[0] is not None, 'PawnSupport actual IA_Move is missing/ambiguous')
+        self.action = actions[0]
+        support = [a for a in u.GameplayStatics.get_all_actors_of_class(world, u.StaticMeshActor)
+                   if self.source_path(a) == self.applied['support_actor']['actor']]
+        source.require(len(support) == 1, 'PawnSupport runtime exact owned support Actor is missing/ambiguous')
+        support_component = support[0].get_component_by_class(u.StaticMeshComponent)
+        source.require(self.source_path(support_component) == self.applied['support_actor']['component'],
+                       'PawnSupport runtime support component differs')
+        if self.plan['stage'] == 'P3':
+            self.standby = self.standby_api['start_standby'](self.encounter, support_component, label='P3_StandBy', seconds=8.)
+            self.standby_started = time.monotonic()
+        self.result.update(world=world.get_path_name(), player_controller=pc.get_path_name(), player=sample,
+                           boss=boss_sample, encounter=object_path(self.encounter), input_action=object_path(self.action),
+                           runtime_experience=object_path(game_mode.get_experience()),
+                           runtime_game_mode_spawn_admission_observed=True)
+        return True
+
+    def tick(self, _delta):
+        if self.finished or self.advancing:
+            return
+        self.advancing = True
+        try:
+            if self.stage == 'end':
+                if not self.levels.is_in_play_in_editor() and self.editor.get_game_world() is None:
+                    self.finish()
+                elif time.monotonic()-self.end_requested > 15:
+                    self.error = self.error or RuntimeError('PawnSupport native End PIE exceeded 15 seconds')
+                    self.finish()
+                return
+            source.require(time.monotonic()-self.started < 60, 'PawnSupport finite PIE observation exceeded 60 seconds')
+            if self.stage == 'bind':
+                if not self.bind():
+                    return
+                self.stage = 'ground'
+            source.require(self.editor.get_game_world() == self.world and self.pc.get_controlled_pawn() == self.pawn
+                           and (self.encounter is None or self.encounter.get_boss_avatar() == self.boss), 'PawnSupport observed native ownership changed')
+            now = self.u.GameplayStatics.get_time_seconds(self.world)
+            player = self.ground_sample(self.pawn)
+            boss = self.ground_sample(self.boss) if self.boss is not None else None
+            self.result['samples'].append({'game_seconds': now, 'stage': self.stage, 'player': player, 'boss': boss})
+            both_grounded = player['exact_owned_walkable_floor'] and player['capsule_clearance_free'] \
+                            and (boss is None or boss['exact_owned_walkable_floor'] and boss['capsule_clearance_free'])
+            if self.stage == 'ground':
+                if not both_grounded:
+                    self.grounded_since = None
+                    return
+                self.grounded_since = now if self.grounded_since is None else self.grounded_since
+                if now-self.grounded_since < .5:
+                    return
+                self.start_location = player['location_cm']
+                self.result['grounding_observed'] = True
+                self.game_stage_start = now
+                self.stage = 'move'
+            if self.stage == 'move':
+                source.require(both_grounded, 'PawnSupport actual CMC lost the owned floor during finite movement')
+                if now-self.game_stage_start < .35:
+                    self.input.inject_input_vector_for_action(self.action, self.u.Vector(0., .4, 0.), [], [])
+                    return
+                self.input.inject_input_vector_for_action(self.action, self.u.Vector(0., 0., 0.), [], [])
+                self.stage, self.game_stage_start = 'settle', now
+            if self.stage == 'settle':
+                source.require(both_grounded, 'PawnSupport actual CMC lost the owned floor after input release')
+                if now-self.game_stage_start < .6:
+                    return
+                distance = math.hypot(*(player['location_cm'][i]-self.start_location[i] for i in range(2)))
+                self.result.update(finite_input_displacement_cm=distance, player=player, boss=boss)
+                try:
+                    source.require(distance > 1., 'PawnSupport original IA_Move produced no finite CMC displacement')
+                except source.SourceError as exc:
+                    # 原移动断言仍失败；额外保存该失败场景的原生图像，最终结果保持 failed。
+                    self.error = exc
+                else:
+                    self.result.update(actual_cmc_landing_verified=True, legal_spawn_verified=True)
+                self.task = self.u.AutomationLibrary.take_high_res_screenshot(1280, 720, self.image.as_posix(),
+                    camera=None, mask_enabled=False, capture_hdr=False, delay=0., force_game_view=False)
+                source.require(self.task is not None and self.task.is_valid_task(), 'PawnSupport native PIE screenshot refused')
+                self.stage = 'capture'
+            if self.stage == 'capture' and self.task.is_task_done() and self.image.is_file():
+                source.require(self.image.read_bytes()[:8] == b'\x89PNG\r\n\x1a\n', 'PawnSupport PIE capture is not PNG')
+                self.result['image'] = source.evidence(self.image)
+                if self.standby is not None and time.monotonic()-self.standby_started < 8.:
+                    return
+                self.end()
+        except Exception as exc:
+            self.error = exc
+            self.end()
+        finally:
+            self.advancing = False
+
+    def end(self):
+        if self.standby is not None:
+            try:
+                report = self.standby.stop(reason='stage_play_end')
+                source.require(report.get('report_path') and Path(report['report_path']).is_file(),
+                               'PawnSupport Boss observer did not write its native report')
+                source.require(report.get('listeners_released') is True,
+                               'PawnSupport Boss observer did not release its native listeners')
+                self.result['standby_observation'] = source.evidence(report['report_path'])
+            except Exception as exc:
+                self.error = self.error or exc
+            self.standby = None
+        self.stage = 'end'
+        self.end_requested = time.monotonic()
+        self.levels.editor_request_end_play()
+
+    def finish(self):
+        self.finished = True
+        cleanup = []
+        try:
+            if self.handle is not None:
+                try:self.u.unregister_slate_post_tick_callback(self.handle)
+                except Exception as exc:cleanup.append('PIE callback: '+str(exc))
+                self.handle = None
+            try:
+                source.require(not self.levels.is_in_play_in_editor() and self.editor.get_game_world() is None,
+                               'PawnSupport observer could not reclaim its own PIE')
+                verify_geometry_state(map_geometry_state(self.u), self.baseline)
+                source.require(source.evidence(package_file(self.plan['map'], '.umap')) == self.applied['map_file']
+                               and source.evidence(package_file(self.applied['support_spec']['package'])) == self.applied['support_package']
+                               and not self.u.EditorLoadingAndSavingUtils.get_dirty_map_packages()
+                               and not self.u.EditorLoadingAndSavingUtils.get_dirty_content_packages(),
+                               'PawnSupport PIE changed saved map/asset or left dirty packages')
+            except Exception as exc:cleanup.append(str(exc))
+            self.result.update(phase='failed' if self.error or cleanup else 'pawn_support_play_passed',
+                               error=str(self.error) if self.error else None, cleanup_errors=cleanup,
+                               standby_visual_verified=False, visual_verified=False)
+            source.write_machine(self.output, self.result)
+        finally:
+            self.world = self.pc = self.pawn = self.boss = self.input = self.action = self.task = self.standby = None
+            self.u.EditorPythonScripting.set_keep_python_script_alive(False)
+            globals()['_stage_support_play'] = None
+
+
 class StageCapture:
     """Bounded native viewport observer; restores its view and process settings."""
     def __init__(self,u,plan,settings,result,output,image,focus_model=None):
@@ -1275,7 +2322,22 @@ def require_api(u,mode):
     if mode in ('probe_textures_readback','surface_textures_readback'):required+=['AssetExportTask','Exporter','TextureExporterDDS']
     if mode in ('materials','preflight','map','readback','assets_readback'):
         required+=['Material','MaterialFactoryNew','CustomInput','CustomMaterialOutputType','MaterialSamplerType']
-    for name in required:source.require(hasattr(u,name),'native full Editor API unavailable: '+name)
+    if mode in ('pawn_support_preflight', 'pawn_support', 'pawn_support_readback', 'pawn_support_play', 'pawn_support_collision', 'pawn_support_visibility', 'pawn_support_asset_repair'):
+        required += ['Actor','ActorComponent','SceneComponent','PrimitiveComponent','StaticMeshComponent',
+                     'LightComponentBase','ReflectionCaptureComponent','LightComponent','BoxReflectionCaptureComponent',
+                     'GeometryScript_AssetUtils','GeometryScript_MeshQueries','GeometryScript_MeshEdits',
+                     'GeometryScript_NewAssetUtils','GeometryScriptCreateNewStaticMeshAssetOptions',
+                     'DynamicMesh','StaticMeshEditorSubsystem','GeometryScriptCopyMeshFromAssetOptions',
+                     'GeometryScriptMeshReadLOD','GeometryScriptLODType','GeometryScriptOutcomePins',
+                     'CollisionTraceFlag','Character','GameMapsSettings','WorldSettings','PlayerStart',
+                     'GameplayStatics','SystemLibrary','HitResult','IntVector','DrawDebugTrace',
+                     'StaticMeshActor','GGYGOBossEncounter','CollisionEnabled','CollisionChannel','CollisionResponseType']
+    if mode in ('pawn_support_preflight', 'pawn_support', 'pawn_support_play'):
+        required += ['EditorPythonScripting','AutomationLibrary','AutomationEditorTask','GGYGOPawnExtensionComponent',
+                     'EnhancedInputLocalPlayerSubsystem']
+    if mode == 'pawn_support_asset_repair':required += ['GeometryScriptCopyMeshToAssetOptions','GeometryScriptMeshWriteLOD']
+    missing = [name for name in required if not hasattr(u, name)]
+    source.require(not missing, 'native full Editor APIs unavailable: '+', '.join(missing))
 
 
 def require_recipe_api(u,plan,settings,mode):
@@ -1340,19 +2402,69 @@ def require_recipe_api(u,plan,settings,mode):
                      'get_input_node_output_name_for_material_expression',
                      'get_material_property_input_node','get_material_property_input_node_output_name'):
             source.require(callable(getattr(u.MaterialEditingLibrary,name,None)), 'native graph readback API unavailable: '+name)
+    if mode in ('pawn_support_preflight', 'pawn_support', 'pawn_support_readback', 'pawn_support_play', 'pawn_support_collision', 'pawn_support_visibility', 'pawn_support_asset_repair'):
+        for cls_name, names in [
+            ('GeometryScript_MeshEdits', ['add_vertex_to_mesh','add_triangle_to_mesh']),
+            ('GeometryScript_MeshQueries', ['get_vertex_count','get_num_vertex_i_ds','get_vertex_position',
+                                           'get_num_triangle_i_ds','get_triangle_indices']),
+            ('DynamicMesh', ['get_triangle_count']),
+            ('GeometryScript_AssetUtils', ['copy_mesh_from_static_mesh_v2']),
+            ('GeometryScript_NewAssetUtils', ['create_new_static_mesh_asset_from_mesh']),
+            ('GameMapsSettings', ['get_game_maps_settings']),
+            ('SystemLibrary', ['capsule_trace_single_by_profile']),
+            ('EditorAssetLibrary', ['load_blueprint_class']),
+            ('SceneComponent', ['set_visibility', 'set_hidden_in_game']),
+            ('PrimitiveComponent', ['set_collision_enabled','set_collision_object_type',
+                                    'set_collision_profile_name','set_collision_response_to_all_channels','set_collision_response_to_channel'])]:
+            for name in names:
+                source.require(callable(getattr(getattr(u, cls_name), name, None)),
+                               'PawnSupport native method unavailable: '+cls_name+'.'+name)
+        source.require(hasattr(u.CollisionTraceFlag, 'CTF_USE_COMPLEX_AS_SIMPLE'),
+                       'PawnSupport native complex-as-simple collision enum unavailable')
+        source.require(all(hasattr(u.CollisionResponseType, name) for name in ('ECR_IGNORE', 'ECR_BLOCK')),
+                       'PawnSupport native collision response enum unavailable')
+        source.require(hasattr(u.get_default_object(u.StaticMeshComponent), 'generate_overlap_events'),
+                       'PawnSupport native overlap BlueprintSetter property unavailable')
+        u.get_default_object(u.StaticMeshComponent).get_editor_property('use_default_collision')
+    if mode == 'pawn_support_asset_repair':
+        source.require(callable(getattr(u.GeometryScript_AssetUtils, 'copy_mesh_to_static_mesh', None)),
+                       'PawnSupport native asset repair write API unavailable')
+    if mode in ('pawn_support_preflight', 'pawn_support', 'pawn_support_play'):
+        missing = []
+        for cls, names in [('UnrealEditorSubsystem', ['get_game_world']),
+                           ('LevelEditorSubsystem', ['editor_request_begin_play','editor_request_end_play','is_in_play_in_editor']),
+                           ('EnhancedInputLocalPlayerSubsystem', ['inject_input_vector_for_action']),
+                           ('Object', ['call_method']),
+                           ('GGYGOPawnExtensionComponent', ['get_ggygo_ability_system_component']),
+                           ('CharacterMovementComponent', ['is_moving_on_ground','is_walkable']),
+                           ('AutomationLibrary', ['take_high_res_screenshot'])]:
+            for name in names:
+                if not callable(getattr(getattr(u, cls), name, None)):missing.append(cls+'.'+name)
+        source.require(not missing, 'PawnSupport production/PIE native methods unavailable: '+', '.join(missing))
+        movement = u.get_default_object(u.Character).get_editor_property('CharacterMovement')
+        floor = movement.get_editor_property('CurrentFloor')
+        for name in ('bBlockingHit','bWalkableFloor','FloorDist','HitResult'):
+            floor.get_editor_property(name)
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode',choices=['inspect','preflight','probe_preflight','textures','probe_textures','surface_textures','surface_textures_readback','probe_textures_readback','affine_preflight','affine','affine_readback',
                                        'map_geometry','map_geometry_readback','geometry_baseline','materials','map','readback',
-                                       'lighting','lighting_readback','assets_readback','capture'])
+                                       'lighting','lighting_readback','assets_readback','capture','pawn_support_preflight',
+                                       'pawn_support','pawn_support_readback','pawn_support_play','pawn_support_collision','pawn_support_visibility','pawn_support_asset_repair'])
     parser.add_argument('--plan',required=True)
     parser.add_argument('--settings')
     parser.add_argument('--map-sha256')
     parser.add_argument('--map-backup')
     parser.add_argument('--geometry-result')
     parser.add_argument('--environment-result', help='accepted lighting checkpoint, or successful map result for cold read')
+    parser.add_argument('--support-preflight', help='PawnSupport apply: exact successful read-only source/map preflight')
+    parser.add_argument('--support-result', help='PawnSupport cold read: exact successful support/map apply result')
+    parser.add_argument('--support-asset-result', help='PawnSupport apply: explicit failed result, read-only reuse of its saved support asset')
+    parser.add_argument('--support-asset-backup', help='PawnSupport winding repair: exact owned failed asset copy in Saved')
+    parser.add_argument('--standby-observer-sha256', help='PawnSupport PIE: exact frozen public Boss observer tool SHA256')
+    parser.add_argument('--p1-support-source-manifest', help='P1 support modes: pinned resource P2 Collider/visible geometry source manifest')
     parser.add_argument('--materials-result', help='explicit failed material result; verify its saved graphs read-only and create only the remaining assets')
     parser.add_argument('--textures-result', help='explicit failed result from this texture phase/settings; verify recorded saved textures read-only and create only the remainder')
     parser.add_argument('--screenshot', help='capture mode: fresh Saved PNG, native viewport RHI screenshot')
@@ -1364,6 +2476,8 @@ def main():
     source.require(args.materials_result is None or args.mode=='materials','material resume is only valid for material creation')
     source.require(args.textures_result is None or args.mode in ('textures','probe_textures','surface_textures'),
                    'texture resume is only valid for texture creation')
+    source.require(args.support_asset_result is None or args.mode in ('pawn_support', 'pawn_support_preflight', 'pawn_support_asset_repair'),
+                   'support asset result is only valid for explicit PawnSupport apply/preflight/repair')
     source.require(args.capture_focus_model is None or args.mode=='capture','capture focus is only valid for observation')
     plan=source.validate_plan(source.read_json(args.plan))
     source.require(args.settings is not None or args.mode in ('inspect','affine','affine_preflight','affine_readback',
@@ -1371,7 +2485,11 @@ def main():
                    'this phase requires explicit texture/rendering input')
     settings=source.read_json(args.settings) if args.settings else {'plan_digest':plan['digest']}
     if args.mode!='inspect':
-        validation_mode={'capture':'readback' if args.capture_materials else 'lighting_readback','probe_preflight':'probe_textures'}.get(args.mode,args.mode)
+        validation_mode={'capture':'readback' if args.capture_materials else 'lighting_readback',
+                         'probe_preflight':'probe_textures','pawn_support_preflight':'readback',
+                         'pawn_support':'readback','pawn_support_readback':'readback',
+                         'pawn_support_play':'readback','pawn_support_collision':'readback','pawn_support_visibility':'readback',
+                         'pawn_support_asset_repair':'readback'}.get(args.mode,args.mode)
         validate_settings(plan,settings,validation_mode)
     if args.mode=='inspect':
         print(json.dumps({'create_only':{m:targets(plan,m) for m in ['textures','materials','affine']},
@@ -1382,6 +2500,9 @@ def main():
     source.require(output.is_relative_to(source.PROJECT/'Saved') and not output.exists(),'result target is not fresh project Saved')
     result={'mode':args.mode,'plan_digest':plan['digest'],'settings_digest':source.digest(settings),'phase':'preflight','saved_assets':[],
             'created_actors':[],'map_saved':False,'restoration_complete':False}
+    if args.mode.startswith('pawn_support'):
+        result['tool_files'] = {name: source.evidence(SCRIPT_DIR/name) for name in
+                               ('bh3_stage_environment_source.py','restore_bh3_stage_environment.py','test_bh3_stage_environment.py')}
     try:
         import unreal as u
         require_api(u,args.mode)
@@ -1413,6 +2534,26 @@ def main():
             apply_map(u,plan,settings,result,args.map_sha256,args.map_backup,previous,args.mode=='map')
         elif args.mode in ('readback','lighting_readback'):
             read_environment(u,plan,settings,result,args.environment_result,args.mode=='readback')
+        elif args.mode == 'pawn_support_preflight':
+            pawn_support_preflight(u, plan, settings, result, args.environment_result, args.p1_support_source_manifest, args.support_asset_result)
+        elif args.mode == 'pawn_support_asset_repair':
+            repair_support_asset(u, plan, settings, result, args.support_preflight, args.support_asset_result, args.environment_result,
+                                 args.p1_support_source_manifest, args.map_sha256, args.support_asset_backup)
+        elif args.mode == 'pawn_support':
+            apply_pawn_support(u, plan, settings, result, args.support_preflight, args.environment_result,
+                               args.map_sha256, args.map_backup, args.p1_support_source_manifest, args.support_asset_result)
+        elif args.mode == 'pawn_support_readback':
+            read_pawn_support(u, plan, settings, result, args.support_result, args.p1_support_source_manifest)
+        elif args.mode in ('pawn_support_collision', 'pawn_support_visibility'):
+            repair_support_component(u, plan, settings, result, args.support_result, args.map_sha256,
+                                     args.map_backup, args.p1_support_source_manifest,
+                                     repair_kind='visibility' if args.mode == 'pawn_support_visibility' else 'collision')
+        elif args.mode == 'pawn_support_play':
+            source.require(args.screenshot is not None, 'PawnSupport PIE requires its actual native image destination')
+            applied = read_pawn_support(u, plan, settings, result, args.support_result, args.p1_support_source_manifest)
+            play = StageSupportPlay(u, plan, settings, result, applied, output, args.screenshot, args.standby_observer_sha256)
+            if not play.finished:globals()['_stage_support_play'] = play
+            return
         elif args.mode=='capture':
             source.require(args.screenshot is not None,'capture requires its PNG destination')
             read_environment(u,plan,settings,result,args.environment_result,args.capture_materials)

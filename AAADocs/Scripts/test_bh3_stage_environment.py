@@ -284,6 +284,29 @@ class StageEquivalentContracts(unittest.TestCase):
         with self.assertRaisesRegex(source.SourceError,'preserved probe Cube'):
             source.lighting_generation_digest(self.plan,broken)
 
+    def test_explicit_intensity_calibration_preserves_generation_and_rejects_other_changes(self):
+        path=source.PROJECT/'Saved/BH3StageEnvironment/P3_UE_Equivalent_Settings_20261009_Materials_R2.json'
+        original=source.read_json(path)
+        selected=copy.deepcopy(original)
+        selected['lighting'].update(directional_lux_scale=1.,local_intensity_scale=1.)
+        selected['lighting_calibration']={'purpose':'ue_visual_intensity_calibration',
+            'source_photometry_verified':False,'reason':'同相机直接光隔离验证',
+            'baseline_settings':source.evidence(path)}
+        self.assertEqual(source.lighting_generation_digest(self.plan,selected),
+                         source.lighting_generation_digest(self.plan,original))
+        restore.validate_settings(self.plan,selected,'lighting_readback')
+        for field in ('local_falloff_exponent','indirect_lighting_intensity'):
+            broken=copy.deepcopy(selected);broken['lighting'][field]*=2
+            with self.assertRaisesRegex(source.SourceError,'protected light policy'):
+                source.lighting_generation_digest(self.plan,broken)
+        broken=copy.deepcopy(selected)
+        key=self.plan['probes'][0]['texture'];broken['textures'][key]['srgb']=not broken['textures'][key]['srgb']
+        with self.assertRaisesRegex(source.SourceError,'protected surface/probe'):
+            source.lighting_generation_digest(self.plan,broken)
+        broken=copy.deepcopy(selected);broken['lighting']['local_intensity_scale']=0.
+        with self.assertRaisesRegex(source.SourceError,'intensity is invalid'):
+            source.lighting_generation_digest(self.plan,broken)
+
     def test_missing_slot_custom_input_and_zero_light_calibration_fail(self):
         key=next(iter(self.plan['materials']))
         broken=copy.deepcopy(self.settings)
@@ -306,7 +329,8 @@ class StageEquivalentContracts(unittest.TestCase):
             values=restore.light_values(row,self.settings)
             rgb=[int(math.floor(row['fields']['m_Color'][c]*255+.5)) for c in ('r','g','b')]
             self.assertEqual(values['light_color'],rgb+[255])
-            scale=10.0 if row['fields']['m_Type']==1 else 1000.0
+            scale=self.settings['lighting']['directional_lux_scale' if row['fields']['m_Type']==1
+                                            else 'local_intensity_scale']
             self.assertAlmostEqual(values['intensity'],row['fields']['m_Intensity']*scale)
             self.assertFalse(values['cast_shadows'])
             pose=restore.environment_pose(row,True)
@@ -605,6 +629,151 @@ class StageP1Contracts(unittest.TestCase):
         with mock.patch.object(Path, 'exists', return_value=False):
             with self.assertRaisesRegex(source.SourceError, 'already exists'):
                 restore.absent_targets(u, self.plan, 'textures', recorded)
+
+
+class StagePawnSupportContracts(unittest.TestCase):
+    def test_support_resume_rejects_foreign_package_or_map_commit_and_changed_bytes(self):
+        spec = {'package': '/Game/Support'}
+        before = {'sha256': 'map'}
+        preflight = {'plan_digest': 'plan', 'settings_digest': 'settings', 'source_scene_baseline': {},
+                     'protected_packages': {}, 'native_source_topology': {'vertices': {}, 'triangles': {}}}
+        package = {'sha256': 'asset'}
+        failed = dict(preflight, mode='pawn_support', phase='failed', failure_phase='pawn_support_asset',
+                      map_saved=False, cleanup_errors=[], saved_assets=[spec['package']],
+                      support_spec=spec, map_before=before, support_package=package)
+        path = source.PROJECT/'Saved/SupportFailure.json'
+        with mock.patch.object(source, 'read_json', return_value=failed), \
+             mock.patch.object(source, 'evidence', return_value=package):
+            self.assertEqual(restore.support_asset_resume(spec, preflight, before, path)[0], failed)
+        repaired = dict(failed, mode='pawn_support_asset_repair', phase='pawn_support_asset_repair_passed')
+        with mock.patch.object(source, 'read_json', return_value=repaired), \
+             mock.patch.object(source, 'evidence', return_value=package):
+            self.assertEqual(restore.support_asset_resume(spec, preflight, before, path)[0], repaired)
+        for key, value in (('phase', 'pawn_support_passed'), ('map_save_attempted', True),
+                           ('cleanup_errors', ['Actor cleanup failed']), ('saved_assets', ['/Game/Foreign']),
+                           ('support_spec', {'package': '/Game/Foreign'}), ('map_before', {'sha256': 'changed'}),
+                           ('native_source_topology', {'triangles': {'0': [0, 1, 2]}})):
+            invalid = dict(failed, **{key: value})
+            with mock.patch.object(source, 'read_json', return_value=invalid), \
+                 mock.patch.object(source, 'evidence', return_value=package):
+                with self.assertRaisesRegex(source.SourceError, 'checkpoint'):
+                    restore.support_asset_resume(spec, preflight, before, path)
+        with mock.patch.object(source, 'read_json', return_value=failed), \
+             mock.patch.object(source, 'evidence', return_value={'sha256': 'tampered'}):
+            with self.assertRaisesRegex(source.SourceError, 'saved package changed'):
+                restore.support_asset_resume(spec, preflight, before, path)
+
+    def test_p2_composition_keeps_three_original_instances_and_excludes_camera(self):
+        plan = source.read_json(source.PROJECT/'Saved/BH3StageEnvironment/P1_Source_Plan_20261009.json')
+        before = copy.deepcopy(plan)
+        manifest = 'F:/AnimeStudio/_work/bh3_stage_candidates_20261009/P2CollisionReference/contract_input_manifest.json'
+        spec = source.pawn_support_spec(plan, manifest)
+        self.assertEqual(plan, before)
+        self.assertEqual((len(spec['vertices']), len(spec['triangles'])), (242, 160))
+        self.assertEqual([r['role'] for r in spec['source_instances']], ['floor', 'wall', 'top'])
+        self.assertEqual(spec['native_triangles'], [[f[0], f[2], f[1]] for f in spec['triangles']])
+        self.assertNotEqual(spec['native_triangles'], spec['triangles'])
+        self.assertEqual([r['sourceGameObjectLayer'] for r in spec['excluded_camera_colliders']], [25, 25])
+        self.assertEqual(spec['source_model'], '1580595554368')
+        self.assertFalse(spec['runtime_world_registration_verified'])
+        self.assertFalse(spec['source_cooking_verified'])
+        world = [source.point(source.matrix(spec['source_world_pose']), p) for p in spec['vertices']]
+        for face in spec['triangles'][:40]:
+            a, b, c = [world[i] for i in face]
+            self.assertGreater((b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]), 0)
+        for face in spec['triangles'][-40:]:
+            a, b, c = [world[i] for i in face]
+            self.assertLess((b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]), 0)
+        self.assertAlmostEqual(world[0][2], -.28885922*100, places=4)
+        with self.assertRaisesRegex(source.SourceError, 'manifest is missing/foreign'):
+            source.pawn_support_spec(plan, Path(manifest).with_name('p2_collision_reference.json'))
+
+    def test_p2_floor_matches_actual_source_triangles_and_old_registration_stays_wrong(self):
+        plan = source.read_json(source.PROJECT/'Saved/BH3StageEnvironment/P1_Source_Plan_20261009.json')
+        spec = source.pawn_support_spec(plan,
+            'F:/AnimeStudio/_work/bh3_stage_candidates_20261009/P2CollisionReference/contract_input_manifest.json')
+        triangles = []
+        for row in spec['visual_surfaces']:
+            vertices, faces = source.parse_support_obj(Path(row['source_obj']['path']).read_text(encoding='utf-8-sig'),
+                '# Original Unity coordinates / units / winding; no axis conversion.')
+            world = [source.point(source.matrix(plan['geometry_actors'][row['model']]['world_transform']), p) for p in vertices]
+            triangles.extend([[world[i] for i in face] for face in faces])
+        floor = [source.point(source.matrix(spec['source_world_pose']), p) for p in spec['vertices'][:41]]
+        distance = [min(source.point_triangle_distance(p, *face) for face in triangles) for p in floor]
+        self.assertLess(max(distance), .1)
+        old = source.pawn_support_spec(plan)
+        wrong = source.point(source.matrix(old['source_world_pose']), old['vertices'][0])
+        self.assertGreater(min(source.point_triangle_distance(wrong, *face) for face in triangles), 28.)
+        self.assertAlmostEqual(source.point_triangle_distance([.2, .2, 1.5], [0, 0, 0], [1, 0, 0], [0, 1, 0]), 1.5)
+
+    def test_spawn_query_requires_exact_owned_walkable_nonpenetrating_floor(self):
+        capsule = {'radius_cm': 34., 'half_height_cm': 88.}
+        support = {'component': 'owned.PawnQuery'}
+        hit = {'component': support['component'], 'initial_penetration': False,
+               'penetration_depth_cm': 0., 'native_cmc_is_walkable': True, 'location_cm': [8., 9., 14.]}
+        bounds = {'min': [-50., -50., -500.], 'max': [50., 50., 900.]}
+        with mock.patch.object(restore, 'support_sweep', side_effect=[{'hit': hit}, {'hit': None}]):
+            candidate = restore.support_spawn_candidate(None, None, support, capsule, None, [8., 9.], bounds)
+        self.assertEqual(candidate['location_cm'], [8., 9., 17.4])
+        self.assertFalse(candidate['actual_spawn_verified'])
+        invalid = [None]
+        for key, value in (('component', 'original.Camera'), ('initial_penetration', True),
+                           ('penetration_depth_cm', .1), ('native_cmc_is_walkable', False)):
+            wrong = dict(hit)
+            wrong[key] = value
+            invalid.append(wrong)
+        for wrong in invalid:
+            with mock.patch.object(restore, 'support_sweep', return_value={'hit': wrong}):
+                with self.assertRaisesRegex(source.SourceError, 'exact walkable owned support'):
+                    restore.support_spawn_candidate(None, None, support, capsule, None, [8., 9.], bounds)
+        with mock.patch.object(restore, 'support_sweep', side_effect=[{'hit': hit}, {'hit': dict(hit)}]):
+            with self.assertRaisesRegex(source.SourceError, 'no clearance'):
+                restore.support_spawn_candidate(None, None, support, capsule, None, [8., 9.], bounds)
+
+    def test_selected_sources_keep_environment_and_camera_policy(self):
+        for stage, filename, model, counts in (
+            ('P1', 'P1_Source_Plan_20261009.json', '1580554081600', (41, 40)),
+            ('P3', 'P3_Source_Plan_20261008_233000.json', '1934927152128', (201, 120))):
+            plan = source.read_json(source.PROJECT/'Saved/BH3StageEnvironment'/filename)
+            before = copy.deepcopy(plan)
+            spec = source.pawn_support_spec(plan)
+            self.assertEqual(plan, before)
+            self.assertEqual(spec['source_model'], model)
+            self.assertEqual((spec['vertices_expected'], spec['triangles_expected']), counts)
+            self.assertEqual(spec['package'], plan['asset_root']+'/StaticMeshes/SM_KevinBoss'+stage+'_PawnSupport')
+            self.assertEqual(spec['camera_policy'], 'preserve_original')
+            self.assertFalse(spec['source_runtime_activation_restored'])
+            self.assertFalse(spec['source_cooking_verified'])
+            bad = copy.deepcopy(plan)
+            bad['colliders'] = [c for c in bad['colliders'] if c['model'] != model]
+            with self.assertRaisesRegex(source.SourceError, 'exact source collider'):
+                source.pawn_support_spec(bad)
+
+    def test_original_p1_obj_frame_retains_upward_floor_and_native_tail(self):
+        plan = source.read_json(source.PROJECT/'Saved/BH3StageEnvironment/P1_Source_Plan_20261009.json')
+        spec = source.pawn_support_spec(plan)
+        self.assertEqual(spec['unparsed_tail'], 'f98b470000803f00000000')
+        self.assertFalse(spec['native_mesh_layout_fully_parsed'])
+        world = [source.point(source.matrix(spec['source_world_pose']), p) for p in spec['vertices']]
+        for face in spec['triangles']:
+            a, b, c = [world[i] for i in face]
+            ab, ac = [[p[i]-a[i] for i in range(3)] for p in (b, c)]
+            self.assertGreater(ab[0]*ac[1]-ab[1]*ac[0], 0)
+        self.assertLess(max(p[2] for p in world)-min(p[2] for p in world), .001)
+        self.assertGreater(max(p[0] for p in world)-min(p[0] for p in world), 8200)
+
+    def test_obj_requires_source_frame_and_rejects_invalid_collision_geometry(self):
+        header = '# Original Unity local coordinates and index winding; no axis/unit conversion.\n'
+        geometry = 'v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n'
+        vertices, faces = source.parse_support_obj(header+geometry)
+        self.assertEqual(vertices, [[0, 0, 0], [-100, 0, 0], [0, -100, 0]])
+        self.assertEqual(faces, [[0, 1, 2]])
+        for invalid in ('', geometry, header+geometry.replace('f 1 2 3', 'f 1 2 4'),
+                        header+geometry.replace('v 0 1 0', 'v 2 0 0'),
+                        header+geometry.replace('v 0 1 0', 'v nan 1 0'),
+                        header+geometry+'usemtl invented\n'):
+            with self.assertRaises(source.SourceError):
+                source.parse_support_obj(invalid)
 
 
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -1,6 +1,6 @@
 # BH3 Stage 导出目录清点
 
-> 当前检查点（2026-10-09）：P1/P3 的 FBX 几何与本轮 UE 等效材质、灯光均已保存，分别完成 77 Renderer／221 槽、97 Renderer／99 槽的地图接线、独立冷读和内场取图。P1 实际图有明显过亮高光；两图的原作光照校准、探针运行时处理与可玩碰撞仍未验收。入口与证据见[本轮 P1 交付](#本轮-p1-ue-等效场景交付2026-10-09)和[本轮 P3 交付](#本轮-p3-ue-等效场景交付2026-10-09)。原清点正文及 P3 阶段记录保留当时范围和结论；其中 P1 尚未接材质的描述是历史检查点。用户已确认 P1/P3 均不是所需目标地图，仍要求完成；其他地图候选另由资源组长调查，不把现有两图改称目标地图。
+> 当前检查点（2026-10-09）：P1/P3 的 FBX 几何与 UE 等效材质、灯光均已保存，分别完成 77 Renderer／221 槽、97 Renderer／99 槽的接线与独立冷读；自有 Pawn 支撑已接入并隐藏。本轮明显过亮已完成[灯光有限校准](#2026-10-09-灯光有限校准)，两图同相机前后画面与主 Editor 保存后换图重载读回通过。原作光照、探针运行时处理、真实 CMC 落地／输入仍未验收。源导入证据见[本轮 P1 交付](#本轮-p1-ue-等效场景交付2026-10-09)和[本轮 P3 交付](#本轮-p3-ue-等效场景交付2026-10-09)；各历史章节的地图哈希、权限、目标范围与未接入描述保留当时事实，当前地图以末节记录为准。
 
 清点日期：2026-09-29。范围：`F:\AnimeStudio\Exports\BH3\Stage`，递归读取全部文件；本轮仅生成本报告，未导入资产、操作 UE、修改关卡或架构笔记，未提交或推送。
 
@@ -270,3 +270,25 @@ P3 `Textures/` 当前有 14 个 Texture2D、3 个 TextureCube，`Materials/` 有
 本次只关闭 P1 的等效材质／灯光／精确地图接线与有用视角可见检查点，不写 `restoration_complete=true`。明显过亮高光仍需视觉校准；可玩碰撞、合法出生点、PlayerStart／Experience、Boss 待机和战斗接入、实际 CMC 落地及镜头行为未验。
 
 P1 补充包的 13 个 MeshCollider 中，12 个有真实网格引用，均 `m_Enabled=true` 但 `hierarchy_active=false`；GI_Volume 的另一个网格引用为空。补充包已有 12 份 CollisionMeshes OBJ，未导入 UE。保留源停用状态与为 UE 演示明确启用支撑是不同选择，不能从有 OBJ 推导当前可走，也不能把空 GI Collider 当地面。P3 同样保留上节碰撞边界：原 simple 胶囊查询未命中，complex 命中 CamCollision 只属只读几何诊断，不能代替真实 CMC 落地验收。下一可玩链须先明确支撑／Camera 政策和资产所有权，当前没有这条链的资产或工具写权。
+
+## 2026-10-09 灯光有限校准
+
+用户本轮先处理明显过亮。主 MCP 实读起点为 P1、non-PIE、两图 clean、无打开的资产编辑器；只使用既有主 Editor。P1 有 27 灯／1 Probe，P3 有 5 灯／2 Probe；两图无 PostProcessVolume 或 CameraActor。项目自动曝光关闭、Bias=1、曝光偏移=0，视口使用游戏曝光设置；Lumen GI／Reflection 开启。本轮没有修改曝光、后处理、Atlas 或材质自发光。
+
+根因由实际隔离对照确认：旧等效配置把源本地强度乘 1000，并使用 Unitless、非逆平方衰减、指数 2；P1 存在多盏半径 290 米的无阴影局部灯，P3 范围达到 632.2 米。UE 此模式按归一化距离计算 `(1-(distance/radius)^2)^exponent`，大范围内不会获得物理 `1/distance²` 衰减。未校准的直接光幅度在既有曝光下使普通受光面大片饱和。P1 同相机仅把本地灯强度暂设 0 后白色覆盖明显减轻，再把方向光暂设 0 后地面恢复深紫，原发光纹样仍保留；临时 0 仅用于诊断，未作为正式配置保存。[UE 官方单位说明](https://dev.epicgames.com/documentation/en-us/unreal-engine/using-physical-lighting-units-in-unreal-engine)说明 Unitless 是引擎自身强度值，本轮没有把 Unity 数字宣称为已恢复的物理量。
+
+正式选择 `directional_lux_scale=1`、`local_intensity_scale=1` 的有限 UE 视觉增益：P1 方向光 1.74 lux、本地 1～8 Unitless；P3 方向光 1 lux、本地 2.1／3.26／3.26／7.4 Unitless。32 灯均保持非零、原色、范围、衰减、阴影标志、聚光角度、挂接／姿态与生成身份；三个 Probe 配置保持。两图只修改灯光 intensity 并精确保存，原网格／材质／自有碰撞支撑不重导。支撑实读仍 `visible=false`、`hidden_in_game=true`、`QueryOnly`；此前静态 Floor／clearance 证据与真实输入／CMC 未测边界保留，本轮未重跑物理查询。
+
+默认生产消费者 `equivalent_settings()` 已持久采用所选增益，`light_values()` 继续消费显式配置。既有地图的校准配置引用准确不可变旧 settings，`lighting_generation_digest()` 保持灯的生成身份，并只允许两项强度增益与差异说明变化；未标记的旧 surface 续接仍不得改灯，材质／Probe／衰减变更仍拒绝。当前配置为 [P1](../../../Saved/BH3StageEnvironment/P1_UE_Equivalent_Settings_20261009_Lighting_Calibrated.json)／[P3](../../../Saved/BH3StageEnvironment/P3_UE_Equivalent_Settings_20261009_Lighting_Calibrated.json)，旧配置与失败历史未覆盖。
+
+| 实际验收 | 证据 |
+| --- | --- |
+| P1 同相机原图／本地光隔离／全直接光隔离 | [before](../../../Saved/BH3StageEnvironment/P1_Lighting_Before_20261009.png)、[local off](../../../Saved/BH3StageEnvironment/P1_Lighting_LocalOff_20261009.png)、[all direct off](../../../Saved/BH3StageEnvironment/P1_Lighting_AllDirectOff_20261009.png) |
+| P1 试值／正式保存后换图重载 | [trial](../../../Saved/BH3StageEnvironment/P1_Lighting_Trial_20261009.png)、[after reload](../../../Saved/BH3StageEnvironment/P1_Lighting_After_Reload_20261009.png)；后者记录重建视图历史后的画面，辅助图标随后已再次隐藏 |
+| P3 同相机前后 | [before](../../../Saved/BH3StageEnvironment/P3_Lighting_Before_20261009.png)、[after](../../../Saved/BH3StageEnvironment/P3_Lighting_After_20261009.png)，保存后重载灯参数完全一致 |
+| 真实 MCP 提交／重载读回／生成消费者校验 | [P1](../../../Saved/BH3StageEnvironment/P1_Lighting_Calibration_20261009.json)、[P3](../../../Saved/BH3StageEnvironment/P3_Lighting_Calibration_20261009.json)；包括原／新实际参数、备份、图片、工具与配置证据 |
+| 有限离线契约 | [45 项通过日志](../../../Saved/BH3StageEnvironment/Lighting_Calibration_Contracts_20261009.log)，10.531 秒；新增显式校准接受及非授权参数／探针／零增益拒绝；首跑旧测试写死 1000／10 而失败，改为严格检查所选配置，原颜色／源强度／布局断言保留 |
+
+当前 P1 地图 464694 B／SHA256 `5CE2113A7237E2C851D61060EC6807C056923A6BE38C71EB7D63108DC5673E0D`；P3 357494 B／`24D5F1E241E2D3E01FB7E51547B1B66CA47346DE466F4A835C2AE2F834EE45D6`。准确校准前备份：[P1](../../../Saved/BH3StageEnvironment/P1_Before_Lighting_Calibration_20261009.umap)／[P3](../../../Saved/BH3StageEnvironment/P3_Before_Lighting_Calibration_20261009.umap)。旧碰撞与环境报告的地图哈希／灯数值属于此前检查点，不能直接冒充这次保存后的全场景验收。
+
+按 [CodeConventions](../../Architecture/CodeConventions.md) 核受影响链：职责／依赖与状态／提交必要保留源计划、显式配置、原生保存的分工；防御必要保留准确生成基线、只校准强度、非零与保护字段校验；迁移原位更新默认生产配置，无旧／新双执行链或错误兜底；业务选择保持可见、可调的 UE 等效，不称原作物理量；测试／构建只做真实主 Editor 重载与有限契约，无新增运行时状态、循环依赖或 C++ 构建。本轮不升级原作视觉、Probe 方向、Lumen 缓存预算或完整玩法验收；红字诊断保留。结束时主 P1、non-PIE、两图 clean，Grid off／Game View on，所有自有 Slate 观察器移除。用户最后移动视口，最新实读相机保留并交统筹；没有再次覆写，拖动模糊截图未用作验收。工具与地图冻结，Git 待统筹协调。

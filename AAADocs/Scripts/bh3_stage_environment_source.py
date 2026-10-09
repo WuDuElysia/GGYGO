@@ -588,12 +588,13 @@ def equivalent_settings(plan):
             'source_runtime_verified': False, 'textures': configs,
             'rendering': {'purpose': 'ue_equivalent_stage', 'materials': graphs},
             'lighting': {'purpose': 'source_numeric_ue_calibration', 'color_space': 'srgb',
-                         'directional_lux_scale': 10.0, 'local_intensity_scale': 1000.0,
+                         'directional_lux_scale': 1.0, 'local_intensity_scale': 1.0,
                          'local_falloff_exponent': 2.0, 'indirect_lighting_intensity': 1.0,
                          'volumetric_scattering_intensity': 0.0, 'spot_inner_cone_ratio': 0.8,
                          'cube_orientation': 'source_faces_unverified',
-                         'differences': ['Source intensities multiplied by explicit UE calibration values; '
-                             '10 lux per directional source unit, 1000 legacy unitless units per local source unit.',
+                         'differences': ['Selected UE visual calibration: 1 lux per directional source unit '
+                             'and 1 legacy unitless unit per local source unit; these are calibrated UE gains, '
+                             'not a recovered Unity-to-photometric conversion. Source colors, ranges and light ratios remain.',
                              'Source numeric colors interpreted as sRGB authoring colors and quantized by UE FColor.',
                              'Movable lights; native no-shadow flags and source range/layout retained; no extra sun/sky light.',
                              'UE box capture blending replaces Unity importance/HDR decode; DDS face orientation uncalibrated.']},
@@ -980,8 +981,249 @@ def prepare_cube_transports(plan, settings, decoder_root, cache_root, scope):
     return updated
 
 
+def parse_support_obj(text, header='# Original Unity local coordinates and index winding; no axis/unit conversion.'):
+    """只接受补充包的原生三角 OBJ，明确进行一次已校准的局部帧转换。"""
+    lines = text.splitlines()
+    require(lines and lines[0] == header,
+            'PawnSupport OBJ does not declare original Unity local coordinates')
+    vertices, triangles = [], []
+    for line in lines:
+        parts = line.split()
+        if not parts or parts[0].startswith('#'):
+            continue
+        kind = parts[0]
+        if kind == 'v':
+            require(len(parts) == 4, 'PawnSupport vertex has another layout')
+            p = [float(v) for v in parts[1:]]
+            require(all(math.isfinite(v) for v in p), 'PawnSupport vertex is non-finite')
+            vertices.append([-100*p[0], -100*p[1], 100*p[2]])
+        elif kind == 'f':
+            require(len(parts) == 4, 'PawnSupport face is not a triangle')
+            face = [int(v.split('/')[0])-1 for v in parts[1:]]
+            require(len(set(face)) == 3 and all(0 <= v < len(vertices) for v in face),
+                    'PawnSupport triangle has duplicate/out-of-range vertices')
+            a, b, c = [vertices[i] for i in face]
+            ab, ac = [[p[i]-a[i] for i in range(3)] for p in (b, c)]
+            cross = [ab[1]*ac[2]-ab[2]*ac[1], ab[2]*ac[0]-ab[0]*ac[2], ab[0]*ac[1]-ab[1]*ac[0]]
+            require(sum(v*v for v in cross) > 1e-12, 'PawnSupport triangle is geometrically degenerate')
+            triangles.append(face)
+        else:
+            require(kind in ('g', 'o', 'vn', 'vt'), 'PawnSupport OBJ has unsupported directive: '+kind)
+    require(vertices and triangles, 'PawnSupport OBJ is empty')
+    return vertices, triangles
+
+
+def pawn_support_spec(plan, p1_source_manifest=None):
+    """Pawn 支撑是已选择的 UE 演示角色，不修改旧环境计划或源停用事实。"""
+    if plan['stage'] == 'P1' and p1_source_manifest is not None:
+        return p2_region_support_spec(plan, p1_source_manifest)
+    stage = plan['stage']
+    require(stage in ('P1', 'P3'), 'PawnSupport stage is outside the selected two maps')
+    mid = {'P1': '1580554081600', 'P3': '1934927152128'}[stage]
+    collider = [r for r in plan['colliders'] if r['model'] == mid]
+    require(len(collider) == 1 and not collider[0]['mesh_is_null'] and not component_enabled(collider[0]),
+            'PawnSupport exact source collider/disabled policy changed')
+    row = plan['geometry_actors'][mid]
+    require(not any(r['model'] == mid for r in plan['affine_meshes']),
+            'PawnSupport source now needs an explicit affine migration')
+    spec = {'stage': stage, 'source_model': mid, 'source_actor': row['actor'],
+            'source_world_pose': row['world_transform'], 'source_collider': collider[0],
+            'source_plan_digest': plan['digest'],
+            'package': plan['asset_root']+'/StaticMeshes/SM_KevinBoss'+stage+'_PawnSupport',
+            'owner': 'GGYGO.BH3.Stage.PawnSupport.v1', 'policy': 'ue_demo_pawn_query_only',
+            'camera_policy': 'preserve_original', 'source_runtime_activation_restored': False,
+            'source_cooking_verified': False}
+    if stage == 'P3':
+        expected = plan['asset_root']+'/StaticMeshes/G1934921182544_Stage_KevinBoss_P3_Collision'
+        require(row.get('mesh') == expected, 'P3 PawnSupport source mesh identity changed')
+        spec.update(source_mesh=expected, vertices_expected=201, triangles_expected=120)
+    else:
+        index_file = Path(plan['source_index']['path'])
+        require(evidence(index_file) == plan['source_index'], 'P1 PawnSupport source index changed')
+        index = read_json(index_file)
+        meshes = [m for m in index['collisionMeshes'] if identity(m['source']) ==
+                  ('cab-b82906fa429932b6a40416c72404d70c', '2359557888624123605')]
+        require(len(meshes) == 1, 'P1 PawnSupport native mesh identity is missing/ambiguous')
+        mesh = meshes[0]
+        require(mesh['meshName'] == 'CL_Stage_KevinbossP1_Base02_Floor_Collision'
+                and mesh['coordinates'] == 'original Unity local; no axis/unit conversion'
+                and collider[0]['fields']['m_Mesh']['m_PathID'] == mesh['source']['pathID'],
+                'P1 PawnSupport collider/OBJ source binding differs')
+        obj = child_file(index_file.parent, mesh['objFile'])
+        metadata = child_file(index_file.parent, mesh['metadataFile'])
+        require(read_json(metadata) == {k: v for k, v in mesh.items() if k != 'metadataFile'},
+                'P1 PawnSupport OBJ metadata differs from source index')
+        vertices, triangles = parse_support_obj(obj.read_text(encoding='utf-8-sig'))
+        require((len(vertices), len(triangles)) == (mesh['vertices'], mesh['triangles']) == (41, 40),
+                'P1 PawnSupport topology cardinality differs')
+        spec.update(source_obj=evidence(obj), source_metadata=evidence(metadata),
+                    native_mesh=mesh['source'], unparsed_tail=mesh['unparsedTailHex'],
+                    native_mesh_layout_fully_parsed=mesh['fullSourceLayoutParsed'],
+                    vertices=vertices, triangles=triangles, vertices_expected=41, triangles_expected=40,
+                    coordinate_contract='UnityLocal -> (-100x,-100y,+100z), then original source Actor world pose')
+    return spec
+
+
+def point_triangle_distance(p, a, b, c):
+    """真实三角形的欧氏距离；退化三角形按其线段集合求几何距离。"""
+    def dot(x, y):return sum(v*w for v, w in zip(x, y))
+    def sub(x, y):return [v-w for v, w in zip(x, y)]
+    def edge(x, y):
+        direction = sub(y, x)
+        length = dot(direction, direction)
+        t = max(0., min(1., dot(sub(p, x), direction)/length)) if length else 0.
+        return math.sqrt(sum((p[i]-x[i]-t*direction[i])**2 for i in range(3)))
+    ab, ac, ap = sub(b, a), sub(c, a), sub(p, a)
+    normal = [ab[1]*ac[2]-ab[2]*ac[1], ab[2]*ac[0]-ab[0]*ac[2], ab[0]*ac[1]-ab[1]*ac[0]]
+    norm_sq = dot(normal, normal)
+    if norm_sq:
+        signed = dot(ap, normal)/norm_sq
+        projected = [ap[i]-signed*normal[i] for i in range(3)]
+        aa, bb, cc = dot(ab, ab), dot(ab, ac), dot(ac, ac)
+        denominator = aa*cc-bb*bb
+        if denominator:
+            u = (cc*dot(projected, ab)-bb*dot(projected, ac))/denominator
+            v = (aa*dot(projected, ac)-bb*dot(projected, ab))/denominator
+            if u >= 0 and v >= 0 and u+v <= 1:
+                return abs(signed)*math.sqrt(norm_sq)
+    return min(edge(a, b), edge(b, c), edge(c, a))
+
+
+def p2_region_support_spec(plan, manifest_path):
+    """选定 P2 三实例按源 Prefab 帧接入 P1 显示坐标，原游戏世界配准仍未知。"""
+    require(plan['stage'] == 'P1', 'P2 region belongs only to the selected P1 map')
+    reference_root = Path('F:/AnimeStudio/_work/bh3_stage_candidates_20261009/P2CollisionReference').resolve()
+    manifest = Path(manifest_path).resolve()
+    require(manifest == reference_root/'contract_input_manifest.json'
+            and evidence(manifest)['sha256'] == '9a84dddae0cf573e6c4526617789e595957f7f78db43e9391f3d4892f624141d',
+            'P2 region source manifest is missing/foreign')
+    inputs = read_json(manifest)
+    files = {}
+    for entry in inputs['inputFiles']+inputs['geometryFiles']:
+        path = Path(entry['path']).resolve()
+        require(path.is_relative_to(reference_root) and evidence(path)['sha256'] == entry['sha256'],
+                'P2 region pinned source/geometry file changed: '+str(path))
+        files[path.name] = path
+    p2 = read_json(files['p2_collision_reference.json'])
+    visual = read_json(files['p1_visual_surface_correspondence.json'])
+    raw_base = Path(inputs['sourceP1RelativeRawPathBase']).resolve()
+    require(raw_base == Path(plan['source_index']['path']).parent.resolve(), 'P2 region P1 source base differs')
+    validated_raw = set()
+    def validate_raw(value):
+        if isinstance(value, dict):
+            if value.get('rawFile') and value.get('rawSha256'):
+                path = Path(value['rawFile'])
+                path = (path if path.is_absolute() else raw_base/path).resolve()
+                require(path.is_relative_to(reference_root.parent) or path.is_relative_to(raw_base),
+                        'P2 region raw source escapes its declared roots')
+                if path not in validated_raw:
+                    actual = evidence(path)
+                    require(actual['sha256'] == value['rawSha256'] and actual['bytes'] == value['byteSize'],
+                            'P2 region original raw bytes changed: '+str(path))
+                    validated_raw.add(path)
+            for child in value.values():validate_raw(child)
+        elif isinstance(value, list):
+            for child in value:validate_raw(child)
+    validate_raw(p2)
+    validate_raw(visual)
+    def parent_matrix(chain):
+        result = [[float(i == j) for j in range(4)] for i in range(4)]
+        previous = 0
+        for node in chain:
+            f = node['transformFields']
+            require(f['m_Father']['m_FileID'] == 0 and f['m_Father']['m_PathID'] == previous
+                    and f['m_GameObject']['m_PathID'] == node['gameObjectSource']['pathID'],
+                    'P2 region exact source parent/owner chain differs')
+            pose = {'translation': [f['m_LocalPosition'][k] for k in ('x', 'y', 'z')],
+                    'quaternion': [f['m_LocalRotation'][k] for k in ('x', 'y', 'z', 'w')],
+                    'scale': [f['m_LocalScale'][k] for k in ('x', 'y', 'z')]}
+            result = multiply(result, matrix(pose))
+            previous = node['transformSource']['pathID']
+        return result
+    wanted = [('-8142335404607599658', 'floor'), ('-2263744829560298407', 'wall'), ('-4757420511476542111', 'top')]
+    require(len(p2['colliderInstances']) == 5 and len(p2['uniqueMeshes']) == 3, 'P2 region source closure differs')
+    meshes = {identity(m['meshSource']): m for m in p2['uniqueMeshes']}
+    vertices, triangles, instances = [], [], []
+    header = '# Original Unity coordinates / units / winding; no axis conversion.'
+    for pid, role in wanted:
+        matches = [i for i in p2['colliderInstances'] if identity(i['source']) == ('cab-915e604e0513ca47e0c042e12494956d', pid)]
+        require(len(matches) == 1, 'P2 region required Collider identity missing: '+role)
+        instance = matches[0]
+        f = instance['sourceFields']
+        require(instance['activeInSourceParentChain'] and all(n['gameObjectFields']['m_IsActive'] for n in instance['parentChain'])
+                and f['m_Enabled'] and not f['m_IsTrigger'] and f['m_Material']['m_PathID'] == 0
+                and instance['meshPointerCorroboratedByOwnerMeshFilter']
+                and str(f['m_Mesh']['m_PathID']) == str(instance['resolvedMeshPathID']),
+                'P2 region source enabled/trigger/material/mesh binding changed: '+role)
+        transform = parent_matrix(instance['parentChain'])
+        require(difference(transform, instance['meshToP2PrefabMatrix']) < 1e-7, 'P2 region derived source matrix differs')
+        mesh = meshes[(instance['resolvedMeshCAB'], str(instance['resolvedMeshPathID']))]
+        local, faces = parse_support_obj(Path(mesh['objFile']).read_text(encoding='utf-8-sig'), header)
+        require((len(local), len(faces)) == (mesh['vertexCount'], mesh['triangleCount']), 'P2 region source topology differs')
+        offset = len(vertices)
+        for p in local:
+            unity = [-p[0]/100, -p[1]/100, p[2]/100]
+            q = point(transform, unity)
+            vertices.append([-100*q[0], -100*q[1], 100*q[2]])
+        triangles.extend([[offset+i for i in face] for face in faces])
+        instances.append({'role': role, 'source': instance, 'mesh_source': mesh['meshSource'],
+                          'vertex_range': [offset, len(vertices)], 'source_obj': evidence(mesh['objFile'])})
+    require((len(vertices), len(triangles)) == (242, 160), 'P2 region selected composition cardinality differs')
+    root_model = '1580595554368'
+    root = plan['geometry_actors'][root_model]
+    surfaces = []
+    for name in ('BuildingA_03_Base01', 'BuildingA_03_Base02'):
+        match = [r for r in visual['surfaces'] if r['nodePath'] == 'Stage_KevinBoss_P1/Stage_KevinBossP1_Fan_BuildingA_03/'+name]
+        require(len(match) == 1, 'P2 region exact visible counterpart is missing: '+name)
+        row = match[0]
+        renderer = [r for r in plan['renderers'] if tuple(r['identity']) == identity(row['rendererSource'])]
+        require(len(renderer) == 1 and component_enabled(renderer[0]), 'P2 region visible renderer binding/active state differs')
+        mesh = [m for m in visual['uniqueVisualMeshes'] if identity(m['source']) == identity(row['sourceMesh'])]
+        require(len(mesh) == 1 and difference(parent_matrix(row['parentChain']), row['meshToP1PrefabMatrix']) < 1e-7,
+                'P2 region visible source mesh/frame differs')
+        surfaces.append({'model': renderer[0]['model'], 'package': renderer[0]['mesh'], 'source': row,
+                         'source_obj': evidence(mesh[0]['objFile']), 'vertex_count': mesh[0]['vertexCount'],
+                         'triangle_count': mesh[0]['triangleCount']})
+    return {'stage': 'P1', 'source_model': root_model, 'source_actor': root['actor'],
+            'source_world_pose': root['world_transform'], 'source_plan_digest': plan['digest'],
+            'package': plan['asset_root']+'/StaticMeshes/SM_KevinBossP1_PawnSupport',
+            'owner': 'GGYGO.BH3.Stage.PawnSupport.v1', 'policy': 'ue_demo_pawn_query_only',
+            'camera_policy': 'preserve_original', 'source_runtime_activation_restored': False,
+            'source_cooking_verified': False, 'runtime_world_registration_verified': False,
+            'world_registration_policy': 'P2 original Prefab coordinates in calibrated P1 root display frame; no old Collider registration',
+            'source_manifest': evidence(manifest), 'source_instances': instances, 'visual_surfaces': surfaces,
+            'excluded_camera_colliders': [i for i in p2['colliderInstances'] if str(i['source']['pathID']) not in {pid for pid, _ in wanted}],
+            'vertices': vertices, 'triangles': triangles,
+            'native_winding_policy': 'Unity source indices retained; reverse once for UE StaticMesh collision front faces',
+            'native_triangles': [[face[0], face[2], face[1]] for face in triangles],
+            'vertices_expected': 242, 'triangles_expected': 160,
+            'floor_vertex_range': instances[0]['vertex_range']}
+
+
 def lighting_generation_digest(plan, settings):
-    """Existing lamp identity comes from its accepted generation, not new surfaces."""
+    """灯的生成身份保持；显式强度校准不改变源布局、探针或材质配置。"""
+    if 'lighting_calibration' in settings:
+        calibration = settings['lighting_calibration']
+        require(calibration.get('purpose') == 'ue_visual_intensity_calibration'
+                and calibration.get('source_photometry_verified') is False
+                and calibration.get('reason'), 'lighting calibration selection is incomplete')
+        proof = calibration['baseline_settings']
+        require(evidence(proof['path']) == proof, 'lighting calibration baseline changed')
+        original = read_json(proof['path'])
+        require('lighting_calibration' not in original and original['plan_digest'] == plan['digest'],
+                'lighting calibration baseline is foreign or already calibrated')
+        require({k:v for k,v in settings.items() if k not in ('lighting','lighting_calibration')}
+                == {k:v for k,v in original.items() if k != 'lighting'},
+                'lighting calibration changes protected surface/probe configuration')
+        adjustable = {'directional_lux_scale', 'local_intensity_scale', 'differences'}
+        require(settings['lighting'].keys() == original['lighting'].keys()
+                and all(settings['lighting'][k] == v for k,v in original['lighting'].items()
+                        if k not in adjustable), 'lighting calibration changes protected light policy')
+        require(all(type(settings['lighting'][k]) in (int,float)
+                    and math.isfinite(settings['lighting'][k]) and settings['lighting'][k] > 0
+                    for k in ('directional_lux_scale','local_intensity_scale'))
+                and settings['lighting']['differences'], 'lighting calibration intensity is invalid')
+        return lighting_generation_digest(plan, original)
     if 'preserved_lighting' not in settings:return digest(settings)
     proof=settings['preserved_lighting']
     for key in ('settings','apply_result'):
