@@ -1,0 +1,256 @@
+# 进度总览迁出正文（2026-10-16）
+
+本页保留迁移前总览及失败、未验边界，仅按需查询；不授予当前窗口。当前事实见[活动排程](Module_Repair_Parallel_Schedule.md)。只修正迁移后相对链接，反向还原校验原文 SHA256 `a734a9e33d2d6435bef57db695704592be6f8d1cfd44d77d37ecc72dd9ed813e`。
+
+# GGYGO 全模块优化进度
+
+当前活跃任务、共享窗口与待验边界唯一入口为[当前排程](Module_Repair_Parallel_Schedule.md)。以下只保留已验检查点，不与活动排程重复维护实时状态；历史“最新／正在推进”不授当前权限。
+
+## 已验检查点（2026-10-09，历史）
+
+本节为当时检查点；下方各阶段原始结果保留，不代表当前仍有那些旧窗口权限或本批整身／动作／表现需求已经完成。
+
+| 工作线 | 已核实产物 | 剩余边界 |
+| --- | --- | --- |
+| Pyrios 转向速率×2 | 灯光完成后仅保存正式 `DA_Movement_Pyrios`：`SteeringMaxYawRate` 1440→2880°/s，原生完整属性读回确认仅这一项变化；Min0／WalkScale1／RunScale0.75／原六点角度响应曲线及其余31属性保持，PawnData正式引用未变，原件已备份 | 未新跑PIE手感、独立冷加载或联机；当前仍是先平滑速度方向、再让胶囊追随速度方向，不是严格沿角色当前正方向推进。非WalkRun瞬转及身体内倾调优留后续，复用已有线性倾身，不新增第二套驱动 |
+| 身体线性侧倾 | 完整需求有限验收通过：正式ABP／CameraMode两包保存及独立冷读；原R2生产观察和warm→原Held均成功。后者0E5W、204内部样本／67同采样线性比较／17覆盖，四张直行／左右／回正图已实际人工读图；原曲线转向保持，额外镜头横移关闭。源码、笔记和父仓均已中文提交并push | 图中躯干及脚在画幅内但运动模糊明显；鞋底接触／IK／骨贡献隔离、HID／联机／Cook未验。原protected与首次Shot超时／裁脚失败保留 |
+| Pyrios前后闪烟雾／普攻01特效 | 正式AM01／GA Step0接线已保存／冷读；完整编译薄入口与明确失败传播构建通过。唯一NS R3完整重编／保存，作者配置差异0、原生绑定缓存差异30；新PID冷启动Ready1／VM80=80。原三探针生产叶R6 Success／0Error／17Warning，真实6～7粒子及自然尾释放／窗内取消重播／早取消重播通过，正常exit0；原失败保留 | 仅Normal01七色有限链，源第8层／原作视觉未完成，NoMerge动态重叠未观察；不扩历史矩阵。Dodge实际磁盘GA已登记但无执行／输入接线，新键等待用户选择，源姿态观察继续；全部攻击／闪避仍由FX牵头收敛，资源查未知用途 |
+| P3源仿射几何及UE等效材质／灯光 | 原97网格／10仿射引用、17纹理／10材质、97 Renderer／99槽及Cube源六面九级mip既有保存／独立冷读保持；本轮五灯强度有限校准已保存并由主UE换图重载验证，两探针、布局、材质与碰撞未改。根实际查看同视角前后图，岩石与反射面的大片白色饱和消退；当前地图SHA24D5F1E2…834EE45D6，原图有备份 | UE等效表现，不是原作完整还原：源GI／曝光与原作光度、探针runtime processed／真实CMC落地未验。自有Pawn支撑已隐藏并保持QueryOnly，但静态支撑查询不代表完整可玩／Boss实战验收；本轮未跑新PID冷读或PIE |
+| P1 UE等效材质／灯光 | 75纹理／40材质、原77 Renderer／221槽、27灯／1Probe既有接线／独立冷读保持；本轮27灯强度有限校准已保存并由主UE换图重载验证，材质／探针／布局／碰撞未改。根已查看隔离对照及保存后重载同视角图，地面与建筑细节恢复；当前地图SHA5CE2113A…C5673E0D，45项工具契约通过。详细证据归[Stage盘点与接入](../Assets/BH3/BH3_Stage_Inventory.md) | 已关闭明显过亮，不称原作完整还原；原作GI／曝光与光度、发光环精确表现、探针运行时处理仍未核。P1目标为用户确认的P2小区域，自有支撑已接入／隐藏；真实CMC落地／出生点／Boss接入未完成，本轮未跑PIE，保留Lumen预算诊断 |
+| Kevin | 完整Derived InPlace内嵌XYZ、四包装配、Ice01 Montage、Mesh-only两Socket及GA／AbilitySet／PawnData挂接保存／独立冷读通过，原Skeleton不变。合法Falling夹具统一构建R3通过；正式生产叶R2 Success／0Error／3Warning，真实配置授予→XYZ胶囊→刀刃窗口GE去重→自然收尾／清理通过，宿主正常exit0 | 仅受控Falling夹具，不代表地面实战、P3演示或联机；P3等地编整链冻结后接入。命中时序仍项目测试，Ice01无已证源音效。R1错误Flying夹具及VT退出失败保留，不放宽CMC权限 |
+| Pyrios斗篷缺口 | 当前ImportedLOD0已原生只读导出并对照源四片：440点／672完整有向三角／两UV共1760独立标量／1380骨权重，固定轴和真实UE量化转换后全部匹配，无漏面／UV丢失／骨错配。R4有效全人物线框与R5三Lit／原null及PIE还原分别保留 | 只排除上述参考数据导入损失；骨bind矩阵微小数值差保留，当前GPU蒙皮／透明遮罩及原上沿ROI未闭合。R5局部线框全黑且A/A变化大于Soft差异，不能归因或改参数。无重导／模型修正，停止截图参数迭代；只读核源Opacity链，失败证据保留 |
+
+完整侧倾证据为 `Saved/AutomationReports/Pyrios_LinearLean_WarmVisual_20261009_Resume/index.json` 和同名原生日志、`Saved/ValidationRecords/PyriosLinearLeanVisual_1791497967622322300_{straight_baseline,left,right,straight_recovered}00000.png`。P3原几何检查点为 `Saved/BH3StageEnvironment/P3_Map_Geometry_{Apply,Cold}_20261009_Resume.json`，当时地图SHA `71350837902FC71A6005820AD0BA010AC8D6BD2333A39606FFFE3819A865A85A`，不是当前材质接线后的地图。Kevin装配日志为 `Saved/Logs/Kevin_Assembly_{Apply,Cold}_R3_20261009_Resume.log`，Montage为 `Saved/Logs/Kevin_Ice01_Montage_{Create,Cold}_20261009_Resume.log`；R2失败保留。斗篷R4两图及日志在 `Saved/AutomationReports/PyriosBody_Native_20261009_R4_{Lit,Wireframe}.png`、`Saved/Logs/PyriosBody_Native_20261009_R4.log`。原四份用户配置／资产保持，不将有限资产检查点写为整需求完成。
+
+P3等效材质／灯光阶段证据：`Saved/BH3StageEnvironment/P3_Materials_Assets_Cold_20261009.json` 核17纹理／10材质及持久图／绑定；`P3_Materials_Map_Apply_20261009_R2.json` 精确保存唯一地图，`P3_Materials_Map_Cold_20261009.json` 新PID只读核97 Renderer／99槽／五灯两探针／10仿射。首轮地图保存遇主Editor共享锁Error32，原文件与备份保持；根经MCP确认原图无未保存／无PIE后正常切图释放锁，新轮保存成功，未强停或丢弃工作。`P3_Materials_Capture_20261009.json` 外壳图及显式源model1934927135424的Rocks内场图 `P3_Materials_Arena_View_20261009.png` 已实际查看；独立采集0保存／0新增Actor，原相机与选集恢复。当前342185字节地图SHA `5CCF56324720B5B011FAC20473E37FECCCB0C4802D50662493D1B2CB65782F84`，原灯光图备份 `P3_Before_Materials_20261009.umap` SHA8B678B02…CC376C1。局部结果集中维护[Stage盘点与接入](../Assets/BH3/BH3_Stage_Inventory.md)，不先重画尚未完成的整Stage架构。
+
+当前公共门禁已推进：两个GGYGO编辑器均已正常结束后，本批冻结C++统一Editor构建R3 Succeeded／exit0，4 actions／18.50秒，日志`Saved/Logs/FX_Kevin_Integration_Build_R3_20261009_083607.log`。R1两处测试局部变量遮蔽、R2 Niagara未导出API链接失败由原测试作者修正；原失败日志保留，不改引擎库。AM01薄工具audit／apply／cold均成功、三宿主正常exit0；仅保存该Montage一包，原件有备份，最终全脏包空，记录`Saved/ValidationRecords/PyriosNormal01FXWindow_20261009_{Audit,Apply,Cold}.json`。普攻GA接线／生产播放及Kevin Socket／实际位移命中尚待执行，不因局部保存标为整链完成。P3缺灯已定位：保存图只有灯名普通节点，LightComponent／ReflectionCapture均0；源5灯／2探针未接入，Stage等效受光政策待用户选择。
+
+斗篷有限数据证据：`Saved/Logs/PyriosBody_ImportedLOD0_20261009_R2.log`、同stem的`Saved/AutomationReports/*.fbx`（实际7300／1315440字节），以及`F:/AnimeStudio/_work/pyrios_body_geometry_20261009/body_fx_source_vs_ue_r2.json`逐点／有向三角／UV／权重对照。Cmd／NullRHI R1在原生FBX导出器的材质上下文CPU蒙皮处MeshObject断言失败；换完整RHI宿主R2成功、绑定／全脏包保持且正常退出，不改UE或CPUAccess。该有限子项已验收，不等于斗篷视觉问题已修好，不为此另更新整模块Obsidian图文。
+
+接续资产与真实失败检查点：Kevin Socket 保存／冷审为 `Saved/Logs/Kevin_Sockets_{Save,Cold}_20261009.log`，combat三包为 `Saved/Logs/Kevin_Combat_Wiring_{Audit_R2,Apply,Cold}_20261009.log`。普攻GA原预检失败保留，R4审核、唯一GA保存和fresh cold均成功，见 `Saved/AssetReadbacks/PyriosComboFX_20261009_{Audit_R4,Apply,Cold}.json`；原件备份保留。新DLL统一构建R2 Succeeded／exit0，`Saved/Logs/FX_Kevin_ProductionSmoke_Build_R2_20261009.log`；普攻R2／R3与Kevin R1的独立原生日志、Automation报告均真实失败，不因资产已落盘标整需求完成。BodyFX正式活动图只读核对结束：118节点／4Custom／106参数的可读代码及最终参数未发现确定漂移，127个保护连接位值仍partial，斗篷视觉根因未闭合；不试改遮罩、不再扩大取证。其它历史状态不覆盖本段。
+
+最新运行里程碑：`Saved/Logs/KevinIce01_Fixture_Build_R3_20261009.log`构建Succeeded／exit0，Kevin R2报告 `Saved/Automation/KevinIce01_ProductionSmoke_R2_20261009/index.json` 为1Success／0Error／3Warning、2.358秒并正常退出，三Warning均原PIE输入生命周期清理诊断，未隐藏。普攻R4 fullRHI离屏、原生CDO后台节流实际False后仍Fail，原报告保留；不再试焦点或预热，FX定位该唯一NS就绪门禁，Combat独立修真实早取消夹具，窗口及生产契约不改。P3等效材质／灯光决定已收到，地编正在原三工具中补整条生产链，尚未保存灯光资产。
+
+身体侧倾已中文提交并push：源码10件 `2ec339b`、Obsidian 17份模块／全局图文 `0db97f8`；统筹复核7张Canvas／148节点／173边及原节点布局／边端点保持。父仓交付正式ABP／CameraMode两资产、原迁移工具、源码指针及当前进度／排程；未混入四份用户配置／资产、七份无关脏笔记或未验Boss／Rendering／FX源码。FX RHI3已完成前后闪六张独立预览及准确激活／SimCache观察，资源清理／脏包检查通过；可見淡紫／灰黑烟，不等于原作视觉或真实闪避接线，1秒尾段已无可见粒子。证据 `Saved/Logs/PyriosFX_20261009_RHI3.log`；RHI1空画面、RHI2清理失败仍保留。普攻01接线正在由FX牵头、Combat／Animation／System各唯一作者实施，完整源码冻结后统一编译。
+
+## 身体线性侧倾（2026-10-09，完整需求有限验收通过；以下保留实施过程）
+
+用户纠正运动偏移：不再额外横移摄像机；身体朝转弯内侧倾斜，倾角随角色到移动目标方向的夹角线性增减。保留已验平滑轨迹／Yaw与角速度曲线、Walk弱／Run强，最大幅度与比例由角色配置控制。Movement复用既有完成区间夹角，本轮零生产源码改动；Animation五件已冻结，线性映射不再依赖速度YawRate或进入指数滤波。原ABP角度基准180与专用CameraMode关闭额外横移已精确保存，独立新PID冷读成功；25张动画图、原ActionPose producer与其骨／Slot配置、PawnData及其余镜头参数保持。机器记录为 `Saved/ValidationRecords/pyrios_linear_lean_{apply,coldread}_r3_20261008.json`，只保存两包、最终脏包空，原件备份保留；实际角色观察仍未通过，不能按旧运动偏移检查点标完成。
+
+统一Editor构建已真实Succeeded／exit0（13 actions、78.52秒），日志 `Saved/Logs/LinearLean_Kevin_Rendering_Build_20261008_211943.log`。首轮十项必要冒烟8Success／2Fail／0NotRun，原报告 `Saved/AutomationReports/LinearLean_Kevin_Rendering_Smoke_20261008_212336/index.json` 保留。两失败夹具修正后同批增量构建Succeeded（7 actions、10.75秒），只复测Boss真实XYZ与Kevin保留作者姿态图两叶，均Success／0Error／0Warning：`Saved/AutomationReports/Kevin_TwoFixtures_Smoke_20261008_222220/index.json`。修正真实Host解绑配装重绑、Task完成到CMC末帧消费间隙及实际Factory／Compile夹具；生产语义与原失败证据不放宽，也不据夹具通过称正式Boss资产接入完成。
+
+两包迁移后的完整RHI生产观察首轮Fail／2Error／5Warning，原报告 `Saved/AutomationReports/Pyrios_LinearLean_Production_20261008_222745/index.json` 保留。Camera提供原池／active模式的调用局部只读查询后，与Kevin Slot工具合并构建Succeeded（14 actions／78.80秒）；新Camera.ModeObservation叶Success／0E0W。原真实Held＋冻结观察脚本R2已通过：`Saved/AutomationReports/Pyrios_LinearLean_Production_R2_20261008_231620/index.json` 叶Success／0Error／5Warning；同名日志finished记录17覆盖全true、237内部采样／82同帧线性比较、真实释放和原PIE恢复。实际落盘样本节流，不能说237完整帧均保存。正式两包、原角色方向／曲线／步态轴向证据已核，最终身体内侧倾斜仍待最小画面确认；不以角度日志或原Spine四元数代替蒙皮目视，联机／HID未验。
+
+其他需求未停：FX真实窗口已保存八Texture与Front四M／四MI；材质模式／用途／深度与实例父链／全部源参数／贴图的原生读回一致。TransformPosition引脚、Custom两阶段数组写入与空FName canonical None适配已修，保持严格比较。原FX组长接独占窗口后实际又保存Back受光M／MI和Front NS，Front原生编译UpToDate；共19／20个新包已保存。Back NS创建但未保存，在原生SpawnPerUnit不存在SpawnSpacing输入处明确失败，原作者只修真实接口适配，不跳过距离发射。原报告 `Saved/AutomationReports/GGYGO_FX_UEEquivalent_EvadeSmokes_FX114_20261008.json` 保留；其他已保存包和旧效果只读，不重导／覆盖／改revision。全套编译、视觉和真实闪避GA接线仍待验；用户明确先UE等效、后视觉校准，不称逐像素复刻。
+
+Kevin原缺DefaultSlot已在单Skeleton备份后精确注册保存，491骨／Guid／Socket等保护一致，独立新PID冷读及already-present只读通过；日志 `Saved/Logs/Kevin_DefaultSlot_{Prepare_20261008_231520,ColdRead_20261008_231620}.log`。正式待机ABP已实际创建、编译、单包保存，独立原姿态图审核existing_preserved通过；原装配Python枚举名称不适用的只读反例已交原作者修正。四包装配尚未执行，先用原待机来源校准真实Mesh／胶囊基准；原75动画仍无正式派生XYZ／Montage，Socket／窗口／Ice01命中与生产链未验，不以待机包存在称Boss实战接入完成。
+
+P1几何已真实保存：独立Editor PID68596正常exit0，78个原生对象／78次精确包保存、77网格、146源节点／221 sections，保存后注册表门禁及实际轴／单位设置通过，地图376226字节；原四用户文件SHA保持，原SceneImport备份保持。报告 `Saved/AutomationReports/BH3_Stage_P1_Geometry_e3574626d5e64eed9070f76230ab9a18.json`、日志 `Saved/Logs/BH3_Stage_P1_Editor_Geometry_20261008_213723.log`。P3新增环境工具13项离线检查已交回；实际机器计划为97Renderer／99槽／10个仿射差异。首次只读Editor的本地模块导入失败已短修；R2实际生成失败结果，缺少所要求的原生GeometryScript方法，尚未进入顶点验证，saved_assets／created_actors均空、map_saved=false。证据 `Saved/BH3StageEnvironment/P3_Affine_Preflight_R2_20261008_233620.json`，原作者仅继续短修真实API适配与可定位诊断。Stage材质等效政策和源禁用碰撞的启用政策尚未获答，不能把Pyrios烟雾决定扩用于Stage。P1／P3材质／灯光／碰撞和完整视觉／可玩仍待接续，不能称地图还原完成。具体权限见[有效排程](Module_Repair_Parallel_Schedule.md)。
+
+## 当前新增需求：代码复杂度整改与审核机制（2026-10-08，本轮已验收）
+
+源码六模块已整批冻结：Movement旧迁移残留／唯一提交与Prediction、私有动作资源拆分；Input物理路径核验合并及Hero原输入会话职责收口；Character无作用尾检／旧通知退役与原H Closing事实；AbilitySystem来源值／纯数值／私有绑定元数据拆分及唯一重试等待；BossAI消费真实位移失败；Combatants真实外调返栈端点重取。必要的重入、网络和原生末帧保护保留，不改UE/GAS库。四处原失败接缝修正后，统一Editor构建3 Succeeded／exit0（7 actions、24.12秒），五项定向复测全部Success／0Error／8Warning；17项首轮13成功／4失败的原报告保留，不重跑全矩阵。具体问题见[整改清单](Module_Audit_Repair_Ledger.md)，文件范围见[有效排程](Module_Repair_Parallel_Schedule.md)。
+
+用户已允许原生退出：QUIT_EDITOR实际进入CloseEditor，但旧无人值守编辑器在AnimationEditor析构时访问违规退出，并非正常关闭成功；原日志保留，未强杀或保存全部。确认旧进程结束后才构建3，再重开普通编辑器／MCP8000完成五项复测，当前非PIE。源码46件已中文提交push `45de80f`，六模块与四统筹入口、此前授权Cues结构整理共34份图文已集中同步并中文提交push `57b5e8a`；16Canvas／281节点／287边、711个文件内去重wiki链接及布局静态检查通过，未做原生Obsidian渲染。全部模块写权关闭，本轮开发、必要门禁与集中图文验收完成；本次父仓交付审核规范、排程／清单、进度和源码指针，不混入原四份用户配置／资产或七份无关脏笔记。
+
+首次构建Failed／exit1（68.03秒），构建2 Succeeded／exit0（12 actions、43.70秒），构建3与两份冒烟原报告均保留：`Saved/Logs/ComplexityAuditBuild_20261008_{1,2,3}.log`、`Saved/AutomationReports/ComplexityAuditSmoke_20261008_{1,2}/index.json`。复测包括原四个失败叶及真实普攻ProductionNativeHeld；残余Warning未隐藏。Input测试宿主完整Editor隔离X2、Host partial-installed动态覆盖，以及联机／Cook／视觉／性能均未验，不以本轮有限门禁替代。CMC主cpp由6262行降为4828行；46件总差异4292新增／3335删除，含职责迁出与测试，本轮并非全项目净减行数。
+
+[代码规范与审核机制](../Architecture/CodeConventions.md)及AGENTS.md已落地：完整需求交付前审核职责、状态、防御依据、迁移残留、业务与测试边界，避免用行数或删保护代替架构改进。原规范的黑板管线、静默返回和镜像目录要求已退役。采用批量编译＋必要原问题冒烟，完整需求验收后集中同步笔记和中文Git，不新增逐函数审批／人工JSON。原FX需求继续独立推进。
+
+独立FX的攻击九包预览在材质recompile时遭遇UE的Zen DDC HTTP线程崩溃：六依赖已保存，未保存master丢失、MI／NS未创建；编译／视觉未验。原生断连与真实日志／失败报告已保留，不重跑覆盖、不改引擎或缓存配置，不据工具离线测试通过冒称资产完成。FX窗口已关闭；统筹已在源码构建成功后正常重开UE 8000作C++必要冒烟，不授予FX覆盖／续建权限。
+
+独立冻结的五份FX工具／专项已中文提交 `49b548a`：修正动态下标依赖／循环裁剪与原生材质生成。其离线专项通过不替代UE九包预览或完整攻击／技能／闪避接入，未纳入忽略的试验资产；随本次父仓推送交付。
+
+笔记首次push因远端新增 `7f4e80c`“理线”被拒，未强推：按ID／属性核对没有语义冲突，保留远端两张AS图全部旧节点几何、连线方向及顺序，同时保留本轮正文／新增节点和边；仅移动本轮新增唤醒节点避开旧布局，两图复验无重叠。中文合并 `09bb88b` 已push，七份其他脏笔记原样保持。
+
+## 新需求：Kevin DemonBattle资产与按动作音效（2026-10-08，执行中）
+
+BossAI已核104资产／75有效动画与76份模型动画来源，独立骨架引用正确，未重复导入。资源已冻结指定源 `Audio/`：79动作目录、6动作46WAV、28个事件名称关联；73动作和143Bank事件仍无法确认关联，不造声音或触发帧。两语言Bank各171事件，旧115统计已更正。音效资产导入检查点已完成：UE标准PythonScript Commandlet首件导入、独立首件读回、剩余45导入及独立全部46读回均真实exit0；磁盘46份SoundWave位于 `/Game/Characters/Boss/Kevin/DemonBattle/Audio/<动作>/`，来源／采样率／声道／时长／非循环与默认音量音高逐份核验，保留44100／32000／36000Hz及单／双声道，不重采样。证据为 `Saved/Logs/KevinAudio_Commandlet_{FirstImport_20261008_1740,FirstReadback_20261008_1746,Remaining45_20261008_1758,All46Readback_20261008_1801}.log`。导入前后原四用户文件及P1空图／失败SceneImport六份磁盘hash相同；主MCP仍P1。没有改Montage／Notify；设备播放、听感、原帧／混音／完整Boss音效仍未验，缺媒体／控制事件按来源记录保留。本检查点后再集中更新局部资产说明，不把资产落盘称为实战声音还原。职责见[有效排程](Module_Repair_Parallel_Schedule.md)。
+
+## 新需求：BH3 Stage两场景导入（2026-10-08，P3几何已保存，完整还原未完成）
+
+P3几何检查点实际通过：独立完整Editor PID95588正常exit0，97个StaticMesh＋1个SceneImport共98包精确保存，120个源节点装配到312021字节地图；源拓扑、层级、材质槽与section分配严格读回通过。报告 `Saved/AutomationReports/BH3_Stage_P3_Geometry_ac54612cec8243a0a6bdf86a5ae94f5d.json`、原日志 `Saved/Logs/BH3_Stage_P3_Editor_Geometry_20261008_1910.log` 保留。主MCP随后独立发现98包，实际打开 `/Game/Map/BH3/L_KevinBoss_P3`，读到120个源N节点（另有引擎节点），地图未脏、非PIE，内容浏览器已定位StaticMeshes。当前视口原生截图仍黑，不能称视觉通过；材质／灯光／碰撞／可玩未完成，P1仍为空图与失败SceneImport现场。目录为 `/Game/Environments/BH3/Stage/<Stage名>/StaticMeshes|Materials|Textures|Collision`，SceneImport在Stage根、地图在 `/Game/Map/BH3/`；未创建无来源的占位材质或迁移无关旧目录。
+
+原三次P3保存前失败均保留：f67为Python槽属性访问、a88为Commandlet缺StaticMeshEditorSubsystem、53ce为把原生重复材质的_Section1名称误判为来源丢失。修正为原生完整Editor显式宿主及“源槽索引→MaterialID→同ID出现次数→原生唯一槽名”派生契约，不剥后缀、不放宽section或造默认材质。原6387字节空P3图备份保持，原六保护文件磁盘指纹完全未变；完整场景仍未验收，不提前重画Obsidian。
+
+保留此前失败：Audio控制台聚焦坐标操作曾发生非预期保存，P1失败SceneImport于16:33:33写盘（15427字节），界面输入为何偏离预期未证明。统筹已精准备份到 `Saved/BH3StageImports/P1_SavedPartialBackup_20261008_31d4e188452541ad9815339e4f706bd8/`，原件／备份SHA相同 `85F1DB4A...DA0A70F`，空P1图SHA仍 `28068D50...A5099C`。未删除／卸载／回滚该现场；GUI输入继续停用，后续Audio改用标准Commandlet完成，不归咎外人／缓存。旧“SoundWave0”和“P3未执行”仅表示当时状态，不是当前结论。
+
+公共实例已收口：实际曾有87772与93540两个同项目UE，8000连旧实例，地编物理UI在新实例；此前“旧地图缓存”解释撤回。Audio0导入保存时发现差异即暂停。统筹OS核对后正常关闭已确认无脏旧87772（完整LogExit），保留93540的P1失败现场，以正常GUI启动其8000；socket进程归属／MCP P1读回／唯一Sky窗口一致。Audio已重新授独占窗口并必须新实例重预检，不沿用旧dirty空或46预检；未保存SceneImport未丢弃。P1/P3修正版副本已通过同UE版本真实FBXSDK2020.2读取、计数同源，原坏副本Import失败保留；这不等于UE几何导入完成。候选显式接续保持原new-only拒绝，需下一短窗口核公开源绑定／空工厂图才准实际执行。Stage源1759补件已冻结，不冒称UE材质／灯光完成。
+
+地编已恢复实际UE控制台操作并通过当前接口预检，P1真实导入失败：新空图 `L_KevinBoss_P1` 已保存，FBXSDK拒绝临时name-only副本，零几何保存、P3未执行。实际world/level为新P1、Actors=0、dirty maps=[]、Interchange inactive，但有一个未保存的脏SceneImport内存包；registry/disk缺席不等于零内存资产，MCP旧地图读回已纠正。原日志、8462字节空图、失败内存包及因unreal.Array转换缺失而中断的部分机器报告保留，未删除／覆盖／整批重跑。工具离线核原FBX／副本与报告转换，统筹已要求归还窗口让Audio先执行，进一步来源只读另排；接续须精确涵盖自有空图、失败内存包及用户变化，不能直接普通new-only重跑。P1 78／P3 98仍是计划，原GUI失败保留；资源继续Shader／反射／碰撞／灯光补证，材料、视觉与可玩未验。范围见[有效排程](Module_Repair_Parallel_Schedule.md)，源清点见[Stage盘点](../Assets/BH3/BH3_Stage_Inventory.md)。
+
+## 新需求：角色受光核因与渲染组件完善（2026-10-08，执行中）
+
+真实Editor主材质Unlit／Custom→Emissive和四槽引用已核，Body1运行MID输入已核，Body2／Weapon完整运行父链及有限画面对照未完成。Rendering组件输入契约的七份源码／工具／专项已冻结，25项离线检查通过；错误Lit／缺必需参数明确拒绝，非法数值不静默clamp，保留正常选灯和自有MID归还。尚未统一编译、运行三项Rendering冒烟或加载新DLL验证画面，原视觉根因未关闭。斗篷缺口是另一条待核几何／透明度问题；用户本轮“特效不对”已明确指粒子，不是身体材质，不能混作同一修复。UE及四用户配置／资产未改，新风格／曝光政策未改。范围见[有效排程](Module_Repair_Parallel_Schedule.md)。
+
+## 当前需求：转向已验收交付，Pyrios攻击／技能／闪避特效实施中（2026-10-08）
+
+- Movement：角色专用角响应已保存，取消小角度最低90°/秒平台并加强大角响应；源码零改、未硬编码提速。必要真实转向观察通过，120°阶跃约半秒时轨迹已转114°、胶囊91°；自然攻击兼容冒烟也通过。两份模块笔记中文提交push `b5037a5`、参数三件提交push `854cb6d`。走跑BlendSpace轴显示名也已单包规范保存／回读，轴／样本／过滤及ABP保持、全局未保存列表为空；该元数据小项单独交付，不追加测试。相关写权全部关闭。
+- FX：普通烟雾确认原材质淡输出；Back03的真实粒子／核心绑定已读回，另发现并修正共享Shader转换器动态目的下标依赖及循环出口裁剪错误。相关47项离线检查通过，修复版八包实际创建／保存／编译及Code、参数读回通过，但烟雾仍近乎空白；不能将底层修复称为全部视觉根因已关闭。现共23个冻结本地预览包，未擅自入Git。资源组30根组件／资源证据不证明触发／挂点；技能GA/Montage缺失、闪避仍占位，完整普攻／技能／闪避尚未接入。FX下一步先只读收敛必要观察，不反复复制八包试未知原因。
+
+用户本轮明确投诉粒子整体不似原作，不是角色材质。只读清点已确认Normal01／02 Trail各8分支、Front02 Trail 12分支，当前新PREVIEW各仅单叶；生成器对Billboard／Stretch及部分运动模块仍不支持。当前三段GA／Montage已查包依赖没有Niagara引用，命中Cue媒体为空；未查动态加载不能称全工程无FX。FX负责完整prefab与生产时机链的修正，不用单子树编译成功冒充完整还原，也不调亮度掩盖缺失模块。
+
+本次检查点（FX111／112）：有效瞬态模拟读得一存活粒子，Color alpha约.923、核心Renderer绑定正确；修复后实际Custom Code28665字符逐字／摘要与生成结果一致、两个源下标参数0已接入，材质与Niagara编译通过。原材质存活／消亡帧实际ROI差异>8像素仍0，因此可见性保留未确认。报告 `Saved/AutomationReports/GGYGO_FX_Back03_DxbcFixValidation_20261008_FX112.json` 与旧失败原样保留。唯一UE窗口已归还，非PIE、原地图／脏包空、自有观察引用清理；共享两件与一次集中Handoff均已冻结。两源＋局部说明＋统筹两入口精确Git，不纳入原四份用户改动、忽略资产或AnimeStudio资料。斗篷另由Rendering只读核源拓扑／蒙皮并等待准确UE观察清单，未改身体；新受光／NTE跨会话授权待用户，完整RGB视觉政策也待选择，不阻塞已有普通FX分析。
+
+FX首批小链为普攻一独立烟雾子树PREVIEW及必要纹理／网格／材质，7个new-only包已保存；原Shader实际渲染已确认，Niagara UpToDate／0 Error/Warning。纠正初步肉眼“不可见”的判断：原完整Code恢复并精确保存后，.07秒存活帧与.50秒消亡帧的独立烟雾ROI有4322像素差异>1、743像素>8，确有很淡输出；临时诊断探针未保存，不能将它当成原效果。报告及两PNG在 `Saved/AutomationReports/GGYGO_FX_OrdinaryPreview_20261008_0128.json` 的native_preview中列明；原游戏同帧／完整prefab一致性未验，实战触发未接，不算普攻完整还原。FX已停写归还UE，性能／计数开关和自身观察器已清，非PIE、原地图保持、脏内容／地图为空。后续仅离线工作与真实来源取证；完整RGB扭曲取舍仍等用户选择。
+
+上述首批10件管线／两专项／局部说明与统筹入口共15件已中文提交push `ed8075d`；七包执行前16项与归还后6项适配分开，旧烟雾证据不覆盖新增v2／独立Wrap行为。FX110的六件native来源脚本／专项及集中局部说明连同统筹两入口共9件已中文提交push `d3565d8`。统筹原命令复跑30项通过；首次受限环境路径解析拒绝导致导入失败的输出保留，获批准重跑时未改源码／断言。后继FX112八包与原15包均维持本地忽略资源，不擅自纳入Git或放开角色目录；外部AnimeStudio资料也不入项目仓。
+
+FX110报告 `Saved/AutomationReports/GGYGO_FX_Back03_NativePreview_20261008_FX110.json` 明确为 `asset_build_passed_visual_unconfirmed`：原材质0.25／1.22秒两帧近乎空白，同一ROI差异>8像素为0，运行粒子数未取到；编译／Bounds／包存在不能替代实际可见证明。原Code与生成计划精确一致，无亮度探针；原游戏Pass／global值、同帧视觉、完整prefab与动作接线仍未验。FX已停写归还唯一UE窗口、8包写权关闭，自身开关／观察器清理，非PIE、地图保持、全局脏包空；下一步先只读定位，不扩大回归矩阵。详见[FX局部交接](../Modules/Character/Rendering/ZZZ_FX_Handoff.md)。
+
+转向观察共229样本、所有约定覆盖成立，原生叶1Success/0E/4W；自然攻击1Success/0E/8W。第一次观察因调度超时而0样本失败的记录保留，紧邻启动后复验通过，不放宽断言。当前非PIE、观察回调已撤、全局未保存列表为空。两线互斥并行，UE写入单窗口；笔记按完整可运行批次集中更新，FX真实播放／视觉／清理尚未验收。唯一范围见[有效排程](Module_Repair_Parallel_Schedule.md)。
+
+## 前序检查点：WalkRun 运动偏移（2026-10-07，开发／必要冒烟／集中图文及三仓交付已完成）
+
+Movement 牵头、Camera／Animation 参与，Character补原同步初始化在途接缝；26件本次与前序必要收尾源码／测试已中文提交并push `b80a80c`，Source/main与远端一致。真实速度轨迹与胶囊朝向共同平滑追赶，方向误差曲线／角速度范围／角色强度可配；Camera与倾身只读原CMC完成区间，不建第二调度／移动状态机。Pyrios专用正常 `DA_Movement_Pyrios`、PawnData引用、CameraMode和ABP普通WalkRun单Spine接线均已精确保存／回读，原共享默认Set、动画曲线源、其余24图及原相机参数保持。用户已批准仅这份新增参数资产强制入库，不放开角色目录，不恢复七旧曲线DA。[有效排程](Module_Repair_Parallel_Schedule.md)记录当前互斥图文范围，全部源码／测试／资产已冻结。
+
+交付检查点：四组长集中图文已保存冻结，34份笔记静态核对通过（16Canvas、307节点／334边、739个文件内去重wiki链接）；精确Git对象的正文／JSON／ID／端点／标签／无重叠也通过，非原生Obsidian视觉验收。笔记中文提交 `74d17d2`／新增节点布局修正 `4e44e1c`均已push；原有节点布局／格式、FX条目和十份批外笔记未纳入。本次父仓提交同步Source指针、六份相关资产、两既有工具及工程进度／排程／路由共13件，不含四份原有配置／Boss测试／角色蓝图。UE88648当前非PIE且原生dirty_content／dirty_maps均空，无在途观察回调；留编辑器供测试，没有SaveAll、强杀或丢弃用户资产。下方前序“待交付／仅规划”均是当时检查点，当前以本段和实际Git为准。
+
+约定集成门禁已通过：Gate106-R3统一Editor构建Succeeded／exit0（11 actions、42.28秒）；R2六必要叶6Success／0Error／0Warning，R3同一Movement叶补启动边界后也通过。R3正式RunObservation为1Success／0Error／5Warning、7.063208秒：原生输入真实持续Run约3游戏秒／释放约1游戏秒，227样本覆盖Walk→Run、实际左右轨迹与胶囊平滑、倾身、镜头外侧和恢复，所有必需覆盖成立、原来源恢复。原AttackAndNatural兼容烟1Success／0Error／8Warning、20.948912秒。报告 `Saved/AutomationReports/GGYGO_Gate106_R3_WalkRunSteering_{Production,Natural}_20261007_MCP.json`及同名Build／Editor日志保留；真实运行Warning、R1侧视数值失败和R2冷启动／观察脚本失败均不改绿。修正真实double几何与原生命周期边界后沿原断言复验，没有画面／速度兜底。HID、联机、Cook、全部TurnBack、碰撞隔离／IK及Spine相对原动画的独立贡献未验；不扩严格矩阵。
+
+前序信号主体已有 Gate105 五烟通过；两处播放结束权限补修的 Gate105-R1 增量构建已 Succeeded／exit0（5 actions、27.48秒），新 DLL 原 AttackAndNatural 一烟 Success／0Error／9Warning、21.045790秒。原生先 Task 后 CMC 的间隙这次未出现（Observed=0），不冒称该顺序动态覆盖；晚到信号拒绝与许可收尾已静态修正，保原末帧消费。父仓／笔记 Git 收尾尚未完成，待本次写入者统一冻结安排；不扩严格矩阵，也不以新任务覆盖原失败或完成边界。
+
+## 前序需求：Montage 信号开放攻击／移动打断（2026-10-07，约定门禁已验，Git 收尾待交付）
+
+用户最新确认已实施：Montage 作者化信号前拒绝打断，越过后该次动作统一允许真实移动取消或下一段攻击，第三段可接首段；下一播放重新关闭，Main／End仅区分轨迹段落。原Task认证stock Notify的原播放身份，GA唯一持门及NextStepIndex；未改CMC／引擎或新增执行器，无信号不得由End代开，早按不缓存重放，无请求完整自然收招。Gate105统一Editor构建Succeeded／exit0（6 actions、26.32秒），原资产工具14项离线通过；正式三Montage＋GA四包已精确保存并新进程冷读，五必要烟5Success／0Error／17Warning、43.915秒，覆盖Main内信号、三段移动取消与重置／WalkRun、03→01新请求、新播放重闭、原订阅清理及无请求自然收招。原生卡帧／渲染变量／PIE退出清理Warning和旧失败保持；联机／HID／全部动作／IK未验。报告 `Saved/AutomationReports/GGYGO_Gate105_InterruptionSignal_Smoke_20261007_MCP.json`，Build／ColdSmoke Editor日志保留。六源已中文提交push `f423f49`；现仅完整需求的一次集中图文同步及父仓／笔记Git交付。Normal02／03仍依既有ignore规则仅本地保存，不擅自force-add；四份批外配置／蓝图保持。运动偏移第14节仅规划、未实施；自由侧视“外侧”选择不阻塞本需求。[有效排程](Module_Repair_Parallel_Schedule.md)记录唯一写入者及公共窗口。
+
+集中图文已由四组长交回冻结，统筹23份静态检查通过（10Canvas、200节点／209边，JSON／端点／标签／wiki目标通过，非Obsidian UI验收）。最后对照发现原Task先完成而CMC末消费未到时的许可存活接缝；Combat仅原cpp／原测试两件补修已保存冻结：原Completed关门、晚信号不得重开，保留末帧位移与双完成等待。Gate105-R1 增量构建与新 DLL 原 AttackAndNatural 一烟已通过，原生反向完成间隙 Observed=0 保留未观察边界，不扩大矩阵。当前新 UE67392 已完成补验，旧 UE86036 弹窗不再是当前阻塞；UE96080 中03信号实际被作者移到1.111460秒，保留并仅保存该脏包、dirty=[]后正常退出，未丢弃资产或执行SaveAll。原报告 `Saved/AutomationReports/GGYGO_Gate105_R1_InterruptionClosure_Smoke_20261007_MCP.json`、对应 Build／Editor 日志保持。父仓及笔记中文Git交付待源码写入者统一冻结，批前布局／格式／FX仍保护。
+
+## 前序检查点：攻击自然收招与滑步修复（2026-10-07，约定验证已完成，图文／父仓交付中）
+
+用户追加确认：当前三段 End 被截为0.5／0.75／1.5秒而非原完整3.316667／5.016667／6.533333秒。本轮恢复完整原 End，再从完整动作最后一采样帧开始自然混出；混合时长独立保留 Montage 可调，真实移动／后继请求主动打断窗口保持。原短 End 候选不再作为验收目标。
+
+前序修复的三Montage完整End已实际保存并新UE冷读，原窗口及批外资产保持；混出时长独立配置0.25秒、触发按实际最后采样间隔，原工具30／45／90帧截断已删除，离线11项通过。Gate104-R2 Editor编译Succeeded/exit0（9 actions，79.08秒），四项必要烟4Success／0Error；有限1170样本覆盖完整第三段自然End及原Task／CMC消费完成合流。对应支撑足片段前后X变化由约−59.91cm降至约+0.42cm，采样端点非严格同帧，不声称IK锁足／全部滑步解决。之后另一攻击链的InputFlushed真实Error保留，原因未确定，不误归为原自然链失败。源码已中文提交并push `d1bfe37`；图文集中交回与父仓提交仍在收束。Normal01已跟踪，Normal02／03仍被既有ignore规则排除，未擅自force-add。完整联机、鞋底几何及胶囊落地仍未验，原失败／既有四份配置蓝图与批外笔记保留。
+
+## 前序优化已验收检查点（2026-10-06，不代表上述新需求完成）
+
+更新：2026-10-06。Gate103-R5统一Editor编译Succeeded/exit0（10 actions、145.63秒）；23项必要冒烟全部Success，0Error／1Warning，保留正常不可取消技能w的切人拒绝诊断。E8持续Buff最终值结算、客户端原生上限接收、Camera摄影入口及原消息／切人／死亡绑定兼容链已达到本轮约定的有限验收。原生结果：`Saved/AutomationReports/GGYGO_Gate103_R5_Closure_Smoke_20261006_MCP.json`；对应Build／Editor日志保留。原R4失败不覆盖，不声称真实联机或Photography插件运行场景通过。
+
+本轮交付：源码 `b514c1d`、`4aac7e2`、`8bddaa3`、`d2bcd76` 均已中文提交并push，Source/main干净且与远端一致；笔记 `c090f5f` 已中文提交并push，28份图文集中静态验收通过（14Canvas、217节点／207边、520个文件内去重wiki链接，0Failure／0重叠Warning）。本次父仓更新同步源码指针、进度／排程与两模块验收记录，Git结果以实际提交记录为准。本批源码、资产及图文写权全部关闭，不再有本轮开发／冒烟／笔记工作；既有未提交配置／蓝图、笔记布局和FX条目保留。UE68600已确认非PIE／“所有已保存”后正常关闭，读回UE／LiveCoding／UBT为零，未执行SaveAll或热重载。
+
+已选Buff语义实际到达：200受10伤害变190、移除倍率Buff后95；100＋200受110伤害得到Current190／Base−10，移除后Current0且既有死亡边沿一次；有限内部Base高于Max的治疗场景也通过，显示生命／韧性始终受0～上限约束，无隐式复活／补偿。真实联机、Cook、全部业务资源／Created销毁／实角色死亡表现、暂停Photography provider与原生Obsidian视觉未验仍留账，不扩大严格矩阵，也不把历史Fail改绿。后继未实施需求：可扩展攻击方向策略／改键轮换、攻击吸附与碰撞协调、跑动平滑转向和镜头偏移；C15外部借用明确留后续、不作为本轮门槛。
+
+维护人：统筹。这里只呈现当前产出、有效范围和剩余交付；阶段历史移至[进度历史](Module_Repair_Progress_History.md)，保留原失败与证据，不继续堆在本页。
+
+前序验收（2026-10-06，历史检查点，不覆盖顶部当前范围）：Gate102-R3 Editor Succeeded/exit0（4 actions、13.92秒），两个GAS必要叶2Success/0E0W；同Binding Refresh后A精确End、旧工作拒绝、后继/新Binding拒绝旧身份及自有grant行政清理通过，未携带Montage/相机业务资源，不声称完整资源刷新清理通过。Gate102-R2正式Held Success/0Error，在End剩0.494577秒时打断并正常Run；Audio实际Playing/固定Sound与原Mesh/有界候选退出/观察回调撤销已观察，天然原因、AutoDestroy动态值、GC和听感未证。Boss有效树成功，非法树行为断言PASS而2条生产Error/Fail保留。R0/R1/R2真实夹具失败报告保持原样，不改绿。全部作者明确停写，10份集中笔记静态校验通过（4Canvas、56节点/55边、181个文件内去重wiki链接，无重叠Warning，非Obsidian UI验收），未修改原图ID/布局/拓扑。UE1468正常退出、零UE/LiveCoding；源码/测试/资产/笔记写权均关闭。C12默认取消/不可取消拒绝/显式后台继续已提问但未获选择，Teams未实施；C15实际外部提供者未实现且正式来源为空，不造假生产插件。前序动作XYZ/姿态/End的验收及三仓交付保持，见下文原检查点。
+
+## 当前结论
+
+本轮保留必要扩展重构，验证采用完整链路统一编译＋必要UE冒烟，不新增严格回归矩阵。未运行和已知失败仍留账；不以声明、派发或局部测试代替完整生产接线。AbilitySystem与Movement分别牵头跨模块配对，各模块独立实现；统筹协调冲突、公共资源窗口与最终验收。模型gpt-6.1-sol／xhigh，Fast关闭，无子代理。
+
+Main动作位移接管与End合格移动打断已通过正式地图原角色GA的有限自动原生输入链：Main内按W跨自然End、End中新按W均在收招尚余约0.5秒时停止原实例、结束GA并清理所持资源；同一真实请求随后按配置1.5秒转Run，曲线驱动/速度/位移实际到达。XYZ原生胶囊物理/碰撞叶通过，不等同于正式非零Z角色动画已测。Locomotion仍使用原动画唯一来源，七旧DA退役不恢复，八备份可恢复；源动画和明确水平策略的独立ActionMotionProfile保留。原生ActionPoseSlot、只读姿态合同与精确Failed清理链已编译并接入真实ABP，正常Main最终Body Z及必需故障清理有动态证据；Gate101-R2同时验证拒绝未准入驱动但保留正常原生动量制动，原额外Movement Error及R1断言失败已有限关闭。本轮约定的开发、必要冒烟和集中笔记已收束，源码／笔记已中文提交push，父仓本次同步交付；未采End姿态、完整混合/Cook/网络不冒称完成。C12切人、Camera摄影发布准入与E8已通过本轮必要烟，C15外部借用留后续。批外工作保持，有效范围见[排程](Module_Repair_Parallel_Schedule.md)。
+
+## 本次已验收检查点
+
+Gate101-R2 原六项必要烟已自行完成：Held/NewPress的End剩0.495957/0.498010秒即停止、原资源恢复，随后Run775.163/777.732cm/s、XY位移1032.037/1024.436cm；XYZ叶0E0W。两个Pose故障的原清理、真实后继及PIE收尾行为PASS，各2E保留，没有额外Movement错误。恢复叶原断言全部到达：64→48.640→42.988cm/s正常制动，未准入Acceleration/RequestedVelocity/未知Override被拒、他人RMS仍保留、停止后外部写入被拒，NativeMomentumBoundary和FailedRequestRecovery完成标记均到达；3E保留，报告仍Fail。报告`Saved/AutomationReports/GGYGO_Gate101_R2_MovementAdmissionSmoke_20261006_MCP.json`与对应Editor/Build日志保持原样，Gate100/Gate101/R1原失败不覆盖。所有源码/资产及图文停写；Animation、Movement、AbilitySystem各七件与统筹四入口已集中核对、中文提交并push，不逐步骤更新。
+
+最终身体Z观察已自行执行：原Saved只读脚本通过正式编辑器Python控制台挂接，复用既有Held叶1Success/0Error/4Warning，End剩0.491050秒时打断并正常Run。147次post-tick采样（146种BodyXYZ）仅覆盖Normal01 Main，Bip001组件Z19.342265～51.118433cm、起伏31.776168cm，XY约0.00000175cm；原World结束注销，无读错。它证明这段最终姿态不再被固定Z压平，不代表147次独立Evaluate、End姿态、Slot中间权重、完整Blend数学、Cook或网络已验。单叶结果`Saved/AutomationReports/GGYGO_Gate100_ActionPoseObserve_20261006_MCP.json`，详细样本沿用同Editor日志，不再新增框架/过程记录。
+
+### 前序检查点（历史范围，当前状态以上文为准）
+
+Gate101-R1曾真实失败：合法Coast=(48.640,0,0)在未知Override场景被清零，CapsuleDelta为零，原断言1111未通过；R2修正原生UpdateVelocityBeforeMovement先于StartNewPhysics的阶段条件后完成上述复验。旧报告与日志仍保留，不把旧失败改称预期故障。
+
+前序End自动输入复验曾读到两个原实例剩余0.490826/0.492855秒即停止，随后Run779.475/776.917cm/s、XY位移1026.233/1023.584cm；CMC为唯一步态权威，三旧ASC步态标签实际均0，不作为Run门槛。以下当时的“未实施/待验/待人工”仅为历史记录，不能覆盖顶部当前验收或恢复写权。
+
+本轮新进展：Gate99 Editor成功（4 actions、12.45秒），正式地图三烟3Success/0Fail/0Error，报告`Saved/AutomationReports/GGYGO_Gate99_XYZ_EndSmoke_20261006_MCP.json`及对应构建/运行日志。Gate95–98原失败保留：新夹具模型初始化、原生焦点“不变”返回值、CharCode-only键码、误消费ASC步态标签均由原作者修正；原严格End/来源/资源/真实运动标准保持，不改生产输入或吞错误。两个End烟各保留首帧hitch和PIE收尾4Warning，XYZ叶0Warning。统筹自行启动/清理UE，不再等待人工；未保存用户资产。Normal03有限源姿态22/22确认PosZ为0而身体骨高度变化，姿态修正尚未实施，不把身体起伏补成胶囊曲线或声称所有Z动画已验收。
+
+Gate92-R4统一编译成功（6 actions、60.71秒、exit0）；16个既有必要烟10Success/6Fail/0Warning。修正UE5.8标量曲线入口读空Legacy容器，动作/普通移动共用原生整组读取，无曲线副本或零值兜底；原loop100、真实Model、移动数学/权威及正常Combo成功。6Fail保留原故障诊断及旧raw重入失败，Recovery实际请求3恢复完成，不称全绿。Gate93单GA已保存并接受，原包备份保持，证据 `Saved/ValidationRecords/PyriosAttackMotion_20261006_Gate93_Before.json` 与 `_After.json`。Main/End、W→Run及最终姿态由统筹自行启动UE作必要验证，不再等待用户手动测试；完整测试后才集中同步架构笔记。Cook、网络与历史极端回归留账，不扩收尾门槛。R4报告 `Saved/AutomationReports/ModuleRepairGate_20261006_92_R4_Smoke/index.json`。
+
+已交付来源迁移与退役的14份图文，笔记仓5b04399已中文提交push；六Canvas JSON/端点/标签及341个wiki目标/锚点静态通过，原生Obsidian视觉未验。两Stop三值精确保存/冷读通过，七DA退役已正常关闭后精确删除并经新进程冷读确认：七包与Registry目标缺席，Set七null及十九参数、源包、八备份保持，dirty=[]。沿用 `StopDirectionFixSemanticNames_20261005.json`、`StopDirectionFixColdReadback_20261005.json`、`VerifyPyriosLocomotionRetirement_20261005.json`，原失败/启动Warning保留。新攻击需求的笔记只在整条链开发与约定测试完成后集中同步，不随本次底层修正重画。
+
+生成工具验收（2026-10-05）：三件脚本/专项由动画资产组长自审冻结，统筹实际运行`python -B -m unittest discover -s AAADocs/Scripts/tests -p test_rootmotion_curve_generation.py -v`（15/15）及`-p test_animation_asset_safety.py -v`（8/8），均exit0。两原FBX的Run_End83、Walk_End151重新生成保留原Speed、位置、角度、路程及时间轴，仅补正确方向；旧manifest同两故障仍明确拒绝，bytes读前后不变。未运行真实UE写入、烘焙或PIE，不把工具通过当成Stop/攻击/替代来源运行时通过；完整运行链路完成后再集中同步Obsidian。
+
+下列Gate82–85为历史实施/失败记录，不能据其旧“待答/未接线/等待UE”等描述恢复写权或判定当前状态；最新以Gate86/87及顶部有效范围为准。
+
+用户已选择贴合刀刃的分段判定。AbilitySystem牵头，Combat查询4文件＋玩家动作3文件已实现、相互静态审查并全部冻结；互审发现的SocketOverride伪有效点已由原作者修正，公共Shape接口不变，统筹实际核对。七件已与GAS四件统一编译，必要烟发现的两处测试夹具问题已由各原作者修正冻结，尚待重编译/运行；正式角色三段不能用合成夹具结果代替。A刃尖已由唯一资产作者单包保存/公开读回，窗口交回（Mesh SHA256 `8AD7E067…`，精确备份`F513E0A0…`，A/B端点与受保护属性保持、dirty=[]）；角色3资产尚未接线。正式三段Combo/命中/Audio尚未验收。当前有效范围见排程顶部，不再按下文Gate82历史“选择待答”停工；架构笔记仍等整需求完成并测试后集中更新。
+
+Gate83原Shared攻击退出失败的四件修正已统一编译：Gate84首轮C2660、R1 C2248均由原作者只在LifecycleTest.cpp修正，生产可见性/校验及全部断言保持；两次失败日志保留。Gate84-R2 Editor Succeeded（4 actions，10.97秒，exit0），新DLL `4B4B0318…`。八条必要烟3 Success/5 Fail/0Warning、exit255（UE原生测试失败退出码，未见ensure/fatal）：正常命中、TypedCorrectionPayload、Boss有限NormalLifecycle成功，四E14-C Case行为全部PASS，RequiredGE1Error/Builder2Error保留。新Shape两叶额外UnsupportedEntry已定位为新夹具使用raw Try缺少真实返回见证；原玩家作者仅两新叶适配既有受控入口、固定Original及实际Completed，已交回冻结，原两配置Error/全部断言保持。Safety三条日志期望次数失败定位为宽模式先消费及同字符串TSet覆盖，原Combat作者仅既有SafetyTest修正8案互斥期望、每案仍1次，生产算法/Warning及行为断言保持；服务容量中断后由同一作者续完并明确冻结，统筹读回两cpp匹配。十一件当前全部停写、写权关闭；两测试修正版尚未重新编译/运行，等待UE资源释放。
+
+Gate85原问题有限复验通过：原正式Untitled/PC/Pawn/Slot/Common不替换，原Shared GA_Attack_Light_C的bIsActive由false经一次Computer Use真实左键输入变true，其余3GA仍false；原生MCP StopPIE后false、原Slot查询为空，当前日志无ensure/still-active/项目Cancel或End拒绝/清理Error，4个保护包dirty=false、两保护资产hash保持。不是正式三段/网络/极端锁定边界验收。正常关闭发现Kiro仍通过8000向本次编辑器发送材质写入（日志08:04:15–16），唯一未落盘M_ZZZFX_Particles_Dissolve属于其特效工作；统筹取消关闭保留，未保存/丢弃，已请用户协调停止操作、保存并释放UE。PID21556仍运行，后继编译受阻；本侧后续新编辑器使用独立端口避免连接混用，不因此允许同时共享项目资产写入。正式角色三资产尚未接线，局部架构笔记仍等整链开发和测试后集中同步。
+
+当前检查点：Gate86 Editor Succeeded（5 actions、17.54秒、exit0）；原八烟5 Success/3 Fail/0Warning、exit255，Safety/Shape兼容均成功，两处夹具问题消失。非法Shape仅原2配置Error且行为PASS；E14-C四Case行为PASS、原Builder2Error/RequiredGE1Error保留，不冒称全绿。11份源码保持作者冻结版本，已拆成中文提交`639821a`（原生销毁收尾）与`2c3f4c1`（分段刀刃形状），并实际push到GGYGO_Source/main。原生销毁收尾已在原Shared攻击的实际激活→StopPIE链路有限复验，无原ensure；原锁定作用域及网络边界仍未关闭。构建与原报告：`Saved/Logs/GGYGO_Gate86_Build_20261005.log`、`Saved/AutomationReports/ModuleRepairGate_20261005_86_Smoke/index.json`。
+
+Gate87角色接线已保存冻结：`GA_Pyrios_Attack_Combo`、`DA_AbilitySet_Pyrios`及`DA_Pawn_Pyrios`仅对应授予引用完成迁移；Shared/Common、原其余三技能与输入Tag保持。正式PIE实际授予角色专用Combo；日志出现01→02→03启动和两次正常退出，但该连段输入来自编辑器外部/手动操作，不冒称统筹受控实战验收。源码与三包写权均关闭，UE/MCP8001不因端口独立而获得并行写入许可。普通Git只精确纳入这三份角色业务配置，Mesh-only刃尖及模型仍依既有外部美术资产策略保留，不force-add。实际实战命中、伤害、去重、音效、Main/End完整表现与网络仍未验；完整需求完成后再集中同步架构图文。
+
+历史诊断起点（已由顶部源码迁移/资产退役结果接续，不作为当前写权）：用户攻击只有动画、无动作位移且仍能Walk/Run；PlayerCombo没有动作申请，`State.Attacking`不等于`Restriction.CantMove`，这项生产接管仍未修复。Stop方向错误与独立曲线DA必要性已另行整改，不能混作攻击根因；战斗普通移动限制窗口仍待用户选择。原证据`Saved/Logs/GGYGO_Gate87_FormalCombo_20261005.log`保持，不恢复旧Sampler兜底。
+
+AbilitySystem 24份与Movement/System/Character 11份整包均已实际交回冻结、集中验收，写权关闭。源码、笔记和父仓已精确提交/push；批外两个uasset、uproject、个人偏好、独立渲染笔记和ZZZ脚本原样保留。正式Run仍缺实际按住W的验证：当前公开sky接口只有瞬时press_key，无独立按下/松开或持续按住；不新增注入框架，不写CMC状态。已询问用户方便操作的时间，待确认再安排一次正常PIE窗口；不会重开静止观察或泛化来源调查。
+
+Movement已按牵头机制汇总本轮正常链路清单，Camera必要检查独立执行，不等待W。Gate81无新构建、源码或资产修改；原正式场景两次取景/投影检查通过，原protected属性读取及Python绑定查询失败完整保留，未据此扩写测试接口。诊断引用已释放，原生StopPIE后false、两UI观察已注销，编辑器正常关闭且进程已消失（退出码未捕获）；两保护资产hash保持、Source clean，公共窗口已释放。完整Camera契约与真实Run未被本次有限结果替代。
+
+Gate82攻击整链正在补齐：输入/能力引用一致，但共享`GA_Attack_Light`只有两个无连线事件，不能执行正式攻击。`ABP_Pyrios`的FullBody已编译、单包保存、dirty=false并冻结；真实Mesh-only `Pyrios_BladeTip_B`也已保存、公开读回/文件/备份核对通过。模型遵循现有`.gitignore`外部资产管线，不强行加入普通Git，刃尖修改与精确备份均在本地。第三段直线约49cm只是连续包络候选，早段会多覆盖约39cm非刃空间，尚不能保证现有离散球查询覆盖；分段候选已按离散采样余量修正为固定world半径A7/B12，已采样源面片与总预算52≤65有离线依据，不等于实际ABP/PIE通过，原显隐证据仍缺。用户路线选择待答，Combat/玩家7文件接口候选已配对；最小存量核验未发现Combo派生/表行候选中的旧Step数组，但任意蓝图Struct节点/常量未穷尽，不宣称删除旧字段绝对安全。动画只读窗口已归还，编辑器正常关闭且原进程已消失（退出码未捕获），公共资源释放。角色三资产与源码仍冻结，不删第三段或盲改Shared/Common/Boss。Normal_01已有非循环SoundWave，预览不代替正式GA实战；前置齐备后一次必要整链冒烟，整需求完成后集中同步图文。证据沿用`Saved/Logs/GGYGO_Gate82_CombatAudioAssets_20261005.log`及所属组长交回，不新建过程JSON或临时播放器。
+
+当前唯一有效范围（2026-10-05）：
+
+- Movement与Input：生产CMC/Hero、CMC只读反射头、原观测脚本及Input夹具冻结；Input LocalSessionReady已Success0E0W，销毁警告消失。Movement牵头对接System唯一启动注册修正，原accepted配置身份校验保留。
+- BossAI：生产及夹具全部冻结；Gate77 NormalLifecycle Success0E0W，仅Mesh/Cleanup/Completed正常A/B范围通过。Gate71 EndReentry Fail4E及原8断言保持，不标完整Boss战斗链完成。
+- Combat与AbilitySystem：生产/测试全部冻结，LifecycleTest.cpp最终C5B23166…已Gate79编译。GA早期原Task结束、ASC/Completed/返回后登记清空及全部资源断言通过；E14-C必要行为验收，不扩大为正式连段/网络/原极端重入全部通过。局部24份图文互斥范围已分配原作者。
+- System：新增InitStateRegistrationSubsystem.h/.cpp已冻结、编译Gate80并实际正式GI运行，职责仅同一GI的原生顺序注册与核验；原Extension/Hero/CMC既有分发链推进，不新增第二权威或业务兜底。
+- 统筹协调全局/build/UE/assets/Git。Gate80/81/82均已关闭，FullBody与真实B刃尖保存冻结，无当前UE使用者。第三段业务选择待答，接口候选已配对但角色三资产及源码未开放。Source7751ae7／Notes9ca9ad1／Parentafc29ea及后续进度记录5cb3b93实际中文提交并push；本次独立资产Git交付范围仅FullBody与统筹两份现有记录，不包含被既有策略排除的角色模型。笔记仅余两份批外渲染文档，父仓批外资产/配置/偏好/ZZZ脚本原样保留。父仓84365f0已由原作者确认并随afc29ea推送；批外渲染/uasset/uproject不纳入本批。gpt-6.1-sol/xhigh Fast关闭，无子代理/LiveCoding/热重载/SaveAll。
+
+前序历史：Movement首次同步的接口与用户行为决定保留；未完成增量撤回只属旧阶段。M2R1/R2及精确退订遗漏已关闭，Gate69私有字段编译错误经既有getter修正；M3b与Hero1此后已配对落盘并编译Gate73，不再按旧“开工/尚未接线”状态排程。Gate70原移动停止叶Success0E0W；失败恢复叶仍保留两条非法配置诊断及原请求3恢复标记，不吞日志转绿，不称正式Run或联机闭合。Camera H1/L1已编译67并冻结；Gate68必要碰撞冒烟保持历史闭合。
+
+## 各模块实际产出
+
+| 模块 | 已落地并有证据的改进 | 尚未完成的主要部分 |
+| --- | --- | --- |
+| Gate80（2026-10-05） | Editor Succeeded，8 actions、49.43秒、exit0；正式原Map/PC/Pawn/CMC/ABP，原生RegisteredOrder成功；原Extension/Hero均GameplayReady，实际CMC配置DA_Movement_Default，WalkToRunHoldSeconds=1.5/BlendInterpSpeed=6.0；原生MCP StopPIE后false，UE exit0 | 180秒1642个实际内存样本，仅NONE/静止，未收到W操作，不证明首按/Run/联机；callback已释放、无保存/导入资产。原Gate78 null失败和启动诊断/两条C4996保留。日志Saved/Logs/GGYGO_Gate80_Build_20261005.log、Saved/Logs/GGYGO_Gate80_FormalPIE_20261005.log |
+| Gate79（2026-10-05） | Editor Succeeded，4 actions、12.03秒、exit0；七烟5 Success/2 Fail、0Warning、exit1，0.0760747秒。四RuntimeHit Case行为断言均PASS | 正常无GE/有效GE为Success0E0W；RequiredGE仅1原生产Error、Builder仅2原生产Error，无断言失败。原生报告Fail与旧失败保留，不称全绿；有限E14-C行为验收，正式连段/网络未证明。原报告Saved/AutomationReports/ModuleRepairGate_20261005_79_Smoke/index.json |
+| Gate77/78（2026-10-05） | Gate77 Editor Succeeded，8 actions、48.43秒、exit0；七烟4 Success/3 Fail、0Warning、exit1。Gate78实际MCP连接、PIE启动/停止、13组反射通过；UE真实exit0 | RuntimeHit四Case的GA早期资源断言失败，后期ASC/Completed资源检查通过，不能把整链标通过。正式CMC首个观测尚无accepted MovementSet，0样本、callback已释放，Run未验。原始报告/日志：Saved/AutomationReports/ModuleRepairGate_20261005_77_Smoke/index.json、Saved/Logs/GGYGO_Gate78_FormalPIE_20261005.log |
+| Gate75-R1（2026-10-05） | Editor Succeeded，4 actions、15.48秒、exit0；新DLL A6542B34；七烟5 Success/2 Fail、exit1 | Input/Combo正常资源/Boss有限正常/移动Authority各0E0W；RuntimeHit NormalModes Case0/1 behavior PASS。RequiredGE共2Error、Builder共3Error，各含1条原生结束参数断言，behavior FAIL；Completed/NativeEnd各1、无新增Apply/Cue及资源检查未报失败，不标整链通过。21源码/两资产保持，UE退出；原生报告Saved/AutomationReports/ModuleRepairGate_20261005_75_Smoke/index.json |
+| Audio 音效 | Normal_01 SoundWave／唯一第2帧PlaySound Notify已保存，原生预览播放；R1已加载对象语义回读通过，四图文已冻结验收；手动临时组件自然结束／重播／Stop／自身归还有有限证据 | 原严格冷读及普通点Notify未消费的EndOffset原始差异保留；原Notify自然退出、GA实战、精确原帧及听感未验 |
+| Camera | M1及H1 Hero/L1 LP已编译67，旧Component冒烟通过，默认PC/GM类核对；父4＋子2均静态接受并冻结。Gate81原正式PC/Pawn/Manager/Hero/Extension/Camera身份跨两次快照保持，possession/view target正确、GameplayReady、有限POV/FOV85及原PC屏幕投影均通过 | 直接LocalPlayer对象身份及模式栈内部未读回；首帧精确时序、坏配置停更/同实例明确重启、H1/L1完整契约、暂停摄影与网络仍未验，不把正常取景烟标为全部Camera通过 |
+| 玩家战斗与Combo | 既有资源/命中迁移必要烟保持；Gate99正式角色首段两种End移动输入均在收招剩余约0.49秒时取消原实例，原Completed/资源清理及真实Run恢复通过 | 其余正式连段、命中/表现和网络未验，故障Error与旧严格失败保留；不把首段有限烟当全部战斗完成 |
+| AbilitySystem | native原身份、Initialize/Body/Cleanup、final激活/结束/取消及Process/OnSpawn/Boss BT受控入口已实施并整链编译；Combo/Boss/Task消费者已配对。Gate79原资源与故障中止必要行为有限通过；24图文/记录已集中验收并中文提交/push | 原GroupLifecycle Fail21E、raw入口缺受控Try见证的UnsupportedEntry与旧立即重开期待保留；普通烟不替代极端重入、正式资产与网络。GA早期Task已结束但native登记尚在、ASC/Completed/全返回后清空分别验收，不降低断言 |
+| Montage Task与安全动画 | 缩放资源按所有权恢复；Task消费ASC精确Result／原Handle／Guard。原Required姿态合同及历史typed OnFailed已接正式角色，两个故障的原清理/真实后继/PIE收尾行为断言通过，生产Error保留 | Boss完整Task链、极端原生重入、Cook/网络未验，原严格失败保留；有限烟不替代全部播放边界 |
+| Combat与伤害 | 命中载荷/表面Tag/Origin/Cue及唯一Owned查询保持，Combo/Boss原资源消费者已迁；Gate79实际Query→Owned Trace→Combo hit四Case行为通过，必需GE/Builder失败直接结束固定原动作及资源归还有证据；局部图文已提交/push | 底层Spec创建、Execution数值、正式资产/Cue表现及网络未验；Boss构造失败只拒绝该hit，不套Combo整动作End。原故障Error/Fail保留，不拿局部查询或构建当整战完成 |
+| Character与Combatants | Host/Extension/Health/Base及H1/H2/H3唯一关闭/owner-only Clear已编译；Gate61两原Host叶0E0W。Gate80原Extension/Hero GameplayReady与唯一PawnData→CMC配置分发已正式验证，初始化三图文已提交/push | 原Host叶不是完整换绑/Montage/联机证明；ASC/Health资源专项及正式换绑仍开放，Gate60旧失败保留。InitState推进不等于ASC绑定成功，两种生命周期不串成第二装配执行器 |
+| Input与Hero | 既有来源/映射/装配与镜头独立清理已接入；Gate99正式Slate→viewport→PC→原PlayerInput→Hero→CMC的W/攻击来源及同请求End交接通过 | 自动原生输入不是HID/人工证明；失败恢复重按、完整Flush重绑与网络仍留界，旧失败保留 |
+| Movement | 正式默认配置Walk→1.5秒→Run、原曲线速度/XY位移与End交接通过；原XYZ胶囊/离地/碰撞/落地/取消叶Success0E0W。Gate101-R2完整拒绝未准入驱动、保留正常原生动量制动和失败恢复行为通过 | 正式非零Z动作资产、完整联机/空地策略未验；原生动量记录仅派生证明，不成为输入/执行权威；非法配置与旧失败保留，不恢复七旧DA或固定速度兜底 |
+| Animation运行时 | 初始化／反初始化／Owner变化统一清表现状态与事件；原源绑定、CMC只读映射和原生ActionPoseSlot分责。正式ABP已迁移，Normal01 Main最终Bip001身体Z起伏31.776cm及Required故障链有有限动态证据 | End姿态、完整Slot混合/全部动作、权威校正、Cook/完整网络未验；147个post-tick样本不是147次独立Evaluate，文档验收不是运行证明 |
+| 动画资产工具 | 原编辑／脏包保护、烘焙／保存结果及完整曲线读取保留；Editor单Profile作者已编译并实际生成七产物；资产四图文已冻结验收，根入口与动画计划资产状态已同步 | 完整冷FRichCurve、其余骨轨／生产ABP／Run和视觉未验；Runtime区间／重放图文另由运行时组长只读预检 |
+| Messages与HealthSet | 真实破韧边沿、属性提交后广播快照、迟到聚合器恢复；原迟到创建失败已通过复测 | 完整Modifier／meta重入矩阵及联机 |
+| BossAI | B1受控原请求／精确Completed等待、BossMelee原资源/薄hook及GA共同生命周期已配对并编译Gate72；NormalLifecycle普通A/B叶Success0E0W，原Completed及Mesh实际恢复有限验证通过 | Gate71 EndReentry Fail4E/原8断言保留。普通叶不含Montage/Trace/watchdog/CMC/伤害；外部强制ProcessExecutionRequest边界、正式Boss→GAS、Morph及PIE／联机仍开放 |
+| Teams | P4-P7/容量/StartSpot/Logout与Creator原退出Controller回收已编译，四局部图文已静态接受冻结；原Shared GA退出ensure已由GA/ASC修正并通过Gate85有限复验 | 2026-10-06只读核对确认C12切人退出GA策略/不可取消准入/旧输入释放/实际Possess结果仍真实未实施，由Teams牵头与AbilitySystem配对下一批。C13当前未见需再改Teams回收源码的已知错误；多角色/拒绝销毁/嵌套退出和网络仍未验，坏档保持 |
+| GameFeature | Loaded／GI／Experience／Session及GameMode Managed已编译，四图文有限接受；正式DA_Experience_Default两数组新进程冷读均空，确认显式无GF正常配置 | 2026-10-06核对未发现当前正式无GF配置新增必修项。外部Borrowed保护契约/提供者实际未实现、配置仍明确拒绝，不冒称只是未测试；真实GFP/跨World/PIE Action隔离和网络仍未验，C15整链不标完整通过 |
+| System | 实际AssetManager、一次共享预载/UPROPERTY持有与显式配置模式保持；E14-C必要故障行为已验。无状态GI注册服务已编译并在正式GI核验原生顺序，配置分发实际推进；三份启动图文/记录已提交/push | GC/Cook与无效顺序故障注入未新跑，不另造GA/CMC/Ready执行链；真实Run不因配置分发成功而标通过 |
+| 渲染与地编工具 | Hero移除角色专属默认业务、材质恢复所有权、灯光配置／缓存分离；渲染冷启动与PIE通过，地编离线测试通过 | 本轮未额外生成地编关卡；其它正式表现不由工具测试替代 |
+
+Physics物理材质保持小模块，材质载荷由Combat与GAS传递；本批Physics组长按互斥租约完成HitImpact策略与局部图文，已交回冻结，Cue源码与政策仍唯一归AbilitySystem，不重复命中或伤害权威。运动转向／镜头侧移和攻击吸附是延期的新需求，不混入本轮完成标准。
+
+
+## 剩余交付与验证边界（不扩严格矩阵）
+
+1. 本批Gate101-R2完整必要烟及整链图文已验收，Source与笔记已中文提交/push，父仓以本次提交交付；不继续追加严格矩阵。完整首按/Flush/网络、全部Z动作和End姿态未验仍保留，不恢复七旧DA、不等待人工。
+2. 下一真实代码任务是Teams C12切人退出接线：已有Squad直接转移控制，GA退出/不可取消准入/旧输入释放/实际Possess结果尚未完整实施。Teams与AbilitySystem只读配对后由统筹安排互斥完整批次，不把它改称“只缺验证”。Camera坏配置/暂停摄影、Teams其他玩法与回收、真实GFP、正式Combo/Boss/Cue/Audio表现仍有未验边界；GF外部Borrowed提供者未实现且当前正式来源空，不新增无实际来源的保护框架。它们不由当前有限烟覆盖，也不自动扩成历史严格矩阵。
+3. 本轮Source `3746f55`与笔记 `9f13ff7`已中文提交/push，父仓提交包含单ABP、Editor节点与Source指针。既有他人配置/蓝图/图布局及特效文本保持在工作区，本轮只提交所属语义；笔记仍有16项既有/布局修改，不冒称全仓clean。原编译/严格失败与生产Error保留；只有真实回归或依赖缺口才重新分派，不机械重做已闭合步骤。
+4. 运动转向/镜头偏移、攻击吸附及其他延期新需求继续独立，未获本轮后继实施授权，不借优化收尾混入业务。
+
+## 最近验收
+
+| 批次 | 实际结果 | 验收边界 |
+| --- | --- | --- |
+| Gate81正式Camera（2026-10-05，无新构建） | 原生MCP Start/StopPIE成功，原正式场景两次VIEW_PROJECTION_PASS，间隔31.453秒；原对象身份保持、初始化就绪、FOV85和有限屏幕投影，正常画面可见 | 仅正常possession/ready/view/projection；原完整诊断因Player protected拒读停止，SubsystemBlueprintLibrary未导出Python，原生属性工具同样拒读Player，失败保留；直接LP身份/模式栈内部、精确首帧/重启及真实W未验。诊断引用释放、Stop后false、observer_1/2注销true、日志Editor shut down/Exiting及原进程消失，退出码未捕获；两保护uasset保持，无源码/资产保存。证据Saved/Logs/GGYGO_Gate81_CameraPIE_20261005.log |
+| Gate75首次合批（2026-10-05） | Editor Failed/OtherCompilationError，112.74秒、exit1 | 新测试cpp:1035 C2248，外部调用项目GA的protected SetCanBeCanceled；运行时DLL仍98FEFFBD，新烟未运行。只交回原作者修同两测试文件，生产权限/策略及原断言不改；失败日志Saved/Logs/GGYGO_Gate75_Build_20261005.log保留 |
+| Gate74正式场景（2026-10-05，无新构建） | Gate73 DLL，原生MCP握手与Start/StopPIE成功，编辑器正常exit0 | BP_GameMode/Teams原创建对/项目CameraManager已读回，角色和取景实际可见；被动脚本因PC无Python get_pawn明确停止，0样本、callback已释放，真实W/Run未验。InputFlushed及两收尾原失效诊断保留；20源码/两保护资产保持，无保存/导入资产。原日志Saved/Logs/GGYGO_Gate74_FormalPIE_20261005.log |
+| Gate73（2026-10-05） | Editor Succeeded，7 actions、42.01秒、exit0，DLL 98FEFFBD；四路径均Success（3无警告成功＋1带警告成功）、exit0，UE/build已退出 | Combo TypedCorrectionPayload、Boss NormalLifecycle、AuthorityAndMapping各0E0W；Input LocalSessionReady 0E1W，警告为Destroyed binding close及metadata retirement，待Movement牵头分类。20源码及两保护资产运行前后保持；正常资源烟不证明正式Run、联机、伤害/Cue或E14-C故障中止。原失败和C4996保留，无断言放宽/ExpectedError。构建Saved/Logs/GGYGO_Gate73_Build_20261005.log；报告Saved/AutomationReports/ModuleRepairGate_20261005_73_Smoke/index.json及Saved/Logs/GGYGO_Gate73_Smoke_20261005.log |
+| Gate72（2026-10-05） | Editor Succeeded，7 actions、74.81秒、exit0，DLL A9432D38；四叶2 Success/2 Fail、exit1，UE已退出 | Boss NormalLifecycle与AuthorityAndMapping各0E0W。Input Fail1E1W：抽象CombatantState无法Spawn；Combo Fail2E0W：纠正后watchdog断言及后续原Guard无效收尾诊断，A EndNormal/B未执行。20源码运行前后不变、两保护资产hash保持，C4996及启动诊断保留；无ExpectedError/断言放宽，不提交为整链完成。构建Saved/Logs/GGYGO_Gate72_Build_20261005.log；报告Saved/AutomationReports/ModuleRepairGate_20261005_72_Smoke/index.json与Saved/Logs/GGYGO_Gate72_Smoke_20261005.log |
+| Gate71／Gate71-R1（2026-10-05） | 首次Editor Failed，89.20秒、exit1；Boss终止结果字段适配后同批Editor Succeeded，5 actions、12.66秒、exit0，新DLL已链接；七叶冒烟1成功/6失败、exit1，UE已退出 | AuthorityAndMapping成功；Admission、Combo两叶、Boss重入及Input两叶未通过，旧断言/诊断/未执行分支保持可见。19源码运行前冻结，两个保护资产运行前后hash不变；C4996警告保留。未整链验收，不提交为完成。原始构建日志Saved/Logs/GGYGO_Gate71_Build_20261005.log与GGYGO_Gate71_R1_Build_20261005.log；冒烟Saved/AutomationReports/ModuleRepairGate_20261005_71_Smoke/index.json与Saved/Logs/GGYGO_Gate71_Smoke_20261005.log |
+| Gate70（2026-10-04） | Editor Succeeded，6 actions，62.24秒，exit0；同原Movement叶Success0E0W，Combo原叶Fail6E0W，UE退出 | 两测试头前置适配后有限移动停止契约恢复；连段失败已到真实PostWriteRejected，原成功重播期望不符合已确认安全边界。原断言/旧报告不改，后续未执行分支不当通过。355源运行后稳定，47保护仅构建时DLL更新；全烟日志21Error/2Warning及C4996保持。证据Saved/ValidationRecords/ModuleRepairGate_20261004_70_Result.json |
+| Gate69R1（2026-10-04） | Editor Succeeded，4 actions，18.40秒，exit0，新DLL已链接；连段叶Fail15E/0W，移动停止叶Fail3E/0W，补跑失败恢复叶Fail2E/0W | 三项报告均未通过；失败恢复两条已核实为刻意非法曲线拒绝日志，原1/1、2/2配对及请求3完成标记保持，无额外断言错误，不登记ExpectedError或吞日志转绿。初次命令漏写恢复叶的Locomotion层级，补跑报告单独保留。不证明生产接线／联机，不降低原断言。报告Saved/AutomationReports/ModuleRepairGate_20261004_69R1_Smoke及ModuleRepairGate_20261004_69R1_Recovery |
+| Gate68（2026-10-04） | Editor Succeeded，8 actions，93.90秒，exit0；既有SafetyAndCoverage叶保留原Legacy并追加最小Owned断言，Success0Error/0Warning；源码6fad9c1中文提交push | Task N0可编译，原窗口隔离有限冒烟通过；不证明新Task回调/捕获析构重入或Combo/Boss生产。355源稳定、47保护仅runtime DLL更新，UE/build0；C4996及启动13Error/2Warning保留。证据Saved/ValidationRecords/ModuleRepairGate_20261004_68_Result.json |
+| Gate67（2026-10-04） | Editor Succeeded，9 actions，123.03秒，exit0；三既有冒烟叶Success，各0Error/0Warning；源码f42d6b2中文提交并push | Camera H1/L1、AS T3-I与Teams Creator可编译；不证明新Manager／Completed／实队／网络。355源构建运行后不变，47保护仅runtime DLL更新，UE/build退出；C4996和启动13Error/2Warning保留 |
+| Gate64R1（2026-10-04） | Editor Succeeded，4 actions，23.86秒，exit0；五既有冒烟叶Success，各0Error/0Warning | 单行native helper适配后五有限原链通过，不代表完整新生产/资产/网络。编译C4996及全烟启动13Error/2Warning保留；353源不变，45保护仅预期runtime DLL更新，UE已退出 |
+| Gate64（历史） | 编译Failed/OtherCompilationError，58.88秒；UHT通过，Cue反射wrapper const C2662 | 原失败保留，没有拿旧DLL运行冒烟代验；修正与新DLL验证分别记录 |
+| Gate63（2026-10-04） | Editor Succeeded，9 actions，79.22秒，exit0；原Camera两叶Success，各0Error／0Warning | T1a／P4-P6／A-B／M1可编译，完整终止／镜头停更重启／网络服务端尚未完成；请求的完整烟日志未落盘，不称启动全日志零错误。353源不变，45保护只有预期runtime DLL变化，UE／构建已退出 |
+| Gate62R1（历史） | Editor编译成功；Trace原叶通过；Camera两原叶Fail511E／11E | 原失败保留，Gate63仅恢复同两叶，不把历史失败删除或改写 |
+| Gate61（历史） | 两原Host叶Success，各0Error／0Warning | 证明原有限生命周期，不替代正式Host／Montage／联机；完整启动13Error／4Warning及Gate60失败保留 |
+
+本批原始报告及哈希：`Saved/ValidationRecords/ModuleRepairGate_20261004_67_Result.json`、`ModuleRepairGate_20261004_67_SourceCheckpoint.json`；中间Gate65／66及旧Gate64R1／64／63／62R1／61的结果和失败继续保留。GF配置冷读：`Saved/ValidationRecords/GF_FormalExperienceColdRead_20261004_Result.json`。
+
+## 详细入口
+
+[项目导航](../README.md) · [有效排程](Module_Repair_Parallel_Schedule.md) · [修复清单](Module_Audit_Repair_Ledger.md) · [模块会话](Module_Conversation_Routing.md) · [阶段历史](Module_Repair_Progress_History.md)
+
+Obsidian架构笔记仍在`F:/Obsidian/Doc/lyra学习笔记/GGYGO架构规划/`；完整需求开发并完成约定测试后集中同步。此页仅在可见里程碑、真实阻塞或完整需求验收时简短更新，不逐小步骤留痕，不生成虚假完成百分比。
