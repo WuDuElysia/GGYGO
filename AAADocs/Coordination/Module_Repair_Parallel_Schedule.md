@@ -16,13 +16,13 @@
 
 最小联机契约保持两Editor／三PIE World，每进程一Mesh，按实际World/Role/PlayerState/GetPawn及发布键配对；不能猜跨端同帧或缺D0首区间。真人已确认晚加入／重获相关性也须显示仍有效的剩余普攻FX及正确时间进度，已结束窗口不补播；远端协议与最小写集由FX／AS／Combat收敛，已进入当前Source批，Root按既有规范审查。Movement N3 provider已核收，Rendering网络N3入口已冻结，真实双进程run pin/连接/视口/FX仍未执行，不作为单人Slot前置。
 
-当前执行窗：当前无UE／构建进程。Core R2已正常exit0并完整107根归还，Root实核after及45条产物／回执身份，详见[本阶段归还](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-core隔离构建r2正常归还)。Root按真人要求收取父工程两份协调文档及Git元数据写窗，其他Source／资产冻结；本次提交后，后继Native须按实际Git差集重新承接保护，不直接消费旧父。AS R3实现7124及输入A0D0已静态核收冻结；Rendering R2唯一纯成功消费入口两件已交回516FFF83…C4719C，待Root核收，host／launch不变，首次小admission仍未消费且须绑定实际新父。R13／prepared R10／旧运行继续冻结，无其他Native授权。
+当前执行窗：Root的Author R1已按真人单次授权仅终止原UE132976，原启动器已退出；保存失败、异常退出及旧日志缺失导致的完整保护失败均保留，不能作为后继Native父。[失败证据及边界](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-author-r1失败收尾及git窗口)。八包磁盘逐件未变；另有UE136580／LiveCoding122336，不在本次终止范围。Root按真人要求仅收取两份协调文档及父／Source子仓Git元数据窗口；Source、生产资产及离线继任冻结，不启动新UE／构建。后继Native须先归还共享进程并建立真实有效的保护父，不能把本次unknown改成通过。
 
-R10宿主审查：三件继任已以prepared_waiting_bindings交回冻结，Root实核runtime41896B／A57F3417…BE3BB90、host36155B／A3799F2F…28D2EA6、pin301396B／537CFBB3…AA5147；launcher不改。1323静态依赖、已删六个重复helper，原16场景／21非boot方法及公有归还／四枚举预编码合同由原作者复核，Root尚未最终核收运行绑定。失败Cold未绑定；runtime／父／run／camera仍None且拒绝执行。后继只待真实成功Cold及明确相机类，不授权运行。
+R10宿主审查：未消费继任已迁移R3公有ABI，并仅刷新R13三依赖及对应provider／伤害合同pin；最终pin303147B／57ED47DD…581CE51。runtime46178B／DA22F8EC…13F8A23、host37973B／D4837E61…459879C及launcher均未再改。Root实际静态check_entry通过、默认执行仍拒绝；1327依赖集合不扩围，公有consumer／四条同步capture唯一、原100ns进程检查及首Draw预布防保留。runtime／父／run／camera均None，冻结等待真实成功Cold及运行绑定，未Numeric／生产验证。
 
-AS新Cold／数值继任：D0新reader本轮真实UE环境、三份加载DLL／出生及与before软件一致已Root实核；八包入场确实未加载。Producer R2在GA未知Step／CDO／graph比较处失败，CDO导出与原Author逐字一致、八包磁盘字节不变；当前RawStep／graph因先assert后保存而缺失，不能称两Remote是唯一差异或当前值为0。七包及诊断四件未执行。R1原八回执／退出／完整父均核收，详见[失败归还](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-当前软件cold-r1失败及完整归还)。新R3／控制器R2先补观察，Step0同一NS及Normal01窗的真实fixed／Ready／端点／两Remote尚待核；不猜参数或放行未知字段。R13最终pin29E2DBC6…DFD5E8已Root实际check_entry／128依赖核收冻结，仅静态、未运行；后继契约定型再另授适配。
+AS新Cold／数值继任：原Cold R2的9差及NS就绪事实见历史；Step0两Remote候选仍为1/30秒及.033秒，非原作或已验性能值，Step1/2保持Disabled／0。R1首次struct setter即失败且未保存；Author R2五件pin D63D838A…B64228F已静态核收冻结，改用原生copy＋仅两字段import_text，验证候选后才Modify及赋回CDO数组，尚未真实UE验证。Cold控制器R3 pin D5F60A2A…42ABE已修受保护Notify读取，仍待成功Author及独立Cold。R13 pin6DB95F28…A0C100CD已迁公有成功consumer，原54392B伤害／Buff断言正文逐字保留，实际运行未验。失败Cold／Author均不能作成功来源；成本、真实Age误差及剩余窗追赶继续待验。
 
-Git阶段检查点：源码子仓3e827859dc246541311727abd441e2c5c874a13c；笔记4da4f4c，二仓当前均无新增改动。父工程前次288d806，本次仅提交本活动入口及既有历史两件；13项无关／未验资产及配置保持原样，不stage。此次为本地阶段检查点，整需求最终验收及精确Git交付仍待；前序检查点见[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r8后续阶段提交与restore归还)。
+Git阶段检查点：本次在父工程185e9a0之后仅提交本活动入口及既有历史两件，记录已核验阶段和本次失败；源码仍3e827859dc246541311727abd441e2c5c874a13c、笔记仍4da4f4c，均无新工作区改动。13项无关／未验资产及配置保持原样，不stage。提交及推送实际结果以Git回执为准，阶段保存不代整需求验收；前序检查点见[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r8后续阶段提交与restore归还)。
 
 ### 当前Source批：CR R3／R4／R6及R7集成
 
@@ -32,7 +32,7 @@ Git阶段检查点：源码子仓3e827859dc246541311727abd441e2c5c874a13c；笔�
 
 Slot-AB已验收归档：保留ActionPoseSlot及生产A，不移Mesh。普通B同Idle身体骨链抬高约63cm，当前节点仍承担必要基准修正；[完整结论与证据](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-slot对照结论保留a身体基准修正)按需查，不再作为其余需求前置。
 
-缓存贴图：worker及真实Core R2已构建并正常归还；R2原177源＋本次2生成项，旧bin/obj为0，产出隔离AnimeStudio.dll。首轮重复属性失败及后继成功过程均已迁[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-core隔离构建r2正常归还)，旧失败目录保留。当前无资源后继写窗，不Restore、不改源码／旧二进制，不复制CLI／原blk、不导出metadata／Decode／runtime.freeze；V/W实际解析、Native ABI、图像及材质采样仍待。
+缓存贴图：Core R2构建及私有CLI四目标metadata已归还，原值／身份与边界见[本阶段历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-私有cli四纹理metadata及完整归还)。标准JSON消费补丁worker-metadata.patch（24584B／E8B6682F…5E05739）已静态核收冻结，仅原Program.cs／pin两件的未应用差异；保留真实mip及独立U/V/W、色彩原值，四metadata先校验，首次payload SHA只能来自实际锁定读。尚未应用／编译／Decode；UV／色彩／过滤／mip／alpha／normal及材质画面待验，完整实际读闭包／Native ABI／全OS写入封闭仍false。无后继资源运行窗。
 
 伤害配置与运行事实只见[CR-R5](Module_Audit_Repair_Ledger.md)：实际10／20／30及Buff20／40／60已有证据，新源码受影响生产验证尚未完成。
 
