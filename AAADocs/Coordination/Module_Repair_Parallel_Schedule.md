@@ -16,25 +16,23 @@
 
 最小联机契约保持两Editor／三PIE World，每进程一Mesh，按实际World/Role/PlayerState/GetPawn及发布键配对；不能猜跨端同帧或缺D0首区间。真人已确认晚加入／重获相关性也须显示仍有效的剩余普攻FX及正确时间进度，已结束窗口不补播；远端协议与最小写集由FX／AS／Combat收敛，已进入当前Source批，Root按既有规范审查。Movement N3 provider已核收，Rendering网络N3入口已冻结，真实双进程run pin/连接/视口/FX仍未执行，不作为单人Slot前置。
 
-当前执行窗：用户2026-10-19明确要求先提交Git，Root在R7完整构建／保护归还后独占阶段Git窗。此为当前需求检查点，不等同整批验收；源码及资产字节保持冻结，原18项复验、生产／视觉／设备／联机仍待，Git收尾后继续。
+当前执行窗：Root按真人要求作本地阶段Git检查点，范围仅已过R8的三件源码、子仓指针和本批协调归档文档；当前无UE／Build／资源进程在途。各作者保持源码／资产／旧证据及既有入口冻结，Git后依真实差集更新准入，不沿用旧父快照冒称新基线。Rendering新Cold控制器五件DFCBFFAF…680020已离线冻结交回，Root尚未核收／授权执行；AS Producer三件2AA0FBF6…B2230C保持冻结，R13最终inputs/pin待固定实际控制器。未验Cold／生产／视觉／联机保留，阶段提交不等于整需求交付。
 
-本次按用户要求作本地阶段检查点：源码子仓 fd9334d8c63fe7ca889ebcdf624430cb93cfc87f、笔记仓 4da4f4c4b5f41cb87ef5c90b3d3f4880ad4554f6；父工程由包含本条的commit记录承载。推送曾被自动审批以私有源码远端及载荷未明确核准为由拒绝，当前未push；不绕过审核。阶段提交后继续同R7原18项及受影响生产／联机验证，完整需求未验边界保持。
+R10宿主审查：FX采样失败挡住释放的问题已由原作者修复，四件pin911C9E520933FF5C4E593B878A73781E03261B112C535E76042113A3D7511FD1已Root静态核收冻结。原16故障场景检查及Root独立真函数三tick回放通过：Sample仅1次，provider／fixture／EndPIE各1次，保失败，ending后才撤callback；原公共归还槽、四枚举和预编码保持。当前仍prepared_waiting_bindings，真实软件／新Cold／3DA／相机类绑定及UE运行未验，禁止直接执行；旧失效路径与准确原图见本阶段历史。
+
+AS新Cold／数值继任：AS原组长已独占获准Saved/Codex/PyriosSavedProductionCold_20261019_Entry_R1三件（cold_assets.py、inputs.json、entry_pin.json）及PyriosProductionDamageProvider_20261019_R13三件（damage_verify.py、inputs.json、entry_pin.json），对实际R8 Build完整父／85根交集0。新producer明确验证已保存八包在当前软件的真实加载／配置兼容，旧作者／旧软件／保存字节作为原始来源，当前Cold与Numeric仍须同一真实reader/software；仅继任consume对应段升级，旧R12／Author／Source／资产不改。无UE／Build／SDK／Git或新控制器写权；R10旧三DA同版门及Cold控制器由Root/Rendering另列，不能冒称六件已能运行。模块直聊被拒时由Root转交，不等逐条真人通信批准。
+
+Git阶段检查点：本轮源码子仓3e827859dc246541311727abd441e2c5c874a13c；父工程由包含本条的提交承载；笔记无新增，保持4da4f4c。本地阶段提交及前序检查点见[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r8后续阶段提交与restore归还)，整需求最终验收及精确Git交付仍待。
 
 ### 当前Source批：CR R3／R4／R6及R7集成
 
-当前42件（38 Runtime＋4 Editor）已通过R7标准完整Target构建，23.65秒；原cmd129384／句柄exit0，完整起点／退出身份及保护通过，原工具会话25522终态exit0。Root实际消费本轮software，核收59产物／3模块／369源码；原18项最新仍为R5的严格14项0E／0W，R7尚未复跑。R6头引用C1083失败及全部原错误已归档保留。
+当前42件（38 Runtime＋4 Editor）已通过R8标准完整Target及原18项全部0E／0W。Root实核真实软件59产物／3模块／369源码；Source集合AC8620C4B7B21B6796CB624A8E12005BFA37084D29397CF5D160F42B79343CD6冻结。两阶段原句柄exit0、clean/noPIE及全部未授权差集0。Combo第四夹具已改真实Notify／Owned Trace、原七清理断言保留并新增原handle Inactive；第三真实Started、第五延期End至末尾本轮已达。
 
-当前已归还构建见[R7 after](../../Saved/Codex/CRSource42Integration_20261019_Entry_R7/Build/after.json)及[return](../../Saved/Codex/CRSource42Integration_20261019_Entry_R7/Build/return.json)：success／protection_success均true，未授权差集0，原共享进程／监听[]。当前只处理用户明确要求的阶段提交，已验源码／资产层与未验运行层继续分列。
-
-单处include已改为实际`Camera/GGYGOCameraMode.h`，CPP及[R7五件](../../Saved/Codex/CRSource42Integration_20261019_Entry_R7/entry_pin.json)已由作者／Root核收冻结，pin SHA `07AB60918DAF9AF23F8FBBCA1C6713F753AA6BF5EE0E2BA74A2F5540332FD6E0`。Root核实42集合`567BDA1D4A65151D700C45F585845B0AA813D24E2240486CCE6350EEC8AE9B08`、准确1源码／2别名迁移、其余41字节不变及272依赖；943软件输入、340原生输入、5567＋2写集和原18项保持。本轮构建及保护已通过；阶段Git不改变源码／资产字节，不作生产／网络证明。
-
-R7须显式承接R6失败构建父及1源码／2别名迁移，其余41一致；原18项及全部强断言保持。五重入的后两场景仍待实际到达，真实Started不冒称覆盖Guard已Returned自定义后钩，PostWriteRejected不放宽。PrepareClose纯写和GAS／CMC权威保持；首生产Draw前布防、首次确认边界、模式资格及真实FX Age／尾部／归还／销毁仍须实际Editor与生产／联机证明。
-
-原13件差集、42集合静态核收及R6构建失败完整归还见[本阶段历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-source42静态核收与r6构建失败归还)。历史不恢复写权，完整需求仍未完成。
+准确证据：[R8 Build return](../../Saved/Codex/CRSource42Integration_20261019_Entry_R8/Build/return.json)、[原18报告](../../Saved/Codex/CRSource42Integration_20261019_Entry_R8/Leaves/Automation/index.json)、[Leaves after](../../Saved/Codex/CRSource42Integration_20261019_Entry_R8/Leaves/after.json)及[return](../../Saved/Codex/CRSource42Integration_20261019_Entry_R8/Leaves/return.json)。构建／执行完整身份、3条弃用警告及迁出过程见[本阶段历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r8构建及18项基础验证闭合)。当前编译／基础叶不代真实首生产Draw、设备输入、FX Age／尾部／归还／销毁、碰撞伤害、视觉／音频或最小联机。
 
 Slot-AB已验收归档：保留ActionPoseSlot及生产A，不移Mesh。普通B同Idle身体骨链抬高约63cm，当前节点仍承担必要基准修正；[完整结论与证据](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-slot对照结论保留a身体基准修正)按需查，不再作为其余需求前置。
 
-缓存贴图：`F:/AnimeStudio/_work/pyrois_decal_texture_cache_decode_20261017/entry_pin.json`及旧四作者件冻结。Resource的`Texture2D.cs`已保存2017+可空V/W，原U不变，未编译；旧缓存JSON仍未知，不能冒称解码／视觉通过。后继仍须补齐Restore／Build／OS依赖、Native ABI和实际采样，将既有四份.dat及原75输入纳入保护，仅为子进程设置冻结PATH／PSModulePath。当前源码集成优先，无资源写窗；旧评估和准确身份见[整理前记录](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-活动入口过程减量)。
+缓存贴图：Resource本地Restore已正常exit0、完整保护归还，未授权差集0，原五回执及准确93根边界见[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r8后续阶段提交与restore归还)。已停止，无Build／Decode后继窗；完整实际读闭包／Native ABI／写入封闭证明仍false，四texturedata未读。V/W补丁未编译、旧worker仍输出V/W=null；实际图像及材质采样未验。
 
 伤害配置与运行事实只见[CR-R5](Module_Audit_Repair_Ledger.md)：实际10／20／30及Buff20／40／60已有证据，新源码受影响生产验证尚未完成。
 

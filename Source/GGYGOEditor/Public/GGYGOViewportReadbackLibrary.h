@@ -10,6 +10,7 @@ class FViewport;
 class ISlateViewport;
 class SViewport;
 class UGameViewportClient;
+class UGameInstance;
 class ULocalPlayer;
 class UWorld;
 class UGGYGOCameraMode;
@@ -72,7 +73,7 @@ struct FGGYGOViewportReadbackResult
 	int32 RenderTargetFormat = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
 	bool bHDR = false;
-	/** 值观察模式不读像素；Complete 表示已捕获匹配的自然 SetupView。 */
+	/** 值观察模式不读像素；Complete 表示匹配的自然 SetupView 及该次 EndDraw 已完成。 */
 	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
 	bool bPlayerViewOnly = false;
 	/** 当前有限玩家投影观察的纯值 JSON；不代表确认位精确写入时刻或 GPU 完成。 */
@@ -110,6 +111,13 @@ private:
 	friend struct FGGYGOPlayerViewExtension;
 	void Initialize(UWorld* ExpectedWorld, bool bReadPixels = true);
 	void InitializePlayerView(ULocalPlayer* ExpectedPlayer, TSubclassOf<UGGYGOCameraMode> ExpectedMode, int32 MaxDraws);
+	void InitializeBeforePIE(UWorld* ExpectedEditorWorld, TSubclassOf<UGGYGOCameraMode> ExpectedMode, int32 MaxDraws);
+	void OnPIEMapReady(UGameInstance* Instance);
+	void OnLocalPlayerAdded(ULocalPlayer* Player);
+	void OnInitialViewportCreated();
+	void OnCancelPIE();
+	bool CaptureInitialViewport(FString& OutError);
+	void RegisterPlayerViewCallbacks();
 	bool PinOriginalPlayer(FString& OutError, bool& bOutReady);
 	void OnPlayerDrawBegin();
 	void OnPlayerDrawEnd();
@@ -156,7 +164,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Viewport")
 	static UGGYGOViewportReadbackTask* BeginGameViewportReadback(UWorld* ExpectedWorld);
 
-	/** 首个生产 Draw 前布防，观察原玩家自然 SetupView；不调用相机求值、GetProjectionData 或 Draw。
+	/** 为已存在的原 viewport 布防，观察后继自然 SetupView；全局首 Draw 使用下一次 PIE 预布防入口。
 	 * @param ExpectedPlayer 明确属于原 World/viewport 的实际 LocalPlayer；PC/PCM/Pawn 就绪后只固定一次。
 	 * @param ExpectedMode 原配置明确的精确 CameraMode 类；不构造、不加载或替换模式。
 	 * @param MaxDraws 1..4096 的自然 Draw 容量；未取得匹配视图则失败，由宿主截止或 finally Release。
@@ -165,4 +173,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Viewport")
 	static UGGYGOViewportReadbackTask* BeginPlayerViewObservation(UWorld* ExpectedWorld,
 		ULocalPlayer* ExpectedPlayer, TSubclassOf<UGGYGOCameraMode> ExpectedMode, int32 MaxDraws);
+
+	/** 在请求单人 PIE 前布防；沿原生创建事件绑定唯一新 World/LocalPlayer/client。
+	 * @param ExpectedEditorWorld 本次请求的原编辑器地图，须存活且当前没有 PIE。
+	 * @param ExpectedMode 精确 CameraMode 类，仅观察资格，不创建或求值。
+	 * @param MaxDraws 1..4096 的自然 Draw 容量；宿主截止时仍须 Release。
+	 * @return 调用方持有的同类有限任务；首 Draw 与首成功投影分列，不认证确认位精确写入时刻。
+	 */
+	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Viewport")
+	static UGGYGOViewportReadbackTask* BeginNextPIEPlayerViewObservation(UWorld* ExpectedEditorWorld,
+		TSubclassOf<UGGYGOCameraMode> ExpectedMode, int32 MaxDraws);
 };

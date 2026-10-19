@@ -2717,3 +2717,49 @@ R6实际标准Build因Editor引用不存在的GGYGOCameraModeStack.h而失败，
 必须保持：原五重入及后继断言，真实Started不冒称覆盖Guard已Returned的自定义后钩成功，PostWriteRejected不放宽；PrepareClose纯写及GAS／CMC权威不变。Editor沿自然SetupView观察完整投影成功，首Draw前布防／固定原玩家，错过首次确认只报首次观察；FX仅记录原事实，ControllerAge／DesiredAge、NativeFrame／Drain、资源归还／尾部／实际销毁分列，未知Terminal保留未知归属，不增生产权威／调度／长期历史。实际Python反射与生产参数仍须真实Editor读回。
 
 <!-- 本阶段原文结束 -->
+
+
+## 2026-10-19 R7构建与PostGit18项归还
+
+本阶段已实际结束并完整归还；需求仍未完成。PostGit入口pin E8B6F01CCAF9CC66640B4941C44E2049A73F1AC467FB4C240F050184763B3FDB，Root工具86207终态exit1。自有UE129804／parent129464／FILETIME 134368546946485812原句柄exit0，clean／noPIE及共享进程／监听[]。准确18项中17项严格0E／0W，仅Combo ActivationCommitAndEndReentry第四场景聚合清理1E／0W；第三真实Started及第五35→36到末尾已有实证。输入出生及两绑定叶已复验通过。完整保护true，35回执hash已核，raw九类7／3／2／3／0／2／2／0／0，无未授权差集；历史旧日志缺口继续false，不重标历史完整。after 13647597B／D38DADBB3E91C469BBFE228DAE19217656545EE710429C3047351B7665F52F38，return 115587B／C5CDEEEF8E606B595925338E91D3ABCA65920235C1C10276DF0DB4220BE5D20C。准确证据Saved/Codex/CRSource42LeavesPostGit_20261019_Entry_R1/Leaves/{Automation/index.json,readback.json,host.json,exit.json,after.json,return.json}。本次不证明生产／视觉／联机。
+
+### 本阶段已结束窗口及核收基线（原文）
+
+当前执行窗：Root独占执行`Saved/Codex/CRSource42LeavesPostGit_20261019_Entry_R1`的Leaves，仅原18项，使用已通过R7构建的原软件，不重编译。作者五件已冻结归还，Root实核pin `E8B6F01CCAF9CC66640B4941C44E2049A73F1AC467FB4C240F050184763B3FDB`、442依赖及原software真实59产物／3模块／369源码通过，原18项／host字节一致。Git显式交接仅准确9个既有元数据＋125对象，其余完整父及85根不变，不排除.git或修改旧证据；操作者身份及实时远端状态仍不冒称。原R7启动前失败16694终态exit1保留，其原18项未启动。本轮结果待实际归还，不作生产／视觉／联机证明。全部Source／生产资产／旧输入／Build／SDK／Git冻结；Rendering仅可继续既有生产入口方案只读收敛。
+
+当前42件（38 Runtime＋4 Editor）已通过R7标准完整Target构建，23.65秒；原cmd129384／句柄exit0，完整起点／退出身份及保护通过，原工具会话25522终态exit0。Root实际消费本轮software，核收59产物／3模块／369源码；原18项最新仍为R5的严格14项0E／0W，R7尚未复跑。R6头引用C1083失败及全部原错误已归档保留。
+
+当前已归还构建见[R7 after](../../Saved/Codex/CRSource42Integration_20261019_Entry_R7/Build/after.json)及[return](../../Saved/Codex/CRSource42Integration_20261019_Entry_R7/Build/return.json)：success／protection_success均true，未授权差集0，原共享进程／监听[]。当前接同入口原18项；已验源码／资产层与未验运行层继续分列。
+
+单处include已改为实际`Camera/GGYGOCameraMode.h`，CPP及[R7五件](../../Saved/Codex/CRSource42Integration_20261019_Entry_R7/entry_pin.json)已由作者／Root核收冻结，pin SHA `07AB60918DAF9AF23F8FBBCA1C6713F753AA6BF5EE0E2BA74A2F5540332FD6E0`。Root核实42集合`567BDA1D4A65151D700C45F585845B0AA813D24E2240486CCE6350EEC8AE9B08`、准确1源码／2别名迁移、其余41字节不变及272依赖；943软件输入、340原生输入、5567＋2写集和原18项保持。本轮构建及保护已通过；阶段Git不改变源码／资产字节，不作生产／网络证明。
+
+R7须显式承接R6失败构建父及1源码／2别名迁移，其余41一致；原18项及全部强断言保持。五重入的后两场景仍待实际到达，真实Started不冒称覆盖Guard已Returned自定义后钩，PostWriteRejected不放宽。PrepareClose纯写和GAS／CMC权威保持；首生产Draw前布防、首次确认边界、模式资格及真实FX Age／尾部／归还／销毁仍须实际Editor与生产／联机证明。
+
+原13件差集、42集合静态核收及R6构建失败完整归还见[本阶段历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-source42静态核收与r6构建失败归还)。历史不恢复写权，完整需求仍未完成。
+
+
+## 2026-10-19 R8构建及18项基础验证闭合
+
+本阶段实际完成并完整归还，不等于完整需求验收。准确42源码集合AC8620C4B7B21B6796CB624A8E12005BFA37084D29397CF5D160F42B79343CD6，3Source／6物理别名迁移，其余39字节不变。R8 pin 4B8F6E29695D8F53E19A43E83CAADE6B4B3D3A2C5EA11934D9485CC4992E5973；Build原cmd126348／parent131024／FILETIME134368607787822633，18动作／91.31秒／原句柄exit0，Root58202终态exit0；真实software59产物／3模块／369源码、30回执已核。Build after14279737B／4B97FD6AD4B6B9136B05FFEC35F875FAE84C2C486981A5DD9FF260E1E68A96BE，return142669B／51BCC6925F9101B0D2C7C77A3C7CA91359CC0F645641F0977FEAA89470EACB70；raw九类79／1／2／3／0／5／0／0／0。3条C4996保留（两NonInstanced拒绝守卫与Editor矩阵旧getter），构建无错误。Leaves原UE125208／parent134992／FILETIME134368613401819419，原18全部Success／0E／0W，Combo五重入含原OwnedTrace Inactive和完整清理断言通过；dirty前后空、noPIE、正常退出／共享[]，Root54611终态exit0。Leaves after13669551B／51994B7AE29083DB9D8A3250B6E924D82A5473B210D614750C3D0CFA23806527，return143474B／3977E35456517C28A80A74E300716D528207F2C3FAEA316E7AE7676C9FCBCD77；35回执hash及原身份实核，raw九类7／3／2／3／0／2／2／0／0。Build及Leaves的success/protection_success均true、未授权差集0；旧失败及历史日志不完整状态保持，不伪造历史。准确证据Saved/Codex/CRSource42Integration_20261019_Entry_R8/{Build,Leaves}/{before.json,host.json,exit.json,after.json,return.json}及Leaves/Automation/index.json。
+
+### 替换前状态及原故障诊断（原文）
+
+当前已核收基线42件（38 Runtime＋4 Editor），R7标准完整Target构建成功，Root真实消费59产物／3模块／369源码；准确18项已在此软件运行，17项严格0E／0W，仅Combo ActivationCommitAndEndReentry第四场景1E／0W。第三真实Started／两实例／速率／watchdog及第五延期End到末尾已达；原攻击与移动门、GAS／CMC权威及全部原断言保持。输入出生、两绑定清理、摄影及四FX发布叶本轮通过，不作真实设备／生产／视觉／联机证明。
+
+当前证据：[PostGit原生报告](../../Saved/Codex/CRSource42LeavesPostGit_20261019_Entry_R1/Leaves/Automation/index.json)、[after](../../Saved/Codex/CRSource42LeavesPostGit_20261019_Entry_R1/Leaves/after.json)、[return](../../Saved/Codex/CRSource42LeavesPostGit_20261019_Entry_R1/Leaves/return.json)。success=false／protection_success=true，35回执及原宿主起止身份已核，无未授权差集。第四场景旧夹具用Legacy BeginTraceWindow，无GA Owned句柄，不应让GA越权清理；仅修真实Notify夹具并追加原句柄Inactive证明，生产行为保持。首生产Draw、真实FX Age／尾部／归还／销毁及晚加入／重获相关性仍待。R7构建／Git交接／本轮完整退出、失败和精确身份见[本阶段历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r7构建与postgit18项归还)。
+
+R10宿主审查：当前`editor_host.py:478`的真实on_frame两tick故障探针已复现：hold时FX Sample失败后转release，下tick仍先采样再次失败，随后stop_observer／finish撤回调，provider.release及close_owned_scene均0次。须在原R10四件窗修复采样与释放的控制流，保留失败并继续同源公共归还／fixture／EndPIE，未知归还仍保现场；此发现尚未通过消息送达作者，未改代码，R8不受影响。
+
+
+## 2026-10-19 三仓本地阶段检查点结束
+
+当时状态原文；后续R8原18已全部通过，当前任务未验边界见活动排程。
+
+本次按用户要求作本地阶段检查点：源码子仓 fd9334d8c63fe7ca889ebcdf624430cb93cfc87f、笔记仓 4da4f4c4b5f41cb87ef5c90b3d3f4880ad4554f6；父工程76d8645653e3a3d5d818871f3f99cf092f6a80d6。Root推送曾被自动审批以私有源码远端及载荷未明确核准为由拒绝，未成功执行，不绕过审核；后续外部同步只核本地记录，不识别操作者或冒称实时远端核验。阶段提交不代整需求验收；原18项已实际运行，剩余单错及受影响生产／联机继续推进。
+
+
+## 2026-10-19 R8后续阶段提交与Restore归还
+
+按真人要求对已通过R8的三件源码及所属协调文档作本地阶段检查点：Source/GGYGO为3e827859dc246541311727abd441e2c5c874a13c（仅普攻结束重入测试的真实Notify／Owned Trace修正）；父工程提交两件Editor预布防源码、准确子仓指针和五份协调归档文档，由包含本段的提交承载。笔记无新增，保持4da4f4c4b5f41cb87ef5c90b3d3f4880ad4554f6。三件源码SHA与R8构建、原18项全部0E／0W时一致；阶段提交不作生产／视觉／联机或整需求完成证明。本轮不推送，前序推送自动审批拒绝及既有本地提交的原事实保持。
+
+Git窗前，Resource已完成本地Restore并正常归还：原PID123116／句柄608／创建FILETIME134368634752976043，exit0，0.844秒，无重启或强杀。完整93根（原85＋8）核对，success／protection_success均true，changed／missing／三类unowned均0；仅obj下新增五个真实NuGet graph文件，四texturedata未读取。五回执位于F:/AnimeStudio/_work/pyrois_decal_texture_cache_decode_20261017/Runtime/Build_20261017_R2/（before.json、after.json、restore.stdout.log、restore.stderr.log、restore.process.json）；after为13766960B／0FA164E54DF0E51C86C175517E28EF57D00F2E58ACE6292805CF46801A43F5FD，Root实核身份及原句柄exit0。networkAllowed=false、Build／Decode未执行；completeReadClosureVerified／nativeAbiAndSystemDependencyClosureVerified／fileWriteConfinementVerified仍false，不扩大完成范围。原作者已停止后继操作，Git修改只在正常完整归还之后执行。

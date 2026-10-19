@@ -448,3 +448,13 @@ B0来源架构预检已交回且零写入；用户2026-10-01现已批准项目GA
 以下为收口前被替换的原段落，完整保留原事实、失败及未验边界；历史权限不恢复，当前状态仅以活动入口为准。
 
 | R7 表现与时间线 | Root审核，FX牵头，AS／公共Task／Animation／Combat／Character按原职责参与；F1／AN2 | 当前37条D02集合R5标准Build／保护通过（两处弃用警告），18基础叶原生16Success／2Fail、严格14项0E／0W；UE正常exit0、clean/noPIE及完整保护通过。五件修复已静态核收冻结，保五原重入及后继断言；新42件作者已冻结，待Root核集合及观测接线；原Guard返回后自定义钩子不冒称真实Started，不放宽生产保护。当前四FX发布叶、NamedNotifyContract及Boss重入等基础叶已通过，生产／视觉／联机未验。已接typed同步窗口、真实BranchingPoint及原公开Payload、反射active状态＋可靠Terminal、单远端Niagara及原角色事实桥；原攻击／移动／MainEnd、GAS／CMC及缺End／混出／终止／尾粒子合同保持。真人晚加入／重获相关性仍须剩余FX及正确Age实证；五Montage／两GA的Queued／NoMerge、FX.Mode／Trace／图委托／两Remote参数待实际读回，原清单turn 01a14fbf-01c2-7502-b81f-350172f8627c。原Editor宿主的首投影及真实FX/ControllerAge缺口已确认，八件既有Source由FX／Rendering原作者同批接线，Camera只读提供合同；当前全批42件，尚未冻结／构建验证。不再调用Kiro，旧协议取舍仅按需查原回执；当前窗口／身份见排程，过程见历史。 |
+
+
+## 2026-10-19 R7及PostGit18项后的状态替换
+
+下列为替换前状态原文；当前R7已构建，输入出生／两绑定叶等17项严格通过，Combo第四夹具仍1E，完整需求未验。准确证据及保护归还见同期排程历史，不将源码或基础叶外推生产／视觉／联机。
+
+| R3 绑定／激活／订阅 | Root审核，AbilitySystem牵头，Character／Combatants／Input／Movement按职责实现；X1／X2／X6 | R3-1／R3-2及NativeWrite已在R5构建；partial Init实际物理清理／原失败／后继隔离断言已到达，原叶3Warning仍未达门禁。本轮仅测试预期诊断修复已静态核收冻结，未复验；激活Serial及Context寿命保持。原失败见历史；R3-3尚未授Hero写窗，按当前优先级接续，不以旧R4等待阻塞本批。 |
+| R4 退役与预留 | Root审核，Input及原模块实现／核消费者；X4／X5、迁移接口及Tag／治疗链 | 四Source退役包装／改用既有QueryMovementInputRequest已过R5编译，出生叶实际执行至拆卸，仍因清理Error／Warning未过。原调用及四Query断言保留；本轮IMC归还顺序及终态诊断修复已静态核收，未复验。其余退役未实施，须核真实C++／BP／Montage／配置／序列化消费者；持续GE及有消费者Tag保留。 |
+| R6 输入与相机 | Input／Camera，Character参与；X7／C1 | LocalPlayer post-Super重复查询已精简并过R5编译；首个真实CameraMode确认闸门及原返栈／bProjected保护保持，PhotographyPublicationAdmission通过。真实生产首帧仍待；四件Editor观测源码已静态核收，R6构建因头引用C1083失败并完整归还，单CPP修复及R7入口已核收，待本轮完整构建／运行，未UE，不以Manager叶或PNG替代投影证据。输入出生夹具修复未放宽生产首闸，当前修后版本待复验；换Pawn／Restart及原失败字段不变。 |
+| R7 表现与时间线 | Root审核，FX牵头，AS／公共Task／Animation／Combat／Character按原职责参与；F1／AN2 | typed同步窗口、真实BranchingPoint及原公开Payload、反射active状态＋可靠Terminal、单远端Niagara及原角色事实桥已接源码；四FX发布叶、NamedNotifyContract及Boss重入等基础叶在R5通过。原攻击／移动／MainEnd、GAS／CMC及缺End／混出／终止／尾粒子合同保持。八件观测源码已静态核收；新42件R6构建因头引用C1083失败并完整归还，尚未复验，准确差集及最后18项结果只见活动排程。生产首投影、真实ControllerAge、晚加入／重获相关性的剩余FX及正确进度仍须实证；五Montage／两GA的Queued／NoMerge、FX.Mode／Trace／图委托／两Remote参数待实际读回，原清单turn 01a14fbf-01c2-7502-b81f-350172f8627c。生产／视觉／联机未验，旧协议取舍按需查原回执，不恢复Kiro调用。 |

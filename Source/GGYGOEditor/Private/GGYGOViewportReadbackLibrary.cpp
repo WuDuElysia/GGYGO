@@ -6,6 +6,7 @@
 #include "Camera/GGYGOPlayerCameraManager.h"
 #include "Editor.h"
 #include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
@@ -17,6 +18,7 @@
 #include "SceneView.h"
 #include "SceneViewExtension.h"
 #include "Serialization/JsonSerializer.h"
+#include "Settings/LevelEditorPlaySettings.h"
 #include "Slate/SceneViewport.h"
 #include "UObject/Package.h"
 #include "UObject/StrongObjectPtr.h"
@@ -34,6 +36,8 @@ namespace GGYGOViewportReadback
 /** 只属于这次 Editor 观察；运行时相机仍是唯一确认与 POV 写端。 */
 struct FGGYGOPlayerViewObservationState
 {
+	TWeakObjectPtr<UWorld> EditorWorld;
+	TWeakObjectPtr<UGameInstance> Instance;
 	TWeakObjectPtr<ULocalPlayer> Player;
 	TWeakObjectPtr<UClass> ModeClass;
 	TWeakObjectPtr<APlayerController> Controller;
@@ -43,7 +47,13 @@ struct FGGYGOPlayerViewObservationState
 	TSharedPtr<ISceneViewExtension, ESPMode::ThreadSafe> Extension;
 	FDelegateHandle BeginDrawHandle;
 	FDelegateHandle EndDrawHandle;
+	FDelegateHandle MapReadyHandle;
+	FDelegateHandle PlayerAddedHandle;
+	FDelegateHandle ViewportCreatedHandle;
+	FDelegateHandle CancelPIEHandle;
 	TSharedPtr<FJsonObject> Source = MakeShared<FJsonObject>();
+	TSharedPtr<FJsonObject> Startup = MakeShared<FJsonObject>();
+	TSharedPtr<FJsonObject> FirstDraw;
 	TSharedPtr<FJsonObject> LastDraw = MakeShared<FJsonObject>();
 	TSharedPtr<FJsonObject> Projection;
 	int32 MaxDraws = 0;
@@ -55,6 +65,7 @@ struct FGGYGOPlayerViewObservationState
 	bool bConfirmedAtArm = false;
 	bool bSawUnconfirmed = false;
 	bool bReleased = false;
+	bool bBeforePIE = false;
 };
 
 /** 只消费自然玩家视图；渲染线程回调全部沿基类空实现。 */
@@ -95,6 +106,15 @@ UGGYGOViewportReadbackTask* UGGYGOViewportReadbackLibrary::BeginPlayerViewObserv
 	{
 		Task->InitializePlayerView(ExpectedPlayer, ExpectedMode, MaxDraws);
 	}
+	return Task;
+}
+
+UGGYGOViewportReadbackTask* UGGYGOViewportReadbackLibrary::BeginNextPIEPlayerViewObservation(UWorld* ExpectedEditorWorld,
+	TSubclassOf<UGGYGOCameraMode> ExpectedMode, int32 MaxDraws)
+{
+	check(IsInGameThread());
+	UGGYGOViewportReadbackTask* Task = NewObject<UGGYGOViewportReadbackTask>(GetTransientPackage(), NAME_None, RF_Transient);
+	Task->InitializeBeforePIE(ExpectedEditorWorld, ExpectedMode, MaxDraws);
 	return Task;
 }
 
@@ -168,6 +188,162 @@ void UGGYGOViewportReadbackTask::InitializePlayerView(ULocalPlayer* ExpectedPlay
 	PlayerView->bArmConfirmationKnown = bReady;
 	PlayerView->bConfirmedAtArm = bReady && PlayerView->Manager->HasConfirmedNativeCameraView();
 	PlayerView->bSawUnconfirmed = bReady && !PlayerView->bConfirmedAtArm;
+	RegisterPlayerViewCallbacks();
+}
+
+void UGGYGOViewportReadbackTask::InitializeBeforePIE(UWorld* ExpectedEditorWorld,
+	TSubclassOf<UGGYGOCameraMode> ExpectedMode, int32 MaxDraws)
+{
+	Result.bPlayerViewOnly = true;
+	Result.Status = EGGYGOViewportReadbackStatus::Pending;
+	Result.Error.Reset();
+	Result.RequestFrame = GGYGOViewportReadback::NativeFrame();
+	if (!GEditor || !GEngine || !IsValid(ExpectedEditorWorld) || ExpectedEditorWorld->WorldType != EWorldType::Editor
+		|| GEditor->GetEditorWorldContext().World() != ExpectedEditorWorld || !ExpectedMode || MaxDraws < 1 || MaxDraws > 4096)
+	{
+		Fail(TEXT("预布防需要当前原编辑器地图、精确模式类及 1..4096 的自然 Draw 上限。"));
+		return;
+	}
+	for (const FWorldContext& Context : GEngine->GetWorldContexts())
+	{
+		if (Context.WorldType == EWorldType::PIE)
+		{
+			Fail(TEXT("已有 PIE WorldContext，不能认证下一次请求的首 Draw。"));
+			return;
+		}
+	}
+	const ULevelEditorPlaySettings* Settings = GetDefault<ULevelEditorPlaySettings>();
+	EPlayNetMode NetMode;
+	int32 Clients;
+	bool bOneProcess;
+	// 这些 getter 的返回值描述选项是否启用；Out 参数才是原配置值。
+	Settings->GetPlayNetMode(NetMode);
+	Settings->GetPlayNumberOfClients(Clients);
+	Settings->GetRunUnderOneProcess(bOneProcess);
+	if (GEditor->PlayWorld || GEditor->GetPlaySessionRequest().IsSet() || GEditor->IsSimulateInEditorInProgress() || NetMode != PIE_Standalone
+		|| Clients != 1 || !bOneProcess || Settings->bLaunchSeparateServer)
+	{
+		Fail(TEXT("首 Draw 预布防只接受未开始的单客户端、同进程 Standalone PIE。"));
+		return;
+	}
+	PlayerView = MakeShared<FGGYGOPlayerViewObservationState>();
+	PlayerView->bBeforePIE = true;
+	PlayerView->EditorWorld = ExpectedEditorWorld;
+	PlayerView->ModeClass = ExpectedMode.Get();
+	PlayerView->MaxDraws = MaxDraws;
+	PlayerView->Source->SetStringField(TEXT("expected_mode_class"), ExpectedMode->GetPathName());
+	PlayerView->Startup->SetStringField(TEXT("editor_world"), ExpectedEditorWorld->GetPathName());
+	PlayerView->Startup->SetStringField(TEXT("editor_world_id"), LexToString(ExpectedEditorWorld->GetUniqueID()));
+	PlayerView->Startup->SetStringField(TEXT("armed_frame"), Result.RequestFrame);
+	PlayerView->MapReadyHandle = FWorldDelegates::OnPIEMapReady.AddUObject(this, &ThisClass::OnPIEMapReady);
+	PlayerView->ViewportCreatedHandle = UGameViewportClient::OnViewportCreated().AddUObject(this, &ThisClass::OnInitialViewportCreated);
+	PlayerView->CancelPIEHandle = FEditorDelegates::CancelPIE.AddUObject(this, &ThisClass::OnCancelPIE);
+	WorldCleanupHandle = FWorldDelegates::OnWorldCleanup.AddUObject(this, &ThisClass::OnWorldCleanup);
+	EndPIEHandle = FEditorDelegates::EndPIE.AddUObject(this, &ThisClass::OnEndPIE);
+}
+
+void UGGYGOViewportReadbackTask::OnPIEMapReady(UGameInstance* Instance)
+{
+	if (Result.Status != EGGYGOViewportReadbackStatus::Pending) { return; }
+	UWorld* EditorWorld = PlayerView->EditorWorld.Get();
+	UWorld* World = IsValid(Instance) ? Instance->GetWorld() : nullptr;
+	const FWorldContext* Context = IsValid(World) && GEngine ? GEngine->GetWorldContextFromWorld(World) : nullptr;
+	int32 PIEContexts = 0;
+	if (GEngine)
+	{
+		for (const FWorldContext& Item : GEngine->GetWorldContexts()) { PIEContexts += Item.WorldType == EWorldType::PIE ? 1 : 0; }
+	}
+	if (!PlayerView->Instance.IsExplicitlyNull() || !IsValid(EditorWorld) || !IsValid(World) || !Context
+		|| World->WorldType != EWorldType::PIE || World->GetNetMode() != NM_Standalone || PIEContexts != 1
+		|| World->GetGameInstance() != Instance || Instance->GetLocalPlayers().Num() != 0 || Instance->GetGameViewportClient()
+		|| UWorld::RemovePIEPrefix(World->GetOutermost()->GetName()) != EditorWorld->GetOutermost()->GetName())
+	{
+		Fail(TEXT("PIE MapReady 的原地图、唯一 GI/WorldContext 或尚未创建玩家/viewport 的启动顺序不成立。"));
+		return;
+	}
+	PlayerView->Instance = Instance;
+	OriginalWorld = World;
+	Result.WorldPath = World->GetPathName();
+	Result.WorldObjectId = LexToString(World->GetUniqueID());
+	Result.WorldContextHandle = Context->ContextHandle;
+	Result.PIEInstance = Context->PIEInstance;
+	Result.WorldType = static_cast<uint8>(World->WorldType);
+	Result.NetMode = static_cast<uint8>(World->GetNetMode());
+	PlayerView->Startup->SetStringField(TEXT("map_ready_frame"), GGYGOViewportReadback::NativeFrame());
+	PlayerView->Startup->SetStringField(TEXT("game_instance"), Instance->GetPathName());
+	PlayerView->Startup->SetStringField(TEXT("game_instance_id"), LexToString(Instance->GetUniqueID()));
+	PlayerView->PlayerAddedHandle = Instance->OnLocalPlayerAddedEvent.AddUObject(this, &ThisClass::OnLocalPlayerAdded);
+}
+
+void UGGYGOViewportReadbackTask::OnLocalPlayerAdded(ULocalPlayer* Player)
+{
+	if (Result.Status != EGGYGOViewportReadbackStatus::Pending) { return; }
+	UGameInstance* Instance = PlayerView->Instance.Get();
+	UWorld* World = OriginalWorld.Get();
+	UGameViewportClient* Client = IsValid(Instance) ? Instance->GetGameViewportClient() : nullptr;
+	if (!PlayerView->Player.IsExplicitlyNull() || !IsValid(Instance) || !IsValid(Player) || !IsValid(World)
+		|| !IsValid(Client) || Instance->GetWorld() != World || Instance->GetLocalPlayers().Num() != 1
+		|| Instance->GetLocalPlayers()[0] != Player || Player->GetWorld() != World || Client->GetWorld() != World
+		|| Player->ViewportClient != Client || Client->GetGameViewport())
+	{
+		Fail(TEXT("LocalPlayerAdded 不是原 GI 的唯一玩家/client，或游戏 viewport 已存在而无法证明首 Draw。"));
+		return;
+	}
+	PlayerView->Player = Player;
+	OriginalClient = Client;
+	Result.GameViewportClientPath = Client->GetPathName();
+	Result.GameViewportClientObjectId = LexToString(Client->GetUniqueID());
+	PlayerView->Source->SetStringField(TEXT("local_player"), Player->GetPathName());
+	PlayerView->Source->SetStringField(TEXT("local_player_id"), LexToString(Player->GetUniqueID()));
+	PlayerView->Startup->SetStringField(TEXT("local_player_added_frame"), GGYGOViewportReadback::NativeFrame());
+	CloseHandle = Client->OnCloseRequested().AddUObject(this, &ThisClass::OnViewportCloseRequested);
+	RegisterPlayerViewCallbacks();
+}
+
+bool UGGYGOViewportReadbackTask::CaptureInitialViewport(FString& OutError)
+{
+	TSharedPtr<ISlateViewport> Interface;
+	if (!OriginalViewport)
+	{
+		UGameViewportClient* Client = OriginalClient.Get();
+		UWorld* World = OriginalWorld.Get();
+		if (!IsValid(Client) || !IsValid(World) || Client->GetWorld() != World || World->GetGameViewport() != Client)
+		{
+			OutError = TEXT("原启动 client/World 尚未关联或已退役。");
+			return false;
+		}
+		const TSharedPtr<SViewport> Widget = Client->GetGameViewportWidget();
+		Interface = Widget ? Widget->GetViewportInterface().Pin() : nullptr;
+		FSceneViewport* Viewport = Client->GetGameViewport();
+		if (!Widget || !Interface || !Viewport || Interface.Get() != static_cast<ISlateViewport*>(Viewport))
+		{
+			OutError = TEXT("原 client 的首个 viewport/widget/interface 尚未完整建立。");
+			return false;
+		}
+		OriginalViewport = Viewport;
+		OriginalWidget = Widget;
+		OriginalInterface = Interface;
+		Result.ViewportIdentity = FString::Printf(TEXT("%p"), static_cast<FViewport*>(Viewport));
+		PlayerView->Startup->SetStringField(TEXT("viewport_bound_frame"), GGYGOViewportReadback::NativeFrame());
+	}
+	return PinOriginalViewport(Interface, OutError);
+}
+
+void UGGYGOViewportReadbackTask::OnInitialViewportCreated()
+{
+	if (Result.Status != EGGYGOViewportReadbackStatus::Pending) { return; }
+	FString Error;
+	if (!CaptureInitialViewport(Error)) { Fail(Error); return; }
+	PlayerView->Startup->SetStringField(TEXT("viewport_created_frame"), GGYGOViewportReadback::NativeFrame());
+}
+
+void UGGYGOViewportReadbackTask::OnCancelPIE()
+{
+	Fail(TEXT("原 PIE 启动请求取消，首 Draw 观察未完成。"));
+}
+
+void UGGYGOViewportReadbackTask::RegisterPlayerViewCallbacks()
+{
 	UGameViewportClient* Client = OriginalClient.Get();
 	PlayerView->BeginDrawHandle = Client->OnBeginDraw().AddUObject(this, &ThisClass::OnPlayerDrawBegin);
 	PlayerView->EndDrawHandle = Client->OnEndDraw().AddUObject(this, &ThisClass::OnPlayerDrawEnd);
@@ -246,14 +422,21 @@ void UGGYGOViewportReadbackTask::OnPlayerDrawBegin()
 {
 	check(IsInGameThread());
 	if (Result.Status != EGGYGOViewportReadbackStatus::Pending) { return; }
-	TSharedPtr<ISlateViewport> Interface;
-	bool bReady;
-	FString Error;
-	if (!PinOriginalViewport(Interface, Error) || !PinOriginalPlayer(Error, bReady)) { Fail(Error); return; }
+	if (PlayerView->bDrawOpen) { Fail(TEXT("原玩家 Draw 重入，不能合并两次自然绘制。")); return; }
 	PlayerView->bDrawOpen = true;
 	++PlayerView->DrawCount;
 	PlayerView->LastDraw = MakeShared<FJsonObject>();
 	PlayerView->LastDraw->SetStringField(TEXT("begin_frame"), GGYGOViewportReadback::NativeFrame());
+	PlayerView->LastDraw->SetNumberField(TEXT("draw_ordinal"), PlayerView->DrawCount);
+	if (PlayerView->DrawCount == 1) { PlayerView->FirstDraw = PlayerView->LastDraw; }
+	TSharedPtr<ISlateViewport> Interface;
+	bool bReady;
+	FString Error;
+	// 有的原生窗口在 OnViewportCreated 广播前就开始 Draw；同一原 client 的首次固定仍在
+	// BeginDraw 的实际回调内完成，早于引擎 GatherActiveExtensions，不重放或补造 BeginDraw。
+	if (PlayerView->bBeforePIE && !CaptureInitialViewport(Error)) { Fail(Error); return; }
+	if (!PinOriginalViewport(Interface, Error) || !PinOriginalPlayer(Error, bReady)) { Fail(Error); return; }
+	PlayerView->LastDraw->SetBoolField(TEXT("original_scope_verified"), true);
 	PlayerView->LastDraw->SetBoolField(TEXT("original_player_ready"), bReady);
 	if (bReady)
 	{
@@ -268,7 +451,21 @@ void UGGYGOViewportReadbackTask::OnPlayerDrawBegin()
 void UGGYGOViewportReadbackTask::OnPlayerDrawEnd()
 {
 	if (Result.Status != EGGYGOViewportReadbackStatus::Pending) { return; }
+	if (!PlayerView->bDrawOpen) { Fail(TEXT("原 EndDraw 没有对应的自然 BeginDraw。")); return; }
+	TSharedPtr<ISlateViewport> Interface;
+	bool bReady;
+	FString Error;
+	if (!PinOriginalViewport(Interface, Error) || !PinOriginalPlayer(Error, bReady)) { Fail(Error); return; }
+	PlayerView->LastDraw->SetStringField(TEXT("end_frame"), GGYGOViewportReadback::NativeFrame());
 	PlayerView->bDrawOpen = false;
+	if (PlayerView->Projection.IsValid())
+	{
+		if (!bReady) { Fail(TEXT("匹配 SetupView 后原玩家在 EndDraw 前已退役。")); return; }
+		Result.ReadbackCompleteFrame = GGYGOViewportReadback::NativeFrame();
+		Result.Status = EGGYGOViewportReadbackStatus::Complete;
+		DetachCallbacks();
+		return;
+	}
 	if (PlayerView->DrawCount >= PlayerView->MaxDraws)
 	{
 		Fail(TEXT("自然 Draw 已到明确上限，尚未取得原玩家完整投影成功后的匹配 SetupView。"));
@@ -279,6 +476,7 @@ void UGGYGOViewportReadbackTask::OnPlayerViewSetup(FSceneViewFamily& ViewFamily,
 {
 	check(IsInGameThread());
 	if (Result.Status != EGGYGOViewportReadbackStatus::Pending || !PlayerView.IsValid()
+		|| PlayerView->Projection.IsValid()
 		|| ViewFamily.RenderTarget != static_cast<FViewport*>(OriginalViewport)
 		|| !ViewFamily.Scene || ViewFamily.Scene->GetWorld() != OriginalWorld.Get()) { return; }
 	TSharedPtr<ISlateViewport> Interface;
@@ -312,6 +510,7 @@ void UGGYGOViewportReadbackTask::OnPlayerViewSetup(FSceneViewFamily& ViewFamily,
 		}
 	}
 	PlayerView->Projection = MakeShared<FJsonObject>();
+	PlayerView->Projection->SetNumberField(TEXT("draw_ordinal"), PlayerView->DrawCount);
 	PlayerView->Projection->SetStringField(TEXT("frame"), GGYGOViewportReadback::NativeFrame());
 	PlayerView->Projection->SetNumberField(TEXT("mode_query_status"), static_cast<uint8>(Mode.Status));
 	PlayerView->Projection->SetStringField(TEXT("mode_query_diagnostic"), Mode.Diagnostic);
@@ -342,9 +541,6 @@ void UGGYGOViewportReadbackTask::OnPlayerViewSetup(FSceneViewFamily& ViewFamily,
 	PlayerView->Projection->SetStringField(TEXT("view_rotation"), View.ViewRotation.ToString());
 	Result.RenderTargetSize = OriginalViewport->GetRenderTargetTextureSizeXY();
 	Result.RenderCallbackFrame = GGYGOViewportReadback::NativeFrame();
-	Result.ReadbackCompleteFrame = Result.RenderCallbackFrame;
-	Result.Status = EGGYGOViewportReadbackStatus::Complete;
-	DetachCallbacks();
 }
 
 void UGGYGOViewportReadbackTask::UpdatePlayerViewJson()
@@ -352,14 +548,21 @@ void UGGYGOViewportReadbackTask::UpdatePlayerViewJson()
 	if (!PlayerView.IsValid()) { return; }
 	auto Json = MakeShared<FJsonObject>();
 	Json->SetStringField(TEXT("schema"), TEXT("GGYGO.PlayerViewObservation/v1"));
-	Json->SetStringField(TEXT("meaning"), TEXT("仅本次布防后的首个匹配自然 SetupView；确认位精确写入时刻及全局首 Draw 未观察。"));
+	Json->SetStringField(TEXT("meaning"), TEXT("首个自然 Draw 与首个匹配成功 SetupView 分列；预布防模式从原 PIE 创建链见证首 Draw，确认位精确写入时刻未观察。"));
 	Json->SetObjectField(TEXT("original_player"), PlayerView->Source);
+	Json->SetObjectField(TEXT("startup"), PlayerView->Startup);
+	if (PlayerView->FirstDraw.IsValid()) { Json->SetObjectField(TEXT("first_draw"), PlayerView->FirstDraw); }
 	Json->SetObjectField(TEXT("last_draw"), PlayerView->LastDraw);
 	if (PlayerView->Projection.IsValid()) { Json->SetObjectField(TEXT("projection"), PlayerView->Projection); }
 	Json->SetBoolField(TEXT("arm_confirmation_known"), PlayerView->bArmConfirmationKnown);
 	Json->SetBoolField(TEXT("confirmed_at_arm"), PlayerView->bConfirmedAtArm);
 	Json->SetBoolField(TEXT("unconfirmed_state_observed"), PlayerView->bSawUnconfirmed);
 	Json->SetBoolField(TEXT("first_confirmation_write_observed"), false);
+	Json->SetBoolField(TEXT("prearmed_before_pie"), PlayerView->bBeforePIE);
+	bool bFirstScopeVerified = false;
+	if (PlayerView->FirstDraw.IsValid()) { PlayerView->FirstDraw->TryGetBoolField(TEXT("original_scope_verified"), bFirstScopeVerified); }
+	Json->SetBoolField(TEXT("first_natural_draw_proven"), PlayerView->bBeforePIE && bFirstScopeVerified
+		&& PlayerView->FirstDraw->HasTypedField<EJson::String>(TEXT("end_frame")));
 	Json->SetBoolField(TEXT("first_observed_only"), !PlayerView->bArmConfirmationKnown || PlayerView->bConfirmedAtArm);
 	Json->SetNumberField(TEXT("draws_since_arm"), PlayerView->DrawCount);
 	Json->SetNumberField(TEXT("draw_limit"), PlayerView->MaxDraws);
@@ -510,6 +713,26 @@ FGGYGOViewportReadbackResult UGGYGOViewportReadbackTask::ReadResult()
 	check(IsInGameThread());
 	if (Result.Status == EGGYGOViewportReadbackStatus::Pending || Result.Status == EGGYGOViewportReadbackStatus::Reading)
 	{
+		if (PlayerView.IsValid() && PlayerView->bBeforePIE)
+		{
+			UGameInstance* Instance = PlayerView->Instance.Get();
+			ULocalPlayer* Player = PlayerView->Player.Get();
+			if (!PlayerView->EditorWorld.IsValid()
+				|| (!PlayerView->Instance.IsExplicitlyNull() && (!IsValid(Instance) || !OriginalWorld.IsValid()
+					|| Instance->GetWorld() != OriginalWorld.Get()))
+				|| (!PlayerView->Player.IsExplicitlyNull() && (!IsValid(Player) || !IsValid(Instance)
+					|| Instance->GetLocalPlayers().Num() != 1 || Instance->GetLocalPlayers()[0] != Player
+					|| !OriginalClient.IsValid() || Player->ViewportClient != OriginalClient.Get()
+					|| OriginalClient->GetWorld() != OriginalWorld.Get())))
+			{
+				Fail(TEXT("原 PIE 启动范围、GI 或唯一 LocalPlayer 已退役。"));
+			}
+			if (!OriginalViewport)
+			{
+				UpdatePlayerViewJson();
+				return Result; // 只由原生创建/Draw 事件布防；读取不替宿主轮询建立 viewport。
+			}
+		}
 		TSharedPtr<ISlateViewport> Interface;
 		FString Error;
 		if (!PinOriginalViewport(Interface, Error))
@@ -534,7 +757,8 @@ void UGGYGOViewportReadbackTask::Release()
 
 void UGGYGOViewportReadbackTask::OnViewportCloseRequested(FViewport* Viewport)
 {
-	if (Viewport == static_cast<FViewport*>(OriginalViewport))
+	if (Viewport == static_cast<FViewport*>(OriginalViewport)
+		|| (PlayerView.IsValid() && PlayerView->bBeforePIE && !OriginalViewport))
 	{
 		Fail(TEXT("原 viewport 请求关闭，读回未完成。"));
 	}
@@ -542,7 +766,7 @@ void UGGYGOViewportReadbackTask::OnViewportCloseRequested(FViewport* Viewport)
 
 void UGGYGOViewportReadbackTask::OnWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources)
 {
-	if (World == OriginalWorld.Get())
+	if (World == OriginalWorld.Get() || (PlayerView.IsValid() && PlayerView->bBeforePIE && World == PlayerView->EditorWorld.Get()))
 	{
 		Fail(TEXT("原 World 正在清理，读回未完成。"));
 	}
@@ -550,7 +774,7 @@ void UGGYGOViewportReadbackTask::OnWorldCleanup(UWorld* World, bool bSessionEnde
 
 void UGGYGOViewportReadbackTask::OnEndPIE(bool bSimulating)
 {
-	if (Result.WorldType == static_cast<uint8>(EWorldType::PIE))
+	if (Result.WorldType == static_cast<uint8>(EWorldType::PIE) || (PlayerView.IsValid() && PlayerView->bBeforePIE))
 	{
 		Fail(TEXT("原 PIE 会话结束，读回未完成。"));
 	}
@@ -579,6 +803,19 @@ void UGGYGOViewportReadbackTask::DetachCallbacks()
 		PlayerView->bReleased = true;
 		PlayerView->bDrawOpen = false;
 		PlayerView->Extension.Reset();
+		if (PlayerView->MapReadyHandle.IsValid()) { FWorldDelegates::OnPIEMapReady.Remove(PlayerView->MapReadyHandle); }
+		PlayerView->MapReadyHandle.Reset();
+		if (UGameInstance* Instance = PlayerView->Instance.Get())
+		{
+			if (PlayerView->PlayerAddedHandle.IsValid()) { Instance->OnLocalPlayerAddedEvent.Remove(PlayerView->PlayerAddedHandle); }
+		}
+		PlayerView->PlayerAddedHandle.Reset();
+		if (PlayerView->ViewportCreatedHandle.IsValid()) { UGameViewportClient::OnViewportCreated().Remove(PlayerView->ViewportCreatedHandle); }
+		PlayerView->ViewportCreatedHandle.Reset();
+		if (PlayerView->CancelPIEHandle.IsValid()) { FEditorDelegates::CancelPIE.Remove(PlayerView->CancelPIEHandle); }
+		PlayerView->CancelPIEHandle.Reset();
+		PlayerView->Instance.Reset();
+		PlayerView->EditorWorld.Reset();
 		if (UGameViewportClient* Client = OriginalClient.Get())
 		{
 			if (Begin.IsValid()) { Client->OnBeginDraw().Remove(Begin); }
