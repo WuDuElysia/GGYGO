@@ -16,13 +16,13 @@
 
 最小联机契约保持两Editor／三PIE World，每进程一Mesh，按实际World/Role/PlayerState/GetPawn及发布键配对；不能猜跨端同帧或缺D0首区间。真人已确认晚加入／重获相关性也须显示仍有效的剩余普攻FX及正确时间进度，已结束窗口不补播；远端协议与最小写集由FX／AS／Combat收敛，已进入当前Source批，Root按既有规范审查。Movement N3 provider已核收，Rendering网络N3入口已冻结，真实双进程run pin/连接/视口/FX仍未执行，不作为单人Slot前置。
 
-当前执行窗：Root的Author R1已按真人单次授权仅终止原UE132976，原启动器已退出；保存失败、异常退出及旧日志缺失导致的完整保护失败均保留，不能作为后继Native父。[失败证据及边界](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-author-r1失败收尾及git窗口)。八包磁盘逐件未变；另有UE136580／LiveCoding122336，不在本次终止范围。Root按真人要求仅收取两份协调文档及父／Source子仓Git元数据窗口；Source、生产资产及离线继任冻结，不启动新UE／构建。后继Native须先归还共享进程并建立真实有效的保护父，不能把本次unknown改成通过。
+当前执行窗：R12加载／probe／Host实际成功，随后数据投影因错误读取顶层GE.package失败；未PIE／攻击。原UE正常exit0、clean/noPIE，45凭据／八包／116根由Root核收，业务false保护true。当前无Native。仅原Rendering可先将Entry_R12四件runtime.py、test_runtime_admission.py、entry_pin.json、admission.json准确前像存入ImplementationHistory/R12_575C5ACC，再原位修正身份投影并重冻新身份；Host／launcher不改，不复制新Entry。新DATA只准备pending Run_R13，最终父稍后绑定。Root按真人请求集中提交已核收的GA两参数及两协调文档；其余Source／生产资产冻结。Resource仅保留Decode正常归还方案，无写权／Native。
 
-R10宿主审查：未消费继任已迁移R3公有ABI，并仅刷新R13三依赖及对应provider／伤害合同pin；最终pin303147B／57ED47DD…581CE51。runtime46178B／DA22F8EC…13F8A23、host37973B／D4837E61…459879C及launcher均未再改。Root实际静态check_entry通过、默认执行仍拒绝；1327依赖集合不扩围，公有consumer／四条同步capture唯一、原100ns进程检查及首Draw预布防保留。runtime／父／run／camera均None，冻结等待真实成功Cold及运行绑定，未Numeric／生产验证。
+运行宿主：R12真实加载交接已通过，唯一callback、180秒加载及原45／30／180各阶段保持。D5真实GE包名在identity.package，当前投影错误假定顶层package；原四事实验证已过，修正仅消费真实身份，不补默认值。原位版本化先归档精确前像，Root新父显式登记全部旧→新别名；旧Run与原失败不改。实际Numeric／PawnExtension／设备／视觉／联机仍待。
 
-AS新Cold／数值继任：原Cold R2的9差及NS就绪事实见历史；Step0两Remote候选仍为1/30秒及.033秒，非原作或已验性能值，Step1/2保持Disabled／0。R1首次struct setter即失败且未保存；Author R2五件pin D63D838A…B64228F已静态核收冻结，改用原生copy＋仅两字段import_text，验证候选后才Modify及赋回CDO数组，尚未真实UE验证。Cold控制器R3 pin D5F60A2A…42ABE已修受保护Notify读取，仍待成功Author及独立Cold。R13 pin6DB95F28…A0C100CD已迁公有成功consumer，原54392B伤害／Buff断言正文逐字保留，实际运行未验。失败Cold／Author均不能作成功来源；成本、真实Age误差及剩余窗追赶继续待验。
+AS新Cold／数值继任：GA现25241B／B873AF26…E310，首段两参数已在新UE持久化读回，后两段Disabled／0、八包0差。Producer7124/C868与D5/BAE0/B9A这批独立Cold已过；七包／Notify及fixed compile、三DA与Vitals GE四链通过，未修改原断言或保存资产。Root只用D5.consume_successful_cold三准确record核收：return1527B／2D67F8F4…57FFF9，after13838253B／6FA1DA35…91F3D6。R13无需更新即可由runtime.cold消费本结果，原54392B伤害／Buff断言保留；R10只绑定pin，三执行文件冻结。成本、Age误差、剩余窗追赶、首Draw／输入／自然结束／清理与联机未由Cold证明。
 
-Git阶段检查点：本次在父工程185e9a0之后仅提交本活动入口及既有历史两件，记录已核验阶段和本次失败；源码仍3e827859dc246541311727abd441e2c5c874a13c、笔记仍4da4f4c，均无新工作区改动。13项无关／未验资产及配置保持原样，不stage。提交及推送实际结果以Git回执为准，阶段保存不代整需求验收；前序检查点见[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r8后续阶段提交与restore归还)。
+Git阶段检查点：按真人请求，本轮仅提交GA首段两项已保存／独立Cold读回参数及两协调文档；运行／成本／画面仍待验，阶段提交不代整需求验收。源码3e827859dc246541311727abd441e2c5c874a13c、笔记4da4f4c无新增改动，不做空提交；13项无关／未验资产及配置保留不stage。推送此前被自动审批拒绝，两个具体GitHub远端授权仍待真人答复，未绕过。准确本地提交以git log为准；[前序检查点](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r8后续阶段提交与restore归还)按需查询。
 
 ### 当前Source批：CR R3／R4／R6及R7集成
 
@@ -32,7 +32,7 @@ Git阶段检查点：本次在父工程185e9a0之后仅提交本活动入口及�
 
 Slot-AB已验收归档：保留ActionPoseSlot及生产A，不移Mesh。普通B同Idle身体骨链抬高约63cm，当前节点仍承担必要基准修正；[完整结论与证据](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-slot对照结论保留a身体基准修正)按需查，不再作为其余需求前置。
 
-缓存贴图：Core R2构建及私有CLI四目标metadata已归还，原值／身份与边界见[本阶段历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-私有cli四纹理metadata及完整归还)。标准JSON消费补丁worker-metadata.patch（24584B／E8B6682F…5E05739）已静态核收冻结，仅原Program.cs／pin两件的未应用差异；保留真实mip及独立U/V/W、色彩原值，四metadata先校验，首次payload SHA只能来自实际锁定读。尚未应用／编译／Decode；UV／色彩／过滤／mip／alpha／normal及材质画面待验，完整实际读闭包／Native ABI／全OS写入封闭仍false。无后继资源运行窗。
+缓存贴图：私有CLI四目标metadata及标准JSON消费补丁均已核收，Program.cs／根pin冻结。新代码Build_R2真实0E／0W，新Worker.dll75776B／E60CCCEA…8EF90，完整保护通过；[编译证据及边界](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r12离线核收与贴图工具编译闭合)已归档。四texturedata仍未解码，首次SHA只能来自实际锁定读；原Decode入口的主动Kill异常路径须先技术收口。UV／色彩／过滤／mip／alpha／normal及材质画面待验，完整读闭包／Native ABI／全OS写入封闭仍false；无资源Native窗。
 
 伤害配置与运行事实只见[CR-R5](Module_Audit_Repair_Ledger.md)：实际10／20／30及Buff20／40／60已有证据，新源码受影响生产验证尚未完成。
 
@@ -51,7 +51,7 @@ Decal九件离线稿位于`Saved/Codex/PyriosSpecialDecalConsumerDraft_20261017/
 
 | 原工作线 | 当前边界与下一动作 | 必要入口 |
 | --- | --- | --- |
-| 生产资产／输入／动作 | 八包已保存并通过独立Cold，移动／姿态／独立打断的单人专项已有结果。新42件构建及专项后，验证实际生产输入、首相机投影、自然结束和清理；E／R／F与诊断试听后延。输入提交／处理不能代替能力触发或真实设备证明。 | [原生产输入入口](../../Saved/Codex/PlayerInputOperations_20261014_P1/README.md)、[原专项与保存证据](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-当前入口重复状态收口) |
+| 生产资产／输入／动作 | 移动／姿态／独立打断的单人专项已有结果，42件构建／专项及当前GA后像独立Cold已过；继续真实生产输入、首相机投影、自然结束及清理。E／R／F与诊断试听后延，输入提交／处理不能代替能力触发或真实设备证明。 | [原生产输入入口](../../Saved/Codex/PlayerInputOperations_20261014_P1/README.md)、[当前Cold](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-独立cold-r3完整通过) |
 | FX／资源还原 | 九失败／Recovery仍未Cold／视觉／动作验收。静态锚点、Main_Distor TRS及Material参数已读，两consumer补丁尚未应用；外部Shader／Texture、cue／挂点／控制／生命周期仍未闭合，Clip内部旋转不证明外部cue。保持冻结，后继按实际依赖补齐并验画面。 | [FX交接](../Modules/Character/Rendering/ZZZ_FX_Handoff.md)、[两consumer补丁](../../Saved/Codex/PyriosMaterialConsumerSourcePatch_20261014/material-input.patch)、[原读取与失败](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-当前入口重复状态收口) |
 
 ## 推进决定与理由
