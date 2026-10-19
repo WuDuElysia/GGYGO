@@ -1,4 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+/** @file AnimationCurveSnapshotTests.cpp @brief 原生浮点曲线反射快照、失败清空与源状态保护专项。 */
 
 #if WITH_DEV_AUTOMATION_TESTS
 #include "GGYGOAnimationCurveSnapshotLibrary.h"
@@ -10,6 +11,8 @@
 #include "UObject/UnrealType.h"
 #include <type_traits>
 
+namespace GGYGOAnimationCurveSnapshotTestHelpers
+{
 namespace
 {
 	struct FExpectedSnapshotField
@@ -144,10 +147,13 @@ namespace
 	}
 }
 
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAnimationCurveSnapshotTest, "GGYGO.Editor.Animation.FloatCurveSnapshot",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FAnimationCurveSnapshotTest::RunTest(const FString& Parameters)
 {
+	using namespace GGYGOAnimationCurveSnapshotTestHelpers;
 	// Family 1: inspect actual generated reflection, not the header text or a substitute struct.
 	if (!CheckFields(*this, FGGYGOFloatCurveKeySnapshot::StaticStruct(), {
 		{TEXT("Time"), FFloatProperty::StaticClass()}, {TEXT("Value"), FFloatProperty::StaticClass()},

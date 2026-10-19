@@ -7,7 +7,9 @@ MCP 的 StaticMeshTools.import_file 只接受 fbx/obj，而 AnimeStudio 的 OBJ 
     Unity 左手 Y 上 → FBX 右手 Y 上：位置/法线 X 取反，三角形顶点顺序反向；
     UV 原样写入（FBX 与 Unity 都是左下原点，UE 导入时自己翻 V，材质再翻回）；
     顶点写成厘米（×100），UnitScaleFactor=1：UE 的 FBX 导入不做单位换算，按文件数值当厘米。
-顶点属性按"每顶点"映射（ByControlPoint / Direct），与 Unity 网格一一对应，不做焊接。
+位置保留全部源 control point；属性按显式选择的三角形角点映射，不做焊接。
+默认反向绕序用于普通 FBX 转换；明确的 UE 消费者可选择保留源绕序。
+位置索引、法线、颜色和 UVIndex 必须一同使用所选角点顺序。
 
 用法：python zzz_mesh_fbx.py <mesh.json> <out.fbx>
 """
@@ -26,10 +28,16 @@ def comps_of(arr, n):
 
 
 def fmt(vals):
-    return ",".join("%.7g" % v for v in vals)
+    # JSON 数值与厘米换算在 Python 中是 double；避免文本再舍入损坏 UV/几何。
+    return ",".join("%.17g" % v for v in vals)
 
 
-def build(mesh):
+def build(mesh, *, reverse_winding=True):
+    """@param reverse_winding 调用者的目标格式契约，不根据文件名或法线猜测。
+    @return 规范 FBX 文本；不读取、写出或导入资产。
+    """
+    if type(reverse_winding) is not bool:
+        raise ValueError("FBX 绕序选择必须是明确布尔值")
     n = mesh["m_VertexCount"]
     name = mesh["m_Name"]
     v = mesh["m_Vertices"]
@@ -46,12 +54,15 @@ def build(mesh):
             raise ValueError("%s 子网格 %d 拓扑 %s 不支持" % (name, si, sm.get("topology")))
         cnt = sm["indexCount"]
         for f in range(start, start + cnt, 3):
-            a, b, cc = idx[f + 2], idx[f + 1], idx[f]
+            a, b, cc = idx[f:f + 3]
+            if reverse_winding:
+                a, cc = cc, a
             polys += [a, b, -cc - 1]
             mats.append(si)
         start += cnt
     if start != len(idx):
         raise ValueError("子网格索引数之和 %d 与索引总数 %d 不符" % (start, len(idx)))
+    corners = [i if i >= 0 else -i - 1 for i in polys]
 
     layers = []
     body = []
@@ -59,19 +70,21 @@ def build(mesh):
     if nr:
         cn = comps_of(nr, n)
         out = []
-        for i in range(n):
+        for i in corners:
             out += [-nr[i * cn], nr[i * cn + 1], nr[i * cn + 2]]
         body.append('\t\tLayerElementNormal: 0 {\n\t\t\tVersion: 101\n\t\t\tName: ""\n'
-                    '\t\t\tMappingInformationType: "ByControlPoint"\n\t\t\tReferenceInformationType: "Direct"\n'
+                    '\t\t\tMappingInformationType: "ByPolygonVertex"\n\t\t\tReferenceInformationType: "Direct"\n'
                     '\t\t\tNormals: *%d {\n\t\t\t\ta: %s\n\t\t\t}\n\t\t}\n' % (len(out), fmt(out)))
         layers.append(("LayerElementNormal", 0))
     col = mesh.get("m_Colors")
     if col:
         if comps_of(col, n) != 4:
             raise ValueError("%s 顶点色不是 RGBA" % name)
+        out = [value for i in corners for value in col[i * 4:i * 4 + 4]]
         body.append('\t\tLayerElementColor: 0 {\n\t\t\tVersion: 101\n\t\t\tName: "Col"\n'
-                    '\t\t\tMappingInformationType: "ByControlPoint"\n\t\t\tReferenceInformationType: "Direct"\n'
-                    '\t\t\tColors: *%d {\n\t\t\t\ta: %s\n\t\t\t}\n\t\t}\n' % (len(col), fmt(col)))
+                    '\t\t\tMappingInformationType: "ByPolygonVertex"\n\t\t\tReferenceInformationType: "Direct"\n'
+                    '\t\t\tColors: *%d {\n\t\t\t\ta: %s\n\t\t\t}\n'
+                    '\t\t}\n' % (len(out), fmt(out)))
         layers.append(("LayerElementColor", 0))
     uv_layers = 0
     for k in range(8):
@@ -85,8 +98,10 @@ def build(mesh):
         for i in range(n):
             out += [uv[i * cu], uv[i * cu + 1]]
         body.append('\t\tLayerElementUV: %d {\n\t\t\tVersion: 101\n\t\t\tName: "UVChannel_%d"\n'
-                    '\t\t\tMappingInformationType: "ByControlPoint"\n\t\t\tReferenceInformationType: "Direct"\n'
-                    '\t\t\tUV: *%d {\n\t\t\t\ta: %s\n\t\t\t}\n\t\t}\n' % (k, k + 1, len(out), fmt(out)))
+                    '\t\t\tMappingInformationType: "ByPolygonVertex"\n\t\t\tReferenceInformationType: "IndexToDirect"\n'
+                    '\t\t\tUV: *%d {\n\t\t\t\ta: %s\n\t\t\t}\n'
+                    '\t\t\tUVIndex: *%d {\n\t\t\t\ta: %s\n\t\t\t}\n\t\t}\n'
+                    % (k, k + 1, len(out), fmt(out), len(corners), ",".join(map(str, corners))))
         uv_layers += 1
     body.append('\t\tLayerElementMaterial: 0 {\n\t\t\tVersion: 101\n\t\t\tName: ""\n'
                 '\t\t\tMappingInformationType: "ByPolygon"\n\t\t\tReferenceInformationType: "IndexToDirect"\n'

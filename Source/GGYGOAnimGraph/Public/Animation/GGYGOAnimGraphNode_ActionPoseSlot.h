@@ -8,7 +8,7 @@
 #include "GGYGOAnimGraphNode_ActionPoseSlot.generated.h"
 
 UCLASS()
-class GGYGOEDITOR_API UGGYGOAnimGraphNode_ActionPoseSlot : public UAnimGraphNode_Base
+class GGYGOANIMGRAPH_API UGGYGOAnimGraphNode_ActionPoseSlot : public UAnimGraphNode_Base
 {
 	GENERATED_BODY()
 

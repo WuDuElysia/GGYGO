@@ -1,4 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+/** @file AnimationCurveReadbackTests.cpp @brief 原生浮点曲线完整读回、失败清空与源状态保护专项。 */
 
 #if WITH_DEV_AUTOMATION_TESTS
 #include "GGYGOAnimationCurveReadLibrary.h"
@@ -7,6 +8,8 @@
 #include "Misc/AutomationTest.h"
 #include "UObject/UObjectGlobals.h"
 
+namespace GGYGOAnimationCurveReadbackTestHelpers
+{
 namespace
 {
 	bool CheckCurve(FAutomationTestBase& Test, const FString& Label, const FFloatCurve& Actual, const FFloatCurve& Expected)
@@ -80,10 +83,13 @@ namespace
 	}
 }
 
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAnimationCurveReadbackTest, "GGYGO.Editor.Animation.FloatCurveReadback",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FAnimationCurveReadbackTest::RunTest(const FString& Parameters)
 {
+	using namespace GGYGOAnimationCurveReadbackTestHelpers;
 	UPackage* Package = AnimationAssetSafetyTests::Package();
 	Package->SetFlags(RF_Transient);
 	UAnimSequence* Source = AnimationAssetSafetyTests::Sequence(Package);

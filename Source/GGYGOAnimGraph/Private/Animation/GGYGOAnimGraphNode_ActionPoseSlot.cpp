@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GGYGOAnimGraphNode_ActionPoseSlot.h"
+#include "Animation/GGYGOAnimGraphNode_ActionPoseSlot.h"
 
 #include "Animation/AnimBlueprint.h"
 #include "Animation/Skeleton.h"

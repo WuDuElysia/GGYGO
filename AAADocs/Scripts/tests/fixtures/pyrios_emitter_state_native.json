@@ -1,0 +1,75 @@
+{
+ "pid": 58328,
+ "mode": "Recovery",
+ "system": "/Game/Characters/Player/Pyrios/FX/Skill/NS_Eff_Pyrois_Attack_Normal_03_02_Hit_Ghost_UE_474e2bf63daf",
+ "emitter": "GhostMesh",
+ "moduleName": "EmitterState",
+ "moduleScript": {
+  "refPath": "/Niagara/Modules/Emitter/EmitterState.EmitterState"
+ },
+ "topology_inputs": [
+  {
+   "bIsVisible": true,
+   "bIsEditable": true,
+   "bIsDynamic": false,
+   "bIsStaticSwitch": true,
+   "name": "Life Cycle Mode",
+   "type": {
+    "classStructOrEnum": {
+     "refPath": "/Niagara/Enums/ENiagaraEmitterLifeCycleMode.ENiagaraEmitterLifeCycleMode"
+    }
+   }
+  },
+  {
+   "bIsVisible": true,
+   "bIsEditable": true,
+   "bIsDynamic": false,
+   "bIsStaticSwitch": true,
+   "name": "Loop Behavior",
+   "type": {
+    "classStructOrEnum": {
+     "refPath": "/Niagara/Enums/ENiagara_EmitterStateOptions.ENiagara_EmitterStateOptions"
+    }
+   }
+  }
+ ],
+ "actual_inputs": [
+  {
+   "name": "Life Cycle Mode",
+   "value": {
+    "struct": {
+     "refPath": "/Script/NiagaraEditor.NiagaraExt_StackInputData_Enum"
+    },
+    "value": {
+     "enum": {
+      "refPath": "/Niagara/Enums/ENiagaraEmitterLifeCycleMode.ENiagaraEmitterLifeCycleMode"
+     },
+     "enumName": "ENiagaraEmitterLifeCycleMode::NewEnumerator1",
+     "displayName": "Self"
+    }
+   }
+  },
+  {
+   "name": "Loop Behavior",
+   "value": {
+    "struct": {
+     "refPath": "/Script/NiagaraEditor.NiagaraExt_StackInputData_Enum"
+    },
+    "value": {
+     "enum": {
+      "refPath": "/Niagara/Enums/ENiagara_EmitterStateOptions.ENiagara_EmitterStateOptions"
+     },
+     "enumName": "ENiagara_EmitterStateOptions::NewEnumerator0",
+     "displayName": "Infinite"
+    }
+   }
+  }
+ ],
+ "read_only": true,
+ "native_pending": false,
+ "dirty_after": [],
+ "saved": [],
+ "inputs_unchanged": true,
+ "disk_unchanged": true,
+ "resource_recovery_passed": false
+}

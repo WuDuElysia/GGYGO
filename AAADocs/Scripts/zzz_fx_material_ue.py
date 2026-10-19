@@ -37,6 +37,10 @@ BUILTIN_NODES = {
     "PCol": ("MaterialExpressionParticleColor", {}, "RGBA"),
     "VCol_rgb": ("MaterialExpressionVertexColor", {}, ""),
     "VCol_a": ("MaterialExpressionVertexColor", {}, "A"),
+    "AtlasFrame": ("MaterialExpressionParticleRandom", {}, ""),
+    "PRot": ("MaterialExpressionParticleSpriteRotation", {}, ""),
+    "PSize": ("MaterialExpressionParticleSize", {}, ""),
+    "RawWorldPos": ("MaterialExpressionWorldPosition", {"WorldPositionShaderOffset": "WPT_ExcludeAllShaderOffsets"}, ""),
 }
 for _k in range(4):
     BUILTIN_NODES["UV%d" % _k] = ("MaterialExpressionTextureCoordinate", {"CoordinateIndex": _k}, "")
@@ -83,6 +87,19 @@ class Builder:
         self.m.tool(MT + "connect_expressions", from_expression=src, from_output_name=out_name,
                     to_expression=dst, to_input_name=in_name)
 
+    def configure_custom(self, expression, inputs, code, output_type, description):
+        cur = json.loads(self.m.tool(OB + "get_properties", instance=expression, properties=["Inputs"])["returnValue"])["Inputs"]
+        grown = cur + [dict(cur[0]) for _ in range(len(inputs) - len(cur))]
+        # Native ArrayAdd requires existing elements unchanged during expansion.
+        self.m.tool(OB + "set_properties", instance=expression, values=json.dumps({"Inputs": grown}))
+        cur = json.loads(self.m.tool(OB + "get_properties", instance=expression, properties=["Inputs"])["returnValue"])["Inputs"]
+        for i, name in enumerate(inputs):
+            cur[i]["inputName"] = name
+        self.set(expression, {"Inputs": cur, "Code": code, "OutputType": output_type, "Description": description})
+        pins = self.m.tool(MT + "get_expression_input_names", expression=expression)["returnValue"]
+        if pins != inputs:
+            raise RuntimeError("%s Custom input readback mismatch: expected %s, got %s" % (expression["refPath"], inputs, pins))
+
     def sampler_type(self, tex_path):
         props = json.loads(self.m.tool(OB + "get_properties", instance=ref(tex_path),
                                        properties=["SRGB", "CompressionSettings"])["returnValue"])
@@ -95,9 +112,20 @@ class Builder:
             raise RuntimeError("%s 压缩设置 %s 未处理" % (tex_path, comp))
         return "SAMPLERTYPE_Color" if props["SRGB"] else "SAMPLERTYPE_LinearColor"
 
-    def build_master(self, plan):
+    @staticmethod
+    def validate_plan(plan):
         if plan.get("output_contract", "color") != "color":
             raise RuntimeError("Distortion fields require their dedicated buffer/composite renderer")
+        if type(plan.get("disable_depth_test")) is not bool:
+            raise ValueError("Material plan requires its resolved source depth-test state")
+        if "ue_environment" in plan:
+            import zzz_fx_ue_equivalent as UE
+            UE.material_properties(plan["ue_environment"])
+            if plan["blend"] != plan["ue_environment"]["blend"]:
+                raise ValueError("UE smoke material blend differs from its environment")
+
+    def build_master(self, plan):
+        self.validate_plan(plan)
         path = "%s/%s" % (MASTER_DIR, plan["master"])
         if path in self.masters:
             return path
@@ -106,8 +134,16 @@ class Builder:
         self.session.created_asset(path)
         # 只开实际用到的用途：每多一种顶点工厂就多编一整套排列，大 Custom 节点会把编译内存撑爆。
         # 自动补用途也关掉，误挂到别的组件上时直接显示默认材质，而不是在编辑器里临时加编。
-        self.set(mat, {"BlendMode": plan["blend"], "ShadingModel": "MSM_Unlit", "TwoSided": plan["two_sided"],
-                       "bUsedWithNiagaraMeshParticles": True, "bAutomaticallySetUsageInEditor": False})
+        properties = {"BlendMode": plan["blend"], "ShadingModel": "MSM_Unlit", "TwoSided": plan["two_sided"],
+                       "bDisableDepthTest": plan["disable_depth_test"],
+                       "bUsedWithNiagaraMeshParticles": plan["renderer_kind"] == "particle" and plan["mesh"],
+                       "bUsedWithNiagaraSprites": plan["renderer_kind"] == "particle" and not plan["mesh"],
+                       "bAutomaticallySetUsageInEditor": False}
+        environment = plan.get("ue_environment")
+        if environment is not None:
+            import zzz_fx_ue_equivalent as UE
+            properties.update(UE.material_properties(environment))
+        self.set(mat, properties)
 
         inputs = []
         prelude = []
@@ -117,23 +153,14 @@ class Builder:
                 prelude.append("float4 VCol = float4(VCol_rgb, VCol_a);")
             else:
                 inputs.append(b)
-        inputs += list(plan["params"]) + list(plan["textures"])
+        inputs += list(plan.get("pixel_params", plan["params"])) + list(plan["textures"])
 
         custom = self.add(mat, "MaterialExpressionCustom", 0, 0)
-        cur = json.loads(self.m.tool(OB + "get_properties", instance=custom, properties=["Inputs"])["returnValue"])["Inputs"]
-        grown = cur + [dict(cur[0]) for _ in range(len(inputs) - len(cur))]
-        self.m.tool(OB + "set_properties", instance=custom, values=json.dumps({"Inputs": grown}))
-        cur = json.loads(self.m.tool(OB + "get_properties", instance=custom, properties=["Inputs"])["returnValue"])["Inputs"]
-        for i, n in enumerate(inputs):
-            cur[i]["inputName"] = n
         code = "\n".join(prelude) + ("\n" if prelude else "") + plan["code"]
-        self.m.tool(OB + "set_properties", instance=custom, values=json.dumps(
-            {"Inputs": cur, "Code": code, "OutputType": "CMOT_Float4", "Description": plan["shader"]}))
-        pins = self.m.tool(MT + "get_expression_input_names", expression=custom)["returnValue"]
-        if pins != inputs:
-            raise RuntimeError("Custom 输入设置失败：%s" % pins)
+        self.configure_custom(custom, inputs, code, "CMOT_Float4", plan["shader"])
 
         y = 0
+        sources = {}
         for n in inputs:
             if n in BUILTIN_NODES:
                 klass, props, out = BUILTIN_NODES[n]
@@ -156,9 +183,47 @@ class Builder:
                     {"Texture": ref(tex)["refPath"], "SamplerType": self.sampler_type(tex)}))
                 out = ""
             self.connect(node, out, custom, n)
+            sources[n] = (node, out)
             y += 120
 
-        self.m.tool(MT + "connect_to_output", expression=custom, output_name="", material_property="MP_EmissiveColor")
+        viewport = plan.get("viewport_clamp")
+        if viewport is not None:
+            for n in viewport["inputs"]:
+                if n in sources or n == "CenterView":
+                    continue
+                if n in BUILTIN_NODES:
+                    klass, props, out = BUILTIN_NODES[n]
+                    node = self.add(mat, klass, -600, y, props)
+                else:
+                    p = viewport["params"][n]
+                    node = self.add(mat, "MaterialExpressionScalarParameter", -600, y,
+                                    {"ParameterName": n, "DefaultValue": float(p["value"])})
+                    out = ""
+                sources[n] = (node, out)
+                y += 120
+            center = self.add(mat, "MaterialExpressionTransformPosition", -300, y,
+                              {"TransformSourceType": "TRANSFORMPOSSOURCE_World", "TransformType": "TRANSFORMPOSSOURCE_View"})
+            # UE shortens the Input property to NAME_None; MCP exposes "None".
+            self.connect(*sources["PPos"], center, "None")
+            sources["CenterView"] = (center, "")
+            wpo = self.add(mat, "MaterialExpressionCustom", 0, y)
+            self.configure_custom(wpo, viewport["inputs"], viewport["code"], "CMOT_Float3",
+                                  "UE equivalence: projected billboard viewport size")
+            for name in viewport["inputs"]:
+                self.connect(*sources[name], wpo, name)
+            self.m.tool(MT + "connect_to_output", expression=wpo, output_name="", material_property="MP_WorldPositionOffset")
+
+        lit = environment is not None and environment["lighting"] == "ue_volumetric_nondirectional"
+        self.m.tool(MT + "connect_to_output", expression=custom, output_name="",
+                    material_property="MP_BaseColor" if lit else "MP_EmissiveColor")
+        if lit:
+            # AlphaComposite consumes the associated RGB directly. No alpha
+            # division, second opacity multiplication or HDR emissive bypass.
+            zero = self.add(mat, "MaterialExpressionConstant", 300, 400, {"R": 0.0})
+            one = self.add(mat, "MaterialExpressionConstant", 300, 500, {"R": 1.0})
+            for prop in ("MP_EmissiveColor", "MP_Metallic", "MP_Specular"):
+                self.m.tool(MT + "connect_to_output", expression=zero, output_name="", material_property=prop)
+            self.m.tool(MT + "connect_to_output", expression=one, output_name="", material_property="MP_Roughness")
         if plan["blend"] in ("BLEND_AlphaComposite", "BLEND_Translucent"):
             mask = self.add(mat, "MaterialExpressionComponentMask", 300, 200, {"R": False, "G": False, "B": False, "A": True})
             self.connect(custom, "", mask, "")

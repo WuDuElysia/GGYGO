@@ -2,19 +2,15 @@
 
 ## CR-20261014：业务代码冗余、模块职责与防御收口
 
-状态：真人将过往冗余整理修复交给既有Kiro代码审查会话（Opus5.5／high）。首批十一Source逻辑范围及受影响契约已收敛，原Source／资产仍无写权；当前授新Saved/Codex/CR_20261015_KiroDraft_R1内受控镜像与补丁草稿，先核完整父／动态写集交空，原输入持续冻结，主线不导入／编译草稿。只接受源码草稿及必要静态／离线证据，真正应用／Target／PIE待业务保护正常归还后另授窗口。原模块作者提供接口与必要失败依据，Kiro直接实施／自审，根负责窗口／核收，不复制实现。玩法新增项继续由根统筹原模块。两轮规范复核及最小条款已写入[CodeConventions](../Architecture/CodeConventions.md)并归档；源码整改仍未落入生产，不新建会话或第二排程，不阻塞主线。共享资源仅按[当前排程](Module_Repair_Parallel_Schedule.md)协调。
+状态：2026-10-19起停止Kiro调用，由Root按现行CodeConventions审查，原模块作者实现。当前42件源码单CPP include修复后已通过R7标准完整构建及保护，Root实核软件；按用户当前要求先作阶段Git检查点，原18项及生产／视觉／设备／联机未验边界保持。前一37条R5已Build／保护通过，18原专项严格14项通过；四未过项的源码修复已静态核收，运行复验待做。生产、视觉、设备及联机仍未验，CR未全部完成；唯一窗口与机器证据见[当前排程](Module_Repair_Parallel_Schedule.md)。
 
-当前可审查产物：[Kiro r1补丁](../../Saved/Codex/CR_20261015_KiroDraft_R1/CR_20261015_KiroDraft_R1_r1.patch)（35631B／A3D3D720…08D912）、[原输入与往返身份](../../Saved/Codex/CR_20261015_KiroDraft_R1/input_manifest_r1.json)。根实核11条身份（10既有源及1未创建测试），原/base/work/新apply_check_verified_r1均无差、补丁10文件实际变更、与N1完整父交集空；仅在全新Saved副本apply-check/apply为0、roundtrip为0。旧CRLF失败补丁及旧校验目录保留，相对递归删除命令已拒绝，安全重试无删除。新测试候选因需生产测试入口已由Kiro撤回；UHT／完整Target／叶／PIE未做，未应用真实Source，功能与语义尚不据此验收。后继应用前必须核原输入仍同并安排必要实际验证，原范围／契约不因草稿减少行数而自动通过。
+当前已应用产物：[r1补丁](../../Saved/Codex/CR_20261015_KiroDraft_R1/CR_20261015_KiroDraft_R1_r1.patch)及[应用身份](../../Saved/Codex/CR_20261015_KiroDraft_R1/input_manifest_r1.json)保持冻结，r1准确八改／两删及R5十Source已核；三测试日志登记修复后的构建／必要叶结果见首段，准确身份与原失败见[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-r6日志登记修复与三叶通过)。生产PIE／联机仍未验，待实施草稿按下方分项读取。
 
 评审依据：Kiro评审会话`01a138f5-b16c-7781-b8f2-003f2878f94a`，最终回执turn`01a13917-7fcc-7e43-9637-ac11ab2b34bf`的“来自Kiro”；仅按需读该最终回执，不搬过程全文。X1～X7及A／M／P／C／AN／F／B／T项均为待核结论，行数／词频／ASCII资产名字表0命中及启发式无调用方不证明可安全删除；未细读区域不作为已确认根因。
 
-目标：在保留真实玩法、CMC／GAS权威与必要生命周期保护的前提下，由Kiro深入检查并解决晦涩、绕行的主流程与重复机制、迁移残留、职责混杂及无依据的重复防御；按语义命名、连续步骤、lambda捕获与具名步骤、契约注释改善受影响代码。解释原先为何这样写、真实解决过什么问题、为何逐步膨胀，以及现有审核为何未及时拦住。不得按行数或lambda数量机械改写，也不得以一枚布尔量／原生SpecHandle代替尚未证明等价的不同资源寿命。
+目标：在保留真实玩法、CMC／GAS权威与必要生命周期保护的前提下，由Root会同原作者检查并解决晦涩、绕行的主流程与重复机制、迁移残留、职责混杂及无依据的重复防御；按语义命名、连续步骤、lambda捕获与具名步骤、契约注释改善受影响代码。解释原先为何这样写、真实解决过什么问题、为何逐步膨胀，以及现有审核为何未及时拦住。不得按行数或lambda数量机械改写，也不得以一枚布尔量／原生SpecHandle代替尚未证明等价的不同资源寿命。
 
-当前首批：Kiro最终范围回执turn `01a1398d-7854-7ff1-bb6b-cdeb8c034890`。拟去三处ClearAbilityInput后的重复复核须核中间写入／谓词依赖；非反射无消费者的CancelInputActivatedAbilities／ClearLocalAvatarBinding／旧AnimCurveSampler及过期注释可按准确写集移交。原九源中BT直接删除全量校验方案已撤回：BossAI实核Actions公开可写，ClearValue可同步触发observer，将BaseWeight改NaN会漏过现<=0检查；仅静态可达反例，未动态复现。保原整表无效即拒绝，等价收敛另由Kiro分析。CR状态由根维护，所有项仍未写入／未授Source窗；资产保护归还后按准确文件冻结换手，必要叶不重跑历史全量矩阵。
-
-现行规范已由原审查会话补齐可读性，并强调同栈去重须核中间写入与谓词依赖；根已读取实际条文。首批之后的深入可读性整改仍由Kiro收敛具体写集，完整主流程／生命周期合同与原严格复现保持，不新增逐步报告或第二任务记录。
-
-最新拟扩围R-A：编队存档／LocalPlayer读取主流程，新增对应首次读取、缓存命中、次级玩家拒绝、坏档拒绝叶。Kiro已读取新规范并消费BossAI合同（completed job `cdeadc81-d10b-4f18-a9bb-84ffac8a5724`）；BT直接删校验及ChooseBossAction三次校验候选已撤回，不需BossAI冻结整改文件。明确列举首批八源加R-A三源共十一Source路径，CR状态文档仍由根维护，不按报数放行未列文件。尚无Source写权，原Player／Teams参与合同及文件冻结；构建／必要叶随完整保护正常归还后安排，R-B／R-C待合同或主线写集让出。
+首批候选与准备过程已归档，见[历史原文](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-cr首批源码准备过程归档)；当前范围与未验项按下表执行，审核以[CodeConventions](../Architecture/CodeConventions.md)为准。
 
 ### 用户七项答复与当前边界
 
@@ -25,7 +21,7 @@
 | 3 | “每段伤害不一样”；追加确认“应影响：攻击力乘各段独立倍率” | 采用角色攻击力×每段独立倍率，攻击Buff须影响每段。旧绝对值／角色攻击力配置先实读再迁移，不以示例100猜实际基数，不擅自填默认倍率。 |
 | 4 | “看情况”／按键来源证明改锁存 | 原qualified Held／先释放再按下语义保持。原Input作者列重绑、焦点／设备切换、多键源的实际差异；等价技术简化自主，行为变化再问用户。 |
 | 5 | “不懂”；追加确认“保留等待，只简化重复机制” | 首次游戏视图继续等待真实相机模式成功就绪，不引入初始化默认镜头过渡。精简重复机制／纯段校验，不删真实返栈保护；切Pawn重新就绪政策单独核，不冒称现闸门已覆盖。 |
-| 6 | “要”／其它客户端看普攻FX | 明确要求远端可见；核GA／Montage／Cue实际生产链，验owner与另一客户端时机、挂点、停止／去重，不以本地Task运行证明远端。 |
+| 6 | “要”／其它客户端看普攻FX；“需要，显示仍有效的剩余特效” | 远端可见包含晚加入／重获相关性时的在途剩余特效及实际时间进度，已结束窗口不补播；验owner与另一客户端时机、挂点、停止／去重，不以本地Task运行证明远端。 |
 | 7 | “可以”／Montage时间线统一 | 同意收敛单一信号机制；原攻击点、移动MainEnd独立许可、自然结束和作者时间语义保持。通道与资产兼容由公共Task、Animation／Combat牵头核实后迁移，不直接改当前在途资产。 |
 
 ### 分项及验收
@@ -33,12 +29,12 @@
 | 分项 | 原牵头／范围 | 必要交付与当前状态 |
 | --- | --- | --- |
 | CR-20261014-R1 原因追溯及规范 | 根统筹；原 Kiro 代码审查会话、AbilitySystem、Character／Combatants、Input、Camera | 规范复核及最小修订完成：外调按可达性；新增持久机制说明基线缺口；先保等价外部契约再迁内部断言；现有自审／验收核必要性与旧入口收尾。剩余原因核查只读：原输入第17次失败、原End与Task清理时序、partial Init及不同寿命身份须逐项对应，替代推断仍待验证，不以“当时要求严格”代原因。 |
-| R2 局部重复与工具职责 | Kiro执行，原模块接口参与；复用下方CR-1014-T1／B1～B6 | 保留准确消费者／反射引用，收敛同次纯路径重复检查、共用真实相同寿命资源；Sync Marker迁Editor并处理类路径兼容。先收敛首批确证冗余写集，未授实现窗。 |
-| R3 绑定／激活／订阅 | Kiro执行，AbilitySystem／Character／Combatants／Input／Movement提供原合同；X1／X2／X6 | 比较原生ActorInfo、Spec／PredictionKey与原资源合同；服务端无预测键、连续再激活、原终止回调重入、partial Init、外部ASC／Avatar换绑等真实边界须证明。不同寿命不可机械合并。只读原因先行。 |
-| R4 退役与预留 | Kiro执行，原模块提供消费者；X4／X5、迁移接口及Tag／治疗链 | 真实C++、BP／Montage／配置／序列化引用核实后再迁移、删除；保留持续GE功能及仍被资产使用Tag，不按扫描0命中直接删。未实施。 |
-| R5 属性与伤害 | AbilitySystem／Combat动作／BossAI | 保留持续GE；用户已确认攻击力×每段独立倍率。玩家与Boss仍写绝对SetByCaller.Damage，倍率尚未生产接入；每次命中建Spec时机保留。[六Source草稿](../../Saved/Codex/DamageSegmentMultiplier_20261016_Draft_R1/inputs.json)已冻结，Root核19输入及apply-check通过，[静态结果归档](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-16-r5独立段倍率草稿冻结)；未应用／编译／运行。Pyrios PawnData所引AbilitySet的effects为空，未发现已配初始化GE漏消费的证据；DefaultStartingData／活动初始化GE、真实攻击力、各段倍率及Boss当前CDO仍待实际读回。下一步核配置并迁移玩家／Boss写键及最终Spec应用前校验，不用旧Damage20或Base／Current=0／0推导倍率。普通GE_Damage_SetByCaller与自毁GE_SelfDestruct分立，旧绝对伤害及独立削韧语义保留。实际Source／资产／UE／构建仍无写权，后继按共享窗口串行。 |
-| R6 输入与相机 | Input／Camera，Character参与；X7／C1 | 相机等待真实模式就绪已确认保留，精简重复机制。输入仍按具体等价／差异收敛，原语义保持；真实外调后的必要核验与无外调重复分开。 |
-| R7 表现与时间线 | FX／公共Task／Animation／Combat；F1／AN2 | 单一时间线消费权威、原窗口行为、owner／远端FX实际一致及生命周期清理；与当前独立打断／最小联机统一验收，不另立第二调度。未实施。 |
+| R2 局部重复与工具职责 | Root审核，原模块按职责实现；复用下方CR-1014-T1／B1～B6 | 保留准确消费者／反射引用，收敛同次纯路径重复检查、共用真实相同寿命资源；Sync Marker迁Editor并处理类路径兼容。首批r1十Source已应用并冻结，必要运行验证及后续职责整改仍待。 |
+| R3 绑定／激活／订阅 | Root审核，AbilitySystem牵头，Character／Combatants／Input／Movement按职责实现；X1／X2／X6 | R3-1／R3-2及NativeWrite已在R5构建；partial Init实际物理清理／原失败／后继隔离断言已到达，原叶3Warning仍未达门禁。本轮仅测试预期诊断修复已静态核收冻结，未复验；激活Serial及Context寿命保持。原失败见历史；R3-3尚未授Hero写窗，按当前优先级接续，不以旧R4等待阻塞本批。 |
+| R4 退役与预留 | Root审核，Input及原模块实现／核消费者；X4／X5、迁移接口及Tag／治疗链 | 四Source退役包装／改用既有QueryMovementInputRequest已过R5编译，出生叶实际执行至拆卸，仍因清理Error／Warning未过。原调用及四Query断言保留；本轮IMC归还顺序及终态诊断修复已静态核收，未复验。其余退役未实施，须核真实C++／BP／Montage／配置／序列化消费者；持续GE及有消费者Tag保留。 |
+| R5 属性与伤害 | AbilitySystem／Combat动作／BossAI | 真人基础攻击10、三段倍率1／2／3，Buff作用各段。机制Source／标准Build／必要专项通过，生产八包保存与独立Cold通过，两诊断GE已准确保存；原攻击点／MainEnd移动分门、独立削韧、旧绝对模式／持续GE保持，角色仍A。R11实际两组10／20／30、Buff20／40／60、六Spec及自然结束已证，同R2正常清理／exit0及全父归还已核，原driver失败保留；后继改动受影响生产、真实设备输入／视觉／联机仍待验；自有Encounter显式AssemblyOnly的Ready及四Vitals1000已实测，真实碰撞命中／衰减仍未验。当前provider／宿主版本、准入失败与唯一执行窗仅在[活动排程](Module_Repair_Parallel_Schedule.md)维护；[八包迁回](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-生产八包迁回保存与独立cold)、[Buff恢复](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-诊断buff保存恢复与正常退出)、[Target保存及原失败](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-targetvitals保存与宿主同步重入)、[首轮Numeric失败](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-numeric首轮读回签名失败)按需查，不以保存／Cold替代运行验收。 |
+| R6 输入与相机 | Input／Camera，Character参与；X7／C1 | LocalPlayer post-Super重复查询已精简并过R5编译；首个真实CameraMode确认闸门及原返栈／bProjected保护保持，PhotographyPublicationAdmission通过。真实生产首帧仍待；四件Editor观测源码已静态核收，R6构建因头引用C1083失败并完整归还，单CPP修复及R7入口已核收，待本轮完整构建／运行，未UE，不以Manager叶或PNG替代投影证据。输入出生夹具修复未放宽生产首闸，当前修后版本待复验；换Pawn／Restart及原失败字段不变。 |
+| R7 表现与时间线 | Root审核，FX牵头，AS／公共Task／Animation／Combat／Character按原职责参与；F1／AN2 | typed同步窗口、真实BranchingPoint及原公开Payload、反射active状态＋可靠Terminal、单远端Niagara及原角色事实桥已接源码；四FX发布叶、NamedNotifyContract及Boss重入等基础叶在R5通过。原攻击／移动／MainEnd、GAS／CMC及缺End／混出／终止／尾粒子合同保持。八件观测源码已静态核收；新42件R6构建因头引用C1083失败并完整归还，尚未复验，准确差集及最后18项结果只见活动排程。生产首投影、真实ControllerAge、晚加入／重获相关性的剩余FX及正确进度仍须实证；五Montage／两GA的Queued／NoMerge、FX.Mode／Trace／图委托／两Remote参数待实际读回，原清单turn 01a14fbf-01c2-7502-b81f-350172f8627c。生产／视觉／联机未验，旧协议取舍按需查原回执，不恢复Kiro调用。 |
 
 交付标准：每个采纳项有当前准确代码／资产依据、原失效与最小复现、保留／删除保护的理由；按独立变化原因和寿命收敛，实际构建／受影响运行／必要联机分别验证。因需求歧义等待只阻相关项。完整已验需求按当次交付归档；未实现／未知／失败保留，不把候选记录或源码瘦身当完成。
 
@@ -62,15 +58,4 @@
 
 ## 历史修复编号与未验边界
 
-2026-10-08复杂度整改已完成约定有限门禁，旧交接、租约和逐批门禁已迁[历史正文](Module_Audit_Repair_Ledger_History_20261016.md)。当前写权只查[排程](Module_Repair_Parallel_Schedule.md)，不从历史恢复。
-
-历史未勾选项、失败、正式资产／网络／Cook未验边界原样保留；需消费时按下列原编号定位并核当前源码／资产，不据旧勾选状态推断现状：
-
-- V组：[V1](Module_Audit_Repair_Ledger_History_20261016.md#issue-v1)、[V2](Module_Audit_Repair_Ledger_History_20261016.md#issue-v2)
-- A组：[A1](Module_Audit_Repair_Ledger_History_20261016.md#issue-a1)、[A2](Module_Audit_Repair_Ledger_History_20261016.md#issue-a2)、[A3](Module_Audit_Repair_Ledger_History_20261016.md#issue-a3)、[A4](Module_Audit_Repair_Ledger_History_20261016.md#issue-a4)、[A5](Module_Audit_Repair_Ledger_History_20261016.md#issue-a5)、[A6](Module_Audit_Repair_Ledger_History_20261016.md#issue-a6)、[A7](Module_Audit_Repair_Ledger_History_20261016.md#issue-a7)、[A8](Module_Audit_Repair_Ledger_History_20261016.md#issue-a8)、[A9](Module_Audit_Repair_Ledger_History_20261016.md#issue-a9)
-- B组：[B1](Module_Audit_Repair_Ledger_History_20261016.md#issue-b1)、[B2](Module_Audit_Repair_Ledger_History_20261016.md#issue-b2)、[B3](Module_Audit_Repair_Ledger_History_20261016.md#issue-b3)、[B4](Module_Audit_Repair_Ledger_History_20261016.md#issue-b4)、[B5](Module_Audit_Repair_Ledger_History_20261016.md#issue-b5)、[B6](Module_Audit_Repair_Ledger_History_20261016.md#issue-b6)、[B7](Module_Audit_Repair_Ledger_History_20261016.md#issue-b7)、[B8](Module_Audit_Repair_Ledger_History_20261016.md#issue-b8)、[B9](Module_Audit_Repair_Ledger_History_20261016.md#issue-b9)
-- C组：[C1](Module_Audit_Repair_Ledger_History_20261016.md#issue-c1)、[C2](Module_Audit_Repair_Ledger_History_20261016.md#issue-c2)、[C3](Module_Audit_Repair_Ledger_History_20261016.md#issue-c3)、[C4](Module_Audit_Repair_Ledger_History_20261016.md#issue-c4)、[C5](Module_Audit_Repair_Ledger_History_20261016.md#issue-c5)、[C6](Module_Audit_Repair_Ledger_History_20261016.md#issue-c6)、[C7](Module_Audit_Repair_Ledger_History_20261016.md#issue-c7)、[C8](Module_Audit_Repair_Ledger_History_20261016.md#issue-c8)、[C9](Module_Audit_Repair_Ledger_History_20261016.md#issue-c9)、[C10](Module_Audit_Repair_Ledger_History_20261016.md#issue-c10)、[C11](Module_Audit_Repair_Ledger_History_20261016.md#issue-c11)、[C12](Module_Audit_Repair_Ledger_History_20261016.md#issue-c12)、[C13](Module_Audit_Repair_Ledger_History_20261016.md#issue-c13)、[C14](Module_Audit_Repair_Ledger_History_20261016.md#issue-c14)、[C15](Module_Audit_Repair_Ledger_History_20261016.md#issue-c15)
-- D组：[D1](Module_Audit_Repair_Ledger_History_20261016.md#issue-d1)、[D2](Module_Audit_Repair_Ledger_History_20261016.md#issue-d2)、[D3](Module_Audit_Repair_Ledger_History_20261016.md#issue-d3)、[D4](Module_Audit_Repair_Ledger_History_20261016.md#issue-d4)、[D5](Module_Audit_Repair_Ledger_History_20261016.md#issue-d5)、[D6](Module_Audit_Repair_Ledger_History_20261016.md#issue-d6)、[D7](Module_Audit_Repair_Ledger_History_20261016.md#issue-d7)、[D8](Module_Audit_Repair_Ledger_History_20261016.md#issue-d8)、[D9](Module_Audit_Repair_Ledger_History_20261016.md#issue-d9)
-- E组：[E1](Module_Audit_Repair_Ledger_History_20261016.md#issue-e1)、[E2](Module_Audit_Repair_Ledger_History_20261016.md#issue-e2)、[E3](Module_Audit_Repair_Ledger_History_20261016.md#issue-e3)、[E4](Module_Audit_Repair_Ledger_History_20261016.md#issue-e4)、[E5](Module_Audit_Repair_Ledger_History_20261016.md#issue-e5)、[E6](Module_Audit_Repair_Ledger_History_20261016.md#issue-e6)、[E7](Module_Audit_Repair_Ledger_History_20261016.md#issue-e7)、[E8](Module_Audit_Repair_Ledger_History_20261016.md#issue-e8)、[E9](Module_Audit_Repair_Ledger_History_20261016.md#issue-e9)、[E10](Module_Audit_Repair_Ledger_History_20261016.md#issue-e10)、[E11](Module_Audit_Repair_Ledger_History_20261016.md#issue-e11)、[E12](Module_Audit_Repair_Ledger_History_20261016.md#issue-e12)、[E13](Module_Audit_Repair_Ledger_History_20261016.md#issue-e13)、[E14](Module_Audit_Repair_Ledger_History_20261016.md#issue-e14)、[E15](Module_Audit_Repair_Ledger_History_20261016.md#issue-e15)
-
-其它未编号边界（Boss必需BT、HitImpact正式接线等）保留在[原明确问题](Module_Audit_Repair_Ledger_History_20261016.md#全部明确问题共享问题合并编号为稳定追踪键)。稳定协作与交付规则仅维护在[AGENTS.md](../../AGENTS.md)及[CodeConventions](../Architecture/CodeConventions.md)，不在清单重抄。
+2026-10-08整改的完整编号索引、旧交接及未勾选／失败／正式资产／网络／Cook边界已迁[历史索引](Module_Audit_Repair_Ledger_History_20261016.md#2026-10-19-活动历史索引迁出)。历史未验不因归档完成或取消，消费时核当前源码／资产；当前写权只查活动排程，不恢复旧租约。稳定规则只见AGENTS.md及CodeConventions。

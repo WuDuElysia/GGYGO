@@ -2,6 +2,7 @@
 import copy
 import hashlib
 import json
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -89,7 +90,146 @@ def halfres_fixture(directory):
     return entry, material, material_file, config, audit, native_state
 
 
+def mixed_keyword_fixture(directory):
+    """复现同材质在两个 Pass 中具有不同 LOCAL／GLOBAL 声明的审计输入。"""
+    entry, material, material_file, config, audit, native_state = halfres_fixture(directory)
+    keywords = ["_EXTRA_DITHER_EFFECT", "_FX_CLIP", "_FX_UNCLIP_SCREEN_IMAGE_OVERRIDE_2_TONE", "_OVERRIDE_OUTLINE"]
+    material["m_ShaderKeywords"] = " ".join(keywords)
+    material_file.write_text(json.dumps(material), encoding="utf-8")
+    audit["serializedMaterialKeywords"] = keywords
+    originals = audit["matches"]
+    audit["matches"], audit["passes"] = [], []
+    for pi, label, global_, local in ((1, "Outline", [], [keywords[0], keywords[1], keywords[3]]),
+                                      (2, "Toon", [keywords[2]], keywords[:2])):
+        source_state = copy.deepcopy(native_state)
+        source_state["m_Name"] = label
+        source_state["m_Tags"] = {"tags": [{"Key": "LIGHTMODE", "Value": label}]}
+        audit["passes"].append({"passIndex": pi, "passName": label, "lightMode": label,
+                                "nativeRenderState": source_state, "resolvedRenderState": {"zTest": {"value": 4}}})
+        for original in originals:
+            text = Path(original["file"]).read_text(encoding="utf-8")
+            lines = text.splitlines()
+            lines[1:2] = (["Keywords { " + " ".join('"' + k + '"' for k in global_) + " }"] if global_ else []) + [
+                "Local Keywords { " + " ".join('"' + k + '"' for k in local) + " }"]
+            raw = ("\n".join(lines) + "\n").encode("utf-8")
+            path = directory / (str(pi) + "_" + original["stage"] + ".txt")
+            path.write_bytes(raw)
+            audit["matches"].append({**original, "passIndex": pi, "globalKeywords": global_, "localKeywords": local,
+                                      "file": str(path), "sha256": hashlib.sha256(raw).hexdigest()})
+    native_path = Path(entry["nativeJson"])
+    native = json.loads(native_path.read_text(encoding="utf-8"))
+    native["m_ParsedForm"]["m_SubShaders"][0]["m_Passes"] = [
+        {"m_State": native_state}] + [{"m_State": p["nativeRenderState"]} for p in audit["passes"]]
+    native_path.write_text(json.dumps(native), encoding="utf-8")
+    Path(config["audit"]).write_text(json.dumps(audit), encoding="utf-8")
+    fx = directory / "Mixed.fx.json"
+    fx.write_text(json.dumps({"name": "Mixed", "root": {"name": "Root", "active": True, "children": [],
+        "particle": {"renderer": {"m_Enabled": True, "m_Materials": [{"m_PathID": 1}]}}}}), encoding="utf-8")
+    fx.with_name("Mixed.deps.json").write_text(json.dumps({
+        "1": {"type": "Material", "files": [str(material_file)]}, "2": entry}), encoding="utf-8")
+    return fx, entry, material, config, audit
+
+
 class NativeSourceTests(unittest.TestCase):
+    def test_mixed_keywords_are_reported_per_candidate_without_changing_strict_selection(self):
+        with WorkspaceTemporaryDirectory() as directory:
+            _, _, material, _, audit = mixed_keyword_fixture(Path(directory))
+            keywords = audit["serializedMaterialKeywords"]
+            protected = copy.deepcopy(audit)
+            outline = N.inspect_program_candidates(audit, 1, keywords)
+            toon = N.inspect_program_candidates(audit, 2, keywords)
+            self.assertEqual(outline["candidates"][0]["material_keyword_roles"]["local"], sorted([keywords[0], keywords[1], keywords[3]]))
+            self.assertEqual(outline["candidates"][0]["material_keyword_roles"]["not_declared_by_candidate"], [keywords[2]])
+            self.assertEqual(toon["candidates"][0]["material_keyword_roles"]["global"], [keywords[2]])
+            self.assertEqual(toon["candidates"][0]["material_keyword_roles"]["not_declared_by_candidate"], [keywords[3]])
+            self.assertEqual(toon["keyword_declaration_scope"], "audited_candidates_only")
+            self.assertEqual(toon["runtime_selection"], "unverified")
+            self.assertEqual(audit, protected)
+            self.assertEqual(material["m_ShaderKeywords"].split(), keywords)
+            with self.assertRaisesRegex(N.NativeShaderError, "found 0"):
+                N.program_from_audit(audit, "fp", 2, [keywords[2]], keywords)
+
+    def test_inspection_retains_ambiguous_programs_and_unobserved_material_keywords(self):
+        with WorkspaceTemporaryDirectory() as directory:
+            _, _, _, _, audit = mixed_keyword_fixture(Path(directory))
+            audit["matches"].append(copy.deepcopy(audit["matches"][0]))
+            audit["serializedMaterialKeywords"].append("_UNOBSERVED_INPUT")
+            result = N.inspect_program_candidates(audit, 1, audit["serializedMaterialKeywords"])
+            self.assertEqual(len(result["candidates"]), 3)
+            self.assertEqual(result["ambiguities"][0]["candidate_indices"], [0, 2])
+            self.assertIn("_UNOBSERVED_INPUT", result["candidates"][0]["material_keyword_roles"]["not_declared_by_candidate"])
+            with self.assertRaisesRegex(N.NativeShaderError, "found 2"):
+                N.program_from_audit(audit, "vp", 1, [], audit["matches"][0]["localKeywords"])
+
+    def test_inspection_rejects_forged_declarations_and_changed_bytes(self):
+        with WorkspaceTemporaryDirectory() as directory:
+            _, _, _, _, audit = mixed_keyword_fixture(Path(directory))
+            forged = copy.deepcopy(audit)
+            forged["matches"][0]["localKeywords"].pop()
+            with self.assertRaisesRegex(N.NativeShaderError, "keyword metadata mismatch"):
+                N.inspect_program_candidates(forged, 1, forged["serializedMaterialKeywords"])
+            path = Path(audit["matches"][0]["file"])
+            path.write_bytes(path.read_bytes() + b"// changed\n")
+            with self.assertRaisesRegex(N.NativeShaderError, "byte digest"):
+                N.inspect_program_candidates(audit, 1, audit["serializedMaterialKeywords"])
+            disabled = N.inspect_program_candidates(audit, 1, audit["serializedMaterialKeywords"], verify_bytes=False)
+            self.assertFalse(disabled["candidates"][0]["program_bytes_verified"])
+            self.assertEqual(disabled["candidates"][0]["keyword_evidence"], "audit_metadata_only")
+
+    def test_inspection_rejects_duplicate_and_conflicting_keyword_metadata(self):
+        with WorkspaceTemporaryDirectory() as directory:
+            _, _, _, _, audit = mixed_keyword_fixture(Path(directory))
+            for change in ("duplicate", "both_roles"):
+                forged = copy.deepcopy(audit)
+                row = forged["matches"][0]
+                if change == "duplicate":
+                    row["localKeywords"].append(row["localKeywords"][0])
+                else:
+                    row["globalKeywords"].append(row["localKeywords"][0])
+                with self.assertRaises(N.NativeShaderError):
+                    N.inspect_program_candidates(forged, 1, forged["serializedMaterialKeywords"])
+
+    def test_profile_four_is_inspection_only(self):
+        with WorkspaceTemporaryDirectory() as directory:
+            _, _, _, _, audit = mixed_keyword_fixture(Path(directory))
+            row = audit["matches"][0]
+            path = Path(row["file"])
+            raw = path.read_bytes().replace(b"vs_5_0", b"vs_4_0")
+            path.write_bytes(raw)
+            row["sha256"] = hashlib.sha256(raw).hexdigest()
+            result = N.inspect_program_candidates(audit, 1, audit["serializedMaterialKeywords"])
+            self.assertEqual(result["candidates"][0]["profile"], "vs_4_0")
+            with self.assertRaisesRegex(N.NativeShaderError, "profile/reflection"):
+                N.program_from_audit(audit, "vp", 1, [], row["localKeywords"])
+
+    def test_real_cli_reports_mixed_keywords_and_ambiguity_without_an_apply_plan(self):
+        with WorkspaceTemporaryDirectory() as directory:
+            directory = Path(directory)
+            fx, _, _, config, audit = mixed_keyword_fixture(directory)
+            audit["matches"].append(copy.deepcopy(audit["matches"][0]))
+            Path(config["audit"]).write_text(json.dumps(audit), encoding="utf-8")
+            mapping = directory / "material_audits.json"
+            mapping.write_text(json.dumps({"1": config["audit"]}), encoding="utf-8")
+            hashes = {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in directory.iterdir()}
+            result = subprocess.run([sys.executable, "-B", str(Path(B.__file__).resolve()), str(fx),
+                                     "--inspect-source-programs", "--material-audits", str(mapping)],
+                                    capture_output=True, text=True, encoding="utf-8", timeout=20)
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            inventory = json.loads(result.stdout)
+            self.assertEqual(inventory["render_preflight"], "inspection_only")
+            self.assertEqual(inventory["renderer_scope"], "existing_particle_renderers_only")
+            self.assertEqual(inventory["runtime_selection"], "unverified")
+            material = inventory["materials"]["1"]
+            self.assertEqual(material["serialized_material_keywords"], sorted(audit["serializedMaterialKeywords"]))
+            self.assertNotIn("local_keywords", material)
+            self.assertEqual(material["passes"][0]["ambiguities"][0]["candidate_indices"], [0, 2])
+            self.assertEqual(material["passes"][1]["candidates"][0]["material_keyword_roles"]["global"],
+                             ["_FX_UNCLIP_SCREEN_IMAGE_OVERRIDE_2_TONE"])
+            self.assertNotIn("plans", inventory)
+            self.assertEqual(hashes, {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in directory.iterdir()})
+            with self.assertRaisesRegex(ValueError, "incomplete render plan"):
+                B.apply_batch([inventory], None, [])
+
     def test_exact_native_candidate_plan_keeps_runtime_selection_unverified(self):
         with WorkspaceTemporaryDirectory() as directory:
             directory = Path(directory)
@@ -144,6 +284,23 @@ class NativeSourceTests(unittest.TestCase):
         lines, resolved = N.render_state(state(), floats, {})
         self.assertEqual(lines, ["Blend One OneMinusSrcAlpha"])
         self.assertEqual(resolved, {"cull": 0, "zwrite": 0, "ztest": 4})
+
+    def test_source_always_depth_test_is_preserved_without_changing_fragment_code(self):
+        with WorkspaceTemporaryDirectory() as directory:
+            entry, material, path, config, _, _ = halfres_fixture(Path(directory))
+            renderer = {"kind": "particle", "mesh": False, "uv_count": 1, "custom_streams": False}
+            native = {"shader_entry": entry, "material_pid": 1, "selection": config}
+            lequal = F.plan(path, renderer, {}, shader_name="UnitTest/Shader", native_source=native)
+            material["m_SavedProperties"]["m_Floats"]["_ZTest"] = 8
+            path.write_text(json.dumps(material), encoding="utf-8")
+            always = F.plan(path, renderer, {}, shader_name="UnitTest/Shader", native_source=native)
+            self.assertFalse(lequal["disable_depth_test"])
+            self.assertTrue(always["disable_depth_test"])
+            self.assertEqual(always["code"], lequal["code"])
+            self.assertEqual(always["blend"], lequal["blend"])
+            self.assertNotEqual(always["master"], lequal["master"])
+            self.assertEqual(always["source_selection"]["render_state"]["resolved_target0"],
+                             lequal["source_selection"]["render_state"]["resolved_target0"])
 
     def test_missing_bound_source_property_does_not_use_serialized_zero(self):
         with self.assertRaisesRegex(N.NativeShaderError, "Missing source"):
@@ -241,6 +398,44 @@ class NativeSourceTests(unittest.TestCase):
     def test_native_preview_configuration_cannot_be_applied_as_complete_prefab(self):
         with self.assertRaisesRegex(ValueError, "source subtree preview"):
             B.preflight("unused.fx.json", assets={}, native_selections={})
+
+    def test_ue_environment_cannot_promote_an_arbitrary_preview_program(self):
+        import zzz_fx_ue_equivalent as UE
+        with WorkspaceTemporaryDirectory() as directory:
+            entry, material, _, config, _, _ = halfres_fixture(Path(directory))
+            with self.assertRaisesRegex(N.NativeShaderError, "explicit equivalent purpose"):
+                N.select_native(entry, material, 1, {**config, "execution_environment": UE.MODE})
+            selected = {**config, "purpose": UE.PURPOSE, "execution_environment": UE.MODE, "lighting": "unlit"}
+            with self.assertRaisesRegex(ValueError, "no contract for material"):
+                N.select_native(entry, material, 1, selected)
+
+    def test_whole_source_inventory_preserves_candidates_without_authorizing_apply(self):
+        with WorkspaceTemporaryDirectory() as directory:
+            directory = Path(directory)
+            entry, material, _, config, audit, native_state = halfres_fixture(directory)
+            audit["passes"] = [{"passIndex": 1, "passName": "TransparentHalfRes", "lightMode": "TransparentHalfRes",
+                                "nativeRenderState": native_state, "resolvedRenderState": {"zTest": {"value": 4}}}]
+            Path(config["audit"]).write_text(json.dumps(audit), encoding="utf-8")
+            fx = directory / "Complete.fx.json"
+            root = {"name": "Root", "active": True, "children": [], "particle": {
+                "renderer": {"m_Enabled": True, "m_Materials": [{"m_PathID": 1}]}}}
+            fx.write_text(json.dumps({"name": "Complete", "root": root}), encoding="utf-8")
+            fx.with_name("Complete.deps.json").write_text(json.dumps({"1": {"type": "Material", "files": [str(directory / "1.native.json")]},
+                                                                     "2": entry}), encoding="utf-8")
+            inventory = B.inspect_source_programs([fx], {"1": config["audit"]})
+            self.assertEqual(inventory["render_preflight"], "inspection_only")
+            self.assertEqual(inventory["runtime_selection"], "unverified")
+            self.assertEqual(inventory["visible_renderers"][0]["node"], "$root")
+            result = inventory["materials"]["1"]
+            self.assertEqual(result["serialized_material_keywords"], sorted(audit["serializedMaterialKeywords"]))
+            self.assertEqual(result["passes"][0]["native_state"], native_state)
+            self.assertEqual([r["globalKeywords"] for r in result["passes"][0]["candidates"]], [[], []])
+            with self.assertRaisesRegex(ValueError, "incomplete render plan"):
+                B.apply_batch([inventory], None, [])
+            audit["serializedMaterialKeywords"].remove("_DITHER_FROM_CAMERA")
+            Path(config["audit"]).write_text(json.dumps(audit), encoding="utf-8")
+            with self.assertRaisesRegex(N.NativeShaderError, "identity/keywords"):
+                B.inspect_source_programs([fx], {"1": config["audit"]})
 
     def test_program_byte_digest_and_candidate_ambiguity_are_strict(self):
         with WorkspaceTemporaryDirectory() as directory:

@@ -1,0 +1,90 @@
+{
+ "source_readback_sha256": "d49664795e01462acf985ee2ec8035620b3b7440e92395f0cb8168d7c21344f7",
+ "scope": "historical native binding fixture; not current Cold or visual proof",
+ "bindings": {
+  "PositionBinding": {
+   "rootName": "GhostPosition",
+   "paramMapVariable": {
+    "name": "GhostMesh.GhostPosition",
+    "typeDefHandle": {
+     "registeredTypeIndex": 107
+    }
+   },
+   "dataSetName": "GhostPosition",
+   "boundVariable": {
+    "varData": [],
+    "name": "None",
+    "typeDefHandle": {
+     "registeredTypeIndex": 105
+    }
+   },
+   "cachedDisplayName": "Emitter.GhostPosition",
+   "bindingSourceMode": "ExplicitEmitter",
+   "bBindingExistsOnSource": true,
+   "bIsCachedParticleValue": false
+  },
+  "MeshOrientationBinding": {
+   "rootName": "GhostOrientation",
+   "paramMapVariable": {
+    "name": "GhostMesh.GhostOrientation",
+    "typeDefHandle": {
+     "registeredTypeIndex": 108
+    }
+   },
+   "dataSetName": "GhostOrientation",
+   "boundVariable": {
+    "varData": [],
+    "name": "None",
+    "typeDefHandle": {
+     "registeredTypeIndex": 105
+    }
+   },
+   "cachedDisplayName": "Emitter.GhostOrientation",
+   "bindingSourceMode": "ExplicitEmitter",
+   "bBindingExistsOnSource": true,
+   "bIsCachedParticleValue": false
+  },
+  "ScaleBinding": {
+   "rootName": "GhostScale",
+   "paramMapVariable": {
+    "name": "GhostMesh.GhostScale",
+    "typeDefHandle": {
+     "registeredTypeIndex": 104
+    }
+   },
+   "dataSetName": "GhostScale",
+   "boundVariable": {
+    "varData": [],
+    "name": "None",
+    "typeDefHandle": {
+     "registeredTypeIndex": 105
+    }
+   },
+   "cachedDisplayName": "Emitter.GhostScale",
+   "bindingSourceMode": "ExplicitEmitter",
+   "bBindingExistsOnSource": true,
+   "bIsCachedParticleValue": false
+  },
+  "VelocityBinding": {
+   "rootName": "GhostVelocity",
+   "paramMapVariable": {
+    "name": "GhostMesh.GhostVelocity",
+    "typeDefHandle": {
+     "registeredTypeIndex": 104
+    }
+   },
+   "dataSetName": "GhostVelocity",
+   "boundVariable": {
+    "varData": [],
+    "name": "None",
+    "typeDefHandle": {
+     "registeredTypeIndex": 105
+    }
+   },
+   "cachedDisplayName": "Emitter.GhostVelocity",
+   "bindingSourceMode": "ExplicitEmitter",
+   "bBindingExistsOnSource": true,
+   "bIsCachedParticleValue": false
+  }
+ }
+}

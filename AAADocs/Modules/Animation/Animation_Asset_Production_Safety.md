@@ -1,6 +1,6 @@
 # 动画资产生产工具安全契约（A1–A5）
 
-本模块没有执行生成器或保存动画生产资产。统筹最新完整链接成功（5个动作，3.05秒），UE冷启动新DLL后，先单独执行 RootMotionBakeLifecycle 与 KeyLightLifecycle，2/2通过；随后全10项GGYGO自动化10/10通过，零errors/warnings。Animation三项安全测试均通过，RootMotion加强断言通过。以下自动化结果不代表真实生产资产生成或玩法验收完成。
+当前 Pyrios 六源保存、恢复冷读、必要生产链与 Slot 保留条件见[本次证据](#pyrios-六源原地化与生产验证2026-10-10)。以下 A1–A5 是此前工具安全验证记录；该批没有执行生成器或保存动画生产资产。统筹最新完整链接成功（5个动作，3.05秒），UE冷启动新DLL后，先单独执行 RootMotionBakeLifecycle 与 KeyLightLifecycle，2/2通过；随后全10项GGYGO自动化10/10通过，零errors/warnings。Animation三项安全测试均通过，RootMotion加强断言通过。以下自动化结果不代表真实生产资产生成或玩法验收完成。
 
 ## A1：RootMotionBakeModifier 的变更所有权
 
@@ -66,3 +66,46 @@ python -B -m unittest discover -s AAADocs/Scripts/tests -p test_animation_asset_
 修复只改测试：一次注册包含 `LogAnimation:` 前缀的完整自动化事件，精确要求两次错误。GWarn 的原始正文不匹配该前缀，保留 Error 给 Modifier 回滚过滤器；自动化 OutputDevice 添加类别前缀后才匹配预期。补充冲突时骨轨与生成曲线不变的断言；没有使用无限次数、广泛日志抑制或修改生产 Modifier。
 
 统筹已重新完整链接、冷启动并通过单项及全套自动化复测。真实生产资产只读/创建缺失、重载回读及游戏命中/取消仍待验收；显式Revert冲突时引擎移除applied snapshot的限制保持不变。
+
+## Pyrios 六源原地化与生产验证（2026-10-10）
+
+本轮仅修改 `/Game/Characters/Player/Pyrios/Animation/` 下 `Avatar_Male_Size03_Pyrois_Ani_Attack_Normal_01`、`_01_End`、`_02`、`_02_End`、`_03`、`_03_End` 六件 AnimSequence；Main 与完整 End 的长度、采样率和 Montage 引用保持。唯一工具为 [normalize_pyrios_attack_pose.py](../../Scripts/normalize_pyrios_attack_pose.py)。没有重导入或再次 Apply/Revert Modifier，没有写曲线、Montage、ABP、Mesh 或 Skeleton。
+
+### 处理机制与保护
+
+每帧取当前 Mesh 参考 Root 的共同 CS XY 锚点 `(0,0)`，计算 `shift=(RootCS.xy−MeshRefRootCS.xy,0)`，同时从 BodyCS 与 RootCS 减去 shift，再分别经各自真实固定父链逆变换回 local。Body 的父链为 `Bone_Root → Avatar_Male_Size03_Pyrois_Model`，Root 属于 Model 下另一分支；不能把 Root 当作 Body 祖先，也不能分别扣各 clip 首帧，否则 Main／End 的绝对起点差仍存在。原 Root／Body Z、旋转和缩放及 Body−Root XYZ 相对姿态保留；曲线仍保存原胶囊轨迹，由原 CMC 链消费。
+
+| 入口 | 输入 → 作用 → 输出／失败 |
+| --- | --- |
+| `audit` | fresh 干净自有宿主、准确六包、当前 Mesh 与 DLL → 原生只读采样真实整数键、半帧及独立 float 末端 → 原姿态／27 条完整公开曲线 DTO／authoring／保护基线。 |
+| `apply` | 同脚本／DLL 的成功 audit 与真实父进程 exit0 回执 → 核当前磁盘及全部基线，先备份六原包，仅 controller 写 `Bip001`、`Root` 轨，逐包精确保存 → 保存清单与写后核验；失败保留实际状态，不自动回滚或 SaveAll。 |
+| `cold` | 完整保存且正常退出的 producer 回执 → 独立 PID 只读重新加载六包 → 对比保存结果和原曲线／authoring。 |
+| `recover-cold` | 六包已完整保存、producer 已结束但退出异常的真实回执 → 独立 PID 只读核保存数据，原样携带 producer 脚本身份／退出码 → 恢复冷读结果；不重写包或将异常改成正常。 |
+
+曲线逐字段以 float.hex 等完整公开 DTO 对照；显示 metadata 使用公开原生 `export_text`，不宣称读取 protected Color 的精确数值。所有非目标骨 local pose 指纹、导入信息、AssetUserData、Modifier 快照、序列配置及六个保护依赖保持；武器 A/B 的真实 Body 后代关系与相对姿态分别核验。所有快照仅供本次离线保护／对比，不进入运行时权威状态。
+
+### 实际资产与宿主结果
+
+六源 60/1 的真实键数为 **102／200／82／302／85／393，共 1164 键**；每个视图共 2328 实样，包含每个整数键、半帧及单独的 float Sequence 末端。RAW 同时核 `bShouldRetarget=false/true` 两视图；只写真实整数键，不把末端 float 插值结果反写成键。
+
+原→写后最大误差均为 component/source 单位：Root XY 残差 `1.9343e-11`，Z 变化 `9.9277e-5`，Body−Root 位移差 `1.2208e-4`，武器相对 Body 位移差 `1.5377e-4`；Q 角误差 `7.6269e-5°`，Scale 差 0。位置门槛为 0.0005、角度 0.001°、Scale 1e-6，原生 controller 的 float32 Euler 往返误差保留。保存后→独立冷读两套完整 RAW pose 快照完全一致；每源 **27 条曲线**的完整公开 DTO 与原 authoring 均一致。数值／骨轨证据不代替最终画面。
+
+| 原生执行与原件 | 实际结果 |
+| --- | --- |
+| `Saved/Codex/PyriosAttackPose_20261010_R1_Audit/` | protected Color 访问真实失败；PID4592 exit0，零保存／零 dirty。 |
+| `Saved/Codex/PyriosAttackPose_20261010_R2_Audit/` | audit 数据通过，零保存／零 dirty；PID38356 实际退出 `-1073741819 (0xC0000005)`，不记正常退出。 |
+| `Saved/Codex/PyriosAttackPose_20261010_R3_Audit/` | 新 DLL fresh audit complete／success，PID3160 真实 exit0，零保存／零 dirty；作为 apply 基线。 |
+| `Saved/Codex/PyriosAttackPose_20261010_R3_Apply/` | 实际六包保存、写后／保存后核验通过，errors 与 dirty 空；原包留在 `OriginalPackages/`。PID10232 实际退出 `0xC0000005`，保存事实与宿主退出失败分别保留。 |
+| `Saved/Codex/PyriosAttackPose_20261010_R3_RecoverCold/` | PID33360 独立恢复冷读 complete／success、errors／saved／dirty 空，真实 exit0；producer10232 失败回执原样保留。`readback.json` SHA256 为 `3b820d9f647849bb4c671d47311f4f430776f9ce09e0df3b63e2bcf56c85478f`。 |
+
+当前工具 429 行，SHA256 `174f027b1eb19ccd85a1b4f3657963963aba77b350562d8859e03cf3fad6d4cd`；R3 audit／apply 的419行 producer 脚本身份仍为 `7e49bc7b35eb1ed76407b3dcf9c9334bd445d12e337e4e6f61731cd5d1e6c914`。独立恢复冷读及后续运行正常退出不能证明此前退出异常根因已修复；未定位原因，没有强杀、改引擎、换 RHI 或伪造回执。
+
+### 生产链与 Slot 条件结论
+
+运行时作者在独立标准 Editor PID33004 只运行既有 `GGYGO.AbilitySystem.PlayerCombo.EndMovement.ProductionNativeNewPress`。`Saved/Logs/PyriosAttackPoseRuntime_20261010_R1.log:3648` 为 Result Success，3687 为 PASS／LastMovementStep=2；实际三 AM Main／End、移动取消与重置、回到 Walk／Run、01 无请求自然 End 和原生 PIE teardown 通过，原生 warnings 保留。日志 SHA256 `160ff71bd8d5fb4f2fa8885c63cd8f45aff42af321257f5f89214549bd86e6ef`。未改旧只读 Observer；978 个最终缓冲观察样本按 AM01／02／03 的 Main 为587／275／110、End 为3／2／1；End只有有限取消入口实样，不能当完整End逐帧姿态或自然03全程观察。15 秒截止按原生命周期注销，不作为自动视觉 PASS。
+
+3695 的原生配置／源／Mesh 参考读回证明实际唯一 `FullBody` producer 与 Guard 要求保持。`ComponentAlignment=(0,0,50.8019981384)`，`MeshRefResidual=(0,2.0247645378,113.7967071533)`；当前 Normal01 的原生源 RootCS 为零。按现 cpp 的 full-action 公式，普通 Slot 与当前 corrector 仍差 **`(0,2.0247645378,62.9947090149)` component/source 单位**。它是原生读回加公式分析，未实际替换／删除 Slot 做 A/B，也不称世界高度 63 cm。六源原地化没有消除固定 Mesh 对齐和实际 Source／参考归一职责；本轮 **保留 ActionPoseSlot 与 Guard，ABP 写集为空**。
+
+3699 真实 cleanup 为 game_world=null、owned_observer_active=false、content/maps dirty 空；运行组父 session14794 得到 exit0，fresh UE／SCW／UBT／LC／AutomationTool／CrashReportClient 全0后正式归还。运行后六源、六保护依赖、两 DLL 与恢复冷读身份一致。六包与工具冻结；此为约定资产／必要生产链／Slot 条件证据，不扩大为逐帧视觉、足底、全部混合／LOD、HID、Cook、Dedicated Server 或联机验收。
+
+按 CodeConventions 核本工具调用链：离线工具仅拥有六包变更和本次保护证据，原 GA／CMC／Animation 权威链保持；脏包、基线／DLL／父链失效均明确失败，保护及退出回执有实际消费者，没有第二播放／帧调度、角色运行时特判或自动成功恢复。六包仍被既有 `.gitignore:76` 精确所属范围忽略，未放开素材目录；最终仅将验收六包和本需求文件交统筹集中 Git。

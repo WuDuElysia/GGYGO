@@ -1,4 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+/** @file GGYGOEditor.h @brief 项目编辑器模块及原生工具注册生命周期。 */
 
 #pragma once
 
@@ -7,8 +8,15 @@
 
 /**
  * GGYGOEditor —— 编辑器专用模块。
- * 存放只在编辑器中使用的工具类，例如动画修改器(UAnimationModifier)。
+ * 存放编辑器动画工具，并接入特效编译工具的原生注册生命周期。
  */
 class FGGYGOEditorModule : public IModuleInterface
 {
+public:
+	virtual void StartupModule() override;
+	virtual void ShutdownModule() override;
+
+private:
+	void RegisterNiagaraCompileTools();
+	void UnregisterNiagaraCompileTools();
 };

@@ -1,22 +1,33 @@
-"""Run with UnrealEditor-Cmd -run=pythonscript -script=<this file> -AllowCommandletRendering.
+"""Run with UnrealEditor-Cmd -run=pythonscript -script="<this file> --exposure-weight=<0..1>" -AllowCommandletRendering.
 
 生成 Pyrios 表面材质：
-- M_Pyrois_Toon：Unlit，单个 Custom 节点承载 nap_avatar_toon.hlsl（NapAvatarStandard
+- M_Pyrois_Toon：Unlit，原程序 Custom 节点承载 nap_avatar_toon.hlsl（NapAvatarStandard
   CharacterToonDeferred 像素逻辑的逐行移植），主光由 UGGYGOCharacterRenderComponent 写入
   KeyLightDirectionWS / KeyLightColor / SceneLightStrength / KeyLightVisibility；
 - MI_Pyrois_Body_1 / Body_2 / Weapon01：参数来自材质 JSON 与 Pyrios_Toon_Globals.json；
 - M_Pyrois_Outline：运行时反面扩张描边；
 - 把三个 MI 绑定到骨骼网格的默认槽位作为编辑器预览。
 可重复运行；完整预检通过前不写资产。
+
+--master-exposure-only --exposure-weight=<0..1> 只给既有主材质接入／配置原生曝光抵偿。
+权重必须明确指定；此入口不重建旧图、不修改其它资产。0保留曝光、1全额抵偿。
+--surface-pipeline 只迁移已验单Master的项目合成/场景预览图，保持现有曝光；
+默认留下未保存编辑，--save-pipeline 才保存。必须在另行授权的干净 UE 窗口运行。
 """
+import argparse
+import hashlib
 import json
+import shutil
 import sys
 from pathlib import Path
 import unreal
 
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-from pyrios_material_plan import BuildJournal, SLOT_INSTANCES, SUFFIXES, load_plan
+from pyrios_material_plan import (BuildJournal, EXPOSURE_INPUTS, EXPOSURE_PARAMETER,
+                                 PREVIEW_LIGHT, PREVIEW_SCALARS, SLOT_INSTANCES,
+                                 SUFFIXES, SURFACE_OUTPUTS, PREVIEW_DATA_NAMES, DISPLAY_PARAMETERS,
+                                 COMPOSITE_CODE, PREVIEW_CODE, exposure_weight, load_plan)
 
 
 ROOT = "/Game/Characters/Player/Pyrios/Materials"
@@ -42,9 +53,6 @@ def slot_inputs(plan):
     return result
 
 
-# 编辑器静态预览的主光；运行时由组件覆盖。方向为 UE 世界空间指向光源。
-PREVIEW_LIGHT = {"KeyLightDirectionWS": (0.35, 0.25, 0.9, 0.0), "KeyLightColor": (1.0, 1.0, 1.0, 1.0)}
-PREVIEW_SCALARS = {"SceneLightStrength": 1.0, "KeyLightVisibility": 1.0}
 JOURNAL = None
 
 
@@ -154,7 +162,208 @@ def scalar_param(m, name, x, y, default, group=None):
     return s
 
 
-def build_main(plan):
+def add_exposure_output(master, custom, configured_weight):
+    """用公开原生节点消费实际 GPU 曝光；不改变主光或原 Toon 运算。"""
+    configured_weight = exposure_weight(configured_weight)
+    inverse = node(master, unreal.MaterialExpressionEyeAdaptationInverse, 700, 0)
+    weight = scalar_param(master, EXPOSURE_PARAMETER, 450, 220, configured_weight, "Display")
+    weight.set_editor_property("slider_min", 0.0)
+    weight.set_editor_property("slider_max", 1.0)
+    if tuple(str(n) for n in MEL.get_material_expression_input_names(inverse)) != EXPOSURE_INPUTS:
+        raise RuntimeError("Native exposure input contract differs")
+    connect(custom, inverse, EXPOSURE_INPUTS[0])
+    connect(weight, inverse, EXPOSURE_INPUTS[1])
+    if not MEL.connect_material_property(inverse, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR):
+        raise RuntimeError("Could not connect native exposure output")
+    return inverse, weight
+
+
+def compile_surface(master):
+    """真实编译诊断与指令数同时有效才允许调用方保存。失败保留脏包和错误。"""
+    errors = MEL.recompile_material(master)
+    if errors is None or errors:
+        raise RuntimeError("Surface compilation failed or returned no diagnostics: " + repr(errors))
+    stats = MEL.get_statistics(master)
+    if stats.num_pixel_shader_instructions <= 0 or stats.num_vertex_shader_instructions <= 0:
+        raise RuntimeError("M_Pyrois_Toon has no valid compiled pixel/vertex shader")
+    unreal.log("PYRIOS_TOON_STATS ps=%s vs=%s" % (stats.num_pixel_shader_instructions,
+                                               stats.num_vertex_shader_instructions))
+
+
+def _toon_snapshot(custom):
+    """同次调用内保护原程序及全部输入的完整原生表达式连接。"""
+    return (custom.get_editor_property("code"),
+            tuple(p.export_text() for p in custom.get_editor_property("inputs")))
+
+
+def add_project_surface(master, custom, plan):
+    """只接入项目输出/瞬态场景预览；不改原185输入顺序，不创建渲染通道。"""
+    outputs = []
+    for name, kind in SURFACE_OUTPUTS:
+        output = unreal.CustomOutput()
+        output.set_editor_property("output_name", name)
+        output.set_editor_property("output_type", getattr(unreal.CustomMaterialOutputType, kind))
+        outputs.append(output)
+    custom.set_editor_property("additional_outputs", outputs)
+    cpd = [scalar_param(master, name, -2900, index * 80, 0.0, "Scene Preview")
+           for index, name in enumerate(PREVIEW_DATA_NAMES)]
+    for index, parameter in enumerate(cpd):
+        parameter.set_editor_property("use_custom_primitive_data", True)
+        parameter.set_editor_property("primitive_data_index", index)
+    vectors = []
+    for offset in (1, 4):
+        vectors.append(add_custom(master, -2600, offset * 80, "return float3(X, Y, Z);",
+            [(name, cpd[offset + index], "") for index, name in enumerate(("X", "Y", "Z"))],
+            "Scene preview vector"))
+    preview = dict(zip((*PREVIEW_LIGHT, *PREVIEW_SCALARS), (*vectors, cpd[7], cpd[8])))
+    links = MEL.get_inputs_for_material_expression(master, custom)
+    for item, source in zip(plan["inputs"], links):
+        name = item["name"]
+        if name not in preview:
+            continue
+        kind = unreal.CustomMaterialOutputType.CMOT_FLOAT3 if name in PREVIEW_LIGHT else unreal.CustomMaterialOutputType.CMOT_FLOAT1
+        selector = add_custom(master, -1600, list(preview).index(name) * 200, PREVIEW_CODE,
+            [("MaterialValue", source, "RGB" if name in PREVIEW_LIGHT else ""),
+             ("PreviewValue", preview[name], ""), ("PreviewValid", cpd[0], "")],
+            "Scene preview: " + name, kind)
+        connect(selector, custom, name)
+    display = [(name, scalar_param(master, name, 300, index * 160, plan["display"][name], "Display"), "")
+               for index, name in enumerate(DISPLAY_PARAMETERS)]
+    composite = add_custom(master, 650, 0, COMPOSITE_CODE,
+        [("MainColor", custom, "return"), ("RimRaw", custom, "RimRaw")] + display,
+        "Project Toon Composite")
+    if not MEL.connect_material_property(composite, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR):
+        raise RuntimeError("Could not connect project surface output")
+    return composite
+
+
+def apply_surface_pipeline(save_result=False):
+    """既有单Master的精确迁移；默认只准备候选，保存必须由调用者明确授权。"""
+    if unreal.EditorLevelLibrary.get_pie_worlds(True):
+        raise RuntimeError("Surface migration requires non-PIE")
+    dirty = list(unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages()) + list(unreal.EditorLoadingAndSavingUtils.get_dirty_map_packages())
+    if dirty:
+        raise RuntimeError("Surface migration refuses dirty packages")
+    plan = load_plan(JSON_DIR, GLOBALS_PATH)
+    master = EAL.load_asset(OUT + "/M_Pyrois_Toon")
+    if not isinstance(master, unreal.Material):
+        raise RuntimeError("Missing existing Toon Master")
+    if master.get_path_name() != OUT + "/M_Pyrois_Toon.M_Pyrois_Toon" or master.get_editor_property("shading_model") != unreal.MaterialShadingModel.MSM_UNLIT:
+        raise RuntimeError("Existing Toon Master identity/shading model differs")
+    custom = MEL.get_material_property_input_node(master, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    if not isinstance(custom, unreal.MaterialExpressionCustom):
+        raise RuntimeError("Expected the accepted direct-output graph; exposure migration is a separate choice")
+    old_code = custom.get_editor_property("code")
+    if hashlib.sha256(old_code.encode("utf-8")).hexdigest() != "36ad1a7aaa6cf2ea0f6fcb75b23d4ea8ff861b23e4b065b0a4a80d80b2098543":
+        raise RuntimeError("Accepted Toon code identity differs; target unchanged")
+    from verify_pyrios_renderer import verify_surface_graph, verify_project_surface_graph
+    verify_surface_graph(master, plan, legacy_direct=True, expected_code=old_code)
+    if len(MEL.get_material_expressions(master)) != len(plan["inputs"]) + 1 or custom.get_editor_property("additional_outputs"):
+        raise RuntimeError("Accepted Toon graph structure differs; target unchanged")
+    original = _toon_snapshot(custom)[1]
+    # 所有正式包编辑前保留精确磁盘副本；同名备份不得覆盖失败/用户历史。
+    source_file = Path(unreal.Paths.project_content_dir()) / "Characters/Player/Pyrios/Materials/Generated/M_Pyrois_Toon.uasset"
+    source_bytes = source_file.read_bytes()
+    if hashlib.sha256(source_bytes).hexdigest() != "3ed65ddfa2431f8d5210219f877636e6643932788e1875d032618608635331de":
+        raise RuntimeError("Accepted saved Toon package changed; no graph mutation")
+    import datetime
+    backup = Path(unreal.Paths.project_saved_dir()) / "AssetBackups" / ("PyriosSurface_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f"))
+    backup.mkdir(parents=True, exist_ok=False)
+    shutil.copyfile(source_file, backup / source_file.name)
+    if (backup / source_file.name).read_bytes() != source_bytes:
+        raise RuntimeError("Toon package backup verification failed; no graph mutation")
+    touch(master)
+    custom.set_editor_property("code", HLSL_PATH.read_text(encoding="utf-8"))
+    add_project_surface(master, custom, plan)
+    verify_project_surface_graph(master, plan)
+    compile_surface(master)
+    verify_project_surface_graph(master, plan)
+    # 原图pin连接允许仅四个主光增加预览选择，其余连接逐字段保持。
+    after = _toon_snapshot(custom)[1]
+    if any(a != b for item, a, b in zip(plan["inputs"], original, after)
+           if item["kind"] not in ("component_vector", "component_scalar")):
+        raise RuntimeError("Migration changed a non-light source input")
+    final_dirty = list(unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages()) + list(unreal.EditorLoadingAndSavingUtils.get_dirty_map_packages())
+    if any(p.get_path_name() != OUT + "/M_Pyrois_Toon" for p in final_dirty):
+        raise RuntimeError("Migration produced foreign dirty packages; no save")
+    if source_file.read_bytes() != source_bytes:
+        raise RuntimeError("Toon disk changed while preparing graph; no save")
+    if save_result:
+        save(master)
+    unreal.log("PYRIOS_SURFACE_PIPELINE " + json.dumps(dict(saved=save_result, supported_light="Directional", occlusion="CharacterTrace")))
+    return master
+
+
+def apply_master_exposure(configured_weight):
+    """只迁移／配置既有主材质，严格图核对和编译后只保存该一个包。"""
+    configured_weight = exposure_weight(configured_weight)
+    if unreal.EditorLevelLibrary.get_pie_worlds(True):
+        raise RuntimeError("Single Master exposure update requires a non-PIE editor")
+    dirty = list(unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages())
+    dirty += list(unreal.EditorLoadingAndSavingUtils.get_dirty_map_packages())
+    if dirty:
+        raise RuntimeError("Single Master exposure update requires a clean editor: " + repr([p.get_path_name() for p in dirty]))
+    plan = load_plan(JSON_DIR, GLOBALS_PATH)
+    master = EAL.load_asset(OUT + "/M_Pyrois_Toon")
+    if not isinstance(master, unreal.Material) or master.get_path_name() != OUT + "/M_Pyrois_Toon.M_Pyrois_Toon":
+        raise RuntimeError("Single Master target is missing or has the wrong identity/type")
+    if (master.get_editor_property("shading_model") != unreal.MaterialShadingModel.MSM_UNLIT
+            or master.get_editor_property("material_domain") != unreal.MaterialDomain.MD_SURFACE):
+        raise RuntimeError("Single Master target must remain an Unlit surface")
+    from verify_pyrios_renderer import verify_surface_graph, verify_project_surface_graph
+    output = MEL.get_material_property_input_node(master, unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    legacy = isinstance(output, unreal.MaterialExpressionCustom)
+    shading_output = output if legacy else MEL.get_inputs_for_material_expression(master, output)[0]
+    project = isinstance(shading_output, unreal.MaterialExpressionCustom) and shading_output.get_editor_property("code") == COMPOSITE_CODE
+    verify_graph = verify_project_surface_graph if project else verify_surface_graph
+    if project:
+        custom = verify_graph(master, plan)
+    else:
+        original_code = shading_output.get_editor_property("code")
+        # 已验旧图允许完成其显式曝光选择；不把新多输出源码灌进旧单输出接口。
+        if hashlib.sha256(original_code.encode()).hexdigest() != "36ad1a7aaa6cf2ea0f6fcb75b23d4ea8ff861b23e4b065b0a4a80d80b2098543":
+            raise RuntimeError("Legacy exposure source is not the accepted frozen program")
+        custom = verify_graph(master, plan, legacy_direct=legacy, expected_code=original_code)
+    before = _toon_snapshot(custom)
+    expressions = tuple(MEL.get_material_expressions(master))
+    expected_count = len(plan["inputs"]) + ((19 if legacy else 21) if project else (1 if legacy else 3))
+    if len(expressions) != expected_count:
+        raise RuntimeError("Unexpected existing surface expressions; refusing to rebuild or remove them")
+    touch(master)
+    if legacy:
+        added = add_exposure_output(master, shading_output, configured_weight)
+        expected_expressions = set(expressions) | set(added)
+    else:
+        weight = MEL.get_inputs_for_material_expression(master, output)[1]
+        weight.set_editor_property("default_value", configured_weight)
+        expected_expressions = set(expressions)
+    if (_toon_snapshot(custom) != before
+            or set(MEL.get_material_expressions(master)) != expected_expressions):
+        raise RuntimeError("Exposure update changed the original Toon graph")
+    if project:
+        verify_graph(master, plan, configured_weight)
+    else:
+        verify_graph(master, plan, configured_weight, expected_code=original_code)
+    compile_surface(master)
+    # 编译可能更新图；仍需保护原185输入，并核对实际曝光输出后才能保存。
+    if (_toon_snapshot(custom) != before
+            or set(MEL.get_material_expressions(master)) != expected_expressions):
+        raise RuntimeError("Compilation changed the original Toon graph")
+    if project:
+        verify_graph(master, plan, configured_weight)
+    else:
+        verify_graph(master, plan, configured_weight, expected_code=original_code)
+    dirty_after = list(unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages())
+    dirty_after += list(unreal.EditorLoadingAndSavingUtils.get_dirty_map_packages())
+    if any(p.get_path_name() != OUT + "/M_Pyrois_Toon" for p in dirty_after):
+        raise RuntimeError("Compilation produced a non-target dirty package; preserving the editor without saving")
+    save(master)
+    unreal.log("PYRIOS_MASTER_EXPOSURE_SAVED %s=%s" % (EXPOSURE_PARAMETER, configured_weight))
+    return master
+
+
+def build_main(plan, configured_weight):
+    configured_weight = exposure_weight(configured_weight)
     m = asset("M_Pyrois_Toon", unreal.MaterialFactoryNew(), unreal.Material)
     clear_expressions(m)
     m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_UNLIT)
@@ -195,17 +404,15 @@ def build_main(plan):
         y += 90
     custom = add_custom(m, -900, 0, HLSL_PATH.read_text(encoding="utf-8"), inputs,
                         "NapAvatarStandard CharacterToonDeferred")
-    if not MEL.connect_material_property(custom, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR):
-        raise RuntimeError("Could not connect emissive output")
+    output = add_project_surface(m, custom, plan)
+    add_exposure_output(m, output, configured_weight)
     if not all(MEL.get_inputs_for_material_expression(m, custom)):
         raise RuntimeError("Custom node has unconnected inputs")
-    MEL.recompile_material(m)
+    from verify_pyrios_renderer import verify_project_surface_graph
+    verify_project_surface_graph(m, plan, configured_weight)
+    compile_surface(m)
+    verify_project_surface_graph(m, plan, configured_weight)
     save(m)
-    stats = MEL.get_statistics(m)
-    unreal.log("PYRIOS_TOON_STATS ps=%s vs=%s" % (stats.num_pixel_shader_instructions,
-                                                  stats.num_vertex_shader_instructions))
-    if stats.num_pixel_shader_instructions <= 0:
-        raise RuntimeError("M_Pyrois_Toon has no compiled pixel shader")
     return m
 
 
@@ -303,14 +510,25 @@ def bind_editor_preview_materials(prechecked=False):
     unreal.log("PYRIOS_EDITOR_PREVIEW_MATERIALS " + str(sorted(bound)))
 
 
-def main():
+def main(configured_weight=None, master_exposure_only=False, surface_pipeline=False, save_pipeline=False):
     global JOURNAL
+    if not surface_pipeline:
+        configured_weight = exposure_weight(configured_weight)
     JOURNAL = BuildJournal()
     try:
+        if surface_pipeline:
+            if configured_weight is not None or master_exposure_only:
+                raise ValueError("Surface pipeline preserves current exposure; do not specify exposure options")
+            apply_surface_pipeline(save_pipeline)
+            return
+        if master_exposure_only:
+            apply_master_exposure(configured_weight)
+            unreal.log("PYRIOS_MASTER_EXPOSURE_OK " + json.dumps(JOURNAL.report("complete")))
+            return
         plan = preflight()  # No writes before the complete source/asset/dirty check.
         EAL.make_directory(OUT)
         configure_textures(plan)
-        m = build_main(plan)
+        m = build_main(plan, configured_weight)
         build_outline()
         for suffix in SUFFIXES:
             set_instance(m, suffix, plan)
@@ -324,4 +542,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--exposure-weight", type=float, help="明确指定曝光抵偿权重0..1，不采用隐式默认")
+    parser.add_argument("--master-exposure-only", action="store_true", help="只迁移／配置既有主材质，不运行整批生成")
+    parser.add_argument("--surface-pipeline", action="store_true", help="只准备既有单Master项目合成候选，保持曝光")
+    parser.add_argument("--save-pipeline", action="store_true", help="显式保存上述单Master，须另有生产窗口")
+    args = parser.parse_args()
+    if args.save_pipeline and not args.surface_pipeline:
+        parser.error("--save-pipeline requires --surface-pipeline")
+    main(args.exposure_weight, args.master_exposure_only, args.surface_pipeline, args.save_pipeline)

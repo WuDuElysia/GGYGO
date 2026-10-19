@@ -1,89 +1,117 @@
-# Pyrios 角色渲染实现（UE 5.8）
+# Pyrios 角色渲染契约（UE 5.8）
 
-> 当前为可编辑、可预览的近似材质，尚未达到游戏内观感。差距、已证实的接线错误及后续顺序见 [材质还原差距核查](Pyrios_Material_Fidelity_Audit.md)。
+> 本页维护渲染职责、资源所有权和材质接口。任务进度、共享窗口及下一动作只看[当前排程](../../../Coordination/Module_Repair_Parallel_Schedule.md#当前窗口与关键路径)；旧验证见[历史证据入口](#历史证据入口)。材质公式、保存、Cold 或构建成功不能替代原图对照。
 
-## 当前代码与资产边界
+## 两条视觉线
 
-2026-09-29：统筹离线测试22/22、完整 DLL 链接/冷启动、GGYGO自动化10/10（含两项渲染测试）通过，自动化零错误零警告。BP 单字段恢复后已编译、单包保存并冷回读15项参数/三槽/描边，legacy=false、autoActivate=true、is_dirty=false；最终哈希9e093db8…05dac3，双旧备份与原baseline保留。本会话MCP真实PIE确认3个表面MID及Leader Pose描边，灯强度10/2.5/0/40/10对应输出0.65/0.325/0/1/0.65。已恢复灯强度并停止自己启动的PIE，BP/原地图未变脏、哈希未变。结束时地图查询变化及MCP可读性限制另记，未宣称原版视觉还原完成。
+| 工作线 | 实际用途与边界 | 准确入口 |
+| --- | --- | --- |
+| Raw 表面材质 | 自有临时角色、明确的 SingleNode 姿态用于隔离材质、主光和显示适配；不证明生产 ABP、CMC、动作或网络。R15 仍绑定旧 A2，不能当成 CS 同版结果；该轮未完成视觉验收。 | [R15 宿主](../../../../Saved/Codex/PyriosSurface_20261013_R15/visual_host.py)、[版本与保护](../../../../Saved/Codex/PyriosSurface_20261013_R15/visual_support_r15.py) |
+| 生产 ABP | 原 GameMode/Experience/Controller 生成并附身的 Pawn，原 Mesh、生产 ABP 和自然骨 Finalize；场景由 Movement provider 交付。CS 同版消费要求真实玩家装配、实际暂停来源及两视角。当前尝试范围、缺口和共享窗口只看当前排程。 | [生产消费合同](../../../../Saved/Codex/PyriosProductionVisual_20261013_P6/README.md)、[准确运行归还](../../../../Saved/Codex/PyriosProductionVisual_20261013_P6/return.json)、[provider pin](../../../../Saved/Codex/MovementProductionScenario_20261013_P1/provider_pin.json) |
 
-迁移契约与执行门禁见 [通用渲染迁移说明](Character_Render_Migration.md)。该 BP 的迁移已完成保存重开验收；真实 PIE 证据与限制见 [运行验收](Character_Render_Runtime_Verification.md)。
+两线都按用户的游戏常态截图检查配色、区域明暗、金属反光、蓝光和描边。Raw 的静态姿态不替生产姿态，生产 idle 也不替 Lean、TurnBack、攻击或远端场景。截图生成后仍须实际看图；场景缺口按 provider 保留，不删减验收集。
 
-## 当前实现
+生产宿主通过引擎公开 `ToolsetLibrary.GetObjectProperties` 从实际 `LevelEditorPlaySettings` CDO 原生读取单人 PIE 配置；要求 Standalone、单客户端、同进程、无额外服务器。玩家装配和暂停来源需要所属模块的公开读取接口；受保护字段不可读时明确拒绝，不以组件枚举或对象 Outer 推断权威输入指针。
 
-- `UGGYGOCharacterRenderComponent` 提供通用 MID、主光传参和描边生命周期；仅消费显式 `MaterialSlots` 与 `OutlineMaterial`，不检查角色名称、不硬编码资产路径。
-- `UGGYGOPyriosRenderComponent` 保留为通用组件的兼容子类；Hero 仍创建同名 `StylizedRenderComponent` 以保持旧资产身份。`bAutoConfigurePyrios` 仅供迁移读取，不再选择材质。字段/函数迁移有 CoreRedirects；该 BP 的序列化兼容性已通过保存重开核对；不外推到未审计资产。
-- `RefreshMaterials()` 先释放旧绑定，只有 BeginPlay 后且组件激活才按准确槽名建立 MID。更换 Mesh/装扮前调用 `ReleaseMaterials()`，更新配置后再刷新。空配置不会自动补齐 Pyrios 材质。
-- 释放只处理仍由组件持有的 MID 覆盖；同 Mesh/同槽恢复原覆盖（包括 null），换 Mesh/槽后清除自己的遗留覆盖，不把旧材质写入新模型，不覆盖第三方替换。
-- 描边需要显式材质与开关，Leader Pose 跟随主 Mesh；仅有表面 MID 的槽位显示描边。
-- 材质是 Unlit，Emissive 中计算 `_LightTex` 法线 RG 与蓝通道偏移、法线高度补偿后的三段明暗、Material ID 分组色、五组高光/边缘光和 MatCap。三个 MI 从原始 JSON 及项目现有贴图生成；高光采用 GGX 近似，Ramp、MatCap 混合与高光仍非原 Shader 等价实现。
-- `_N/_M/_A` 贴图设为线性 BC7，避免 normal-map BC5 压缩丢失 `_N.B`，并保留 `_M.A` MatCap 遮罩。
+## 职责与资源所有权
 
-## 光照选择
+`UGGYGOCharacterRenderComponent` 只管理角色材质、受控主光输入及可选描边，不改场景灯、ASC、CMC 或 Animation 的权威状态，不另建帧调度。常改的槽位、材质、光强响应、色调和描边参数由角色 BP/材质资产配置。源码见[声明](../../../../Source/GGYGO/Character/Components/GGYGOCharacterRenderComponent.h)、[实现](../../../../Source/GGYGO/Character/Components/GGYGOCharacterRenderComponent.cpp)。
 
-角色使用 UE 的 `DirectionalLight` 作为主光方向和颜色输入，组件每 0.1 秒更新一次。通用组件的参考强度、响应、输出系数、上限默认均为 1，角色值写在 BP；光强比求幂、乘输出系数并限幅后写入 MID 的 `SceneLightStrength`。`KeyLightTint`、`OccludedKeyLightVisibility` 也可按角色蓝图配置。MI 的静态预览默认 `SceneLightStrength=1.0`、主光方向 `(0.35, 0.25, 0.9)`。2026-10-04 起 BP 设为 `KeyLightIntensityResponse=0`、`KeyLightOutputScale=1`（`set_pyrios_light_response.py`，原 BP 备份于 `Saved/RenderLightResponseBackup/`，原哈希 `9e093db8…05dac3`）：UE 主光只提供方向与颜色，强度恒为 1，与静态预览一致。角色明暗由材质自己算，因此场景的 Lumen、Skylight、点光源和 UE 默认 Lit BRDF 不直接叠加到角色表面；环境与其他物体继续使用 UE 光照。可见性射线仍只是角色级遮挡近似。
+| 输入 → 接口 | 作用 → 输出或清理 |
+| --- | --- |
+| 显式 `MaterialSlots`、角色 Mesh → `RefreshMaterials()` | 先释放旧资源；BeginPlay 后且激活时按准确槽名建立 MID，记录 Mesh/槽身份、原 nullable override 和本次 MID。空配置不自动加载角色资产；配置无效给定位诊断。 |
+| Mesh/装扮更换 → `ReleaseMaterials()` → 提供方更新配置 → `RefreshMaterials()` | 提供方明确管理更换边界。Tick 发现 Mesh/槽失效时释放，等待显式刷新，不猜替代 Mesh 或材质。 |
+| 停用、EndPlay、OnUnregister → `ReleaseMaterials()` | 只处理当前覆盖仍等于自身 MID 的槽。同 Mesh/槽恢复原覆盖；身份改变则清自身遗留覆盖；保留第三方已接管的材质。清自身描边、预览数据和弱灯缓存。 |
+| `bEnableOutline`、显式 `OutlineMaterial`、已配置表面槽 → `UpdateOutline()` | 创建自身 Leader Pose 壳，关闭碰撞、阴影和 Decals；未配置表面的槽透明。释放只销毁自己的壳。 |
+| 显式 `KeyLight` 或自动弱缓存 → `SampleLighting()` → `UpdateLighting()` | 向 MID 写 `KeyLightDirectionWS`、`KeyLightColor`、`SceneLightStrength`、`KeyLightVisibility`。不改灯强度、颜色或位置，不把缓存写回配置。 |
 
-## 表面材质实现（2026-10-04 起）
+`UGGYGOPyriosRenderComponent` 只保留旧序列化类路径；Hero 的 `StylizedRenderComponent` 名称保持。旧 `bAutoConfigurePyrios` 仅供迁移，不参与运行时资产选择。CoreRedirects 和已审计 BP 的迁移过程见[迁移历史](Character_Render_Migration.md)；不能从该历史外推其它 BP 的兼容性。
 
-`M_Pyrois_Toon` 的 Custom 节点是 NapAvatarStandard `CharacterToonDeferred` Pass（变体 `{_NAP_SHADER_QUALITY_HIGH, _MATCAP_ON, _FX_UNCLIP_SCREEN_IMAGE_OVERRIDE_2_TONE, _FX_UNCLIP_SECONDARY_EMISSION_RIM_GLOW}`，含屏幕贴图与自发光分支）像素着色器的逐行移植，设计与伪代码见 Obsidian `Character/渲染实现.md`「表面材质：NapAvatarStandard 逐行移植」。
+## 主光与显示适配
 
-- 生成链：`gen_nap_avatar_hlsl.py`（离线，读 `F:/AnimeStudio/Exports/Shader/ZZZ_20260925` 的反汇编与 `.dat`）→ `nap_avatar_toon.hlsl` + `nap_avatar_toon_inputs.json` → `build_pyrios_materials.py`（UE）。重新生成 HLSL 后必须重跑 UE 构建。
-- MI 参数：`pyrios_material_plan.py` 读三份 JSON；Unity `Color` 属性做 Gamma→Linear，`Vector` 原样；MatCap 打包数组按“该组有贴图则切片号=组号”重建（推断）。源材质启用双面 UV、对称 UV、叠加贴图或折射 MatCap 时直接报错。
-- 场景级全局量：`AAADocs/Assets/Pyrios/Rendering/Pyrios_Toon_Globals.json`。这些在游戏里来自运行时全局 cbuffer 和角色实体缓冲，导出数据里没有，文件里是编辑器起始值；对照游戏调色改这里。
-- 阴影：原 Pass 的逐对象阴影与级联阴影换成组件的角色级 `KeyLightVisibility`；逐像素投影阴影仍缺。
-- 不经过 UE 光照：Unlit 不吃 Lit BRDF、Lumen、天光、点光、SSAO、投影阴影。仍作用于角色像素的只有整屏阶段：高度雾/体积雾、Bloom、tonemapper 与调色；原游戏的 UberPost/Bloom 未移植。
-- 网格 UV：骨骼网格需要 UV0/UV1/UV2（UV1 描边平滑法线，UV2 自发光）。AnimeStudio CLI 默认 `uvs` 设置不导出 UV2，导出时需临时打开，并用 `--merge_load` 同时加载模型块与三个材质所在块，否则 FBX 只有一个材质连接。重导用 `reimport_pyrios_mesh_uv.py`（Interchange，沿用资产里的导入设置）。
-- 贴图 sRGB 照抄 Unity `m_ColorSpace`（`AAADocs/Assets/Pyrios/Rendering/UnityMaterials/TextureSettings/`）；HDR 颜色按“gamma 底色 × 强度”换算；输出超过 1 的部分按 `HighlightBleed` 推白（近似游戏后处理）。依据见 Obsidian `Character/渲染实现.md`。
-- 对照截图：`capture_pyrios_toon.py` → `AAADocs/References/Captures/PyriosToon/`，逐版文字结论在同目录 `INDEX.md`。像素统计用 `png_stats.py`。
-- 顶点色：已用 SceneCapture 读回材质中的顶点色，RG=0.5、A=0，与 FBX 一致。
+### 主光输入
 
-历史验证（2026-09-26，旧版组件）：将 Body 1/2 的预览 `MatCapGain` 从 0.22 降至 0.11，Weapon 从 0.30 降至 0.18；它与主光强度分开调节。UE MCP 重建、D3D12 材质重编译和 JSON/MI 核对通过，缩略图保存在 `Saved/PyriosLightMatCapReduced_20260926.png`。保存并关闭编辑器后，`GGYGOEditor Win64 Development` 完整构建、链接成功，重新启动加载了新组件。MCP Simulate 中临时 Pyrios 角色的运行时 MID 在主光强度 10 时 `SceneLightStrength=0.65`，改为 2.5 时为 0.325，改为 40 时上限为 1.0。模拟已停止，临时角色已删除，编辑器关卡的主光仍为 10。
+自动模式复用同 World 的有效 DirectionalLight 弱缓存，失效后按对象路径排序选取。显式灯隐藏、关闭或无效时不换替代灯。没有有效灯时直接光颜色为黑、强度为零；MatCap、环境底色和自发光仍按材质公式计算，因此“关主灯后仍可见”本身不证明 UE 又叠加了 Lit 光照。
 
-`MAT_Pyrois_Body_FX01` 槽由独立的身体 FX 材质 `MI_Pyrois_Body_FX` 绘制，见下文「身体 FX」。Weapon01 JSON 的 `_Emission=0`；截图中的剑身蓝光不能只由当前静态武器材质解释，需另查 FX 和运行时驱动。游戏参考图还包含全局光照、曝光和后处理贡献。
+有效灯的强度响应为：
 
-主光选择把显式 `KeyLight` 与自动发现的弱引用缓存分开。自动模式优先复用有效缓存，失效后按对象路径排序选一盏有效 DirectionalLight；显式灯隐藏、关闭或无效时不擅自换灯。无有效灯时颜色为黑、`SceneLightStrength=0`，MatCap/环境底色/自发光仍由材质独立决定。缓存不写回配置。
+```text
+Factor = Response == 0 ? 1 : (Intensity / ReferenceIntensity)^Response
+SceneLightStrength = min(OutputScale * Factor, MaxStrength)
+```
 
-## 资产与脚本
+`ReferenceKeyLightIntensity`、`KeyLightIntensityResponse`、`KeyLightOutputScale`、`MaxKeyLightStrength`、`KeyLightTint`、`OccludedKeyLightVisibility` 是通用配置；角色实际值以该轮 BP 读回为准，不把历史 0.65 或固定强度模式当当前默认。非有限值、非法响应范围和必需输入无效时拒绝该生命周期；修正后显式刷新。更新沿组件既有 Tick，间隔由 `LightingUpdateInterval` 配置。
 
-材质位于 `Content/Characters/Player/Pyrios/Materials/Generated/`：
+`bTraceKeyLightOcclusion` 的 Visibility 射线只给角色级遮挡。它不提供原游戏逐对象/级联阴影贴图，也不是逐像素投影阴影。
 
-- `M_Pyrois_Toon`、`M_Pyrois_Outline`
-- `MI_Pyrois_Body_1`、`MI_Pyrois_Body_2`、`MI_Pyrois_Weapon01`
+### 材质光照和后处理
 
-生成脚本：`AAADocs/Scripts/build_pyrios_materials.py`。场景级全局参数：`AAADocs/Assets/Pyrios/Rendering/Pyrios_Toon_Globals.json`。验证脚本：`AAADocs/Scripts/verify_pyrios_renderer.py`。两者可用 UE 的 Python 编辑器脚本插件运行。验证器默认只读；仅显式 `--compile` 才重编译并可能使包变脏。生成器先完整校验 JSON、全局参数、纹理、目标类型、槽位及脏包，再开始写入；BuildJournal 区分已尝试、已保存和未保存/失败，保存失败不报告整体成功。项目 `.gitignore` 仅放行部分自研 `Content` 路径；新生成的五个材质 `.uasset` 和被改动的 Pyrois 骨骼模型位于忽略的美术目录，已在本地编辑器保存，但跨 checkout 时需通过项目资产管线一同交付。`ABP_Pyrios` 位于 Git 白名单内。
+表面 Master 为 Unlit，原 Toon 公式在 Emissive 路径内计算。UE DirectionalLight 作为方向、颜色和受控强度的输入；UE 默认 Lit BRDF、Lumen GI、Skylight 与点光没有再次叠加到该表面。原游戏的附加灯、阴影资源、曝光、LUT 和 Pass 调度不能从材质 JSON 推出，当前未实现完整多灯或逐像素 Toon 阴影。
 
-编辑器预览绑定脚本：`AAADocs/Scripts/bind_pyrios_editor_preview.py`。三个 MI 已写入 Pyrois 骨骼模型对应的默认材质槽；`MAT_Pyrois_Body_FX01` 槽由 `build_pyrios_body_fx.py` 绑定 `MI_Pyrois_Body_FX`。`BP_PC_Pyrios` 的 Mesh 没有材质覆盖，因此骨骼模型缩略图、材质球和角色蓝图视口都能直接预览 Toon 材质，无需运行游戏。生成脚本重跑时也会执行同一绑定。
+项目显示适配与原 Shader 输入分开：主颜色、`RimRaw`、`BloomWeight` 分开输出，项目用 `RimCompositeGain`/`RimMaxIntensity` 合成边缘光；`ExposureCompensationWeight` 经公开原生 `EyeAdaptationInverse` 节点调节曝光抵偿，0 保留场景曝光、1 抵偿曝光。该路径不会取消雾、Bloom、tonemapper 或调色，也不是原游戏后处理等价实现。配置与公式见[纯数据计划](../../../Scripts/pyrios_material_plan.py)、[材质构建](../../../Scripts/build_pyrios_materials.py)和[场景级起始值](../../../Assets/Pyrios/Rendering/Pyrios_Toon_Globals.json)。
 
-## 历史验证记录（2026-09-24～26，旧版组件）
+## 编辑器预览
 
-以下保留已保存材质与旧链路的证据，不代表 2026-09-29 通用组件、迁移或生命周期测试通过。
+| 场景 | 输入 → 行为 | 验证边界 |
+| --- | --- | --- |
+| 材质球、模型资产窗口、BP 的 EditorPreview | 模型默认 MI 与其明确预览光参数 → 表面材质可直接显示，不需要 BeginPlay。 | 不从该独立预览 World 推断生产场景受光或运行组件就绪。 |
+| 关卡 Editor World | 非模板、激活组件显式开启 `bPreviewSceneLighting` → 同一 `SampleLighting()` 结果经瞬态 CustomPrimitiveData 传给材质，可创建自身描边壳。 | 当前源码具备该路径；新版本的实际预览画面仍待对应视觉线验证。 |
+| Game/PIE World | BeginPlay/激活后按显式槽建立 MID → 运行主光与描边。 | 真实生产 Pawn/ABP、自然骨 Finalize 和画面对照由生产视觉线核验。 |
 
-- `GGYGOEditor Win64 Development` 编译通过。
-- 完整 UE 编辑器使用 D3D12 对 `M_Pyrois_Toon` 和 `M_Pyrois_Outline` 调用 `MaterialEditingLibrary.recompile_material`，返回零编译错误。
-- 验证了三个 MI、模型槽位，以及九张数据贴图的线性 BC7 设置。
-- 加载 `BP_PC_Pyrios` 时确认它继承了 `StylizedRenderComponent`。`ABP_Pyrios` 的七条旧 `Locomotion_*` 过渡调用已换为 `bHasMoveInput`、`IsAnimationRunGait()` 和 `IsTurnBackCurveDriven()` 的蓝图组合，并在编辑器中编译、保存成功；角色蓝图也再次编译成功。
-- 在 UE MCP 中用临时 `ACharacter`、Pyrois Mesh 和该组件进行 Simulate：运行时材质从模型原有的深色占位材质切换为生成的白灰/蓝色 Toon 材质；把临时组件描边宽度调到 3 cm 后，截图可见反面扩张描边，证明运行时描边链路生效。默认宽度仍为 0.6 cm。
-- 编辑器内验证了 Pyrois 模型资产缩略图、`MI_Pyrois_Body_1` 材质球和 `BP_PC_Pyrios` 视口，均显示白灰/蓝色 Toon 材质；脚本再次检查材质编译、贴图和默认槽位接线通过。预览截图在 `Saved/PyriosMeshAssetPreview.png`、`Saved/PyriosMaterialSpherePreview.png`、`Saved/PyriosBlueprintViewport.png`。
-- 对照两张游戏内截图后，修正了 Material ID 反序分组及原先手写的 MatCap 槽位。UE 重新编译通过，MI 的 MatCap 贴图与 JSON 自动核对通过。关闭 MatCap 的诊断预览显示胸甲原本有深灰底色，原先大面积偏白主要由错误的 MatCap 叠加造成；当前完整视觉仍需对照场景和剩余 Shader 路径处理。
-- 2026-09-26 通过本地 UE MCP 8000 在当前 UE 5.8 编辑器运行生成和验证脚本；材质保存成功，两种主材质重新编译无错，三份 MI 的 JSON 高光/边缘光/阴影与预览校准参数核对通过。降低增益并重新打开模型资产窗口后的截图：`Saved/PyriosMCPMeshEditor_Final_20260926.png`。默认预览中银甲仍偏亮，须在目标关卡固定曝光、光色和姿态后再调。描边壳仍由运行时组件生成，编辑器静态视口只预览表面 Toon 材质。
-- 动画蓝图修复前的文件备份在 `Saved/ABP_Pyrios_before_repair_20260924.uasset`。临时路径编译过的历史版本仅用于核对逻辑；最终修复是在原资产中替换七条节点，并保留其资产身份和其余状态机内容。
+Editor 场景预览独占主 Mesh 的 CPD 0..8：Valid、方向 XYZ、颜色 RGB、Strength、Visibility。材质必须具备准确的九个标量接口；配置槽必须与当前材质一致，未配置槽不得消费这些索引。已有序列化 CPD 默认值或预留槽被占用时明确拒绝。Mesh 尚未注册属于原生暂态，沿既有 Tick 等其就绪。
 
-## 身体 FX
+预览不改 Mesh 的材质覆盖或序列化默认。释放先核自身写入的 Valid，再只恢复仍等于自身写值的槽；外部接管的数据保留。Mesh、材质或数据所有权改变后停止并要求显式刷新，不覆盖第三方状态。
 
-- 生成：`UnrealEditor-Cmd GGYGO.uproject -run=pythonscript -script=AAADocs/Scripts/build_pyrios_body_fx.py -AllowCommandletRendering`。需关闭编辑器或保证目标包未脏；可重复运行。
-- 换算：`AAADocs/Scripts/pyrios_fx_plan.py` 可单独 `python` 运行，打印三层参数；源材质启用了 master 未实现的特性时报错。
-- 层逻辑：`AAADocs/Scripts/fx_dissolve_mask_layer.hlsl`，对应 `Particles_Dissolve_CustomColor_Mask_Cap` 在 `_UsingNonPSR=1` 下的像素着色器。
-- 叠加：Unity 端每个 FX 网格挂 `[FX04, FX01, FX02]` 三个材质画三遍；UE 在 `M_FX_DissolveMaskLayers` 内按同序做预乘 over 合成，`BlendMode=AlphaComposite`。
-- 贴图寻址与色彩空间来自 `AAADocs/Assets/Pyrios/Rendering/UnityMaterials/TextureSettings/*.json`（AnimeStudio CLI `--types Texture2D --export_type JSON`，只有 `Eff_Mask_2408` 为 Clamp）。
-- 2026-10-04 验证：SM6 编译通过、新进程重载无编译错误、MI 参数回读一致、网格槽位保存。未做视口/PIE 与游戏画面对照。设计与边界见 Obsidian `Character/渲染实现.md`「身体 FX」。
+## 原 Shader 与材质数据
 
-## 技能特效
+AnimeStudio 的 `MAT_Pyrois_*.json` 是 Unity 材质对象，含 Shader 引用、贴图、颜色、标量、关键字和禁用 Pass；它不是 Shader 程序。导出的 `.shader`/反汇编与 `.dat` 提供程序、变体和反射表，但仍不包含某个游戏帧的全局 cbuffer、角色实体缓冲、阴影资源和后处理调度。
 
-- 在开着的编辑器（MCP 8000）里依次运行，前两步只需一次：
-  ```
-  python AAADocs/Scripts/zzz_fx_fetch.py <fx.json>          # 依赖导出 + 网格 FBX
-  python AAADocs/Scripts/zzz_fx_import_assets.py <deps.json> # 贴图/网格导入
-  python AAADocs/Scripts/zzz_fx_build.py <fx.json>           # 材质 + Niagara
-  ```
-- `fx.json` 由 `zzz_fx_index.py` / `zzz_fx_extract.py` 从 Raw 导出生成（见脚本头注释）；中间数据在 `F:/AnimeStudio/Exports/ZZZ/Pyrois_SkillFX/`。
-- 结果报告 `<根名>.ue_report.json` 列出生成的发射器与跳过原因。全局常量取值在 `AAADocs/Assets/Shared/FX/ZZZ_FX_Globals.json`。
-- 2026-10-05：试点 `NS_Eff_Pyrois_Attack_Normal_01_01_Trail` 7/8 发射器，编译 UpToDate；未挂攻击、未与游戏对照。设计见 Obsidian `Character/渲染实现.md`「技能特效」。
+生成链：
+
+```text
+NapAvatarStandard 的反汇编 + .dat 反射
+    → gen_nap_avatar_hlsl.py
+    → nap_avatar_toon.hlsl + nap_avatar_toon_inputs.json
+三份材质 JSON + TextureSettings + 显式项目全局配置
+    → pyrios_material_plan.py
+    → build_pyrios_materials.py
+    → M_Pyrois_Toon + 三份 MI + 模型默认表面槽
+```
+
+生成器选取 `CharacterToonDeferred` 的明确变体：`_NAP_SHADER_QUALITY_HIGH`、`_MATCAP_ON`、`_FX_UNCLIP_SCREEN_IMAGE_OVERRIDE_2_TONE`、`_FX_UNCLIP_SECONDARY_EMISSION_RIM_GLOW`。用同一 Pass 的反射表恢复 cbuffer 名称并移植像素运算；这不表示所有 Unity 渲染通道已还原。准确分支见[HLSL 生成器](../../../Scripts/gen_nap_avatar_hlsl.py)。
+
+| 原输入/输出 | 移植与已知边界 |
+| --- | --- |
+| UV0、`LightTex`、两张 OtherData | 法线 RG、B 通道明暗偏移、Material ID 五组色带/高光/边缘光。打包数据图用线性 BC7 保留 B/A，具体 sRGB 和寻址按 TextureSettings。 |
+| MatCap 数组 | 拆成五张贴图；“有贴图的组用对应切片”是重建推断，不能当作已取得运行时数组。 |
+| Color/Vector | Color 的 LDR 按 sRGB 曲线转线性；HDR 用“gamma 底色 × 强度”，是对照图选择的换算，缺 Unity 存储约定的直接证据；Vector 原样。 |
+| 顶点与坐标 | UV1 供描边平滑法线，UV2 供自发光；Unity Y 向上/米与 UE 坐标、UV 翻转和副切线符号显式适配。网格重导必须保留材质连接、顶点色及全部所需 UV。 |
+| 主光与阴影 | 实体主光改用组件四个输入；实体环境/色调参数来自显式项目全局配置，阴影采样改为角色级 Visibility。 |
+| 屏幕贴图、自发光、运行时覆盖 | 开启的分支必须有真实贴图；删除的 `_OverrideRimGlow`/`_Override2Tone` 等分支必须在源材质中为关闭，未知或未实现特性报错。运动矢量/GBuffer 输出未复刻。 |
+| 项目 Emissive | 原主颜色与边缘输出经上述项目合成/曝光适配进入 Emissive；原游戏 UberPost/Bloom 未移植。 |
+
+全局配置中的数值是编辑器起始值，不是从 JSON 得到的原游戏灯光。重新生成 HLSL 后需在受协调的 UE 窗口重建材质，不能只改源码文件就声称资产更新。
+
+## 资产、工具与 FX 接缝
+
+| 项 | 位置或接口 |
+| --- | --- |
+| 表面/描边资产 | `Content/Characters/Player/Pyrios/Materials/Generated/`：`M_Pyrois_Toon`、`M_Pyrois_Outline`、`MI_Pyrois_Body_1/Body_2/Weapon01`。 |
+| 编辑器默认槽 | [bind_pyrios_editor_preview.py](../../../Scripts/bind_pyrios_editor_preview.py) 绑定模型默认 MI；Blueprint 的实际 override 必须单独读回，不能由脚本意图推断。 |
+| 验证/生成 | [verify_pyrios_renderer.py](../../../Scripts/verify_pyrios_renderer.py) 默认只读，显式 `--compile` 可能使包变脏；生成器先核源数据、有限值、特性、纹理、槽位、类型和脏包，BuildJournal 区分尝试、保存与失败，不提供全资产事务。 |
+| 模型重导 | [reimport_pyrios_mesh_uv.py](../../../Scripts/reimport_pyrios_mesh_uv.py) 沿既有 Interchange 设置；[素材导出 skill](../../../../.kiro/skills/zzz-anime-assets-cli/SKILL.md) 约束 CLI 来源。 |
+| 身体 FX 槽 | `MAT_Pyrois_Body_FX01` 使用独立 `MI_Pyrois_Body_FX`；表面槽配置不接管它，描边对应槽透明。身体三层合成、技能 Niagara 和 cue/挂点等边界归[FX 接口与证据](ZZZ_FX_Handoff.md)。 |
+
+Weapon01 的静态 JSON `_Emission=0` 不能解释截图中的全部剑光。剑身基本表面、运行时 FX 和 Bloom 必须分别核来源；Shader 候选存在不代表参考帧实际使用。胸口白芯、斗篷及未知挂载不由猜面罩区域、默认时间或替代特效补齐。
+
+生成美术资产所在目录受项目忽略规则约束；跨 checkout 须经既有资产管线交付，不因本任务放开整个角色目录。失败日志、备份及旧执行副本保留。
+
+## 历史证据入口
+
+以下只用于追溯各自记录的版本和范围，不授当前 UE/构建/Git 窗口，也不替本轮视觉验收：
+
+- [迁移历史](Character_Render_Migration.md)：旧类、BP 配置、首次失败与保存重开过程。
+- [2026-09-29 Cold/PIE 记录](Character_Render_Runtime_Verification.md)：当时 MID/描边/主光响应、退出观察及无截图限制；旧参数不作当前值。
+- [早期材质差距与 NTE 只读对照](Pyrios_Material_Fidelity_Audit.md)：旧接线问题、来源证据和方案边界。
+- [旧项目实现原文](Pyrios_Renderer_Implementation_History_20261013.md)、[旧 Obsidian 原文](Pyrios_Renderer_Obsidian_History_20261013.md)：本次整理前逐字节存档，含旧验证和当时算法说明，不作为活动契约。
+- [表面材质 Save](../../../../Saved/Codex/PyriosSurface_20261012_R10/Save.json)、[独立 Cold](../../../../Saved/Codex/PyriosSurface_20261012_R10/Cold.json)与[旧捕获索引](../../../References/Captures/PyriosToon/INDEX.md)：按原报告区分资产保存、编译与实际画面。

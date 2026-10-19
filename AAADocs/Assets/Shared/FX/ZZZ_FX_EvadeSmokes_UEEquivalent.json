@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "mode": "ue_native_evade_smoke_environment_v1",
+  "global_environment": "explicit_clear_scene_calibration_baseline_with_native_UE_fog",
+  "calibration": "reference_visual_comparison_pending",
+  "revision": "ue_equiv_smoke_v1",
+  "prefabs": {
+    "Eff_Pyrois_Evade_Front_01_Smoke": "F:/AnimeStudio/Exports/ZZZ/Pyrois_SkillFX_Evidence/Prefabs/Eff_Pyrois_Evade_Front_01_Smoke.fx.json",
+    "Eff_Pyrois_Evade_Back_01_Smoke": "F:/AnimeStudio/Exports/ZZZ/Pyrois_SkillFX_Evidence/Prefabs/Eff_Pyrois_Evade_Back_01_Smoke.fx.json"
+  },
+  "particle_equivalence": {
+    "mode": "source_particles_ue_equivalent_v1",
+    "dampen_reference_seconds": 0.016666666666666666,
+    "dampen_strength": 1,
+    "viewport_limit_scale": 1
+  },
+  "materials": {
+    "-8628735267290221435": {"audit": "F:/AnimeStudio/_work/zzz_fx_smoke_20261008/Materials/-8628735267290221435.audit.json", "purpose": "ue_equivalent_source_particles", "pass_index": 1, "global_keywords": [], "execution_environment": "ue_native_evade_smoke_environment_v1", "lighting": "unlit"},
+    "4815780514172297095": {"audit": "F:/AnimeStudio/_work/zzz_fx_smoke_20261008/Materials/4815780514172297095.audit.json", "purpose": "ue_equivalent_source_particles", "pass_index": 1, "global_keywords": [], "execution_environment": "ue_native_evade_smoke_environment_v1", "lighting": "unlit"},
+    "54218374060949528": {"audit": "F:/AnimeStudio/_work/zzz_fx_smoke_20261008/Materials/54218374060949528.audit.json", "purpose": "ue_equivalent_source_particles", "pass_index": 1, "global_keywords": [], "execution_environment": "ue_native_evade_smoke_environment_v1", "lighting": "unlit"},
+    "6221463485550019036": {"audit": "F:/AnimeStudio/_work/zzz_fx_smoke_20261008/Materials/6221463485550019036.audit.json", "purpose": "ue_equivalent_source_particles", "pass_index": 1, "global_keywords": [], "execution_environment": "ue_native_evade_smoke_environment_v1", "lighting": "unlit"},
+    "-8783148842178813392": {"audit": "F:/AnimeStudio/_work/zzz_fx_smoke_20261008/Materials/-8783148842178813392.audit.json", "purpose": "ue_equivalent_source_particles", "pass_index": 1, "global_keywords": [], "execution_environment": "ue_native_evade_smoke_environment_v1", "lighting": "ue_volumetric_nondirectional"}
+  }
+}

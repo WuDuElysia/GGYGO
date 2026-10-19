@@ -19,6 +19,13 @@ ASSET = "editor_toolset.toolsets.asset.AssetTools."
 OBJ = "editor_toolset.toolsets.object.ObjectTools."
 WRAP = {0: "TA_Wrap", 1: "TA_Clamp", 2: "TA_Mirror"}
 FILTER = {0: "TF_Nearest", 1: "TF_Bilinear", 2: "TF_Trilinear"}
+MESH_IMPORT_SETTINGS = {
+    "vertex_color_import_option": "REPLACE", "normal_import_method": "FBXNIM_IMPORT_NORMALS",
+    "combine_meshes": True, "generate_lightmap_u_vs": False,
+    "convert_scene": True, "force_front_x_axis": False, "convert_scene_unit": False,
+    "transform_vertex_to_absolute": True, "bake_pivot_in_vertex": False,
+    "import_uniform_scale": 1.0,
+}
 
 
 def read_json(path):
@@ -61,8 +68,9 @@ def texture_properties(settings):
             "MipGenSettings": "TMGS_FromTextureGroup" if mip_count > 1 else "TMGS_NoMipmaps"}
 
 
-def plan_imports(deps_paths, revision="", selected_pids=None):
+def plan_imports(deps_paths, revision="", selected_pids=None, mesh_sources=None):
     selected_pids = set(str(p) for p in selected_pids) if selected_pids is not None else None
+    mesh_sources = {str(p): Path(f) for p, f in (mesh_sources or {}).items()}
     entries, assets = {}, {}
     for deps_path in deps_paths:
         for pid, entry in read_json(deps_path).items():
@@ -76,10 +84,15 @@ def plan_imports(deps_paths, revision="", selected_pids=None):
                 props = texture_properties(read_json(source_file(entry, ".json")))
                 directory = TEX_DIR
             else:
-                source, directory = source_file(entry, ".fbx"), MESH_DIR
+                source = mesh_sources[pid] if pid in mesh_sources else source_file(entry, ".fbx")
+                directory = MESH_DIR
+                if source.suffix.lower() != ".fbx" or not source.is_file():
+                    raise ValueError("Mesh 来源必须是实际 FBX 文件: " + str(source))
             identity = {"type": entry["type"], "name": entry["name"], "pid": pid,
                         "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
                         "properties": props, "revision": revision}
+            if entry["type"] == "Mesh":
+                identity["mesh_import_settings"] = dict(MESH_IMPORT_SETTINGS)
             name = version_name(entry["name"], identity)
             item = {"identity": identity, "source": str(source), "path": directory + "/" + name,
                     "name": name, "directory": directory, "properties": props, "type": entry["type"]}
@@ -89,14 +102,55 @@ def plan_imports(deps_paths, revision="", selected_pids=None):
             assets[pid] = item["path"]
     if selected_pids is not None and selected_pids != set(entries):
         raise ValueError("Selected texture/mesh dependencies are missing: " + repr(sorted(selected_pids - set(entries))))
+    if any(pid not in entries or entries[pid]["type"] != "Mesh" for pid in mesh_sources):
+        raise ValueError("FBX 来源覆盖只允许本批明确选择的 Mesh")
     return {"entries": entries, "assets": assets, "targets": sorted(set(assets.values()))}
 
 
-def apply_imports(plan, session):
+def import_static_mesh(unreal, item):
+    """标准 Editor 的显式 FBX 导入；不使用会默认忽略源顶点色的通用快捷入口。"""
+    if item["identity"]["mesh_import_settings"] != MESH_IMPORT_SETTINGS:
+        raise ValueError("未实现的 Mesh 导入契约")
+    options = unreal.FbxImportUI()
+    for prop, value in dict(automated_import_should_detect_type=False, import_mesh=True,
+            import_as_skeletal=False, import_materials=False, import_textures=False, import_animations=False,
+            override_full_name=True, mesh_type_to_import=unreal.FBXImportType.FBXIT_STATIC_MESH,
+            original_import_type=unreal.FBXImportType.FBXIT_STATIC_MESH).items():
+        options.set_editor_property(prop, value)
+    data = options.get_editor_property("static_mesh_import_data")
+    settings = {**MESH_IMPORT_SETTINGS,
+        "vertex_color_import_option": unreal.VertexColorImportOption.REPLACE,
+        "normal_import_method": unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS,
+        "import_translation": unreal.Vector(0, 0, 0), "import_rotation": unreal.Rotator(0, 0, 0)}
+    for prop, value in settings.items():
+        data.set_editor_property(prop, value)
+        if data.get_editor_property(prop) != value:
+            raise RuntimeError("FBX 导入选项读回不同: " + prop)
+    task = unreal.AssetImportTask()
+    for prop, value in dict(filename=item["source"], destination_path=item["directory"],
+            destination_name=item["name"], factory=unreal.FbxFactory(), options=options,
+            automated=True, replace_existing=False, replace_existing_settings=False, save=False).items():
+        task.set_editor_property(prop, value)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+    expected = item["path"] + "." + item["name"]
+    if list(task.get_editor_property("imported_object_paths")) != [expected]:
+        raise RuntimeError("FBX 导入产物不是本批唯一新网格: " + item["path"])
+    mesh = unreal.EditorAssetLibrary.load_asset(item["path"])
+    if not isinstance(mesh, unreal.StaticMesh) or mesh.get_path_name() != expected:
+        raise RuntimeError("FBX 新网格身份不同: " + item["path"])
+    imported = mesh.get_editor_property("asset_import_data")
+    for prop, value in settings.items():
+        if imported.get_editor_property(prop) != value:
+            raise RuntimeError("网格有效导入设置不同: " + prop)
+
+
+def apply_imports(plan, session, *, unreal=None):
     # Check every source before importing the first item, including later items.
     for item in plan["entries"].values():
         if hashlib.sha256(Path(item["source"]).read_bytes()).hexdigest() != item["identity"]["source_sha256"]:
             raise ValueError("FX import source changed after planning: " + item["source"])
+    if any(i["type"] == "Mesh" for i in plan["entries"].values()) and unreal is None:
+        raise ValueError("源 Mesh 导入需要显式标准 Editor 宿主，通用 MCP 快捷入口不能保证顶点色契约")
     for item in plan["entries"].values():
         path = item["path"]
         if path in session.created:
@@ -106,9 +160,7 @@ def apply_imports(plan, session):
             session.m.tool("editor_toolset.toolsets.texture.TextureTools.import_file",
                            folder_path=item["directory"], asset_name=item["name"], source_file=item["source"])
         else:
-            session.m.tool("editor_toolset.toolsets.static_mesh.StaticMeshTools.import_file",
-                           folder_path=item["directory"], asset_name=item["name"], source_file=item["source"],
-                           import_materials=False, import_textures=False, combine_meshes=True)
+            import_static_mesh(unreal, item)
         if not session.m.tool(ASSET + "exists", path=path)["returnValue"]:
             raise RuntimeError("Imported FX asset is missing: " + path)
         session.created_asset(path)

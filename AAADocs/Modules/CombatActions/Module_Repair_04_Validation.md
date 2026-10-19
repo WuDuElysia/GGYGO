@@ -336,9 +336,9 @@
 7. 静态门禁：diff whitespace、生成头/include、接口交叉引用、测试注册名、临时 World RAII及文件范围。没有运行的 C++ 测试明确标为待统筹执行。
 8. 局部文档和 Canvas 在接口冻结后同步，校验 JSON/ID/边/链接；根目录全局状态由统筹维护。
 
-## 当前文件所有者
+## 第04批历史文件所有者
 
-详细名单与状态见 `AAADocs/Modules/CombatActions/Module_Repair_04_Subleases.md`。临时实现使用 `gpt-6-luna / max`：`/root/task_motion`、`/root/combo_lifecycle`、`/root/asc_admission`。
+当时名单与状态见[第04批完整历史](Module_Repair_04_Subleases_History_20261013.md)。当时临时实现使用 `gpt-6-luna / max`：`/root/task_motion`、`/root/combo_lifecycle`、`/root/asc_admission`；当前路由以[会话路由](../../Coordination/Module_Conversation_Routing.md)为准。
 
 ## 已核对的引擎边界
 

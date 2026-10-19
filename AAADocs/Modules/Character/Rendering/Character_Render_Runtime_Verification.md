@@ -1,4 +1,6 @@
-# Character 渲染：冷回读与真实 PIE 验收（2026-09-29）
+# Character 渲染：冷回读与真实 PIE 记录（2026-09-29，历史）
+
+> 本页保存当时的真实对象、参数、退出观察和工具限制，不代表当前 DLL/BP 或本轮画面已通过。稳定接口见[渲染契约](Pyrios_Renderer_Implementation.md)；当前任务与窗口见[当前排程](../../../Coordination/Module_Repair_Parallel_Schedule.md)。
 
 ## 资产门禁（统筹执行）
 

@@ -1,4 +1,6 @@
-# Pyrios 材质还原差距核查（2026-09-24）
+# Pyrios 早期材质差距核查（2026-09-24～29，历史）
+
+> 本页保留早期接线差距、当时截图和来源/NTE 对照。下文“当前/上一版”指各段日期，不作本轮状态；后续移植与编辑器预览的稳定接口见[渲染契约](Pyrios_Renderer_Implementation.md)，任务与窗口只看[当前排程](../../../Coordination/Module_Repair_Parallel_Schedule.md)。
 
 ## 对照输入
 
@@ -64,13 +66,11 @@ NTE 导出的 `Exports/HT/Content/Characters/Player/002_edgar/ter/weapon/MI_play
 
 UE MCP 中将 Body 1/2 的 `MatCapGain` 从 0.22 下调到 0.11、Weapon 从 0.30 下调到 0.18，并保留在 `Pyrios_Editor_Calibration.json`；这是编辑器亮度修正，不是导出的游戏参数。缩略图 `Saved/PyriosLightMatCapReduced_20260926.png` 仍比游戏常态参考亮，后续需用同一光向、同一曝光和姿态对照。保存并重启编辑器后，C++ 完整构建成功；UE MCP Simulate 验证 MID 的 `SceneLightStrength` 随主光强度 10 → 2.5 → 40 变化为 0.65 → 0.325 → 1.0（上限）。临时测试角色已删除，关卡灯光未被改动。
 
-## 通用组件整改与视觉还原边界（2026-09-29）
+## 通用组件整改的历史范围（2026-09-29）
 
-2026-09-29：统筹离线测试22/22、完整 DLL 链接/冷启动、GGYGO自动化10/10（含两项渲染测试）通过，自动化零错误零警告。BP 单字段恢复后已编译、单包保存并冷回读15项参数/三槽/描边，legacy=false、autoActivate=true、is_dirty=false；最终哈希9e093db8…05dac3，双旧备份与原baseline保留。本会话MCP真实PIE确认3个表面MID及Leader Pose描边，灯强度10/2.5/0/40/10对应输出0.65/0.325/0/1/0.65。已恢复灯强度并停止自己启动的PIE，BP/原地图未变脏、哈希未变。结束时地图查询变化及MCP可读性限制另记，未宣称原版视觉还原完成。
+该批完成了职责/配置迁移，未借此重新调色或证明 Shader 等价还原。迁移失败与恢复见[迁移历史](Character_Render_Migration.md)，实际 MID/描边/主光响应及无截图限制见[历史 Cold/PIE 记录](Character_Render_Runtime_Verification.md)。
 
-源码中的光照/材质生命周期已迁入 `UGGYGOCharacterRenderComponent`；旧类仅保留序列化身份。角色名称判断和内置材质路径已移除，Pyrios 参数与槽位改由 BP 显式配置，该 BP 的迁移已保存并冷回读通过。无有效主灯时直接光为零；材质恢复校验 Mesh、槽位和当前 MID 所有权。详见 [迁移与验收](Character_Render_Migration.md)。
-
-本批没有重建材质、重新调色或证明原 Shader 等价还原。MatCap 独立于主光、GGX/Ramp 近似、单射线遮挡以及静态预览与运行光向不同仍是观感差异来源。NTE 的 `MSM_Toon` 和 MPC 支持场景/角色分层的设计参考；场景公共 MPC、编辑器实时同步光照与完整 Toon 着色模型仍是方案，尚未实现。
+活动材质、光照与编辑器预览接口只在[稳定渲染契约](Pyrios_Renderer_Implementation.md)维护。下面保留当时的只读来源和方案判断，不将其未实现项或旧配置沿用为当前事实。
 
 ## 光源接入方案复核（2026-09-29，只读分析）
 

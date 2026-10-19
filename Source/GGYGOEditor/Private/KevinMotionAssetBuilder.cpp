@@ -1,11 +1,9 @@
-/** Production tool only: original sequences are read-only; paired derived poses and curves share one trajectory. */
-#include "Character/Data/GGYGOActionMotionProfile.h"
+/** @file KevinMotionAssetBuilder.cpp @brief Source-verified, new-only paired in-place poses and actor-local XYZ montage curves. */
 #include "Animation/AnimSequence.h"
 #include "Animation/Skeleton.h"
 #include "Animation/AnimData/IAnimationDataModel.h"
 #include "Animation/AnimData/IAnimationDataController.h"
 #include "AssetRegistry/AssetRegistryModule.h"
-#include "Curves/CurveVector.h"
 #include "Dom/JsonObject.h"
 #include "HAL/IConsoleManager.h"
 #include "Misc/FileHelper.h"
@@ -15,35 +13,77 @@
 #include "Serialization/JsonSerializer.h"
 #include "UObject/MetaData.h"
 #include "UObject/SavePackage.h"
+#include "UObject/StrongObjectPtr.h"
 
 namespace GGYGOKevinMotion
 {
-	constexpr TCHAR Base[] = TEXT("/Game/Characters/Boss/Kevin/DemonBattle");
+	constexpr TCHAR Base[] = TEXT("/Game/Characters/Boss/Kevin/DemonBattle/Animation/");
 	constexpr TCHAR OwnerKey[] = TEXT("GGYGO.MotionBuilder");
-	constexpr TCHAR OwnerValue[] = TEXT("KevinGroundMotion.v1");
-	const FName MotionBone(TEXT("Bip001"));
+	constexpr TCHAR OwnerValue[] = TEXT("KevinMontageXYZ.v2");
+	constexpr TCHAR CurveSpace[] = TEXT("ActorLocalCmXYZ.v1");
+	constexpr TCHAR MontageConfig[] = TEXT("AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Montage_Config.json");
+	constexpr TCHAR BasisConfig[] = TEXT("AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Wiring_Config.json");
+	const FName CurveNames[] = {TEXT("RootMotion_PosX"), TEXT("RootMotion_PosY"), TEXT("RootMotion_PosZ")};
+	using FJson = TSharedPtr<FJsonObject>;
+
+	bool Fail(const FString& Context, const FString& Reason)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[KevinMotion] %s: %s"), *Context, *Reason);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> VectorJson(const FVector& V)
+	{
+		return {MakeShared<FJsonValueNumber>(V.X), MakeShared<FJsonValueNumber>(V.Y), MakeShared<FJsonValueNumber>(V.Z)};
+	}
+
+	bool ReadNumbers(const FJson& Object, const TCHAR* Key, int32 Count, double* Out)
+	{
+		const TArray<TSharedPtr<FJsonValue>>* Values = nullptr;
+		if (!Object || !Object->TryGetArrayField(Key, Values) || Values->Num() != Count) return false;
+		for (int32 Index = 0; Index < Count; ++Index)
+			if (!(*Values)[Index]->TryGetNumber(Out[Index]) || !FMath::IsFinite(Out[Index])) return false;
+		return true;
+	}
+
+	struct FBasis
+	{
+		FQuat Rotation;
+		FVector Scale;
+	};
+
+	bool ReadBasis(const FJson& Object, FBasis& Basis)
+	{
+		bool bConfirmed = false;
+		double Q[4], S[3];
+		if (!Object || !Object->TryGetBoolField(TEXT("confirmed"), bConfirmed) || !bConfirmed
+			|| !ReadNumbers(Object, TEXT("mesh_relative_rotation_xyzw"), 4, Q)
+			|| !ReadNumbers(Object, TEXT("mesh_relative_scale"), 3, S))
+			return Fail(TEXT("motion_asset_basis"), TEXT("confirmed quaternion/scale required; provisional assembly is not a motion basis"));
+		Basis.Rotation = FQuat(Q[0], Q[1], Q[2], Q[3]);
+		Basis.Scale = FVector(S[0], S[1], S[2]);
+		if (!FMath::IsNearlyEqual(Basis.Rotation.SizeSquared(), 1., .00001) || Basis.Scale.X <= 0 || Basis.Scale.Y <= 0 || Basis.Scale.Z <= 0
+			|| !FMath::IsNearlyEqual(Basis.Scale.X, Basis.Scale.Y, 0.00001)
+			|| !FMath::IsNearlyEqual(Basis.Scale.X, Basis.Scale.Z, 0.00001))
+			return Fail(TEXT("motion_asset_basis"), TEXT("normalized xyzw and finite positive uniform mesh scale required; no inferred transform"));
+		return true;
+	}
+
+	bool LoadJson(const FString& Path, FJson& Document)
+	{
+		FString Text;
+		return (FFileHelper::LoadFileToString(Text, *Path)
+			&& FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Document) && Document)
+			|| Fail(Path, TEXT("unreadable JSON document"));
+	}
 
 	struct FTrack
 	{
 		TArray<FTransform> Keys;
 		FTransform Reference;
-		FTransform At(int32 Frame) const { return Keys.IsEmpty() ? Reference : Keys[FMath::Min(Frame, Keys.Num() - 1)]; }
+		// An absent track means the engine reference pose; one key is an explicit static track.
+		FTransform At(int32 Frame) const { return Keys.IsEmpty() ? Reference : Keys[Keys.Num() == 1 ? 0 : Frame]; }
 	};
-
-	TArray<TSharedPtr<FJsonValue>> VectorJson(const FVector& V)
-	{
-		return { MakeShared<FJsonValueNumber>(V.X), MakeShared<FJsonValueNumber>(V.Y), MakeShared<FJsonValueNumber>(V.Z) };
-	}
-
-	FVector JsonVector(const TArray<TSharedPtr<FJsonValue>>& V)
-	{
-		return FVector(V[0]->AsNumber(), V[1]->AsNumber(), V[2]->AsNumber());
-	}
-
-	FQuat JsonQuat(const TArray<TSharedPtr<FJsonValue>>& V)
-	{
-		return FQuat(V[0]->AsNumber(), V[1]->AsNumber(), V[2]->AsNumber(), V[3]->AsNumber()).GetNormalized();
-	}
 
 	FTransform ComponentAt(const TArray<FTrack>& Tracks, const FReferenceSkeleton& Ref, int32 Bone, int32 Frame)
 	{
@@ -56,7 +96,7 @@ namespace GGYGOKevinMotion
 		return Value;
 	}
 
-	/** An inferred orthogonal signed axis permutation, validated against every imported frame. */
+	/** Import-coordinate evidence only; generated motion always uses the original UE component pose. */
 	struct FAxisMap
 	{
 		int32 Axis[3] = {0, 1, 2};
@@ -66,11 +106,11 @@ namespace GGYGOKevinMotion
 		{
 			const double Determinant = FVector::DotProduct(FVector::CrossProduct(Map(FVector::ForwardVector), Map(FVector::RightVector)), Map(FVector::UpVector));
 			const FVector Axial = Map(FVector(Q.X, Q.Y, Q.Z)) * Determinant;
-			return FQuat(Axial.X, Axial.Y, Axial.Z, Q.W).GetNormalized();
+			return FQuat(Axial.X, Axial.Y, Axial.Z, Q.W);
 		}
 	};
 
-	// Existing content is only inspected. A builder tag never authorizes replacing edits.
+	// Existing content is only inspected. A producer marker never grants overwrite permission.
 	bool CanInspectExisting(UObject* Object, UClass* ExpectedClass)
 	{
 		return Object && Object->IsA(ExpectedClass) && !Object->GetPackage()->IsDirty()
@@ -81,265 +121,425 @@ namespace GGYGOKevinMotion
 	{
 		UObject* Object = LoadObject<UObject>(nullptr, *(Path + TEXT(".") + FPackageName::GetLongPackageAssetName(Path)));
 		Existing = Cast<T>(Object);
-		if (!Object) return !FPackageName::DoesPackageExist(Path);
+		if (!Object)
+		{
+			const UPackage* Package = FindPackage(nullptr, *Path);
+			return !FPackageName::DoesPackageExist(Path) && (!Package || !Package->IsDirty());
+		}
 		return FPackageName::DoesPackageExist(Path) && CanInspectExisting(Object, T::StaticClass());
 	}
 
-	template<typename T> T* CreateAsset(const FString& Path)
+	/** Effective clip bounds are independent of exported support keys outside the native animation. */
+	bool MatchesNativeClipRange(const double* Range, double NativeDuration)
 	{
-		T* Asset = NewObject<T>(CreatePackage(*Path), *FPackageName::GetLongPackageAssetName(Path), RF_Public | RF_Standalone | RF_Transactional);
-		FAssetRegistryModule::AssetCreated(Asset);
-		return Asset;
+		return FMath::IsFinite(NativeDuration) && NativeDuration > 0
+			&& FMath::IsNearlyZero(Range[0], .00001)
+			&& FMath::IsNearlyEqual(Range[1], NativeDuration, .0001);
 	}
 
-	bool Save(UObject* Asset)
+	struct FPreparedMotion
 	{
-		UPackage* Package = Asset->GetOutermost();
-		Package->GetMetaData().SetValue(Asset, OwnerKey, OwnerValue);
-		Asset->MarkPackageDirty();
-		FSavePackageArgs Args;
-		Args.TopLevelFlags = RF_Public | RF_Standalone;
-		Args.SaveFlags = SAVE_NoError;
-		return UPackage::SavePackage(Package, Asset,
-			*FPackageName::LongPackageNameToFilename(Package->GetName(), FPackageName::GetAssetPackageExtension()), Args);
+		FString Name, Path, SourceHash;
+		FName Bone;
+		FBasis Basis;
+		TStrongObjectPtr<UAnimSequence> Source, Existing;
+		TArray<FVector> Positions, Scales, ActorDisplacements;
+		TArray<FQuat> Rotations;
+		TArray<float> Times;
+		FJson Report;
+	};
+
+	FString BasisStamp(const FBasis& Basis)
+	{
+		FJson Object = MakeShared<FJsonObject>();
+		Object->SetBoolField(TEXT("confirmed"), true);
+		Object->SetArrayField(TEXT("mesh_relative_rotation_xyzw"), {
+			MakeShared<FJsonValueNumber>(Basis.Rotation.X), MakeShared<FJsonValueNumber>(Basis.Rotation.Y),
+			MakeShared<FJsonValueNumber>(Basis.Rotation.Z), MakeShared<FJsonValueNumber>(Basis.Rotation.W)});
+		Object->SetArrayField(TEXT("mesh_relative_scale"), VectorJson(Basis.Scale));
+		FString Text;
+		FJsonSerializer::Serialize(Object.ToSharedRef(), TJsonWriterFactory<>::Create(&Text));
+		return Text;
 	}
 
-	bool Build(const TSharedPtr<FJsonObject>& Clip, bool bWrite, TSharedRef<FJsonObject> Report)
+	bool DecomposeXYZ(const FTransform& Original, const FTransform& OriginalLocal, const FTransform& Parent,
+		const FVector& FirstPosition, const FQuat& MeshToActor, FTransform& InPlaceLocal, FVector& ActorDelta)
 	{
-		const FString Suffix = Clip->GetStringField(TEXT("suffix"));
-		Report->SetStringField(TEXT("suffix"), Suffix);
-		const auto Fail = [&Report](const FString& Reason)
+		const FVector Scale = Parent.GetScale3D();
+		if (Parent.ContainsNaN() || FMath::IsNearlyZero(Scale.X) || FMath::IsNearlyZero(Scale.Y) || FMath::IsNearlyZero(Scale.Z)) return false;
+		InPlaceLocal = FTransform(OriginalLocal.GetRotation(), Parent.InverseTransformPosition(FirstPosition), OriginalLocal.GetScale3D());
+		ActorDelta = MeshToActor.RotateVector(Original.GetTranslation() - FirstPosition);
+		return !InPlaceLocal.ContainsNaN() && !ActorDelta.ContainsNaN();
+	}
+
+	bool SameCurve(const FRichCurve& A, const FRichCurve& B)
+	{
+		return A.GetConstRefOfKeys() == B.GetConstRefOfKeys() && A.DefaultValue == B.DefaultValue
+			&& A.PreInfinityExtrap == B.PreInfinityExtrap && A.PostInfinityExtrap == B.PostInfinityExtrap;
+	}
+
+	bool ValidateDerived(const FPreparedMotion& Plan, UAnimSequence* Derived)
+	{
+		const IAnimationDataModel* SourceModel = Plan.Source->GetDataModel();
+		const IAnimationDataModel* Model = Derived->GetDataModel();
+		FMetaData& Metadata = Derived->GetPackage()->GetMetaData();
+		FJson StoredJson;
+		FBasis Stored;
+		const FString Stamp = Metadata.GetValue(Derived, TEXT("GGYGO.MotionAssetBasis"));
+		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Stamp), StoredJson) || !StoredJson
+			|| !ReadBasis(StoredJson, Stored) || !Stored.Rotation.Equals(Plan.Basis.Rotation, .00001)
+			|| !Stored.Scale.Equals(Plan.Basis.Scale, .00001))
+			return Fail(Plan.Path, TEXT("derived basis provenance differs; existing asset preserved"));
+		if (!Model || Derived->GetSkeleton() != Plan.Source->GetSkeleton() || Derived->bEnableRootMotion
+			|| Derived->bForceRootLock || !FMath::IsNearlyEqual(Derived->RateScale, 1.f)
+			|| Model->GetNumberOfKeys() != Plan.Times.Num() || Model->GetFrameRate() != SourceModel->GetFrameRate()
+			|| !FMath::IsNearlyEqual(Derived->GetPlayLength(), Plan.Source->GetPlayLength(), .001f)
+			|| Model->GetNumBoneTracks() != SourceModel->GetNumBoneTracks()
+			|| Metadata.GetValue(Derived, TEXT("GGYGO.MotionCurveSpace")) != CurveSpace
+			|| Metadata.GetValue(Derived, TEXT("GGYGO.MotionSourceFBXSHA256")) != Plan.SourceHash)
+			return Fail(Plan.Path, TEXT("derived pose/grid/source/basis contract differs; existing asset preserved"));
+		TArray<FName> Names;
+		SourceModel->GetBoneTrackNames(Names);
+		for (FName Name : Names)
 		{
-			Report->SetStringField(TEXT("error"), Reason);
-			UE_LOG(LogTemp, Error, TEXT("[KevinMotion] %s"), *Reason);
-			return false;
-		};
-		if (Suffix != TEXT("01") && Suffix != TEXT("02")) return Fail(TEXT("Only initial Ice01/02 are configured."));
-		UAnimSequence* Source = LoadObject<UAnimSequence>(nullptr, *Clip->GetStringField(TEXT("source_sequence")));
-		if (!Source || !Source->GetSkeleton() || !Source->GetDataModel() || Source->GetPackage()->IsDirty()) return Fail(TEXT("Missing source animation/model/skeleton."));
-		const IAnimationDataModel* Model = Source->GetDataModel();
-		const FReferenceSkeleton& Ref = Source->GetSkeleton()->GetReferenceSkeleton();
-		const int32 Bone = Ref.FindBoneIndex(MotionBone);
-		const int32 Count = Model->GetNumberOfKeys();
-		const float Duration = Source->GetPlayLength();
-		const auto& Samples = Clip->GetArrayField(TEXT("samples"));
-		if (Bone == INDEX_NONE || Count < 2 || Samples.Num() != Count || !FMath::IsNearlyEqual(Source->RateScale, 1.f)
-			|| !FMath::IsNearlyEqual(Duration, static_cast<float>(Clip->GetNumberField(TEXT("duration"))), 0.001f))
-			return Fail(TEXT("Source key grid, duration, RateScale or motion bone differs from audited FBX."));
+			if (!Model->IsValidBoneTrackName(Name)) return Fail(Plan.Path, TEXT("derived bone track missing"));
+			TArray<FTransform> Actual, Expected;
+			Model->GetBoneTrackTransforms(Name, Actual);
+			if (Name == Plan.Bone)
+			{
+				if (Actual.Num() != Plan.Times.Num()) return Fail(Plan.Path, TEXT("derived motion-bone grid differs"));
+				for (int32 Frame = 0; Frame < Actual.Num(); ++Frame)
+					if (!Actual[Frame].Equals(FTransform(Plan.Rotations[Frame], Plan.Positions[Frame], Plan.Scales[Frame]), .001))
+						return Fail(Plan.Path, TEXT("paired in-place pose differs"));
+			}
+			else
+			{
+				SourceModel->GetBoneTrackTransforms(Name, Expected);
+				if (Actual.Num() != Expected.Num()) return Fail(Plan.Path, TEXT("non-motion bone grid changed"));
+				for (int32 Frame = 0; Frame < Actual.Num(); ++Frame)
+					if (!Actual[Frame].Equals(Expected[Frame], .001))
+						return Fail(Plan.Path, TEXT("non-motion bone changed"));
+			}
+		}
+		if (Model->GetFloatCurves().Num() != SourceModel->GetFloatCurves().Num() + 3)
+			return Fail(Plan.Path, TEXT("derived float-curve set differs"));
+		for (const FFloatCurve& SourceCurve : SourceModel->GetFloatCurves())
+		{
+			const FFloatCurve* Actual = Model->FindFloatCurve(FAnimationCurveIdentifier(SourceCurve.GetName(), ERawCurveTrackTypes::RCT_Float));
+			if (!Actual || Actual->GetCurveTypeFlags() != SourceCurve.GetCurveTypeFlags() || !SameCurve(Actual->FloatCurve, SourceCurve.FloatCurve))
+				return Fail(Plan.Path, TEXT("unrelated source curve changed"));
+		}
+		for (int32 Axis = 0; Axis < 3; ++Axis)
+		{
+			const FFloatCurve* Curve = Model->FindFloatCurve(FAnimationCurveIdentifier(CurveNames[Axis], ERawCurveTrackTypes::RCT_Float));
+			if (!Curve || !Derived->HasCurveData(CurveNames[Axis], false)
+				|| Curve->FloatCurve.PreInfinityExtrap != RCCE_Constant || Curve->FloatCurve.PostInfinityExtrap != RCCE_Constant)
+				return Fail(Plan.Path, TEXT("required native XYZ curve missing or extrapolation differs"));
+			const TArray<FRichCurveKey>& Keys = Curve->FloatCurve.GetConstRefOfKeys();
+			if (Keys.Num() != Plan.Times.Num()) return Fail(Plan.Path, TEXT("XYZ curve key count differs"));
+			for (int32 Frame = 0; Frame < Keys.Num(); ++Frame)
+				if (!FMath::IsNearlyEqual(Keys[Frame].Time, Plan.Times[Frame], .0001f)
+					|| !FMath::IsNearlyEqual(Keys[Frame].Value, static_cast<float>(Plan.ActorDisplacements[Frame][Axis]), .001f)
+					|| Keys[Frame].InterpMode != RCIM_Linear)
+					return Fail(Plan.Path, TEXT("XYZ curve differs from paired full trajectory"));
+		}
+		return true;
+	}
 
+	bool Prepare(const FJson& Clip, const FBasis& Basis, FPreparedMotion& Plan)
+	{
+		FString SourcePath, BoneName;
+		const TArray<TSharedPtr<FJsonValue>>* Samples = nullptr;
+		double AuditedDuration = 0, ClipRange[2];
+		if (!Clip || !Clip->TryGetStringField(TEXT("source_clip"), Plan.Name)
+			|| !Clip->TryGetStringField(TEXT("source_sequence"), SourcePath)
+			|| !Clip->TryGetStringField(TEXT("derived_sequence"), Plan.Path)
+			|| !Clip->TryGetStringField(TEXT("motion_bone"), BoneName) || BoneName.IsEmpty()
+			|| !Clip->TryGetStringField(TEXT("fbx_sha256"), Plan.SourceHash) || Plan.SourceHash.Len() != 64
+			|| !Clip->TryGetNumberField(TEXT("duration"), AuditedDuration) || !FMath::IsFinite(AuditedDuration)
+			|| !ReadNumbers(Clip, TEXT("clip_range_seconds"), 2, ClipRange)
+			|| !Clip->TryGetArrayField(TEXT("samples"), Samples))
+			return Fail(TEXT("selected clip"), TEXT("invalid schema2 source audit"));
+		Plan.Report->SetStringField(TEXT("source_clip"), Plan.Name);
+		Plan.Report->SetStringField(TEXT("sequence"), Plan.Path);
+		if (!FPackageName::IsValidLongPackageName(SourcePath) || SourcePath != FString(Base) + TEXT("AS_") + Plan.Name
+			|| !FPackageName::IsValidLongPackageName(Plan.Path) || !Plan.Path.StartsWith(FString(Base) + TEXT("Derived/")))
+			return Fail(Plan.Name, TEXT("source/derived paths outside the explicit Kevin animation contract"));
+		Plan.Source.Reset(LoadObject<UAnimSequence>(nullptr, *(SourcePath + TEXT(".") + FPackageName::GetLongPackageAssetName(SourcePath))));
+		if (!Plan.Source || !Plan.Source->GetSkeleton() || !Plan.Source->GetDataModel()
+			|| !FPackageName::DoesPackageExist(SourcePath) || Plan.Source->GetPackage()->IsDirty()
+			|| Plan.Source->GetSkeleton()->GetPackage()->IsDirty())
+			return Fail(SourcePath, TEXT("missing/unsaved source, data model or skeleton"));
+		Plan.Basis = Basis;
+		Plan.Bone = FName(*BoneName);
+		const IAnimationDataModel* Model = Plan.Source->GetDataModel();
+		const FReferenceSkeleton& Ref = Plan.Source->GetSkeleton()->GetReferenceSkeleton();
+		const int32 Bone = Ref.FindBoneIndex(Plan.Bone);
+		const int32 Count = Model->GetNumberOfKeys();
+		const float Duration = Plan.Source->GetPlayLength();
+		if (Bone == INDEX_NONE || !Model->IsValidBoneTrackName(Plan.Bone) || Count < 2
+			|| Count != Model->GetNumberOfFrames() + 1 || Samples->Num() != Count || Model->GetFrameRate().Numerator <= 0
+			|| Model->GetFrameRate().Denominator <= 0 || !FMath::IsFinite(Duration) || Duration <= 0
+			|| !MatchesNativeClipRange(ClipRange, Model->GetPlayLength())
+			|| !FMath::IsNearlyEqual(AuditedDuration, ClipRange[1], .00001)
+			|| !FMath::IsNearlyEqual(Plan.Source->RateScale, 1.f) || !FMath::IsNearlyEqual(static_cast<double>(Duration), AuditedDuration, .001))
+			return Fail(SourcePath, TEXT("source key grid/duration/rate/motion bone differs from audited FBX"));
+		for (FName Name : CurveNames)
+			if (Model->FindFloatCurve(FAnimationCurveIdentifier(Name, ERawCurveTrackTypes::RCT_Float)))
+				return Fail(SourcePath, TEXT("reserved XYZ curve already authored on source; no replacement"));
 		TArray<FTrack> Tracks;
 		Tracks.SetNum(Ref.GetNum());
 		for (int32 Index = 0; Index < Ref.GetNum(); ++Index)
 		{
-			Tracks[Index].Reference = Ref.GetRefBonePose()[Index];
-			if (Model->IsValidBoneTrackName(Ref.GetBoneName(Index))) Model->GetBoneTrackTransforms(Ref.GetBoneName(Index), Tracks[Index].Keys);
+			FTrack& Track = Tracks[Index];
+			Track.Reference = Ref.GetRefBonePose()[Index];
+			if (Track.Reference.ContainsNaN() || !Track.Reference.GetRotation().IsNormalized())
+				return Fail(SourcePath, TEXT("invalid reference-pose transform: ") + Ref.GetBoneName(Index).ToString());
+			if (!Model->IsValidBoneTrackName(Ref.GetBoneName(Index))) continue;
+			Model->GetBoneTrackTransforms(Ref.GetBoneName(Index), Track.Keys);
+			if (Track.Keys.Num() != 1 && Track.Keys.Num() != Count)
+				return Fail(SourcePath, TEXT("bone track is neither explicit static nor complete source grid: ") + Ref.GetBoneName(Index).ToString());
+			for (const FTransform& Key : Track.Keys)
+				if (Key.ContainsNaN() || !Key.GetRotation().IsNormalized())
+					return Fail(SourcePath, TEXT("invalid bone transform: ") + Ref.GetBoneName(Index).ToString());
 		}
 		TArray<FTransform> Original;
 		TArray<FVector> FbxPositions;
 		TArray<FQuat> FbxRotations;
 		for (int32 Frame = 0; Frame < Count; ++Frame)
 		{
-			const TSharedPtr<FJsonObject> Sample = Samples[Frame]->AsObject();
-			const double Time = Model->GetFrameRate().AsSeconds(FFrameTime(Frame));
-			if (FMath::Abs(Time - Sample->GetNumberField(TEXT("time"))) > 0.001)
-				return Fail(TEXT("UE / FBX sample times do not match."));
-			Original.Add(ComponentAt(Tracks, Ref, Bone, Frame));
-			FbxPositions.Add(JsonVector(Sample->GetArrayField(TEXT("fbx_translation_cm"))));
-			FbxRotations.Add(JsonQuat(Sample->GetArrayField(TEXT("fbx_rotation_xyzw"))));
+			const FJson Sample = (*Samples)[Frame]->AsObject();
+			double Time = 0, T[3], Q[4];
+			const double GridTime = Model->GetFrameRate().AsSeconds(FFrameTime(Frame));
+			if (!Sample || !Sample->TryGetNumberField(TEXT("time"), Time) || !FMath::IsFinite(Time)
+				|| FMath::Abs(GridTime - Time) > .001 || !ReadNumbers(Sample, TEXT("fbx_translation_cm"), 3, T)
+				|| !ReadNumbers(Sample, TEXT("fbx_rotation_xyzw"), 4, Q))
+				return Fail(Plan.Name, TEXT("FBX sample time/finite coordinates do not match UE source grid"));
+			const FQuat Rotation(Q[0], Q[1], Q[2], Q[3]);
+			if (!Rotation.IsNormalized()) return Fail(Plan.Name, TEXT("audited FBX quaternion is not normalized"));
+			const FTransform Component = ComponentAt(Tracks, Ref, Bone, Frame);
+			if (Component.ContainsNaN() || !Component.GetRotation().IsNormalized())
+				return Fail(SourcePath, TEXT("invalid original motion-bone component transform"));
+			Original.Add(Component);
+			FbxPositions.Add(FVector(T[0], T[1], T[2]));
+			FbxRotations.Add(Rotation);
+			Plan.Times.Add(Frame == Count - 1 ? Duration : static_cast<float>(GridTime));
 		}
-
-		FAxisMap Best;
-		double BestError = TNumericLimits<double>::Max();
+		if (!FMath::IsNearlyEqual(Model->GetFrameRate().AsSeconds(FFrameTime(Count - 1)), static_cast<double>(Duration), .0001))
+			return Fail(Plan.Name, TEXT("native last frame does not cover full clip duration"));
+		FAxisMap Mapping;
+		double TranslationError = 0, RotationError = 0;
+		int32 MatchingMaps = 0;
 		const int32 Permutations[6][3] = {{0,1,2},{0,2,1},{1,0,2},{1,2,0},{2,0,1},{2,1,0}};
 		for (const auto& Permutation : Permutations)
-		{
 			for (int32 Bits = 0; Bits < 8; ++Bits)
 			{
 				FAxisMap Candidate;
 				for (int32 Axis = 0; Axis < 3; ++Axis) Candidate.Axis[Axis] = Permutation[Axis];
 				Candidate.Sign = FVector(Bits & 1 ? -1 : 1, Bits & 2 ? -1 : 1, Bits & 4 ? -1 : 1);
-				double Error = 0.;
+				double PositionError = 0, AngleError = 0;
 				for (int32 Frame = 0; Frame < Count; ++Frame)
-					Error = FMath::Max(Error, FVector::Distance(Original[Frame].GetTranslation() - Original[0].GetTranslation(), Candidate.Map(FbxPositions[Frame] - FbxPositions[0])));
-				if (Error < BestError) { Best = Candidate; BestError = Error; }
+				{
+					PositionError = FMath::Max(PositionError, FVector::Distance(Original[Frame].GetTranslation() - Original[0].GetTranslation(),
+						Candidate.Map(FbxPositions[Frame] - FbxPositions[0])));
+					const FQuat UE = Original[Frame].GetRotation() * Original[0].GetRotation().Inverse();
+					const FQuat FBX = Candidate.MapRotation(FbxRotations[Frame] * FbxRotations[0].Inverse());
+					AngleError = FMath::Max(AngleError, FMath::RadiansToDegrees(UE.AngularDistance(FBX)));
+				}
+				if (PositionError <= .25 && AngleError <= .25 && Candidate.Axis[2] == 1)
+				{
+					++MatchingMaps; Mapping = Candidate; TranslationError = PositionError; RotationError = AngleError;
+				}
 			}
-		}
-		double RotationError = 0.;
-		for (int32 Frame = 0; Frame < Count; ++Frame)
-		{
-			const FQuat UEDelta = Original[Frame].GetRotation() * Original[0].GetRotation().Inverse();
-			const FQuat FbxDelta = Best.MapRotation(FbxRotations[Frame] * FbxRotations[0].Inverse());
-			RotationError = FMath::Max(RotationError, FMath::RadiansToDegrees(UEDelta.AngularDistance(FbxDelta)));
-		}
-		Report->SetNumberField(TEXT("fbx_to_ue_translation_error_cm"), BestError);
-		Report->SetNumberField(TEXT("fbx_to_ue_relative_rotation_error_deg"), RotationError);
-		Report->SetArrayField(TEXT("axis_permutation"), {MakeShared<FJsonValueNumber>(Best.Axis[0]), MakeShared<FJsonValueNumber>(Best.Axis[1]), MakeShared<FJsonValueNumber>(Best.Axis[2])});
-		Report->SetArrayField(TEXT("axis_sign"), VectorJson(Best.Sign));
-		Report->SetArrayField(TEXT("ue_first_position_cm"), VectorJson(Original[0].GetTranslation()));
-		Report->SetArrayField(TEXT("fbx_first_position_cm"), VectorJson(FbxPositions[0]));
-		Report->SetStringField(TEXT("source_fbx_sha256"), Clip->GetStringField(TEXT("fbx_sha256")));
-		if (BestError > 0.25 || RotationError > 0.25 || Best.Axis[2] != 1)
-			return Fail(TEXT("Imported pose does not match audited FBX axis/units/rotation; no assets written."));
-
-		TArray<FVector> Positions, Scales, Displacements;
-		TArray<FQuat> Rotations;
-		double Residual = 0., ReconstructionError = 0.;
+		if (MatchingMaps != 1)
+			return Fail(Plan.Name, FString::Printf(TEXT("FBX/UE full-pose axis evidence is missing or ambiguous (%d matching maps); no inferred basis"), MatchingMaps));
+		Plan.Report->SetArrayField(TEXT("axis_permutation"), {MakeShared<FJsonValueNumber>(Mapping.Axis[0]), MakeShared<FJsonValueNumber>(Mapping.Axis[1]), MakeShared<FJsonValueNumber>(Mapping.Axis[2])});
+		Plan.Report->SetArrayField(TEXT("axis_sign"), VectorJson(Mapping.Sign));
+		Plan.Report->SetNumberField(TEXT("fbx_to_ue_translation_error_cm"), TranslationError);
+		Plan.Report->SetNumberField(TEXT("fbx_to_ue_relative_rotation_error_deg"), RotationError);
 		const int32 Parent = Ref.GetParentIndex(Bone);
+		double Residual = 0, ReconstructionError = 0;
 		for (int32 Frame = 0; Frame < Count; ++Frame)
 		{
-			FVector Delta = Original[Frame].GetTranslation() - Original[0].GetTranslation();
-			Delta.Z = 0.;
-			FTransform InPlace = Original[Frame];
-			InPlace.AddToTranslation(-Delta);
-			const FTransform ParentTransform = ComponentAt(Tracks, Ref, Parent, Frame);
-			const FTransform Local = InPlace.GetRelativeTransform(ParentTransform);
-			Positions.Add(Local.GetTranslation());
-			Rotations.Add(Local.GetRotation());
-			Scales.Add(Local.GetScale3D());
-			Displacements.Add(Delta);
-			const FTransform Rebuilt = Local * ParentTransform;
-			Residual = FMath::Max(Residual, FVector::Dist2D(Rebuilt.GetTranslation(), Original[0].GetTranslation()));
-			ReconstructionError = FMath::Max(ReconstructionError, FVector::Distance(Rebuilt.GetTranslation() + Delta, Original[Frame].GetTranslation()));
+			const FTransform ParentPose = ComponentAt(Tracks, Ref, Parent, Frame);
+			const FTransform OriginalLocal = Tracks[Bone].At(Frame);
+			// Preserve original local rotation/scale exactly; only the translation track is rebased.
+			FTransform Local;
+			FVector ActorDelta;
+			if (!DecomposeXYZ(Original[Frame], OriginalLocal, ParentPose, Original[0].GetTranslation(), Basis.Rotation, Local, ActorDelta))
+				return Fail(Plan.Name, TEXT("paired pose has noninvertible parent or nonfinite motion"));
+			Plan.Positions.Add(Local.GetTranslation());
+			Plan.Rotations.Add(OriginalLocal.GetRotation());
+			Plan.Scales.Add(OriginalLocal.GetScale3D());
+			// UE imports are already cm. Uniform mesh scale is applied once by CMC, never baked here.
+			Plan.ActorDisplacements.Add(ActorDelta);
+			const FTransform Rebuilt = Local * ParentPose;
+			Residual = FMath::Max(Residual, FVector::Distance(Rebuilt.GetTranslation(), Original[0].GetTranslation()));
+			ReconstructionError = FMath::Max(ReconstructionError, FVector::Distance(Rebuilt.GetTranslation() + Basis.Rotation.UnrotateVector(Plan.ActorDisplacements.Last()), Original[Frame].GetTranslation()));
+			if (!Rebuilt.GetRotation().Equals(Original[Frame].GetRotation(), .001)
+				|| !Rebuilt.GetScale3D().Equals(Original[Frame].GetScale3D(), .001))
+				return Fail(Plan.Name, TEXT("paired decomposition changed source rotation/scale"));
 		}
-		Report->SetNumberField(TEXT("in_place_residual_cm"), Residual);
-		Report->SetNumberField(TEXT("reconstruction_error_cm"), ReconstructionError);
-		Report->SetNumberField(TEXT("duration"), Duration);
-		Report->SetNumberField(TEXT("keys"), Count);
-		Report->SetArrayField(TEXT("last_displacement_cm"), VectorJson(Displacements.Last()));
-		if (Residual > 0.001 || ReconstructionError > 0.001) return Fail(TEXT("Pose decomposition residual exceeds tolerance."));
+		if (Residual > .001 || ReconstructionError > .001) return Fail(Plan.Name, TEXT("full XYZ paired decomposition exceeds tolerance"));
+		Plan.Report->SetNumberField(TEXT("in_place_residual_xyz_cm"), Residual);
+		Plan.Report->SetNumberField(TEXT("reconstruction_error_xyz_cm"), ReconstructionError);
+		Plan.Report->SetArrayField(TEXT("ue_first_position_cm"), VectorJson(Original[0].GetTranslation()));
+		Plan.Report->SetArrayField(TEXT("last_actor_displacement_cm"), VectorJson(Plan.ActorDisplacements.Last()));
+		Plan.Report->SetNumberField(TEXT("duration"), Duration);
+		Plan.Report->SetNumberField(TEXT("keys"), Count);
+		UAnimSequence* Existing = nullptr;
+		if (!InspectOutput(Plan.Path, Existing)) return Fail(Plan.Path, TEXT("wrong type/owner/dirty/unpersisted output; preserved"));
+		Plan.Existing.Reset(Existing);
+		if (Existing && !ValidateDerived(Plan, Existing)) return false;
+		Plan.Report->SetBoolField(TEXT("saved_this_run"), false);
+		Plan.Report->SetStringField(TEXT("status"), Existing ? TEXT("existing_verified_preserved") : TEXT("planned_missing"));
+		return true;
+	}
 
-		const FString Stem = TEXT("Kevin_Ice_Attack_") + Suffix;
-		const FString SequencePath = FString(Base) + TEXT("/Animation/Derived/AS_") + Stem + TEXT("_InPlace");
-		const FString CurvePath = FString(Base) + TEXT("/Motion/CV_") + Stem + TEXT("_Translation");
-		const FString ProfilePath = FString(Base) + TEXT("/Motion/DA_") + Stem + TEXT("_Motion");
-		Report->SetStringField(TEXT("sequence"), SequencePath);
-		Report->SetStringField(TEXT("curve"), CurvePath);
-		Report->SetStringField(TEXT("profile"), ProfilePath);
-		UAnimSequence* Derived = nullptr;
-		UCurveVector* Curve = nullptr;
-		UGGYGOActionMotionProfile* Profile = nullptr;
-		if (!InspectOutput(SequencePath, Derived) || !InspectOutput(CurvePath, Curve) || !InspectOutput(ProfilePath, Profile))
-			return Fail(TEXT("Output type/owner/dirty-package check failed; all existing assets preserved."));
-		// Compare the full generated pose/curve baseline without writing. No stored stamp
-		// can establish that an asset has not been hand-edited since the stamp was saved.
-		if (Derived)
+	bool Create(const FPreparedMotion& Plan)
+	{
+		if (Plan.Existing) return true;
+		UAnimSequence* Derived = DuplicateObject<UAnimSequence>(Plan.Source.Get(), CreatePackage(*Plan.Path), *FPackageName::GetLongPackageAssetName(Plan.Path));
+		if (!Derived) return Fail(Plan.Path, TEXT("unable to duplicate source"));
+		TStrongObjectPtr<UAnimSequence> KeepAlive(Derived);
+		Derived->SetFlags(RF_Public | RF_Standalone | RF_Transactional);
+		IAnimationDataController& Controller = Derived->GetController();
+		Controller.OpenBracket(FText::FromString(TEXT("Pair full XYZ in-place pose and actor-local curves")), false);
+		bool bWritten = Controller.SetBoneTrackKeys(Plan.Bone, Plan.Positions, Plan.Rotations, Plan.Scales, false);
+		for (int32 Axis = 0; bWritten && Axis < 3; ++Axis)
 		{
-			const IAnimationDataModel* ExistingModel = Derived->GetDataModel();
-			if (!ExistingModel || Derived->GetSkeleton() != Source->GetSkeleton() || Derived->bEnableRootMotion
-				|| Derived->bForceRootLock || !FMath::IsNearlyEqual(Derived->RateScale, 1.f)
-				|| ExistingModel->GetNumberOfKeys() != Count || !FMath::IsNearlyEqual(Derived->GetPlayLength(), Duration, .001f)
-				|| ExistingModel->GetNumBoneTracks() != Model->GetNumBoneTracks())
-				return Fail(TEXT("Existing derived sequence differs from generated baseline; preserved."));
-			TArray<FName> TrackNames;
-			Model->GetBoneTrackNames(TrackNames);
-			for (FName Name : TrackNames)
+			TArray<FRichCurveKey> Keys;
+			for (int32 Frame = 0; Frame < Plan.Times.Num(); ++Frame)
 			{
-				TArray<FTransform> Actual;
-				if (!ExistingModel->IsValidBoneTrackName(Name)) return Fail(TEXT("Existing derived sequence missing track; preserved."));
-				ExistingModel->GetBoneTrackTransforms(Name, Actual);
-				const int32 TrackIndex = Ref.FindBoneIndex(Name);
-				if (TrackIndex == INDEX_NONE || Actual.Num() != Count) return Fail(TEXT("Existing track grid differs; preserved."));
-				for (int32 Frame = 0; Frame < Count; ++Frame)
-				{
-					const FTransform Expected = Name == MotionBone ? FTransform(Rotations[Frame], Positions[Frame], Scales[Frame]) : Tracks[TrackIndex].At(Frame);
-					if (!Actual[Frame].Equals(Expected, .001)) return Fail(TEXT("Existing pose differs from generated baseline; preserved."));
-				}
+				FRichCurveKey Key(Plan.Times[Frame], static_cast<float>(Plan.ActorDisplacements[Frame][Axis]));
+				Key.InterpMode = RCIM_Linear;
+				Keys.Add(Key);
 			}
+			const FAnimationCurveIdentifier Id(CurveNames[Axis], ERawCurveTrackTypes::RCT_Float);
+			bWritten = Controller.AddCurve(Id, AACF_DefaultCurve, false) && Controller.SetCurveKeys(Id, Keys, false);
 		}
-		if (Curve)
-		{
-			for (int32 Axis = 0; Axis < 3; ++Axis)
-			{
-				const auto& Keys = Curve->FloatCurves[Axis].GetConstRefOfKeys();
-				if (Keys.Num() != Count) return Fail(TEXT("Existing curve key count differs; preserved."));
-				for (int32 Frame = 0; Frame < Count; ++Frame)
-				{
-					const float Time = Frame == Count - 1 ? Duration : static_cast<float>(Model->GetFrameRate().AsSeconds(FFrameTime(Frame)));
-					if (!FMath::IsNearlyEqual(Keys[Frame].Time, Time, .0001f) || !FMath::IsNearlyEqual(Keys[Frame].Value, static_cast<float>(Displacements[Frame][Axis]), .001f) || Keys[Frame].InterpMode != RCIM_Linear)
-						return Fail(TEXT("Existing curve differs from generated baseline; preserved."));
-				}
-			}
-		}
-		FString ValidationError;
-		if (Profile && (!Curve || Profile->TranslationCurve != Curve || !FMath::IsNearlyEqual(Profile->Duration, Duration, .001f) || !Profile->ValidateMotion(ValidationError)))
-			return Fail(TEXT("Existing profile differs from trajectory contract; preserved. ") + ValidationError);
-		Report->SetBoolField(TEXT("saved_this_run"), false);
-		Report->SetStringField(TEXT("status"), TEXT("existing_preserved_or_missing"));
-		if (!bWrite) return true;
-		const bool bCreateDerived = !Derived, bCreateCurve = !Curve, bCreateProfile = !Profile;
-		if (bCreateDerived)
-		{
-			Derived = DuplicateObject<UAnimSequence>(Source, CreatePackage(*SequencePath), *FPackageName::GetLongPackageAssetName(SequencePath));
-			if (!Derived) return Fail(TEXT("Unable to duplicate source."));
-			FAssetRegistryModule::AssetCreated(Derived);
-			IAnimationDataController& Controller = Derived->GetController();
-			Controller.OpenBracket(FText::FromString(TEXT("Bake ground action in place")), false);
-			const bool bKeysWritten = Controller.SetBoneTrackKeys(MotionBone, Positions, Rotations, Scales, false);
-			Controller.CloseBracket(false);
-			if (!bKeysWritten) return Fail(TEXT("Unable to write derived bone keys."));
-			Derived->bEnableRootMotion = false; Derived->bForceRootLock = false; Derived->RateScale = 1.f;
-		}
-		if (bCreateCurve)
-		{
-			Curve = CreateAsset<UCurveVector>(CurvePath);
-			for (int32 Frame = 0; Frame < Count; ++Frame)
-			{
-				const float Time = Frame == Count - 1 ? Duration : static_cast<float>(Model->GetFrameRate().AsSeconds(FFrameTime(Frame)));
-				for (int32 Axis = 0; Axis < 3; ++Axis)
-				{
-					const FKeyHandle Key = Curve->FloatCurves[Axis].AddKey(Time, Displacements[Frame][Axis]);
-					Curve->FloatCurves[Axis].SetKeyInterpMode(Key, RCIM_Linear);
-				}
-			}
-		}
-		if (bCreateProfile)
-		{
-			Profile = CreateAsset<UGGYGOActionMotionProfile>(ProfilePath);
-			Profile->TranslationCurve = Curve; Profile->Duration = Duration;
-		}
-		if (!Profile->ValidateMotion(ValidationError)) return Fail(ValidationError);
-		// Save only assets created by this invocation, never incidental edits on loaded ones.
-		if ((bCreateDerived && !Save(Derived)) || (bCreateCurve && !Save(Curve)) || (bCreateProfile && !Save(Profile)))
-			return Fail(TEXT("Could not save all new assets; inspect partial output before retry."));
-		Report->SetBoolField(TEXT("saved_this_run"), bCreateDerived || bCreateCurve || bCreateProfile);
-		Report->SetStringField(TEXT("status"), bCreateDerived || bCreateCurve || bCreateProfile ? TEXT("created_missing_preserved_existing") : TEXT("existing_verified_preserved"));
+		Controller.CloseBracket(false);
+		if (!bWritten) return Fail(Plan.Path, TEXT("paired bone/curve write failed; new package remains unsaved"));
+		Derived->bEnableRootMotion = Derived->bForceRootLock = false;
+		Derived->RateScale = 1.f;
+		FMetaData& Metadata = Derived->GetPackage()->GetMetaData();
+		Metadata.SetValue(Derived, OwnerKey, OwnerValue);
+		Metadata.SetValue(Derived, TEXT("GGYGO.MotionCurveSpace"), CurveSpace);
+		Metadata.SetValue(Derived, TEXT("GGYGO.MotionAssetBasis"), *BasisStamp(Plan.Basis));
+		Metadata.SetValue(Derived, TEXT("GGYGO.MotionSourceFBXSHA256"), *Plan.SourceHash);
+		Derived->PostEditChange();
+		if (!ValidateDerived(Plan, Derived)) return false;
+		FAssetRegistryModule::AssetCreated(Derived);
+		Derived->MarkPackageDirty();
+		FSavePackageArgs Args;
+		Args.TopLevelFlags = RF_Public | RF_Standalone;
+		Args.SaveFlags = SAVE_NoError;
+		if (!UPackage::SavePackage(Derived->GetPackage(), Derived,
+			*FPackageName::LongPackageNameToFilename(Plan.Path, FPackageName::GetAssetPackageExtension()), Args))
+			return Fail(Plan.Path, TEXT("save failed; inspect partial output before retry"));
+		Plan.Report->SetBoolField(TEXT("saved_this_run"), true);
+		Plan.Report->SetStringField(TEXT("status"), TEXT("created"));
 		return true;
 	}
 
 	void Run(const TArray<FString>& Args)
 	{
-		const bool bWrite = Args.Num() > 0 && Args[0] == TEXT("build");
-		const FString Input = Args.Num() > 1 ? Args[1] : FPaths::ProjectSavedDir() / TEXT("Codex/kevin_motion_source.json");
-		FString Text;
-		TSharedPtr<FJsonObject> Document;
-		if (!FFileHelper::LoadFileToString(Text, *Input) || !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Document)
-			|| !Document.IsValid() || Document->GetIntegerField(TEXT("schema")) != 1)
-		{
-			UE_LOG(LogTemp, Error, TEXT("[KevinMotion] Run audit_kevin_action_motion.py first; unreadable input %s"), *Input);
-			return;
-		}
-		TSharedRef<FJsonObject> Report = MakeShared<FJsonObject>();
-		TArray<TSharedPtr<FJsonValue>> Results;
+		if (Args.Num() < 2 || (Args[0] != TEXT("audit") && Args[0] != TEXT("build")) || (Args[0] == TEXT("audit") && Args.Num() != 2))
+		{ Fail(TEXT("command"), TEXT("expected <audit|build> <schema2-source-audit> [exact missing derived packages for build]")); return; }
+		const bool bWrite = Args[0] == TEXT("build");
+		FJson Document, Wiring, Config;
+		if (!LoadJson(Args[1], Document) || !LoadJson(FPaths::ProjectDir() / BasisConfig, Wiring)
+			|| !LoadJson(FPaths::ProjectDir() / MontageConfig, Config)) return;
+		int32 Schema = 0, ConfigSchema = 0;
+		FString BasisPath, SelectionPath;
+		const FJson *Snapshot = nullptr, *Current = nullptr;
+		const TArray<TSharedPtr<FJsonValue>> *Clips = nullptr, *Selected = nullptr, *Catalog = nullptr;
+		if (!Document->TryGetNumberField(TEXT("schema"), Schema) || Schema != 2
+			|| !Document->TryGetStringField(TEXT("basis_config"), BasisPath) || BasisPath != BasisConfig
+			|| !Document->TryGetStringField(TEXT("montage_config"), SelectionPath) || SelectionPath != MontageConfig
+			|| !Document->TryGetObjectField(TEXT("motion_asset_basis"), Snapshot)
+			|| !Wiring->TryGetObjectField(TEXT("motion_asset_basis"), Current)
+			|| !Document->TryGetArrayField(TEXT("clips"), Clips)
+			|| !Config->TryGetNumberField(TEXT("schema_version"), ConfigSchema) || ConfigSchema != 2
+			|| !Config->TryGetArrayField(TEXT("selected_actions"), Selected) || Selected->IsEmpty()
+			|| !Config->TryGetArrayField(TEXT("actions"), Catalog) || Clips->Num() != Selected->Num())
+		{ Fail(Args[1], TEXT("schema2, authoritative basis/selection paths and exact selected clip set required")); return; }
+		FBasis Basis, Audited;
+		if (!ReadBasis(*Current, Basis) || !ReadBasis(*Snapshot, Audited)) return;
+		if (!Basis.Rotation.Equals(Audited.Rotation, .00001) || !Basis.Scale.Equals(Audited.Scale, .00001))
+		{ Fail(Args[1], TEXT("basis snapshot is stale; audit the confirmed Wiring configuration again")); return; }
+		TArray<FPreparedMotion> Plans;
+		TSet<FString> Names, Targets;
+		TArray<FString> Missing;
+		TArray<TSharedPtr<FJsonValue>> Rows;
 		bool bSuccess = true;
-		for (const auto& Value : Document->GetArrayField(TEXT("clips")))
+		for (int32 Index = 0; Index < Selected->Num(); ++Index)
 		{
-			TSharedRef<FJsonObject> Row = MakeShared<FJsonObject>();
-			const bool bClipSuccess = Build(Value->AsObject(), bWrite, Row);
-			Row->SetBoolField(TEXT("success"), bClipSuccess);
-			bSuccess &= bClipSuccess;
-			Results.Add(MakeShared<FJsonValueObject>(Row));
+			FString Name;
+			const FJson Clip = (*Clips)[Index]->AsObject();
+			FString ClipName, ClipSource, ClipDerived, ClipBone;
+			if (!(*Selected)[Index]->TryGetString(Name) || Name.IsEmpty() || Names.Contains(Name)
+				|| !Clip || !Clip->TryGetStringField(TEXT("source_clip"), ClipName) || ClipName != Name
+				|| !Clip->TryGetStringField(TEXT("source_sequence"), ClipSource)
+				|| !Clip->TryGetStringField(TEXT("derived_sequence"), ClipDerived)
+				|| !Clip->TryGetStringField(TEXT("motion_bone"), ClipBone))
+			{ bSuccess = Fail(Args[1], TEXT("source audit does not match the ordered unique selected_actions")); break; }
+			Names.Add(Name);
+			FJson Action;
+			for (const auto& Entry : *Catalog)
+			{
+				FString Candidate; const FJson Object = Entry->AsObject();
+				if (Object && Object->TryGetStringField(TEXT("source_clip"), Candidate) && Candidate == Name)
+				{
+					if (Action) { bSuccess = Fail(Name, TEXT("ambiguous action catalog")); break; }
+					Action = Object;
+				}
+			}
+			FString ExpectedSource, ExpectedDerived, ExpectedBone;
+			bool bRequired = false;
+			if (!bSuccess) break;
+			if (!Action || !Action->TryGetStringField(TEXT("source_sequence"), ExpectedSource) || ExpectedSource != ClipSource
+				|| !Action->TryGetStringField(TEXT("sequence_override"), ExpectedDerived) || ExpectedDerived != ClipDerived
+				|| !Action->TryGetStringField(TEXT("motion_bone"), ExpectedBone) || ExpectedBone != ClipBone
+				|| !Action->TryGetBoolField(TEXT("require_sequence_override"), bRequired) || !bRequired || Targets.Contains(ClipDerived))
+			{ bSuccess = Fail(Name, TEXT("stale/duplicate derived source, bone or selection contract")); break; }
+			Targets.Add(ClipDerived);
+			FPreparedMotion Plan; Plan.Report = MakeShared<FJsonObject>();
+			Rows.Add(MakeShared<FJsonValueObject>(Plan.Report));
+			bSuccess = Prepare(Clip, Basis, Plan);
+			if (!bSuccess) break;
+			if (!Plan.Existing) Missing.Add(Plan.Path);
+			Plans.Add(MoveTemp(Plan));
 		}
+		if (bSuccess && bWrite)
+		{
+			TSet<FString> Approved;
+			for (int32 Index = 2; Index < Args.Num(); ++Index)
+			{
+				if (!Missing.Contains(Args[Index]) || Approved.Contains(Args[Index]))
+				{ bSuccess = Fail(Args[Index], TEXT("approved new packages must exactly match missing selected outputs")); break; }
+				Approved.Add(Args[Index]);
+			}
+			for (const FString& Path : Missing)
+				if (bSuccess && !Approved.Contains(Path)) bSuccess = Fail(Path, TEXT("explicit new-package authorization required"));
+			// All sources, generated baselines and targets are prepared before any asset is created.
+			for (const FPreparedMotion& Plan : Plans)
+			{
+				if (!bSuccess) break;
+				bSuccess = Create(Plan);
+			}
+		}
+		FJson Report = MakeShared<FJsonObject>();
 		Report->SetBoolField(TEXT("success"), bSuccess);
 		Report->SetBoolField(TEXT("write_requested"), bWrite);
-		Report->SetArrayField(TEXT("clips"), Results);
+		Report->SetArrayField(TEXT("clips"), Rows);
 		FString Output;
-		FJsonSerializer::Serialize(Report, TJsonWriterFactory<>::Create(&Output));
-		FFileHelper::SaveStringToFile(Output, *(FPaths::ProjectSavedDir() / TEXT("Codex/kevin_motion_build_report.json")));
-		UE_LOG(LogTemp, Display, TEXT("[KevinMotion] %s %s. See Saved/Codex/kevin_motion_build_report.json"), bWrite ? TEXT("Build") : TEXT("Audit"), bSuccess ? TEXT("passed") : TEXT("failed"));
+		FJsonSerializer::Serialize(Report.ToSharedRef(), TJsonWriterFactory<>::Create(&Output));
+		UE_LOG(LogTemp, Display, TEXT("[KevinMotion] %s"), *Output);
 	}
 
 	FAutoConsoleCommand Command(TEXT("GGYGO.BuildKevinMotionAssets"),
-		TEXT("GGYGO.BuildKevinMotionAssets [audit|build] [source-audit-json]. Defaults to read-only audit."),
+		TEXT("Explicit audit/build, schema2 source-audit path, and exact missing derived packages for build. No CurveVector/Profile assets or overwrites."),
 		FConsoleCommandWithArgsDelegate::CreateStatic(&Run));
 }
 
@@ -347,22 +547,41 @@ namespace GGYGOKevinMotion
 #include "Tests/AnimationAssetSafetyTestUtils.h"
 #include "Misc/AutomationTest.h"
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FKevinMotionOutputSafetyTest, "GGYGO.Editor.Animation.KevinMotionOutputGuard",
-    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FKevinMotionOutputSafetyTest::RunTest(const FString& Parameters)
 {
-    using namespace GGYGOKevinMotion;
-    UPackage* Package = AnimationAssetSafetyTests::Package();
-    // InspectOutput expects a package asset path; use the package's short name.
-    UCurveVector* Asset = NewObject<UCurveVector>(Package, *FPackageName::GetLongPackageAssetName(Package->GetName()));
-    Package->GetMetaData().SetValue(Asset, OwnerKey, OwnerValue);
-    Package->SetDirtyFlag(false);
-    TestTrue(TEXT("Clean owned output passes memory guard"), CanInspectExisting(Asset, UCurveVector::StaticClass()));
-    TestFalse(TEXT("Owner marker cannot authorize wrong asset type"), CanInspectExisting(Asset, UAnimSequence::StaticClass()));
-    UCurveVector* Found = nullptr;
-    TestFalse(TEXT("Unpersisted in-memory output is not a verified asset"), InspectOutput(Package->GetName(), Found));
-    Package->SetDirtyFlag(true);
-    TestFalse(TEXT("Unsaved edits reject all writes"), CanInspectExisting(Asset, UCurveVector::StaticClass()));
-    TestTrue(TEXT("Inspection retains dirty state"), Package->IsDirty());
-    return true;
+	using namespace GGYGOKevinMotion;
+	UPackage* Package = AnimationAssetSafetyTests::Package();
+	UAnimSequence* Asset = NewObject<UAnimSequence>(Package, *FPackageName::GetLongPackageAssetName(Package->GetName()));
+	Package->GetMetaData().SetValue(Asset, OwnerKey, OwnerValue);
+	Package->SetDirtyFlag(false);
+	TestTrue(TEXT("Clean owned output passes memory guard"), CanInspectExisting(Asset, UAnimSequence::StaticClass()));
+	TestFalse(TEXT("Owner marker cannot authorize wrong asset type"), CanInspectExisting(Asset, USkeleton::StaticClass()));
+	UAnimSequence* Found = nullptr;
+	TestFalse(TEXT("Unpersisted in-memory output is not a verified asset"), InspectOutput(Package->GetName(), Found));
+	Package->SetDirtyFlag(true);
+	TestFalse(TEXT("Unsaved edits reject all writes"), CanInspectExisting(Asset, UAnimSequence::StaticClass()));
+	TestTrue(TEXT("Inspection retains dirty state"), Package->IsDirty());
+	const double EffectiveRange[] = {0., 2.}, ExportSupportRange[] = {0., 2.0166667};
+	TestTrue(TEXT("Effective clip range preserves the native final frame"), MatchesNativeClipRange(EffectiveRange, 2.));
+	TestFalse(TEXT("Export support cannot extend the native clip"), MatchesNativeClipRange(ExportSupportRange, 2.));
+	// Preserve the original nonzero offset/Q/S while removing real vertical motion.
+	const FQuat MeshToActor(FVector::UpVector, HALF_PI);
+	const FTransform Parent(FQuat(FVector::UpVector, .3), FVector(12, -8, 4), FVector(2));
+	const FTransform FirstLocal(FQuat(FVector::ForwardVector, .2), FVector(30, 15, 70), FVector(1.1));
+	const FTransform LastLocal(FirstLocal.GetRotation(), FirstLocal.GetTranslation() + FVector(25, -10, 35), FirstLocal.GetScale3D());
+	const FTransform First = FirstLocal * Parent, Last = LastLocal * Parent;
+	FTransform InPlace;
+	FVector ActorDelta;
+	TestTrue(TEXT("XYZ decomposition accepts valid original parent"), DecomposeXYZ(Last, LastLocal, Parent, First.GetTranslation(), MeshToActor, InPlace, ActorDelta));
+	TestTrue(TEXT("Vertical component survives"), FMath::IsNearlyEqual(ActorDelta.Z, 70., .001));
+	TestTrue(TEXT("Full in-place offset stays at first component pose"), (InPlace * Parent).GetTranslation().Equals(First.GetTranslation(), .001));
+	TestTrue(TEXT("Actor curve reconstructs all XYZ"), ((InPlace * Parent).GetTranslation() + MeshToActor.UnrotateVector(ActorDelta)).Equals(Last.GetTranslation(), .001));
+	TestTrue(TEXT("Original rotation retained"), InPlace.GetRotation().Equals(LastLocal.GetRotation()));
+	TestTrue(TEXT("Original scale retained"), InPlace.GetScale3D().Equals(LastLocal.GetScale3D()));
+	FVector InitialDelta;
+	TestTrue(TEXT("First offset is not discarded"), DecomposeXYZ(First, FirstLocal, Parent, First.GetTranslation(), MeshToActor, InPlace, InitialDelta)
+		&& InPlace.Equals(FirstLocal, .001) && InitialDelta.IsNearlyZero());
+	return true;
 }
 #endif

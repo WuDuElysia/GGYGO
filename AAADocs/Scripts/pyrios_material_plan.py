@@ -15,6 +15,20 @@ from pathlib import Path
 
 SUFFIXES = ("Body_1", "Body_2", "Weapon01")
 SLOT_INSTANCES = {"MAT_Pyrois_" + s: "MI_Pyrois_" + s for s in SUFFIXES}
+# Authored editor-preview inputs. These are not a fallback for an unavailable
+# scene light; the active component supplies the four inputs at runtime.
+PREVIEW_LIGHT = {"KeyLightDirectionWS": (0.35, 0.25, 0.9, 0.0), "KeyLightColor": (1.0, 1.0, 1.0, 1.0)}
+PREVIEW_SCALARS = {"SceneLightStrength": 1.0, "KeyLightVisibility": 1.0}
+# 显示适配属于材质输出，不加入原 Shader 的185个输入或组件的四个主光输入。
+EXPOSURE_PARAMETER = "ExposureCompensationWeight"
+EXPOSURE_INPUTS = ("LightValueInput", "AlphaInput")
+SURFACE_OUTPUTS = (("RimRaw", "CMOT_FLOAT3"), ("BloomWeight", "CMOT_FLOAT1"))
+PREVIEW_DATA_NAMES = ("ScenePreviewValid", "ScenePreviewDirectionX", "ScenePreviewDirectionY",
+                      "ScenePreviewDirectionZ", "ScenePreviewColorR", "ScenePreviewColorG",
+                      "ScenePreviewColorB", "ScenePreviewStrength", "ScenePreviewVisibility")
+DISPLAY_PARAMETERS = ("RimCompositeGain", "RimMaxIntensity")
+COMPOSITE_CODE = "return MainColor + min(max(RimRaw, 0.0), RimMaxIntensity) * RimCompositeGain;"
+PREVIEW_CODE = "return PreviewValid > 0.5 ? PreviewValue : MaterialValue;"
 INPUTS_PATH = Path(__file__).resolve().with_name("nap_avatar_toon_inputs.json")
 SHADER_NAME = "miHoYo/Character/NapAvatarStandard"
 GROUP_SUFFIX = ("", "2", "3", "4", "5")  # 材质组 0..4 对应属性后缀
@@ -52,6 +66,28 @@ def number(v, label):
     if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
         raise ValueError("Expected finite number: " + label)
     return float(v)
+
+
+def exposure_weight(value):
+    """明确的材质配置：0保留场景曝光，1抵偿曝光，中间值部分抵偿。无隐式默认。"""
+    value = number(value, EXPOSURE_PARAMETER)
+    if not 0.0 <= value <= 1.0:
+        raise ValueError(EXPOSURE_PARAMETER + " must be in [0, 1]")
+    return value
+
+
+def scene_light_settings(reference_intensity, intensity_response, output_scale, max_strength):
+    """完整场景受光配置；此入口要求非零响应，固定强度模式仍由组件显式支持。"""
+    values = {"ReferenceKeyLightIntensity": number(reference_intensity, "ReferenceKeyLightIntensity"),
+              "KeyLightIntensityResponse": number(intensity_response, "KeyLightIntensityResponse"),
+              "KeyLightOutputScale": number(output_scale, "KeyLightOutputScale"),
+              "MaxKeyLightStrength": number(max_strength, "MaxKeyLightStrength"),
+              "bPreviewSceneLighting": True}
+    if values["ReferenceKeyLightIntensity"] < 0.01 or not 0 < values["KeyLightIntensityResponse"] <= 1:
+        raise ValueError("场景受光必须有正参考强度及 (0,1] 响应")
+    if values["KeyLightOutputScale"] < 0 or values["MaxKeyLightStrength"] < 0:
+        raise ValueError("场景受光增益和上限必须非负")
+    return values
 
 
 def unity_gamma_to_linear(v):
@@ -173,7 +209,7 @@ def load_globals(path, inputs):
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     expected = {i["name"] for i in inputs if i["kind"] == "global"} | \
                {i["name"] for i in inputs if i["kind"] == "extra" and not i["name"].startswith("MC_")}
-    values = {k: v for k, v in data.items() if not k.startswith("//")}
+    values = {k: v for k, v in data.items() if not k.startswith("//") and k != "ProjectDisplay"}
     if set(values) != expected:
         raise ValueError("Globals keys differ: missing %s, unknown %s" % (
             sorted(expected - set(values)), sorted(set(values) - expected)))
@@ -183,6 +219,17 @@ def load_globals(path, inputs):
             raise ValueError("Global needs four values: " + k)
         result[k] = tuple(number(x, k) for x in v)
     return result
+
+
+def load_display(path):
+    """项目显示配置，独立于源游戏 cbuffer；必须完整、有限且非负。"""
+    data = json.loads(Path(path).read_text(encoding="utf-8")).get("ProjectDisplay")
+    if not isinstance(data, dict) or set(data) != set(DISPLAY_PARAMETERS):
+        raise ValueError("ProjectDisplay 必须明确配置 " + str(DISPLAY_PARAMETERS))
+    values = {k: number(v, k) for k, v in data.items()}
+    if any(v < 0 for v in values.values()):
+        raise ValueError("ProjectDisplay 参数必须非负")
+    return values
 
 
 def load_plan(json_dir, globals_path, inputs_path=INPUTS_PATH):
@@ -207,7 +254,8 @@ def load_plan(json_dir, globals_path, inputs_path=INPUTS_PATH):
                 raise ValueError("贴图槽 %s 混用了 sRGB 与线性贴图" % slot)
     return {"inputs": inputs, "materials": materials, "params": params, "textures": textures,
             "texture_names": names, "texture_srgb": {n: settings[n]["srgb"] for n in names},
-            "slot_srgb": slot_srgb, "globals": load_globals(globals_path, inputs)}
+            "slot_srgb": slot_srgb, "globals": load_globals(globals_path, inputs),
+            "display": load_display(globals_path)}
 
 
 class BuildJournal:

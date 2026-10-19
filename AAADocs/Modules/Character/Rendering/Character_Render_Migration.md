@@ -1,19 +1,16 @@
-# 通用角色渲染迁移与验收
+# 通用角色渲染迁移记录（2026-09-29，历史）
 
-## 当前状态（2026-09-29）
+## 历史范围
 
-2026-09-29：统筹离线测试22/22、完整 DLL 链接/冷启动、GGYGO自动化10/10（含两项渲染测试）通过，自动化零错误零警告。BP 单字段恢复后已编译、单包保存并冷回读15项参数/三槽/描边，legacy=false、autoActivate=true、is_dirty=false；最终哈希9e093db8…05dac3，双旧备份与原baseline保留。本会话MCP真实PIE确认3个表面MID及Leader Pose描边，灯强度10/2.5/0/40/10对应输出0.65/0.325/0/1/0.65。已恢复灯强度并停止自己启动的PIE，BP/原地图未变脏、哈希未变。结束时地图查询变化及MCP可读性限制另记，未宣称原版视觉还原完成。
+本页保留当时的 BP 迁移、失败恢复与保存重开证据。运行 MID/描边/主光响应的完整记录见[历史 Cold/PIE 验收](Character_Render_Runtime_Verification.md)；稳定接口只看[渲染契约](Pyrios_Renderer_Implementation.md)，当前任务与共享窗口只看[当前排程](../../../Coordination/Module_Repair_Parallel_Schedule.md)。
 
-本说明只记录已确认的门禁。统筹独占 UE 的冷启动、迁移和自动化执行；当前源码、脚本、配置冻结。本批不重建材质，不改变视觉校准，不保存无关资产。
+以下窗口、冻结和验证描述仅属于 2026-09-29 迁移批次，不构成当前开工许可。旧参数/哈希保留用于追溯，不作为当前 BP 配置。
 
-## 职责与兼容契约
+## 迁移时身份约束
 
-- `UGGYGOCharacterRenderComponent`：显式槽位绑定、MID 所有权、受控主光、可选描边与清理。角色差异由 BP/材料资产配置，不含角色名判断或 LoadObject 默认资产回退。
-- `UGGYGOPyriosRenderComponent`：继承通用类，保留 `/Script/GGYGO.GGYGOPyriosRenderComponent` 序列化路径。`AGGYGOHeroCharacter` 继续创建名为 `StylizedRenderComponent` 的旧子类；不在未验收前替换子对象身份。
-- `bAutoConfigurePyrios` 保留可序列化属性，迁移写 false；不再参与运行时资产选择。`FGGYGOCharacterRenderSlot` 反射名保留，DefaultEngine.ini 为移动的属性和 RefreshMaterials 函数提供 CoreRedirects。重定向已编译不代表旧 BP 已通过加载/保存验证。
-- `RefreshMaterials()` 仅在 BeginPlay 后且激活时建立绑定。Mesh/装扮提供方负责先 Release、更新 Mesh/配置、再 Refresh。空配置不安装 MID；Tick 检测 Mesh/槽位失效时释放并等待显式刷新。
-- 原覆盖保存自 OverrideMaterials，null 表示使用模型默认材质。释放只操作仍等于已安装 MID 的槽；原 Mesh/槽相同则恢复原覆盖，不同则清除自身遗留覆盖；第三方写入保留。EndPlay、OnUnregister、Deactivate 均释放自身资源。
-- KeyLight 是显式配置，ResolvedKeyLight 是 transient 弱缓存。自动模式保留有效缓存，失效后按对象路径排序选择有效灯；显式不可用时不擅自回退。无有效灯输出黑色与零 SceneLightStrength；环境底色、MatCap、自发光仍独立。
+本批保留 `UGGYGOPyriosRenderComponent` 的序列化类路径、Hero 的 `StylizedRenderComponent` 子对象名及 `FGGYGOCharacterRenderSlot` 反射名；迁移 `bAutoConfigurePyrios=false`，并核 CoreRedirects。它们是下述资产恢复的历史前提，不能外推未审计 Blueprint。
+
+运行材质、灯缓存和编辑器预览的所有权/清理规则只在[稳定渲染契约](Pyrios_Renderer_Implementation.md#职责与资源所有权)维护。
 
 ## 已采集旧基线
 
@@ -47,16 +44,16 @@
 
 这份工具针对已审计 Pyrios 目标，不自动迁移其他 Blueprint。出现额外旧类使用者或多模板时，须先制定其映射。模型默认 MI 已保存，因此静态表面预览可以继续存在；它不能证明运行组件已经配置正确。
 
-## 生产工具门禁
+## 当时工具验证
 
-- `verify_pyrios_renderer.py` 默认只读；`--compile` 显式重编译可能使材质包变脏，不自动保存。
-- `build_pyrios_materials.py` 使用 `pyrios_material_plan.py`，在资产修改前验证完整源 JSON、有限数值、已知校准项、所需纹理、目标类型、槽位和脏包。BuildJournal 列明 attempted/保存/未保存与失败；工具不是全资产事务，失败后可能部分完成。
+工具的活动接口和副作用见[渲染契约：资产、工具与 FX 接缝](Pyrios_Renderer_Implementation.md#资产工具与-fx-接缝)。以下保留当时验证状态，不代表本轮重新执行。
+
 - 9 项离线回归已通过，6 份相关脚本 AST 检查通过；真实源纯读取计划包含 3 份材质和 16 项纹理引用。以上不等于生成器本次已在 UE 执行。
 - 旧基线审计与两项渲染 C++ 自动化已执行，最新复测均为 Success、零错误零警告；迁移器首次只读 preflight 已通过；apply 在旧标志写入处失败，尚未编译/保存。重建器未执行。
 
-## 视觉边界
+## 迁移批次的视觉边界
 
-表面仍是 Unlit/Emissive 的 Toon 近似。静态预览使用 MI 基准光，组件动态主光/描边需要 BeginPlay；编辑器实时场景光同步、公共 MPC、逐像素 Toon 阴影和多点光接入均未实现。本次安全与职责整改不提高原 Shader 的公式还原程度。历史截图与材质证据见 [实现说明](Pyrios_Renderer_Implementation.md) 和 [差距审计](Pyrios_Material_Fidelity_Audit.md)。
+当时的迁移不提高原 Shader 还原程度，也没有完成原图对照。当前编辑器预览接口与仍缺少的完整多灯/逐像素阴影，见[稳定渲染契约](Pyrios_Renderer_Implementation.md#编辑器预览)；旧截图和判断见[差距审计历史](Pyrios_Material_Fidelity_Audit.md)。
 
 ## KeyLightLifecycle 历史警告与已通过复验（2026-09-29）
 

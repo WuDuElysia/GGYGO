@@ -1,7 +1,7 @@
 """Unity ParticleSystem 预制体（.fx.json）→ Niagara 发射器方案（离线，不依赖 UE）。
 
 一个渲染中的 ParticleSystem 节点对应一个 Niagara 发射器。粒子行为不套 Niagara 的高层模块，
-而是用 Set Parameters 模块把 Unity 的公式逐项写成 HLSL 表达式，保证数值与 Unity 一致：
+而是用 Set Parameters 模块把已核实的 Unity 公式逐项写成 HLSL 表达式：
 
     发射器更新：Emitter State（Self、Once/Infinite、时长=lengthInSec、延迟=startDelay）
                  Spawn Burst（逐个 burst 的时刻与数量）/ Spawn Rate（rateOverTime）
@@ -14,14 +14,19 @@
 四元数 (x, y, z, w) → (-x, z, y, w)；缩放 (sx, sy, sz) → (sx, sz, sy)。
 所有 Unity 量先在 Unity 坐标里算好，最后一步才换到 UE。
 
-未实现的模块（形状发射、速度、噪声、碰撞、子发射器、拖尾…）一旦启用就报错，不生成近似效果。
+支持 Sphere/Cone Base 出生形状、View Billboard 和 Lifetime Grid UV；
+标准帧/缩放适配复用引擎时钟；未知减速/触限度量须显式选择可调UE等效，不能冒称原生一致。
 """
 import math
 import re
+import zzz_fx_particle_renderer as PR
+import zzz_fx_particle_motion as PM
+import zzz_fx_particle_uv as PU
 
 UNITY_RENDER_MODE = {0: "Billboard", 1: "Stretch", 2: "HorizontalBillboard", 3: "VerticalBillboard", 4: "Mesh", 5: "None"}
 # 已实现的模块；其余模块 enabled=true 时报错
-SUPPORTED_MODULES = {"InitialModule", "EmissionModule", "ColorModule", "SizeModule", "RotationModule", "CustomDataModule"}
+SUPPORTED_MODULES = {"InitialModule", "EmissionModule", "ColorModule", "SizeModule", "RotationModule", "CustomDataModule",
+                     "ShapeModule", "UVModule", "VelocityModule", "ClampVelocityModule", "LightsModule"}
 
 
 class SpecError(Exception):
@@ -202,6 +207,18 @@ def minmax_curve_const(c):
     if c["minMaxState"] != 0:
         raise SpecError("发射器级参数要求常量 MinMaxCurve，实际模式 %d" % c["minMaxState"])
     return c["scalar"]
+
+
+def burst_count(c, path):
+    """Burst counts are integers; preserve two-constant random event counts."""
+    if c["minMaxState"] not in (0, 3):
+        raise SpecError("%s burst count curve mode %r is not implemented" % (path, c["minMaxState"]))
+    maximum = c["scalar"]
+    minimum = c["minScalar"] if c["minMaxState"] == 3 else maximum
+    if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0 or v != int(v)
+           for v in (minimum, maximum)) or minimum > maximum:
+        raise SpecError("%s burst count requires ordered nonnegative integer endpoints" % path)
+    return int(maximum) if minimum == maximum else {"min": int(minimum), "max": int(maximum)}
 
 
 def gradient_h(g, t):
@@ -397,11 +414,15 @@ class Randoms:
                 for i in range((self.n + 3) // 4)]
 
 
-def check_modules(ps, path):
+def check_modules(ps, path, policy=None):
     for name, expected in (("simulationSpeed", 1.0), ("useUnscaledTime", False),
                            ("stopAction", 0), ("ringBufferMode", 0), ("playOnAwake", True)):
         if name in ps and ps[name] != expected:
             raise SpecError("%s %s=%r requires its source runtime lifecycle/time contract" % (path, name, ps[name]))
+    PM.check_limit_velocity(ps.get("ClampVelocityModule"), path, policy)
+    lights = ps.get("LightsModule")
+    if lights and lights["enabled"] and any(lights["light"][k] for k in ("m_FileID", "m_PathID")):
+        raise SpecError("%s LightsModule bound Light prefab requires a source light renderer" % path)
     for k, v in ps.items():
         if isinstance(v, dict) and v.get("enabled") and k not in SUPPORTED_MODULES:
             raise SpecError("%s 启用了 %s，未实现" % (path, k))
@@ -414,11 +435,9 @@ def check_modules(ps, path):
         raise SpecError("%s 的 gravityModifier 不为 0，重力未实现" % path)
     if im.get("randomizeRotationDirection", 0.0) != 0.0:
         raise SpecError("%s randomizeRotationDirection≠0 未实现" % path)
-    if ps.get("ShapeModule", {}).get("enabled"):
-        raise SpecError("%s 启用了 ShapeModule，形状发射未实现" % path)
     em = ps.get("EmissionModule") if ps.get("EmissionModule", {}).get("enabled") else None
-    if em and minmax_curve_const(em["rateOverDistance"]) != 0.0:
-        raise SpecError("%s rateOverDistance≠0 未实现" % path)
+    if em and minmax_curve_const(em["rateOverDistance"]) < 0.0:
+        raise SpecError("%s rateOverDistance must be nonnegative" % path)
 
 
 def custom_data_h(cd, idx, age, rnd, program=None):
@@ -436,14 +455,84 @@ def custom_data_h(cd, idx, age, rnd, program=None):
     raise SpecError("CustomData 模式 %r" % mode)
 
 
-def emitter_spec(node, path_nodes, clip, ue_assets, material_paths, material_plan):
+def sprite_motion(ps, path, chain, tscale, shape_pos, shape_dir, velocity_h, sim_local, rnd, curves):
+    """Single velocity owner, native dt/lifetime, source-frame displacement.
+
+    Keep Niagara positions in world space even for Unity local simulation: the
+    source displacement follows current node/owner transforms explicitly. This
+    prevents Niagara bLocalSpace from reapplying parent scale in Local/Shape
+    scaling modes. No inverse owner scale or second transform/time cache.
+    """
+    smode = ps["scalingMode"]
+    clamp = ps.get("ClampVelocityModule")
+    if not sim_local and clamp and smode == 0:
+        raise SpecError("%s world simulation with hierarchy-scale Clamp needs its source metric-frame adapter" % path)
+    if not sim_local and clamp and len(set(tscale)) != 1:
+        raise SpecError("%s world simulation with nonuniform-scale Clamp needs its source metric-frame adapter" % path)
+    origin = "(Engine.Owner.Position + %s)" % qrot_h("Engine.Owner.Rotation",
+                                 "(Engine.Owner.Scale * %s)" % ue_pos_h(chain.pos_h()))
+
+    def vector_world(vector, scale, owner_scale):
+        value = ue_pos_h(qrot_h(chain.quat_h(), "(%s * %s)" % (f3(scale), vector)))
+        if owner_scale:
+            value = "(Engine.Owner.Scale * %s)" % value
+        return qrot_h("Engine.Owner.Rotation", value)
+
+    shape_world = vector_world(shape_pos, chain.S if smode == 2 else tscale, smode in (0, 2))
+    birth = "(%s + %s)" % (origin, shape_world)
+    spawn, update = list(chain.temps), list(chain.temps)
+    base = "Particles.UEFX_BaseVelocity"
+    total = "Transient.UEFX_TotalVelocity"
+    linear = "Transient.UEFX_LinearVelocity"
+    initial = "(%s * Particles.USpeed)" % shape_dir
+    if sim_local:
+        spawn += [(base, "Vector", initial), ("Particles.UEFX_Displacement", "Vector", "float3(0.0,0.0,0.0)"),
+                  ("Particles.Position", "Position", birth)]
+        update.append((linear, "Vector", velocity_h))
+    else:
+        spawn += [(base, "Vector", vector_world(initial, tscale, smode == 0)),
+                  ("Particles.Position", "Position", birth)]
+        update.append((linear, "Vector", vector_world(velocity_h, tscale, smode == 0)))
+    update.append((total, "Vector", "(%s + %s)" % (base, linear)))
+    tunables = []
+    if clamp:
+        limit = minmax_curve_h(clamp["magnitude"], "Particles.NormalizedAge", rnd.take(), curves)
+        if not sim_local:
+            limit = "(%s * %s)" % (limit, f(abs(tscale[0]) * 100.0))
+        update += PM.dampen_entries(clamp, limit, total, f)
+        # Retain damping feedback. Reconstructing the original start speed each
+        # update would discard all earlier damping; curve velocity is additive.
+        update.append((base, "Vector", "(%s - %s)" % (total, linear)))
+        tunables = [("Emitter.UEFX_DampenReferenceSeconds", "Float"), ("Emitter.UEFX_DampenStrength", "Float")]
+    if sim_local:
+        update += [("Particles.UEFX_Displacement", "Vector", "(Particles.UEFX_Displacement + %s * Engine.DeltaTime)" % total),
+                   ("Particles.Velocity", "Vector", vector_world(total, tscale, smode == 0)),
+                   ("Particles.Position", "Position", "(%s + %s)" % (birth,
+                        vector_world("Particles.UEFX_Displacement", tscale, smode == 0)))]
+    else:
+        update += [("Particles.Velocity", "Vector", total),
+                   ("Particles.Position", "Position", "(Particles.Position + Particles.Velocity * Engine.DeltaTime)")]
+    # Hierarchical size incorporates the owner transform once. Local ignores
+    # parents; Shape does not scale size or movement. Axis lengths remain valid
+    # under owner nonuniform scaling without pretending the chain is pure TRS.
+    if smode == 0:
+        size_scale = "float3(%s)" % ", ".join("length(Engine.Owner.Scale * %s)" % ue_pos_h(
+            qrot_h(chain.quat_h(), f3(tuple(tscale[i] if i == axis else 0.0 for i in range(3)))))
+            + " / 100.0" for axis in range(3))
+    else:
+        size_scale = f3(tscale)
+    return spawn, update, size_scale, tunables
+
+
+def emitter_spec(node, path_nodes, clip, ue_assets, material_paths, material_plan, particle_equivalence=None):
     path = "/".join(n["name"] for n in path_nodes)
     raw_ps, rd = node["particle"]["system"], node["particle"]["renderer"]
     # New source evidence preserves disabled modules as well as enabled ones.
     # Their serialized curves are inert and must never become live simulation.
     ps = {k: v for k, v in raw_ps.items() if not isinstance(v, dict) or "enabled" not in v
           or v["enabled"] or k == "InitialModule"}
-    check_modules(ps, path)
+    policy = PM.equivalence_policy(particle_equivalence)
+    check_modules(ps, path, policy)
     im = ps["InitialModule"]
     rnd = Randoms()
     spawn_curves, update_curves = CurveProgram("Spawn"), CurveProgram("Update")
@@ -467,9 +556,27 @@ def emitter_spec(node, path_nodes, clip, ue_assets, material_paths, material_pla
         rot0 = "float3(0.0, 0.0, %s)" % minmax_curve_h(im["startRotation"], eage, rnd.take(), spawn_curves)
     spawn.append(("Particles.URot", "Vector", rot0))
     spawn.append(("Particles.UStable", "Vector4", "float4(rand(1.0), rand(1.0), rand(1.0), rand(1.0))"))
-    # 形状模块关闭时 Unity 从变换原点沿本地 +Z 以 startSpeed 发射；没有任何力，位移 = 速度 × 年龄
+    # Shape samples are source-local birth attributes. No shape means the
+    # original origin/+Z direction; unsupported enabled shapes fail explicitly.
+    shape_entries, shape_pos, shape_dir, shape = PM.birth_shape_h(ps.get("ShapeModule"), path, rnd, f)
+    spawn += shape_entries
+    if shape is not None:
+        shape_q = f4(qeuler_zxy(*(math.radians(value) for value in shape["m_Rotation"])))
+        shape_pos = "(%s + %s)" % (f3(shape["m_Position"]), qrot_h(shape_q,
+                    "(%s * %s)" % (f3(shape["m_Scale"]), shape_pos)))
+        shape_dir = qrot_h(shape_q, shape_dir)
+        spawn += [("Particles.UShapePosition", "Vector", shape_pos),
+                  ("Particles.UShapeDirection", "Vector", shape_dir)]
+        shape_pos, shape_dir = "Particles.UShapePosition", "Particles.UShapeDirection"
     spawn.append(("Particles.USpeed", "Float", minmax_curve_h(im["startSpeed"], eage, rnd.take(), spawn_curves)))
-    local_pos = "(float3(0.0, 0.0, 1.0) * Particles.USpeed * Particles.Age)"
+    local_pos = "(%s + %s * Particles.USpeed * Particles.Age)" % (shape_pos, shape_dir)
+    velocity = ps.get("VelocityModule")
+    requirements = []
+    if velocity and rd["m_RenderMode"] != 0:
+        # The unfinished mesh candidate never passed preflight. Retire that
+        # dead write chain rather than retain a speculative integrator behind
+        # a permanent native-evidence requirement. This is an adapter gap.
+        raise SpecError("%s mesh VelocityModule simulation-frame adapter is not implemented" % path)
 
     # 旋转随寿命（角速度，弧度/秒）
     rm = ps.get("RotationModule")
@@ -503,7 +610,7 @@ def emitter_spec(node, path_nodes, clip, ue_assets, material_paths, material_pla
         speed = im["startSpeed"]
         stationary = speed["minMaxState"] == 0 and speed["scalar"] == 0.0 or (
             speed["minMaxState"] == 3 and speed["scalar"] == 0.0 and speed["minScalar"] == 0.0)
-        if ps["scalingMode"] == 0 or not stationary:
+        if ps["scalingMode"] == 0 or not stationary or shape is not None:
             raise SpecError("%s 切变影响层级尺寸或运动，需要矩阵变换路径" % path)
     if ps["scalingMode"] == 0:
         tscale = chain.S
@@ -514,44 +621,94 @@ def emitter_spec(node, path_nodes, clip, ue_assets, material_paths, material_pla
     else:
         raise SpecError("%s 未知 scalingMode %r" % (path, ps["scalingMode"]))
     mode = rd["m_RenderMode"]
-    if mode != 4:
-        raise SpecError("%s 渲染模式 %s 未实现（只做了 Mesh）" % (path, UNITY_RENDER_MODE.get(mode, mode)))
+    if mode not in (0, 4):
+        raise SpecError("%s 渲染模式 %s 未实现" % (path, UNITY_RENDER_MODE.get(mode, mode)))
+    renderer_contract = PR.mesh_contract(rd, path) if mode == 4 else PR.sprite_contract(rd, path)
+    viewport = PR.viewport_plan(rd, policy, path) if mode == 0 else None
+    if viewport is not None:
+        if material_plan.get("viewport_clamp") != viewport:
+            raise SpecError("%s sprite material is missing/mismatches its explicit viewport geometry adapter" % path)
+        renderer_contract["requirements"] = []
+        renderer_contract["viewport_adapter"] = {k: viewport[k] for k in ("mode", "metric", "precision")}
+        renderer_contract["viewport_adapter_signature"] = PR.viewport_signature(viewport)
     align = rd["m_RenderAlignment"]
-    update.append(("Particles.UPartQ", "Quat", qeuler_h("Particles.URot")))
-    if align == 2:      # Local：网格随变换旋转
+    if mode == 0:
+        if im["rotation3D"] or (rm and rm["separateAxes"]):
+            raise SpecError("%s 3D billboard rotation requires a source plane adapter" % path)
+        q_u = None
+    elif align == 2:      # Local：网格随变换旋转
         q_u = qmul_h(chain.quat_h(), "Particles.UPartQ")
     elif align == 1:    # World：只用粒子自身旋转
         q_u = "Particles.UPartQ"
     else:
         raise SpecError("%s 网格对齐模式 %d 未实现" % (path, align))
+    if mode == 4:
+        update.append(("Particles.UPartQ", "Quat", qeuler_h("Particles.URot")))
     scale_u = "(Particles.USize * %s)" % f3(tscale)
     pose = list(chain.temps)
     owner_q = "Engine.Owner.Rotation"
-    if align == 1:
+    if mode == 0:
+        pose_q = None
+    elif align == 1:
         # World-aligned meshes keep world orientation even in local simulation.
         inverse_owner = "float4(-Engine.Owner.Rotation.xyz, Engine.Owner.Rotation.w)"
         q_local = qmul_h(inverse_owner, ue_quat_h(q_u)) if sim_local else ue_quat_h(q_u)
     else:
         q_local = ue_quat_h(q_u)
-    pose_q = ("Particles.MeshOrientation", "Quat", q_local)
+    if mode == 4:
+        pose_q = ("Particles.MeshOrientation", "Quat", q_local)
     # 粒子在节点本地的位移经节点变换到预制体根空间（scalingMode=Shape 时位置也按变换缩放，与 Hierarchical 同）
     pos_u = "(%s + %s)" % (chain.pos_h(), qrot_h(chain.quat_h(), "(%s * %s)" % (f3(chain.S), local_pos)))
-    if sim_local:
-        update += pose + [("Particles.Position", "Position", ue_pos_h(pos_u)), pose_q]
+    emitter_update = []
+    if mode == 0:
+        velocity_h, velocity_world = PM.linear_velocity_h(velocity, path, rnd, update_curves, minmax_curve_h)
+        if velocity_world:
+            raise SpecError("%s World VelocityModule requires its inverse source simulation-frame conversion" % path)
+        s_motion, u_motion, sprite_scale, tunables = sprite_motion(ps, path, chain, tscale,
+                                                        shape_pos, shape_dir, velocity_h, sim_local, rnd, update_curves)
+        spawn += s_motion
+        update += u_motion
+        scale_u = "(Particles.USize * %s)" % sprite_scale
+        if tunables:
+            emitter_update = [(name, kind, f(policy["dampen_reference_seconds" if name.endswith("ReferenceSeconds") else "dampen_strength"]))
+                              for name, kind in tunables]
+    elif ps.get("ClampVelocityModule"):
+        raise SpecError("%s mesh ClampVelocityModule needs its simulation-frame adapter" % path)
+    elif sim_local:
+        update += pose + [("Particles.Position", "Position", ue_pos_h(pos_u))]
+        if pose_q is not None:
+            update.append(pose_q)
     else:
         # 世界空间：出生时把节点位置换到世界，之后沿出生时的方向直线运动；
         # Local 对齐的朝向仍按当前变换每帧更新（与 Unity 相同）
         spawn += [(n, t, e) for n, t, e in pose]
-        spawn.append(("Particles.UWorldOrigin", "Position",
-                      "(Engine.Owner.Position + %s)" % qrot_h("Engine.Owner.Rotation", "(Engine.Owner.Scale * %s)" % ue_pos_h(chain.pos_h()))))
-        spawn.append(("Particles.UWorldDir", "Vector",
-                      qrot_h("Engine.Owner.Rotation", "(Engine.Owner.Scale * %s)" % ue_pos_h(qrot_h(chain.quat_h(), "float3(0.0, 0.0, 1.0)")))))
+        birth_origin = "(%s + %s)" % (chain.pos_h(), qrot_h(chain.quat_h(),
+                            "(%s * %s)" % (f3(chain.S), shape_pos)))
+        world_origin = "(Engine.Owner.Position + %s)" % qrot_h("Engine.Owner.Rotation", "(Engine.Owner.Scale * %s)" % ue_pos_h(birth_origin))
+        world_direction = qrot_h("Engine.Owner.Rotation", "(Engine.Owner.Scale * %s)" % ue_pos_h(qrot_h(chain.quat_h(), shape_dir)))
         update += [(n, t, e) for n, t, e in pose]
+        spawn += [("Particles.UWorldOrigin", "Position", world_origin),
+                  ("Particles.UWorldDir", "Vector", world_direction)]
         update.append(("Particles.Position", "Position",
                        "(Particles.UWorldOrigin + Particles.UWorldDir * Particles.USpeed * Particles.Age)"))
-        world_q = ue_quat_h(q_u) if align == 1 else qmul_h(owner_q, ue_quat_h(q_u))
-        update.append(("Particles.MeshOrientation", "Quat", world_q))
-    update.append(("Particles.Scale", "Vector", ue_scale_h(scale_u)))
+        if mode == 4:
+            world_q = ue_quat_h(q_u) if align == 1 else qmul_h(owner_q, ue_quat_h(q_u))
+            update.append(("Particles.MeshOrientation", "Quat", world_q))
+    render_scale = "(%s * %s)" % (scale_u, PR.mesh_flip_h(renderer_contract["flip_probability"], rnd))
+    if mode == 4:
+        if ps.get("UVModule"):
+            raise SpecError("%s Mesh UVModule requires a mesh-stream animation adapter" % path)
+        update.append(("Particles.Scale", "Vector", ue_scale_h(render_scale)))
+    else:
+        # Sprite geometry width/height remain Unity X/Y; they are not 3D scale
+        # axes. Niagara rotates the UV-down basis clockwise, hence -Unity Z.
+        update += [("Particles.SpriteSize", "Vector2", "((%s).xy * 100.0)" % render_scale),
+                   ("Particles.SpriteRotation", "Float", "(-Particles.URot.z * %s)" % f(180 / math.pi))]
+        uv_spawn, uv_update, uv = PU.entries(ps.get("UVModule"), path, rnd,
+                                      (spawn_curves, update_curves), minmax_curve_h, f)
+        spawn += uv_spawn
+        update += uv_update
+        renderer_contract["subuv"] = uv
 
     # 动态材质参数（与 zzz_fx_material 的槽约定一致）
     dyn = material_plan["dyn_params"]
@@ -571,29 +728,53 @@ def emitter_spec(node, path_nodes, clip, ue_assets, material_paths, material_pla
     update = update_curves.entries + update
 
     em = ps.get("EmissionModule")
-    bursts, rate = [], 0.0
+    bursts, rate, distance_rate = [], 0.0, 0.0
     if em:
         for b in em["m_Bursts"]:
-            if b.get("probability", 1.0) != 1.0:
+            probability = b.get("probability", 1.0)
+            if probability == 0.0:
+                continue  # Explicit source zero probability is an inert burst.
+            if probability != 1.0:
                 raise SpecError("%s burst 概率≠1 未实现" % path)
-            count = minmax_curve_const(b["countCurve"])
+            count = burst_count(b["countCurve"], path)
+            if count == 0:
+                continue  # Serialized inactive count is not an extra emitter.
             cycles = b["cycleCount"] if b["cycleCount"] > 0 else 1
             if b["cycleCount"] == 0:
                 raise SpecError("%s burst 无限循环未实现" % path)
             for k in range(cycles):
-                bursts.append((b["time"] + k * b["repeatInterval"], int(round(count))))
+                bursts.append((b["time"] + k * b["repeatInterval"], count))
         rate = minmax_curve_const(em["rateOverTime"])
+        distance_rate = minmax_curve_const(em["rateOverDistance"])
+    emitter_spawn = []
+    if distance_rate > 0:
+        # Only a derived previous source-emitter position is retained. Native
+        # SpawnPerUnit owns fractional count, spacing and emission lifecycle.
+        # Rotation of an offset child must contribute, unlike Owner.Velocity.
+        emission_position = "(Engine.Owner.Position + %s)" % qrot_h(owner_q,
+                                      "(Engine.Owner.Scale * %s)" % ue_pos_h(chain.pos_h()))
+        emitter_spawn = list(chain.temps) + [("Emitter.UEFX_PreviousEmissionPosition", "Position", emission_position)]
+        emitter_update += list(chain.temps) + [
+            ("Transient.UEFX_EmissionPosition", "Position", emission_position),
+            ("Transient.UEFX_EmissionVelocity", "Vector", "(Engine.DeltaTime > 0.0 ? (Transient.UEFX_EmissionPosition-Emitter.UEFX_PreviousEmissionPosition)/Engine.DeltaTime : float3(0.0,0.0,0.0))"),
+            ("Emitter.UEFX_PreviousEmissionPosition", "Position", "Transient.UEFX_EmissionPosition")]
     mesh_pid = str(rd["m_Mesh"]["m_PathID"])
-    if mesh_pid not in ue_assets:
+    if mode == 4 and mesh_pid not in ue_assets:
         raise SpecError("%s 的网格 PathID %s 没有导入" % (path, mesh_pid))
     mats = [str(m["m_PathID"]) for m in rd["m_Materials"] if m["m_PathID"] != 0]
     if len(mats) != 1:
         raise SpecError("%s 有 %d 个材质，多材质网格粒子未实现" % (path, len(mats)))
     return {
         "name": re.sub(r"[^A-Za-z0-9_]", "_", path),
-        "path": path, "local_space": sim_local,
+        "path": path, "local_space": sim_local if mode == 4 else False,
+        "source_simulation_space": "local" if sim_local else "world", "source_scaling_mode": ps["scalingMode"],
         "loop": bool(ps["looping"]), "duration": ps["lengthInSec"], "delay": minmax_curve_const(ps["startDelay"]),
-        "bursts": bursts, "rate": rate, "spawn": spawn, "update": update,
-        "renderer": {"kind": "mesh", "mesh": ue_assets[mesh_pid], "material": material_paths[mats[0]],
-                     "sort": rd["m_SortingOrder"]},
+        "bursts": bursts, "rate": rate, "spawn": spawn, "update": update, "requirements": requirements,
+        "emitter_spawn": emitter_spawn, "emitter_update": emitter_update,
+        "distance_rate": distance_rate,
+        "particle_equivalence": policy,
+        "source_particle_lights": "unbound_no_light_renderer" if ps.get("LightsModule") else "disabled",
+        "renderer": {"kind": "mesh" if mode == 4 else "sprite",
+                     **({"mesh": ue_assets[mesh_pid]} if mode == 4 else {}), "material": material_paths[mats[0]],
+                     "sort": rd["m_SortingOrder"], **renderer_contract},
     }

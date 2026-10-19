@@ -21,6 +21,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import zzz_dxbc_hlsl as T  # noqa: E402
 import zzz_shader_variants as V  # noqa: E402
+import zzz_fx_particle_uv as PU  # noqa: E402
 from pyrios_material_plan import unity_color_to_linear  # noqa: E402
 
 GLOBALS_PATH = HERE.parent / "Assets/Shared/FX/ZZZ_FX_Globals.json"
@@ -88,6 +89,13 @@ def stream_component(name, k, ctx):
         use.update(["WorldPos"])
         return "PosU.%s" % "xyz"[k]
     if name == "Normal":
+        if not ctx["mesh"]:
+            direction = ctx.get("sprite_normal_direction")
+            if direction == 1:
+                use.update(["CamPos", "PPos"])
+                return "F.U(normalize(CamPos - PPos)).%s" % "xyz"[k]
+            if direction != 0:
+                raise PlanError("公告板 Normal 流需要明确的源 NormalDirection=0/1 契约")
         use.update(["NrmW"])
         return "F.U(normalize(NrmW)).%s" % "xyz"[k]
     if name == "Color":
@@ -98,12 +106,28 @@ def stream_component(name, k, ctx):
         return "PCol.%s" % "xyzw"[k]
     if name in ("UV", "UV2", "UV3", "UV4"):
         ch = {"UV": 0, "UV2": 1, "UV3": 2, "UV4": 3}[name]
+        if not ctx["mesh"] and ctx.get("sprite_subuv") and ch in (0, 1):
+            use.update(["UV0", "AtlasFrame"])
+            return PU.stream_component(name, k, ctx["sprite_uv_tiles"])
+        if not ctx["mesh"] and (ctx.get("sprite_static_quad_uv") or (ch >= 2 and ctx.get("sprite_extra_quad_uv"))):
+            # Explicit UE billboard environment with source sheet animation off:
+            # every declared static UV channel uses the unanimated quad.
+            use.add("UV0")
+            return "UV0.x" if k == 0 else "(1.0 - UV0.y)"
         if ch > 0 and not ctx["mesh"]:
-            raise PlanError("公告板粒子的 %s 流（序列帧下一帧 UV）未实现" % name)
+            raise PlanError("公告板粒子的 %s 流需要明确的源 UV 通道契约" % name)
         if ch >= ctx["uv_count"]:
             return "0.0"  # Unity 对网格缺失的 UV 层送 0
         use.add("UV%d" % ch)
         return "UV%d.x" % ch if k == 0 else "(1.0 - UV%d.y)" % ch
+    if name == "AnimBlend" and not ctx["mesh"] and ctx.get("sprite_subuv"):
+        use.add("AtlasFrame")
+        return PU.stream_component(name, k, ctx["sprite_uv_tiles"])
+    if name in ("Rotation", "Rotation3D") and not ctx["mesh"] and ctx.get("sprite_rotation_2d"):
+        if name == "Rotation3D" and k < 2:
+            return "0.0"
+        use.add("PRot")
+        return "(-PRot)"  # native sprite material value is radians, in UV-down basis
     if name == "Center":
         use.add("PPos")
         return "(F.U(PPos) * 0.01).%s" % "xyz"[k]
@@ -316,6 +340,12 @@ def plan(material_path, renderer, tex_assets, shader_name=None, output_contract=
     sp = mat["m_SavedProperties"]
     floats, colors, texenvs = sp["m_Floats"], sp["m_Colors"], sp["m_TexEnvs"]
     provider, builtin_docs = load_globals()
+    environment = p.get("execution_environment")
+    equivalent = source_selection is not None and source_selection["purpose"] == "ue_equivalent_source_particles"
+    if equivalent:
+        import zzz_fx_ue_equivalent as UE
+        UE.validate_texture_uv_modes(floats)
+        provider = UE.provider(provider)
 
     if output_contract == "distortion_field":
         depth_slots = [slot for slot, info in p["fp"]["bind"]["tex"].items()
@@ -375,6 +405,12 @@ def plan(material_path, renderer, tex_assets, shader_name=None, output_contract=
     vs = T.translate(p["vp"], "a", vs_provider, {k: "".join(sorted(v[0])) for k, v in need.items()})
 
     ctx = {"builtins": set(), "dyn": {}, "mesh": renderer.get("mesh", False), "uv_count": renderer.get("uv_count", 1),
+           "sprite_subuv": renderer.get("sprite_subuv", False),
+           "sprite_static_quad_uv": equivalent and renderer.get("sprite_static_quad_uv", False),
+           "sprite_extra_quad_uv": equivalent and renderer.get("sprite_extra_quad_uv", False),
+           "sprite_uv_tiles": renderer.get("sprite_uv_tiles", (1, 1)),
+           "sprite_normal_direction": renderer.get("sprite_normal_direction"),
+           "sprite_rotation_2d": renderer.get("sprite_rotation_2d", False),
            "warnings": []}
     av = vs_inputs(p["vp"], vs["live_inputs"], renderer, ctx)
     link = ["    uint4 bv%d = ao%d;" % (preg, vreg) for vreg, (_, preg) in sorted(need.items())]
@@ -386,7 +422,6 @@ def plan(material_path, renderer, tex_assets, shader_name=None, output_contract=
                 raise PlanError("全局量 %s 取无效果值的前提是 %s=%s，材质里是 %r" % (name, prop, required, floats.get(prop)))
 
     src, dst = blend_of(p, floats)
-    environment = p.get("execution_environment")
     if environment is not None:
         blend, out_conv = environment["blend"], environment["output_conversion"]
     elif (src, dst) not in BLEND_MAP:
@@ -402,6 +437,7 @@ def plan(material_path, renderer, tex_assets, shader_name=None, output_contract=
         raise PlanError("ZWrite=%r 的半透明特效未实现" % zwrite)
     if ztest not in (None, 4.0, 8.0, 0.0):
         raise PlanError("ZTest=%r 未实现（只支持 LEqual / Always）" % ztest)
+    disable_depth_test = ztest == 8.0
 
     mat_params = dict(ps["mat_params"])
     mat_params.update(vs["mat_params"])
@@ -425,10 +461,18 @@ def plan(material_path, renderer, tex_assets, shader_name=None, output_contract=
             + "    " + returns[out_conv] + "\n")
     # Custom 节点函数体里不需要缩进；去掉 4 空格前缀便于阅读
     body = "\n".join(l[4:] if l.startswith("    ") else l for l in body.split("\n"))
+    if equivalent:
+        body = "// Explicit UE equivalent environment; source shadow response is replaced, visual calibration pending.\n" + body
 
     params = {}
     for name, dim in mat_params.items():
         params[name] = {"dim": dim, "value": material_value(name, dim, shader["props"], floats, colors, texenvs)}
+    pixel_params = list(params)
+    viewport = renderer.get("viewport_clamp")
+    if viewport is not None:
+        if set(viewport["params"]) & (set(params) | set(textures)):
+            raise PlanError("Source shader parameters collide with reserved UE viewport adapter parameters")
+        params.update(viewport["params"])
     tex_params = {}
     for name in textures:
         env = texenvs.get(name)
@@ -445,9 +489,14 @@ def plan(material_path, renderer, tex_assets, shader_name=None, output_contract=
     key_data = {"generator": 2, "renderer_kind": renderer["kind"], "mesh": renderer.get("mesh", False),
                           "output_contract": output_contract,
                           "code": body, "params": sorted(params), "tex": sorted(tex_params), "blend": blend,
-                          "two_sided": cull == 0.0, "builtins": sorted(builtins)}
+                           "two_sided": cull == 0.0, "disable_depth_test": disable_depth_test, "builtins": sorted(builtins)}
+    if equivalent:
+        key_data["ue_environment"] = environment
+    if viewport is not None:
+        key_data["viewport_adapter"] = {k: viewport[k] for k in ("mode", "metric", "code", "inputs")}
     if source_selection is not None:
-        source_selection["runtime_global_values"] = "unverified_existing_preview_provider"
+        source_selection["runtime_global_values"] = ("explicit_clear_scene_calibration_inputs_not_original_runtime" if equivalent
+                                                     else "unverified_existing_preview_provider")
         source_selection["global_provider"] = str(GLOBALS_PATH)
         source_selection["global_provider_sha256"] = hashlib.sha256(GLOBALS_PATH.read_bytes()).hexdigest()
         key_data["source_selection"] = source_selection
@@ -456,15 +505,19 @@ def plan(material_path, renderer, tex_assets, shader_name=None, output_contract=
     short = shader_name.split("/")[-1].replace(" ", "")
     return {
         "material": mat["m_Name"], "shader": shader_name, "keywords": keywords, "pass": p["name"],
-        "master": "M_ZZZFX_%s_%s" % (short, key), "code": body, "blend": blend,
+        "master": "M_ZZZFX_%s%s_%s" % ("UEEquivalent_" if equivalent else "", short, key), "code": body, "blend": blend,
         "two_sided": cull == 0.0, "builtins": sorted(builtins), "dyn_params": ctx["dyn"],
+        "disable_depth_test": disable_depth_test,
         "params": params, "textures": tex_params,
+        "pixel_params": pixel_params,
+        **({"viewport_clamp": viewport} if viewport is not None else {}),
         "renderer_kind": renderer["kind"], "mesh": renderer.get("mesh", False),
         "output_contract": output_contract, "output_register": output_register,
         "source_variant": str(shader_file),
         "source_variant_sha256": source_selection["native_sha256"] if source_selection else
                                  hashlib.sha256(shader_file.read_bytes()).hexdigest(),
         **({"source_selection": source_selection} if source_selection else {}),
+        **({"ue_environment": environment} if equivalent else {}),
         "disabled_passes": mat.get("m_DisabledShaderPasses") or [], "warnings": ctx["warnings"],
         "skipped_passes": [q["lightmode"] for q in shader["passes"]
                            if q is not p and q["lightmode"] not in (mat.get("m_DisabledShaderPasses") or [])],

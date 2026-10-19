@@ -12,6 +12,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import zzz_fx_material as FM
 import zzz_fx_niagara as FN
+import zzz_fx_particle_renderer as PR
+import zzz_fx_mesh_renderer as MR
 import zzz_unity_anim as UA
 from zzz_fx_asset_session import AssetSession, version_name
 from zzz_fx_material_ue import Builder, MASTER_DIR, MI_DIR
@@ -92,7 +94,77 @@ def mi_name(plan, revision=""):
                         "params": plan["params"], "textures": plan["textures"], "revision": revision})
 
 
-def preflight(fx_path, *, assets=None, revision="", preview_node=None, deps_path=None, native_selections=None):
+def inspect_source_programs(fx_paths, material_audits):
+    """仅审计既有 Particle Renderer 清单，不选择运行策略或认证完整 Prefab。
+
+    保留停用 Renderer／Pass，核验启用候选的原字节及各自关键词声明。
+    完整材质输入与程序声明分别报告；结果不能用作资产写入计划。
+    """
+    import zzz_fx_native_shader as NS
+    visible, disabled, materials = [], [], {}
+    for fx_path in fx_paths:
+        fx = read_json(fx_path)
+        deps = read_json(dependency_path(fx_path, fx))
+        for node, path, active in walk(fx["root"]):
+            if not active or not node.get("particle") or not node["particle"]["renderer"]:
+                continue
+            renderer = node["particle"]["renderer"]
+            mids = [str(m["m_PathID"]) for m in renderer["m_Materials"] if m["m_PathID"]]
+            label = "/".join(n["name"] for n in path) or "$root"
+            row = {"prefab": fx["name"], "node": label, "materials": mids}
+            if not renderer["m_Enabled"] or not mids:
+                disabled.append(row)
+                continue
+            visible.append(row)
+            for mid in mids:
+                source = dependency_file(deps, mid, ".json")
+                material = read_json(source)
+                shader_id = str(material["m_Shader"]["m_PathID"])
+                shader = deps[shader_id]
+                audit_path = Path(material_audits[mid])
+                audit = NS.read_json(audit_path)
+                native_path, serialized_keywords = NS.validate_audit_identity(shader, material, mid, audit)
+                identity = (str(source.resolve()), str(native_path.resolve()), serialized_keywords)
+                if mid in materials:
+                    if materials[mid]["identity"] != identity:
+                        raise ValueError("Conflicting source identity for material " + mid)
+                    continue
+                passes = []
+                source_disabled = set(material.get("m_DisabledShaderPasses") or [])
+                for source_pass in audit["passes"]:
+                    pi = source_pass["passIndex"]
+                    inactive = source_pass["passName"] in source_disabled or source_pass["lightMode"] in source_disabled
+                    programs = NS.inspect_program_candidates(audit, pi, serialized_keywords,
+                                                              verify_bytes=not inactive)
+                    passes.append({"pass_index": pi, "name": source_pass["passName"],
+                                   "disabled": inactive, **programs,
+                                   "native_state": source_pass["nativeRenderState"],
+                                   "resolved_state": source_pass["resolvedRenderState"]})
+                materials[mid] = {"identity": identity, "source_material": str(source), "source_shader": str(native_path),
+                                  "audit": str(audit_path), "serialized_material_keywords": serialized_keywords,
+                                  "enabled_pass_mask": material.get("m_EnabledPassMask"), "passes": passes}
+    if set(material_audits) != set(materials):
+        raise ValueError("Program inventory audits must exactly match visible source materials")
+    return {"scope": "source_program_inventory", "renderer_scope": "existing_particle_renderers_only",
+            "render_preflight": "inspection_only",
+            "visible_renderers": visible, "disabled_renderers": disabled,
+            "materials": {mid: {key: value for key, value in item.items() if key != "identity"}
+                          for mid, item in materials.items()}, "runtime_selection": "unverified"}
+
+
+def preflight(fx_path, *, assets=None, revision="", preview_node=None, deps_path=None, native_selections=None,
+              particle_equivalence=None, ue_equivalent=None):
+    environment_data = None
+    if ue_equivalent is not None:
+        import zzz_fx_ue_equivalent as UE
+        if native_selections is not None or preview_node is not None:
+            raise ValueError("UE equivalent production cannot consume a preview selection or subtree")
+        environment_data = UE.configuration(ue_equivalent)
+        if particle_equivalence is not None and particle_equivalence != environment_data["particle_equivalence"]:
+            raise ValueError("UE smoke particle tunables differ from the explicit environment configuration")
+        particle_equivalence = environment_data["particle_equivalence"]
+        revision = revision or environment_data["revision"]
+    policy = FN.PM.equivalence_policy(particle_equivalence)
     if native_selections is not None and (not isinstance(native_selections, dict) or preview_node is None):
         raise ValueError("Explicit native candidate selections are restricted to a source subtree preview")
     fx = read_json(fx_path)
@@ -107,7 +179,7 @@ def preflight(fx_path, *, assets=None, revision="", preview_node=None, deps_path
         prefix = selected[0][1]
         rows = [row for row in rows if row[1][:len(prefix)] == prefix]
     clip = None
-    blocked, specs, materials, controls = [], [], {}, []
+    blocked, specs, materials, controls, mesh_contracts = [], [], {}, [], []
     # Legacy extraction did not preserve all renderer component types. Read the
     # original index, or require the new description's explicit inventory.
     inventory = {}
@@ -159,7 +231,15 @@ def preflight(fx_path, *, assets=None, revision="", preview_node=None, deps_path
             blocked.append({"node": label, "reason": "Light component is not implemented"})
         mesh = node.get("mesh")
         if mesh and mesh["enabled"]:
-            blocked.append({"node": label, "reason": "MeshRenderer lifecycle/material support is required"})
+            try:
+                contract = MR.inspect(node, list(path), deps, clip)
+                mesh_contracts.append({"node": label, **contract})
+                blocked.extend({"node": label, "reason": "MeshRenderer requires " + requirement}
+                               for requirement in contract["required_consumers"])
+            except (ValueError, FN.SpecError, KeyError, OSError) as error:
+                blocked.append({"node": label, "reason": "%s: %s" % (type(error).__name__, error)})
+        elif "MeshRenderer" in types and not mesh:
+            blocked.append({"node": label, "reason": "MeshRenderer source description is missing"})
         if "particle" not in node:
             continue
         renderer = node["particle"]["renderer"]
@@ -176,13 +256,27 @@ def preflight(fx_path, *, assets=None, revision="", preview_node=None, deps_path
             context = {"kind": "particle", "streams": renderer["m_VertexStreams"],
                        "custom_streams": renderer["m_UseCustomVertexStreams"],
                        "mesh": renderer["m_RenderMode"] == 4,
+                       "sprite_subuv": renderer["m_RenderMode"] == 0 and
+                                       bool(node["particle"]["system"].get("UVModule", {}).get("enabled")),
+                       "sprite_uv_tiles": tuple(node["particle"]["system"].get("UVModule", {}).get(k)
+                                                for k in ("tilesX", "tilesY")),
+                       "sprite_normal_direction": renderer.get("m_NormalDirection"),
+                       "sprite_rotation_2d": not node["particle"]["system"].get("InitialModule", {}).get("rotation3D", False)
+                            and not node["particle"]["system"].get("RotationModule", {}).get("separateAxes", False),
+                       "sprite_static_quad_uv": environment_data is not None and renderer["m_RenderMode"] == 0
+                           and node["particle"]["system"].get("UVModule", {}).get("enabled") is False,
+                       "sprite_extra_quad_uv": environment_data is not None and renderer["m_RenderMode"] == 0,
                        "uv_count": uv_count(deps, mesh_pid) if renderer["m_RenderMode"] == 4 else 1}
+            if renderer["m_RenderMode"] == 0 and policy is not None:
+                context["viewport_clamp"] = PR.viewport_plan(renderer, policy, label)
             plan = material_plan(deps, mpid, context, assets,
+                                 environment_data["materials"].get(mpid) if environment_data is not None else
                                  native_selections.get(mpid) if native_selections is not None else None)
             if revision:
                 plan["master"] = version_name(plan["master"], revision)
             mi = "%s/%s" % (MI_DIR, mi_name(plan, revision))
-            spec = FN.emitter_spec(node, list(path), clip, assets, {mpid: mi}, plan)
+            spec = FN.emitter_spec(node, list(path), clip, assets, {mpid: mi}, plan, policy)
+            NiagaraBuilder.validate_spec(spec)
             if not path:
                 spec["name"], spec["path"] = "PrefabRoot", "$root"
             specs.append(spec)
@@ -196,6 +290,10 @@ def preflight(fx_path, *, assets=None, revision="", preview_node=None, deps_path
         blocked.append({"node": "$root", "reason": "Node paths collide after Niagara name normalization"})
     report = {"name": fx["name"], "blocked": blocked, "renderers": [s["path"] for s in specs],
               "runtime_controls": controls, "action_integration": "unverified", "visual_comparison": "unverified"}
+    if mesh_contracts:
+        report["mesh_renderer_contracts"] = mesh_contracts
+    if policy is not None:
+        report["particle_equivalence"] = {**policy, "precision": "explicit_UE_equivalent_not_native_identity"}
     if preview_node is not None:
         report.update({"scope": "source_subtree_preview", "source_node": preview_node,
                        "source_prefab_restore": "incomplete", "action_integration": "outside preview scope"})
@@ -206,7 +304,15 @@ def preflight(fx_path, *, assets=None, revision="", preview_node=None, deps_path
         if set(native_selections) != used:
             raise ValueError("Native selections must exactly match selected source materials")
         report["source_shader_selection"] = "explicit_preview_candidates_runtime_unverified"
+    if environment_data is not None:
+        UE.validate_prefab(fx_path, environment_data, report["renderers"])
+        report.update({"scope": "complete_source_prefab_UE_equivalent", "source_prefab_restore": "complete_structure_UE_environment",
+                       "source_shader_selection": "explicit_UE_equivalent_not_source_runtime",
+                       "ue_environment": {"name": UE.MODE, "configuration": str(Path(ue_equivalent).resolve()),
+                                          "calibration": environment_data["calibration"]}})
     base = "NS_" + fx["name"] if preview_node is None else "NS_PREVIEW_" + fx["name"] + "_" + preview_node
+    if environment_data is not None:
+        base = "NS_UEEquivalent_" + fx["name"]
     system = "%s/%s" % (SYSTEM_DIR, version_name(base, {"specs": specs, "revision": revision}))
     targets = sorted({system, *materials, *(MASTER_DIR + "/" + p["master"] for p in materials.values())})
     return {**report, "system": system, "targets": targets, "specs": specs, "materials": materials,
@@ -214,9 +320,21 @@ def preflight(fx_path, *, assets=None, revision="", preview_node=None, deps_path
 
 
 def apply_batch(plans, mcp, approved_targets, imports=None):
+    import zzz_fx_ue_equivalent as UE
+    UE.validate_batch(plans)
     for plan in plans:
         if plan.get("render_preflight") != "complete" or plan.get("blocked") or not plan.get("specs"):
             raise ValueError("Cannot apply an incomplete render plan")
+        for material in plan["materials"].values():
+            Builder.validate_plan(material)
+        for spec in plan["specs"]:
+            NiagaraBuilder.validate_spec(spec)
+            renderer = spec["renderer"]
+            if renderer["kind"] == "sprite":
+                material = plan["materials"].get(renderer["material"])
+                viewport = material.get("viewport_clamp") if material is not None else None
+                if viewport is None or PR.viewport_signature(viewport) != renderer.get("viewport_adapter_signature"):
+                    raise ValueError("%s sprite material viewport adapter contract mismatch before editor mutation" % spec["name"])
     targets = {path for plan in plans for path in plan["targets"]}
     if imports:
         targets.update(imports["targets"])
@@ -232,8 +350,9 @@ def apply_batch(plans, mcp, approved_targets, imports=None):
             material_builder.build_instance(material, master, mi.rsplit("/", 1)[1])
         state = NiagaraBuilder(session).build_system(plan["system"], plan["specs"])
         reports.append({k: plan[k] for k in ("name", "system", "renderers", "runtime_controls",
-                                             "action_integration", "visual_comparison", "scope", "source_node",
-                                             "source_prefab_restore") if k in plan})
+                                              "action_integration", "visual_comparison", "scope", "source_node",
+                                              "source_prefab_restore", "particle_equivalence", "ue_environment",
+                                              "source_shader_selection") if k in plan})
         reports[-1]["compile"] = state
     return reports
 
@@ -250,10 +369,42 @@ def main():
                         help="Explicit dependency file for a single FX source; never falls back to legacy exports")
     parser.add_argument("--plan-imports", action="store_true")
     parser.add_argument("--revision", default="")
+    parser.add_argument("--particle-equivalence", type=Path,
+                         help="Explicit mode and all tunables; omitted retains strict native-kernel requirements")
+    parser.add_argument("--ue-equivalent", type=Path,
+                        help="Explicit complete Front/Back UE environment configuration, with source evidence retained")
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--endpoint")
     parser.add_argument("--approved-targets", type=Path)
+    parser.add_argument("--inspect-source-programs", action="store_true",
+                        help="只读审计源 Particle Renderer 候选，不生成资产写入计划")
+    parser.add_argument("--material-audits", type=Path,
+                        help="JSON：准确材质 PathID 到既有程序审计文件路径的映射")
     args = parser.parse_args()
+    if args.inspect_source_programs:
+        if any((args.assets_map, args.deps_path, args.plan_imports, args.revision,
+                args.particle_equivalence, args.ue_equivalent, args.apply, args.endpoint, args.approved_targets)):
+            parser.error("--inspect-source-programs cannot be combined with production/import options")
+        if not args.material_audits:
+            parser.error("--inspect-source-programs requires --material-audits")
+        try:
+            audits = read_json(args.material_audits)
+            if not isinstance(audits, dict) or any(not isinstance(k, str) or not k or
+                    not isinstance(v, str) or not v for k, v in audits.items()):
+                raise ValueError("--material-audits must map material PathIDs to audit file paths")
+            result = inspect_source_programs(args.fx, audits)
+        except (ValueError, OSError, KeyError) as error:
+            print(json.dumps({"scope": "source_program_inventory", "render_preflight": "inspection_only",
+                              "runtime_selection": "unverified", "status": "failed", "error": str(error)},
+                             ensure_ascii=False, indent=1))
+            return 1
+        print(json.dumps(result, ensure_ascii=False, indent=1))
+        return 0
+    if args.material_audits:
+        parser.error("--material-audits requires --inspect-source-programs")
+    if args.ue_equivalent:
+        import zzz_fx_ue_equivalent as UE
+        args.revision = args.revision or UE.configuration(args.ue_equivalent)["revision"]
     if args.deps_path and len(args.fx) != 1:
         parser.error("--deps-path requires one FX source")
     plans, errors = [], []
@@ -267,12 +418,17 @@ def main():
         try:
             plans.append(preflight(path, assets=imports["assets"] if imports else
                                    read_json(args.assets_map) if args.assets_map else None,
-                                   revision=args.revision, deps_path=args.deps_path))
+                                   revision=args.revision, deps_path=args.deps_path,
+                                    particle_equivalence=read_json(args.particle_equivalence) if args.particle_equivalence else None,
+                                    ue_equivalent=args.ue_equivalent))
         except PreflightError as error:
             errors.append(error.report)
     if errors:
         print(json.dumps({"preflight": "blocked", "errors": errors}, ensure_ascii=False, indent=1))
         return 1
+    if args.ue_equivalent:
+        import zzz_fx_ue_equivalent as UE
+        UE.validate_batch(plans)
     if not args.apply:
         print(json.dumps({"plans": plans, "imports": imports}, ensure_ascii=False, indent=1))
         return 0

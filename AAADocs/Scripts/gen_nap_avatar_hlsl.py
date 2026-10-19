@@ -13,7 +13,7 @@
 - 逐对象阴影与级联阴影采样替换为组件提供的 KeyLightVisibility；
 - 角色实体缓冲 t1 替换为材质参数：主光颜色/方向来自组件，其余字段来自 Entity* 参数；
 - t3/t4/t5/t6 换成 MainTex/LightTex/OtherDataTex/OtherDataTex2，t7 MatCap 数组换成五张独立贴图；
-- 输出合成为 SV_Target0（漫反射+高光+自发光）加上 SV_Target1 编码前的边缘光。
+- 主色、编码前边缘光和 Bloom 亮度权重分别输出到 Custom 引脚，由材质图配置合成；不是 UE MRT。
 
 用法：python gen_nap_avatar_hlsl.py
 """
@@ -27,6 +27,8 @@ SHADER_DIR = Path(r"F:\AnimeStudio\Exports\Shader\ZZZ_20260925")
 TEXT_PATH = SHADER_DIR / "PyriosFullText/miHoYo_Character_NapAvatarStandard.shader"
 DAT_PATH = SHADER_DIR / "PyriosRaw/miHoYo_Character_NapAvatarStandard.dat"
 PASS_NAME = "CharacterToonDeferred"
+# 原始 DXBC 的 hash；该片元的 and r5.w, r3.w, l(0x00000001) 用作布尔分组标志。
+SKIN_FLAG_FRAGMENT_HASH = "9225f290963128b1"
 # 两个 _FX_UNCLIP_* 变体打开屏幕贴图（_ScreenImage）、二次自发光与特殊武器自发光分支；
 # Pyrios 胸口和右臂的蓝光就来自 Body_1 的 _ScreenImage / _SpecialWeaponEmission。
 KEYWORDS = {"_NAP_SHADER_QUALITY_HIGH", "_MATCAP_ON",
@@ -226,7 +228,36 @@ def must_sub(pattern, repl, text, desc, count=None):
     return new
 
 
+def replace_main_light_shadows(lines):
+    """只替换阴影输出，保留跨越源阴影块的光向归一化及距离衰减。"""
+    start, end = cut_block(lines, lambda line: "_is_main_light_shadows_on" in line, "shadow")
+    block = "\n".join(lines[start:end + 1])
+    # r9.w 是块外计算、块后消费的逆距离；源变体寄存器布局变化时必须重新核对。
+    if any("w" in components for components in re.findall(r"\br9\.([xyzw]+)\s*=", block)) or any(
+            not re.search(r"\b" + register + r"\.w\s*=", block) for register in ("r11", "r10")):
+        raise RuntimeError("源主光阴影寄存器契约变化：预期输出 r11.w/r10.w，保留 r9.w")
+    # 原程序有两路阴影结果：r11.w 直接混合 ReceiveShadows；r10.w 还受实体主光权重影响。
+    # r12.y 此时仍是实体主光权重，后续 PackedParams 分支会按原程序消费 r10.w。
+    lines[start:end + 1] = [
+        "  r11.w = lerp(1.0, KeyLightVisibility, _ReceiveShadows.x);",
+        "  r10.w = lerp(1.0, KeyLightVisibility, _ReceiveShadows.x * _AvatarMainLightColor.w * saturate(r12.y * 2.0 - 1.0));",
+    ]
+
+
+def restore_skin_group_flag(program):
+    """恢复反编译器丢失的非零布尔值；只接受已核原片元及分组判断。"""
+    if not re.search(r'^"// hash: ' + SKIN_FLAG_FRAGMENT_HASH + r"\s*$", program, re.M):
+        raise RuntimeError("源材质分组片元身份变化，不能恢复未知立即数")
+    # DXBC 比较结果为 0xFFFFFFFF/0，再与 1 做 AND。反编译器把 0x00000001
+    # 当浮点并打印为 0.000000；这里用数值 1 保持后续布尔选择，避免次正规浮点被清零。
+    pattern = (r"(?m)^(\s*r3\.w = cmp\(\(int\)r2\.w == asint\(_SkinMatId\.x\)\);\n"
+               r"\s*)r5\.w = r3\.w \? 0\.000000 : 0;$")
+    return must_sub(pattern, r"\g<1>r5.w = r3.w ? 1 : 0;", program,
+                    "材质分组布尔寄存器契约", count=1)
+
+
 def transform(program):
+    program = restore_skin_group_flag(program)
     body = program[program.index("{", program.index("void main(")) + 1:]
     body = body[:body.rindex("return;")]
     lines = body.split("\n")
@@ -236,9 +267,8 @@ def transform(program):
     b = next(i for i, l in enumerate(lines) if "o2.z = " in l)
     del lines[a:b + 1]
 
-    # 2. 阴影：整段替换为组件的角色级可见度，_ReceiveShadows 仍按原式混合
-    s, e = cut_block(lines, lambda l: "_is_main_light_shadows_on" in l, "shadow")
-    lines[s:e + 1] = ["  r9.w = lerp(1.0, KeyLightVisibility, _ReceiveShadows.x);", "  r8.w = r9.w;"]
+    # 2. 阴影：组件提供角色级可见度，保留原程序输出与其它活跃寄存器。
+    replace_main_light_shadows(lines)
 
     # 3'. 运行时 FX 覆盖分支（覆盖边缘光、覆盖双色调）。Pyrios 材质都关着，pyrios_material_plan 要求其为 0；
     # 整段删掉，避免引入对象矩阵和额外贴图。
@@ -297,22 +327,14 @@ def transform(program):
     text = re.sub(r"^(\s*[\w.]+ = )(r\d+\.[xyzw]{2,4}) \? (.+) : (.+);$",
                   r"\1select(\2, \3, \4);", text, flags=re.M)
 
-    # 8. 输出：SV_Target1 存的是 min(1, 0.2*sqrt(边缘光))，在开方前截下边缘光，与 SV_Target0 相加。
+    # 8. 保留可定位的源输出。Deferred 消费者未知，项目合成不冒称原游戏 RT 调度。
     lines = text.split("\n")
     k = next(i for i, l in enumerate(lines) if re.match(r"\s*(r\d+\.[xyzw]{3}) = sqrt\(\1\);", l))
     rim = re.match(r"\s*(r\d+\.[xyzw]{3})", lines[k]).group(1)
     kept = [l for l in lines[k + 1:] if re.match(r"\s*o0\.xyz = ", l)]
-    # o1.w = 0.3333 * 自发光亮度，写进 8 位目标后最大表示 3；原管线用它驱动 Bloom。
     glow = next(re.search(r"o1\.w = ([^;]+);", l).group(1) for l in lines[k + 1:] if "o1.w = " in l)
-    # o0 是 HDR 颜色，直接交给 UE 的 Bloom 与 tonemapper；自发光的过亮部分由它们处理。
-    # glow（o1.w，原管线写给自家 Bloom 的亮度）在 UE 里没有对应输入，不使用。
-    del glow
-    # 游戏的后处理合成没有导出。游戏画面里同一色相的自发光，弱处是饱和深蓝、强处（胸口光核、右臂纹线）发白；
-    # UE 的 tonemapper 逐通道处理，(0.1, 0.1, 20) 这类极端蓝只会饱和成纯蓝。这里把超过 1 的最大分量按
-    # HighlightBleed 均匀加到三个通道上，近似游戏后处理的高光去饱和；低于 1 的颜色不受影响。
-    text = "\n".join(lines[:k] + ["  float3 rimOut = %s;" % rim] + kept +
-                     ["  float3 c = o0.xyz + min(rimOut, 25.0);",
-                      "  return c + max(0.0, max(c.x, max(c.y, c.z)) - 1.0) * HighlightBleed.x;", ""])
+    text = "\n".join(lines[:k] + ["  RimRaw = %s;" % rim] + kept +
+                     ["  BloomWeight = %s;" % glow, "  return o0.xyz;", ""])
     if re.search(r"\bcb[0-4]\[|\bt[0-9]\.|\bv(5|6|9)\.", text):
         raise RuntimeError("仍有未替换的寄存器: " + str(re.findall(r"\bcb[0-4]\[\d+\][^;]*|\bt[0-9]\.\w+", text)[:5]))
     return text
@@ -394,9 +416,10 @@ def main():
               [{"name": n, "kind": "extra"} for n in EXTRA_VECTORS] +
               [{"name": n, "kind": "material"} for n in material] +
               [{"name": n, "kind": "global"} for n in globals_])
+    # 输出分离不改变原185输入或色彩属性身份；契约变化必须另行迁移，不能顺手重写。
+    if json.loads(OUT_INPUTS.read_text(encoding="utf-8")) != {"inputs": inputs, "color_properties": color_props}:
+        raise RuntimeError("原 Toon 输入契约变化，拒绝生成")
     OUT_HLSL.write_text(PRELUDE + "\n" + code, encoding="utf-8")
-    OUT_INPUTS.write_text(json.dumps({"inputs": inputs, "color_properties": color_props},
-                                     ensure_ascii=False, indent=1), encoding="utf-8")
     print("material", len(material), "global", globals_)
 
 

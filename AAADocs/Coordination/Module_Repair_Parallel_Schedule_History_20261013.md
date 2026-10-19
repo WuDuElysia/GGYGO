@@ -2094,3 +2094,626 @@ Root实际消费E1两flag源并完成单CPP映射，旧源及5产品字节均保
 P16 Lean20_R1 prepare exit0、1373输入；launch.ps1:14因Root与绝对输入键相拼而exit1，尚未创建UE/host。原七件、原pin备份及VisualFailure.json保留在 `Saved/Codex/PyriosProductionVisual_20261016_P16_Run_Lean20_R1/`；修复仅P16输入发布端规范为项目相对键，旧launcher未改，下一次用新R2目录。该轮没有PIE／范围调用／视觉验收。
 
 文档整理交付：五份主要入口合计574994→64075 bytes（约88.9%减少）：总览79475→1828、修复清单122733→20313、Obsidian实施状态76324→2425、MovementInput契约186198→26263、ActorInfo事务110264→13246。Root总览仅相对链接修正可逆还原、清单原尾文仅加入定位锚点可逆还原；Obsidian及两契约History逐字节保全原全文。原稳定编号／章节保留导航，未完成及失败不升级。两个模块作者已停写。入口README及Obsidian计划蓝图已改为先当前需求、后按需接口／历史；不新增状态副本、人工任务JSON、定时扫描或逐项审批。
+
+CTX-20261016已独立中文提交并push：父工程 `a1a147a`，Obsidian `104a97c`。仅本次11份项目文档及3份笔记，Source/资产未纳入。父仓首次自动审批因远程目的地授权拒绝；核既有origin为WuDuElysia/GGYGO、唯一待推本次提交及用户本轮AGENTS明确commit/push授权后，原目的地重审通过并实际push成功。
+
+## 2026-10-16 P16 Lean20 R2范围调用与双图归还
+
+入口 `Saved/Codex/PyriosProductionVisual_20261016_P16_Run_Lean20_R2/Visual.json`；manifest1373输入、SHA07E82A3E…6DE4E。Editor102324/父86760/FILETIME134365971992660213由原句柄观察exit0，原Root shell31822实际exit0；ParentAfter unchangedtrue/changed[]，dirty与cleanup_errors为空。Visual success仅宿主链通过，actual_visual_acceptedfalse。
+
+S1默认全量、范围、合法空尾、非法范围拒绝、非空exact index在实际Python调用均通过。Lean20 trial9844d7962284498f9c47652d2fdc5a19，Finalize20334、误差21.728737°、Delta.013779；两图同Finalize、177骨记录保留。Front原图清晰，Side原图严重模糊，Root均实际查看；GPU pose对应未证明，不判完整整身视觉通过。release restoredtrue/errornull/pausedfalse。getter+glue与json.loads/host/provider hold计时分别保留，不相加当总时长；held provider单次最多2条，原最终全量181条仍归档。Lean60/TurnBack/B及联机未由此完成。原R1失败保留，P17只获新Saved采图修复窗，Movement只读核必要骨贡献。
+
+## 2026-10-16 TurnBack R1真实RunOut交接失败
+
+入口 `Saved/Codex/PyriosProductionVisual_20261016_P16_Run_TurnBackSourceYaw_R1/VisualFailure.json`（20499608B），实际prepare1373输入／manifest042A8CEB…0A31。Editor85272/父88796/FILETIME134365984580965712，原句柄及Root shell20092均exit0，ParentAfter unchangedtrue/changed[]；Visual successfalse，cleanup_errors只保留原自然采样失败，0截图。trial414b1122d71d41d09754a9dd4439c98b。
+
+实际215记录中50条TurnBack：D0 frame17709从t0开始，原Yaw-1.239238024°实际一致，前49区间逐区间一致。首差为frame17758/serial216/request1/sequence7/phase3，t1.051490545→1.073242664；请求Yaw0、curve_yaw_appliedfalse、endedfalse/end_reason0/native_source_finishedfalse，但胶囊由接近180°回转约133.64°。原P7在同一区间before×requestedYaw与after不一致处明确失败；未放宽断言、未冒充完成。Movement正区分RunOut合法权威交接与快照归属，M3只授Saved草稿，不提前改Source或延长旧Source寿命。P16/R1及C5/R8保护归还。
+
+Slot只读边界：Animation Runtime确认额外职责为骨平移/参考归一与修正票据，CMC来源位移及GAS播放另有机制；普通Slot+显式None已有契约，仍需真实B姿态。Animation资产确认当前三ERF六源仍含RAW公共平移、未共同锚点原地化，enable_root_motion/force_root_lock均false；A/B RootMotionMode均IgnoreRootMotion。RAW轨不代实际运行提取/可见位移，三技能及Shared其它GA兼容仍未证明，不从普攻B外推全局退役。原准确资产读回留在SkillAssets_20261012_R1既有Create/Preflight与Cold，不复制全表。
+
+## 2026-10-16 P17 Lean20清晰双图及正常归还
+
+入口 `Saved/Codex/PyriosProductionVisual_20261016_P17_Run_Lean20_R1/Visual.json`；P17仅加原PlayerCameraManager公开CameraCut调用，支持/prepare/launch及其它35旧方法字节保持，未改Source/姿态/角窗/时间线/生产相机。1373输入manifest CCDE6648…D1999，实际Editor56752/父97684/FILETIME134365994545152085，经原句柄及Root shell24307正常exit0。ParentAfter unchangedtrue/changed[]，dirty/cleanup为空，release restoredtrue/errornull/pausedfalse。
+
+trial d545b3e872dc46f1bce7f924bfdd3eeb，Finalize20974/方向误差21.345802°。Front/Side各2070×777，原Native读回完成；两metadata同20974，公开Python方法及CPU flag现场true，各cut_requests1。Root实际查看两张原始图：正面与侧面清晰、R2严重侧视拖影消失，整个人物及脚位在画幅内；本项采图修复核收。renderer_consumption/GPU pose formal proof仍false，原Visual.actual_visual_acceptedfalse保留，未冒充20/60完整数值／其它动作／联机或生产总验收。S1五项实际范围检查继续通过。
+
+Visual.json 236589B/D3664394E42EB925FCA48C3E99164828957AD693F6ED4807D828CA176898010B；ParentAfter456B/B3605D9A6E1C5CB2E0298F0C95FADBDFF547F6CCC10D76E575F2F0D05ADAA3F7；原句柄exit320B/626C989B3601FD71D82D997F7242C992F60FB3841FEE3BF8C3C52FD8DA5CC709。原R2模糊图及失败不覆盖。后继P17采图逻辑只需随M3新软件重绑，不再重做CameraCut修补。
+
+## 2026-10-16 R5初始化一次只读入口冻结
+
+`Saved/Codex/DamageAttributeInitialRead_20261016_R1/reader.py`11784B/BB5A23551B63107E261170D9C0A39AC7CEBB3F6954C477B20B3B59FFB07C6465，pin8770B/242E9E63F7A78A762A9A4E0A0B08B7011BF8EF93596A66E4DEFE7DF8DB5465B3。Root读实际函数，核reader+18接口依据身份全匹配；作者已停写，Source/资产未改。只有 `read(ue,pawn,asc)`，从调用方原Ready端点一次复核Pawn/ASC/Owner Slot并读取BaseDamage、DefaultStartingData目标行、PawnData授予GE及原ASC活动GE；未知/partial/rejected明确保留，不扫全World、不加载资产、不创建observer或写文件，不把配置或活动列表当过往Instant初始化证明。
+
+编译/AST/缺端点拒绝为离线层；真实UE绑定及初始化读回未执行。C5父只作Saved写窗安全，运行软件/World/Ready由后继R9/C6 Host核验，纯reader不调用旧C5/R8消费者。后继Host原Ready点一次消费并入既有run结果；实际读回后退休诊断入口。倍率Source草稿继续未应用，R5未完成。
+
+## 2026-10-16 M3 TurnBack完整源旋转交接源码归还
+
+最终Draft patch18931B/2466F2AE…0406，inputs15692B/0CD39AA4…16BE，15块试应用通过。Root预审发现无Origin且Yaw非零分支仍按增量授SourceYaw，原作者确认并修正后再冻结；原测试全部字节保留，只追加原AuthorityAndMapping叶的Native RunOut交接反例，无新增测试叶或旧断言/容差变化。
+
+正式入口 `Saved/Codex/MovementTurnBackHandoff_20261016_M3/return.json`6230B/F6BE20936D3076A12C83A5A4697EA7B32DFDE40FA3C3D8EC8F400D7FAB3552BC，before14669897B/F8755ED2…44CB、after14407386B/378F2B402D40E0F21A58D849DC6F4B986AD92ACF3F7D091757D4EC5626588AEB。Root核6正式依赖及4实际postimage全部一致；完整父changed恰四源8别名、803consumer/60补充/旧失败/119公共metadata/85动态根31188实物所有未授权差集为空。P17旧3443文本计数不是冻结集，113为当时成功解析metadata数、原inline曾跳过解析失败，不能叫完整闭包；原Rendering与Movement直接收敛公开collector/严格多文档JSON读取/明确动态根算法，按当前119全部成功、0解析失败重取，未写新collector或任务JSON，不把旧20/85根当永久全量。
+
+CMC Origin记录原准入旋转合同，完整源零Yaw尾段继续独占旋转；RMS按原寿命结束，RunOut输入/轨迹仍交还，不重挂或延长RMS。无原合同的普通零Yaw保留WalkRun转向，非零明确拒绝；观测不授权限。SourceYaw逐区间严格核实际Quaternion，取消/失败按原请求/段/绑定，不清后继，终末区间保留。实际改动仅CMC h53107B/5C22A173…7B04、cpp226352B/FFB3BA16…848A、MotionExecutionObservation20666B/610B9A85…77A1、原测试86064B/ECC038CA…18A9。
+
+源码窗已归还、全部Source冻结；未编译/跑新反例/PIE/视觉/网络。R9须消费该正式after继承真实Source，Root只跑受影响原AuthorityAndMapping及通用finalizer涉及的现有ActionMotion.TimingAndOwnership两叶，不扩历史矩阵；UE5.8原AutomationCommandline.cpp:135明确支持+组合为一次队列。随后C6与原TurnBack失败复验，旧R8/P7/P17不再运行。
+
+## 2026-10-16 R9编译成功但完整保护失败
+
+R9入口已核1563依赖、M3实际四源映射、31681实物保护覆盖及30执行路径/16既有合法别名。prepare实际exit0，before SHA4306D823571218E2BB392D1313BF0567D898C7D3DCDF9BF58E4EC7B98FEED3E5。完整Target实际Succeeded/51.33秒；原构建PID89916、父98376、FILETIME134366045305368534，经原句柄native exit0；Root外层shell82701因保护失败exit1，无return/成功after/shared_final。
+
+[原失败快照](../../Saved/Codex/ObserverIntegration_20261016_BuildEntry_R9/failure_after.json)8206185B/4E1CEF92BB7FFA1D7A2615D47F448BDF2C6CBEA4A9920BBCDA494630570FEFEE：changed47/unowned37，未声明差集为R6两PDB和35个Intermediate生成物，其它未声明及COPY输入变化为空，模块/原生日志错误为空。原合同仅四COPY源码及五产品，不能把编译exit0当完整保护成功；未启动UE/Native/Cold。Root已确认共享UE/编译进程为0。
+
+R9原pin、完整前后失败及日志保持不动，仅Rendering原作者只读核全部差集与UBT/UHT输出所有权，交准确后继契约；未授重写旧基线、目录豁免、新入口或执行。M3 Source及生产资产保持冻结，后继从真实当前状态重新核定。
+
+## 2026-10-16 R10完整Target与受保护输入归还
+
+Root核R10三件身份及31900实物输入的完整父／显式入口冻结保护，819精确生成物、831新输出与826既有合法alias，源码写集为空。实际prepare通过，before SHA4659B3A9C7235DF284A18EEED0504A2593EB836209C947F0891F19C042B160ED；Root原shell14015正常exit0。完整准入／819当前生成物备份769054042B均通过；原构建PID89156、父102184、FILETIME134366074013910528，经原句柄exit0。Target Succeeded/3.82秒/0 actions，是对R9已编译M3产品的增量验证，不冒称重新编译全部文件。
+
+[正式return](../../Saved/Codex/ObserverIntegration_20261016_BuildEntry_R10/return.json)189732B/635F5BF286D99FDC89EDAB82ABDA8EBB2B9441A405730E37D979687E8B760103；after8538381B/BABA8E751D0C26D0FA9A3E410A03A330B0FDB4D70ECF4B858FFF2DB9C5FCA313；Source pin21E48BBE718BD07D22F96696AE72FEDD7C53A88DA1167BD2E72033CD5B253162。完整保护changed2（UHT timestamps、DependencyCache）、unowned/COPY输入变化0，819备份身份通过，共享进程／监听正常归还。8项Target产品与5个准许写入的runtime路径分列；公开C916.software实际核Root／COPY Source、三DLL及35项完整产品通过。Native／Cold／PIE／视觉不由本构建升级。
+
+实际UBT另写全局Trace.uba并轮换备份，R10 native_sidecars仅声明本入口UBT目录，存在诊断输出声明缺口；该全局trace不在完整父／显式外部保护及运行产品，未伪称输入漂移、未补签旧pin或另建R11。原作者只读核本机UnrealBuildTool.cs:209-231、UBAExecutor.cs:312/369及Log.cs轮换逻辑，尚无已证明有效的路径定向参数。Root在后继Native新输出窗将当前trace2899B/75CA6941…10B86及对应R9备份18326B/C2CDC956…7AABF按实际SHA保存到MovementTurnBackHandoff_20261016_M3_Automation_R10/R10_build_trace.uba与R9_backup_trace.uba；原文件不改。后继构建须预声明全局工具trace及准确轮换范围。
+
+## 2026-10-16 Native两叶通过及C6旧运行父拒绝审计
+
+Root在R10冻结软件执行同一队列两准确叶AuthorityAndMapping／ActionMotion.TimingAndOwnership，原Editor91468／父100192／FILETIME134366079532660462，原shell77859正常exit0，共享进程／监听归还。实际index1494B/B95DC345DADA6E75F3FC1A9C709CD8BD42CC2980FFF49BD29F9887AB68EA4CE5，恰两叶Success／0错误0警告，未扩历史矩阵。证据为Root Native目录`MovementTurnBackHandoff_20261016_M3_Automation_R10/exit.json`及其report_directory/index.json。
+
+后继C6原shell54483在before完整父读取时因旧AssetRegistry shard缺失exit1，未创建C6输出／未启动Editor，失败已存同Native目录C6_preflight_failure.json。Root随后再次实际C916.software复核Root／COPY Source、Config／Plugins、三DLL及35实际产品通过；Native整体旧父保护仍false，不把测试通过升级为保护成功或Cold。
+
+Rendering只读全审计对原R10 after比较：8项旧entry差异＝5修改（CachedAssetRegistry_0.ref、CachedAssetRegistryDiscovery.bin、RiderLink Intermediate/FileSystemMappings.ini、AutoSDKInfo.json/txt）＋3缺失（旧7CC…AssetRegistry bin及02.23.39两SDK备份）。动态集新增4项＝新D7E…bin、04.44.22两SDK备份、已声明Native日志，成员31188→31189；缺失仍完整列入，未改原基线。Root Source／COPY输入／产品、资产及其它完整父表零差异。新旧AssetRegistry bin均128894933B、SHA B3A9B2EC12E933A95E4BA593522CABB4A26A561BED90E588747FC0DE502B182D，不恢复旧GUID名。
+
+生产者依据：AssetDataGatherer.cpp:400/4536/4541及415起回收、4186析构PostWrite；AssetDataGathererDiscoveryCache.cpp:38。AssetRegistryCacheRootFolder在AssetDataGatherer.cpp:191有真实定向支持。RiderShaderInfo.cpp:11-36生成并原子替换映射ini；TargetPlatformManagerModule.cpp:385启动ValidatePlatforms并固定写AutoSDKInfo，Native日志83证明-NoTurnkey未阻止；UBT Log.BackupLogFile负责轮换。仅诊断请求略过已确认missing键以完成读取，最终仍对原完整基线比较且input_protection_passed=false，未新造collector。
+
+最小后继为独立Native新父准入和Cold显式protection-parent接入，保持R10真实软件及六资产校验。新Saved九文件作者窗已另授，未执行准入或Cold；原R10／C916／失败和Source／资产保持冻结。
+
+## 2026-10-16 Native新父准入与C6_R2 Cold完整归还
+
+九件入口冻结核收，Root实际8项父准入＋12项Cold离线校验通过；146／134依赖及新输出对完整父／85动态根交集0。Root原句柄64790执行Native_R1准入exit0，[return](../../Saved/Codex/PyriosRuntimeParentAdmission_20261016_Native_R1/return.json)10456B／007D0EEE78B1A8E9992C7830D10B91209859CF9E13C51C671AF47E7A2D3E1897。原业务／动态成员／根类型越界均0，精确生命周期变化获显式准入；prior_full_parent_protection_passed与trace_before_pool_complete仍false，不补签旧Native／R10。
+
+Root按真实父return/SHA串行运行C6_R2，原shell15993正常exit0，原Editor99792／父92668／FILETIME134366120193162332，原Process句柄观测exit0；共享进程／监听空。新[Cold return](../../Saved/Codex/PlayerBridgeIntegration_20261013_R6/Project/Saved/Codex/PyriosRuntimeAssetCold_20261016_C6_R2/return.json)为v2，SHA BADF7B46C11BCC062C7BC44081E9C148D9DAA4562EE247AE88A16532B1204BAD，success／window_returned／protection_success均true。原生读回准确六资产（A／B ABP、三Normal Montage、唯一Combo GA）与完整历史作者事实一致，dirty／saved／errors空，原MainEnd及攻击事件保持；runtime_or_visual_tested／network_tested仍false。
+
+完整after SHA1425BA3ADB681CFF45A99F1F8F47CF075312BFF400BB26B026F5684A0683B4FD，越界／动态越界／根类型越界空；7项旧entry差异仅原SDK／Rider／Trace精确producer输出，SDK备份动态新增／缺失各2。默认AssetRegistry严格未变，实际新缓存仅本轮EngineCache的Discovery、ref与GUID bin三文件；缓存参数已由真实日志和输出身份核实。Cold通过不代替TurnBack原失败复测、完整姿态、Slot A/B、生产回迁或联机验收。
+
+## 2026-10-16 P18 TurnBack原问题复测与完整归还
+
+原Movement冻结P8两件，Root实核177运行输入＋15依赖身份一致，P7→P8业务差异仅首次public Ready公开同装配ASC及说明／模块标签；不改原Yaw、自然结束或清理断言。原Rendering冻结P18五件，pin SHA39FB8C24B733ED86D1E9690A059E6B457DD75CB752EB6AB24CD5932BAB1F8D8A，作者9项离线检查，Root核4入口＋30来源身份／Python语法及准确23输出对完整父／85动态根交集0。Root原prepare句柄47686正常exit0，写2349输入的单TurnBackSourceYaw／paused_capture清单，SHA735E28DDB27C756A8B3740898EEDBEC9B742CB147AFB04F95C8F28D35D32ED0D；无新增源码／资产修改。
+
+Root原运行句柄97808，Editor101992／父93528／FILETIME134366147503334934。通过Session Frontend向本轮实例只投一次冻结py命令，真实进入PIE并完成public Ready。试次7ee3dc2f2a5b4712a1e95bdb6b7c23de共255条观察，TurnBack request1／sequence7，110唯一区间累计SourceYaw −180.00015246868134°；D0帧29184起始源0，D1帧29293覆盖RunOut至源2.383333444595337秒并ended，末尾零Yaw不再被普通转向抢回。释放帧29301胶囊四元数与D1最终帧一致，restored=true／error=null，原World解除暂停；原P16第50区间回摆失败仍保留。
+
+[Front](../../Saved/Codex/PyriosProductionVisual_20261016_P18_Run_TurnBackSourceYaw_R1/TurnBackSourceYaw_Front.png)524197B与[Side](../../Saved/Codex/PyriosProductionVisual_20261016_P18_Run_TurnBackSourceYaw_R1/TurnBackSourceYaw_Side.png)561737B，均2070×777，Root已看原图，正侧主体、髋／腿／脚清楚且在画面内。原Visual.json success=true、dirty／cleanup空；暂停采图numeric=null／native_scene_accepted=false及raw actual_visual_accepted=false保留，Root看图结论仅接纳本次图像可判读，不冒称完整角色还原、连续数值或联机验收。启动日志另保留与原P16／P17相同的13条AutomationTest Condition failed，均在本轮py入口前；未把日志宣称为零错误。
+
+原Process句柄观测exit0，真实共享进程／监听空，退出后完整保护通过；[ProcessAfter](../../Saved/Codex/PyriosProductionVisual_20261016_P18_Run_TurnBackSourceYaw_R1/ProcessAfter.json) SHA909CE250D7DC382A32BA9D1436C2FCF9F18D046595D944C72058317ADFCDC0EE，success／unchanged=true、errors及三类越界空，2367项实际protected_inputs。Visual.json为239416B／65DE00B53FF015D6116AF0A7333C4D6197A40F5EA96A051DB119F6E3BCC9A6A1；Visual_exit SHA271AA4D0DBDF5AB1683A1DE067B845927A93224C79C989F1174A36AE790A8A91。后继继承本次真实当前父，C6只作历史六资产／软件来源，不重复按旧工具池消费。
+
+首次[Ready属性读回](../../Saved/Codex/PyriosProductionVisual_20261016_P18_Run_TurnBackSourceYaw_R1/PlayerReady_TurnBackSourceYaw.json)4463B成功且read_errors空，BaseDamage Base／Current=0／0，过去写入历史unknown。AbilitySystem仅只读消费后确认实例／Slot CDO无DefaultStartingData、PawnData AbilitySet无GE、活动GE=0；所缺数值与来源只在R5活动条目维护，异步询问真人，不阻塞移动／Slot。B R3三件逻辑冻结、Root核16依赖及pending拒绝，不执行BP author／Cold；先补新软件Normal A，再以其真实最新父修正B绑定并对照。P18专项归还不等于生产回迁、Lean60、Slot去留、设备或联机完成。
+
+## 2026-10-16 P19准备阶段四冻结入口自身相交
+
+P19共享三件冻结，pin19342B／29442BA30953BD54B3FA9840B10640635483957BFE71FEE634D310C7050F8586。Root核2新入口、23来源及4运行源字节，单A准入／旧C6父拒绝／A错父拒绝／B缺绑定拒绝共4项通过；新R5 not_requested不载reader、不复制旧快照。复制前全23输出与完整父／85动态根交集0，AS R2十三写路径及Material一JSON并行写集再核0。
+
+Root原prepare句柄46534实际exit1，完整当前父消费已走完，prepare_manifest.py:453将全23根文件枚举同时作为后继写集，误与已加入当前父严格冻结的四复制入口（host、support、prepare、launch）自身相交。Root按真实P18完整父加实际复制件再次计算，准确4项，未生成provider／pin／manifest、未启动UE或攻击。原四复制代码及原共享P19不改；create-only保留[PreparationFailure](../../Saved/Codex/PyriosProductionVisual_20261016_P19_Run_NormalA_R1/PreparationFailure.json)3027B／87971548235532DCF33EDAAB20C3C3478651DE754B8EDDE2C34850D8935E9C84与[原entry_pin](../../Saved/Codex/PyriosProductionVisual_20261016_P19_Run_NormalA_R1/entry_pin.failed.json)。原测试覆盖未达到真实copy→冻结→后继写阶段，不冒称成功。
+
+修复仅新共享P20三文件：四复制入口保留严格输入保护，后继三生成件及十六证据按真实阶段求交，全23根用于全程枚举；不加别名豁免／目录排除、不改业务或重跑TurnBack。P20三新路径及本次两失败证据路径对完整父／85动态根交集0。当前有效运行父仍是P18实际ProcessAfter，P19没有产生新归还。
+
+## 2026-10-16 Material外层运行时内容冻结归还
+
+Resource唯一create-only产物[external_runtime_inputs_20261016.json](F:/AnimeStudio/_work/pyrois_special_decal_material_prepare_20261013/external_runtime_inputs_20261016.json)801779B／C92DA06B97612F1C6C62A8812BDFCA6D4C1C23C13709DCA667E37B7A6CC0E8AA，四精确范围846普通实物文件／334567124B；目录／环境／硬链接／重解析及身份差集空。Root用原public fp实核846内容及3公共API文件，身份均一致。Pins／Exports仍实际缺席，未执行Source Read／Native加载；coreSourceBuildInputClosureAudited=false及readAuthorized=false保留。冻结JSON及原v3十八件不再写；准确Read写集和外层保护证据接点另只读准备，不以内容冻结代源解码或视觉完成。
+
+## 2026-10-16 P20 Normal A双视角与完整归还
+
+P20冻结pin为6D9E6ECA63BE895322A63B4D27D056EDF24E8F57400672F6A02349B04B115CD5。Root核35输入／23输出对完整P18父和85动态根交集0；真实复制四件后旧全枚举仍交集4，新阶段guard对后继19写集通过，四入口保持严格输入。prepare原句柄90781 exit0，2386输入，实际manifest SHA BFAB75105E9432530FD3C71850638A7FD6A929CE6FDED751CC4D66AF546D7290；旧P19失败及原字节保留，不重跑已验TurnBack。
+
+单标准Editor PID89228、父101080、FILETIME134366191685402670；Session Frontend向该实例提交冻结py入口一次。trial `69fe51917a9f45f38643c2d4c8be665d`、A原Class，同一Finalized帧12755的[正面](../../Saved/Codex/PyriosProductionVisual_20261016_P20_Run_NormalA_R1/SlotA_NormalAttack_Front.png)与[侧面](../../Saved/Codex/PyriosProductionVisual_20261016_P20_Run_NormalA_R1/SlotA_NormalAttack_Side.png)均2070×777，Root已原图查看，髋／膝／双腿／双脚清晰在画内；黑边及斗篷拖影原样保留，不凭图推导Mesh偏移。原GA完整退出=true、未取消、exit_kind=End、natural_history_complete=true、订阅释放=true；provider restored=true、error=null、pause=false。206原动作记录仍保留。此为paused_capture，numeric=null／native_scene_accepted=false／raw actual_visual_accepted=false不改，GPU骨架对应仍未证明，Root可见判断与机器运行结论分列。
+
+Root原launch句柄35495 exit0、原Process句柄exit0，共享进程／监听空。Visual.json 418654B／754B8A233CEAAAED18D10E453A04C2BFEA36C3BD7C8731499450A15F672C5B64，success=true、dirty／cleanup空；[退出后ProcessAfter](../../Saved/Codex/PyriosProductionVisual_20261016_P20_Run_NormalA_R1/ProcessAfter.json)14112798B／5F70E7931441337131D859FC4FF7F0F2945C9A50E2D5968CAF4915AE662779D3，success／unchanged=true、errors及三类越界空，2404实际保护输入／85动态根。后继以此为当前父；B初始保存／Cold／对照、Lean60、生产／设备／联机及整需求仍未完成。
+
+## 2026-10-16 Material单次读取与完整归还
+
+Root在实际P20完整父上核10新输出对869输入／Source及Oodle路径／85动态根交集0，846运行时metadata／成员集、ENV、解析版本与命令路径无差异。Resource复用原v3入口及public保护API，opaque pins两个SHA保持null，不提前读Source／Native正文；一次Read后原pwsh PID98160由原Process句柄观测exit0，worker status=Read／targetCount=1。输入Source整块4205167B及Native606208B经原锁定快照与finalProtection保护，目标逻辑对象5652B，不把对象大小冒称整块读取量。
+
+根目录`F:/AnimeStudio/_work/pyrois_special_decal_material_prepare_20261013`。[真实输出](F:/AnimeStudio/_work/pyrois_special_decal_material_prepare_20261013/Exports/Read_20261016_R1/worker.stdout.json)13968B／5BD64A7AB236DF5804A48A214450813B23CA4CFF7A749AA0D05299022EA7F71F，材质`Eff_Others_Gl_GUID9910bf83963e0b54d8343d17a37dd387`，171 floats／19colors、9槽中4非空Texture PPtr。[after](F:/AnimeStudio/_work/pyrois_special_decal_material_prepare_20261013/Runtime/logs/MaterialRead_20261016_R1/after.json)13754531B／51FCE31A44BDB2A02640BF792BF709BC9276388967D6BF1FF52C0819CEBD8C3C；before SHA5BC31A7BCDDFF60259A6AF48CF5E393F87725CA79744EB1CC981C47F85C4512B；process SHAD91164BCEB68E85279026AA9BA14A4F00892D601B1932E279922B2D3146ADD78。Root实读原凭据并核8实际输出：pins1／Exports2／外层5，两个failure未创建，parent stdout与worker stdout字节相同、两stderr空；changed／missing／三类unowned／dynamic added及missing全0，runtime unchanged=true。
+
+Resource归还后冻结全部输入／证据并停止Read，FX原会话已在只读消费。Shader／Texture只外部引用，未追依赖／导图；`completeResourceClosure=false`、`cueOrLifecycleVerified=false`、`coreSourceBuildInputClosureAudited=false`及`partialWorkerStreamsGuaranteed=false`保留；未记录worker子PID／实际加载运行时模块。无UE资产／Source写入，不以静态参数和完整保护代视觉、时序或动作验收。
+
+## 2026-10-17 Lean60 R1中断与实际保护差集
+
+`Saved/Codex/PyriosProductionVisual_20261016_P20_Run_Lean60_R1`沿冻结P20准备，Root原prepare48254 exit0、2411输入，manifest SHA91AB15DCD84228B499222FE8723C15F1948FAC272EBFF518B709E6CFF7EB67F0；真实4复制后冻结／19后继写集通过。Root原launch11284曾记录UE96004、父95288、FILETIME134366226902977220。Session Frontend在控制入口恢复时被用户物理Esc中断；后续客户端重载使原句柄不可读。当前CIM核两PID及子进程均不存在，LastBootUpTime为2026-10-14，未发生本轮系统重启；不能据此推断进程退出原因或退出码。
+
+原run保留9根文件及3个EngineCache文件；日志无host py命令，ParentBefore／Visual／Visual_exit／ProcessAfter缺席，无PIE、姿态或双图验证结果，不制造原退出回执。Root只读原public audit52261实际exit0，基于NormalA完整父5F70E793…779D3的严格owner空集检查clean=false：入口7项仅AutoSDK／Rider／Trace变化，其中3旧备份缺失；动态AutoSDK两增两缺，root-type无变化。业务Source、资产、默认AR及DLL产品无变化。原严格失败不改成成功；新准入只在另窗保留完整原差集并明确接纳精确producer，旧A成功、旧R1退出未知和新当前保护分列。
+
+## 2026-10-17 Lean60 R2双视角与完整归还
+
+旧R1失败／退出未知保持；P21真实准入的[return](../../Saved/Codex/PyriosProductionVisual_20261017_P21_Resume_R1/return.json) SHA8D744AD0…4520E，仅接纳精确AutoSDK／Rider／Trace生命周期变化，原严格差集及exit=null原样保留。Root核23输出对完整父／2421输入／85根交集0，四件复制后十九后继写集真实校验通过；prepare2429输入、manifest FBC5912B…8AC4E7。
+
+新[Lean60_R2](../../Saved/Codex/PyriosProductionVisual_20261017_P21_Run_Lean60_R2/Visual.json)实际UE126624、父125020；Console只执行一次原冻结py入口。trial a6159454d01849ad95a2a6c444366eb5，两2070×777原图及Finalized均9005，Root已看完整角色／髋膝双腿倾斜；方向误差58.347°。149行骨长跨度≤1.69e-5cm。Release restored=true、error=null、pause=false；Visual success=true、cleanup_errors及dirty为空。原句柄exit0、共享进程／监听为空；最终[ProcessAfter](../../Saved/Codex/PyriosProductionVisual_20261017_P21_Run_Lean60_R2/ProcessAfter.json)14133249B，SHA30CA8A838CA1D67FBEF22F020A927499ACEA47DDBE297AB8BF6146B471FA8A19，success／unchanged=true、errors／三类unowned空，2447输入／85根。
+
+原基准待确认时的诊断：足中→骨盆／头在CS XZ侧倾投影44.124°／44.265°，完整三维对地分别33.955°／26.415°。真人原需求“相对地面、直立90°”及最早P6契约未明文选平面或身体基准线；P8只断言方向误差，未计算身体角度。投影不能替代原全身数值验收，三维候选也不能反推实现失败；真人随后明确答复“按侧倾平面衡量，保留动画原有前倾和屈膝”，据约44°侧倾投影、原图及释放／完整保护核收本代表专项；不将完整三维候选混作同一目标。B独立继续。numeric=null、raw visual_accepted=false、GPU姿态对应false、源播放器姿态NotApplicable等边界不改。生产／联机未验；原P21入口／完整证据冻结。
+
+## 2026-10-17 B A3写入前失败与完整保护归还
+
+R3重绑pin C97B1C24…D49E3／24依赖，Root实核author18／Cold13对最新全父／输入／85根交集0；保留NormalA证明、Lean60_R2为当时唯一当前父。Root原执行98187于隔离[A3](../../Saved/Codex/PlayerBridgeIntegration_20261013_R6/Project/Saved/Codex/PyriosSlotBInitialClass_20261016_A3/readback.json)启动UE128624；真实capture514的Blueprint.parent_class未暴露，baseline即失败，saved=[]、save_attempted=false、dirty前后空，BP前后均41539B／SHA30222669166D758E896583D93C044B0667ADFCFD0C53C390E7274843B7A5810D，备份已保留。未发生业务修改或单包保存。
+
+原[host_exit](../../Saved/Codex/PlayerBridgeIntegration_20261013_R6/Project/Saved/Codex/PyriosSlotBInitialClass_20261016_A3/host_exit.json)305B／SHA571AF7D0…E8D15为原句柄exit0；共享进程／监听归还为空。[protection_after](../../Saved/Codex/PlayerBridgeIntegration_20261013_R6/Project/Saved/Codex/PyriosSlotBInitialClass_20261016_A3/protection_after.json)13369032B／SHA88B84D59DEE62FF2DA97ED373ADECCBB33E0E90B76D0BA54AC75D23EB7031EBA，success=true，business_changes／residual_unowned／dynamic／root-type全空。实际13件及EngineCache保留；finish因原生导出集合未完整产生而退出1，return缺席，不制造已完成回执。R3三件已在失败窗口保护中冻结；新入口必须保留这些原证据及缺件，只沿真实失败after建立后继当前保护，不原位修改R3／A3，不放宽父类／完整CDO／图／编译／保存断言。
+
+## 2026-10-17 Decal离线稿三文件回归
+
+九件Saved投影保持单独职责，原Source／资产未应用。最初8ef136因双目录混载原脚本而exit2／0tests；56f07a新鲜子进程来源正确，但父宿主对尚不存在目录的导入缓存问题仍exit2／0tests，异常布局被错误清理的事实保留。改用复制完成后再启动新鲜标准进程的单目录真实布局，不为夹具增加生产path修复。5969dc实际104例有2失败：新cube夹具的短swizzle及未提供新选项时多传None；原[失败R3布局](../../Saved/Codex/PyriosSpecialDecalConsumerDraft_20261017/test_runtime/.zzz_fx_test_layout_R3/)23件494215B保留。
+
+仅修两Saved稿：build恢复未指定source-selections的旧2参调用，cube夹具改用完整swizzle，目的分量及原六断言AST不变。Root实核新build SHA F1A23A6D…18851／liveness test SHA6F7A1967…7EDD8。0dc22f新鲜`python -B -m unittest test_zzz_fx_native_shader test_zzz_dxbc_liveness test_zzz_fx_batch_safety`实际104／104通过、exit0，suite0.331s；探针8模块来源及自然Globals正确，23输入494263B和九稿身份差集0、无意外或残留夹具。成功R4布局按绝对路径／重解析核验后清理，原失败及原流未覆盖；无额外wrapper／报告、C#／HLSL编译、真实Shader消费或UE／动作视觉证明。
+
+## 2026-10-17 缓存贴图SDK评估
+
+缓存解码四作者件冻结，entry_pin SHA4F5526F6…4B3F9，Program未改；标准MSBuild入口固定SDK10.0.302、worker net9.0-windows／runtime9.0.3、本地ref9.0.18，Root实核283已知输入。仅执行属性／项目预处理：原PID138020／131248均原句柄exit0，耗时0.609s／0.359s，无强杀。实际期望属性及parse差异0，94个imports、Runtime仅授权十文件、八普通副作用树无额外文件。
+
+[after](F:/AnimeStudio/_work/pyrois_decal_texture_cache_decode_20261017/Runtime/Build_20261017_R1/after.json)13676123B／SHA5FA94F727A701FC0F81518C6B03B56161628B386FDA0F1CF81A5A6F8F05486CB，原公共A3完整保护集合前后全零差异，原业务失败未改。75个imports不在完整before父表，Root已实核其当前大小／SHA；不能据after反推读取前已冻结，准确新集合留after.newImportsComparedToKnownTable，后继真实add_inputs使用，不补历史。before SHA B3624801…E7842，evaluate stdout SHA4789FBB9…1157C，project.expanded.xml SHA366631E6…714E；完整原流／原句柄进程回执均在同目录。未Restore／Build／Native／像素／UE，完整实际读集与ABI未证明。共享窗归还，四作者／十产物保持冻结，B优先。
+
+## 2026-10-17 B A4单包保存与完整归还
+
+R4三件冻结，pin C92A1AAF…10B71，Root实核27项目依赖／12真实API依据及author18／Cold13对A3全父／16原失败文件／85根交集0。使用本机真实get_blueprint_parent_class；CompileBlueprint为bool且语义为非Error，另核Status3／5，编译后重取GeneratedClass／CDO；transient Status逐阶段核、不掩盖其它资产差异。外部Python明确UTF8。原R3／A3／P21不改，A3缺件及失败原样保留；当前父为真实A3 after，出生下界明示其原退出UTC，不伪称after生成时间。
+
+Root原执行60166实际[A4](../../Saved/Codex/PlayerBridgeIntegration_20261013_R6/Project/Saved/Codex/PyriosSlotBInitialClass_20261017_A4/return.json)成功：UE128532原句柄exit0，return3092B／SHA585B2304CCD16BEFAA974D7B7E82F894309E79664A276F28A76B029CBE922038。仅隔离BP初始AnimClass A→ABP_Pyrios_SlotNative_AB，编译实际bool True、状态3→3；父类／完整CDO／图／保存后读回相符，saved只含该包、dirty／errors为空。包41562B／SHAA177403B87E112348CFF1F01FE236B639A6C3DC505A55B1E24ED86D8F555A5A1，侧包仍无。全父仅同一BP双别名变化，residual／dynamic／root-type空，其它资产无变化；原工程未写。仅资产保存与完整保护核收，独立Cold／PIE／双图／自然退出仍分别待验。
+
+## 2026-10-17 B C4独立Cold与完整归还
+
+新标准UE130944独立读取A4磁盘B包；BP／Mesh原生CDO导出与A4 saved逐字节相等，父类／状态／完整图及ClassB一致。saved=[]、save_attempted=false、dirty／errors空，包仍41562B／A177403B…5A5A1、侧包无；原进程句柄exit0，完整after无业务／residual／dynamic／root-type变化。Root按原phase_receipt实际核收，13固定件加3缓存完整，未执行PIE／动作／视觉／联机。
+
+[C4 return](../../Saved/Codex/PlayerBridgeIntegration_20261013_R6/Project/Saved/Codex/PyriosSlotBInitialClass_20261017_C4/return.json)2387B，SHA0DDB9122BCF018FF46295E06EB92B3B9D867FB4553AA311A2A4F57FB2D5895DC；[完整after](../../Saved/Codex/PlayerBridgeIntegration_20261013_R6/Project/Saved/Codex/PyriosSlotBInitialClass_20261017_C4/protection_after.json)13381743B，SHA4ADC49324BF3E26A1CD3D72D17EBA3083165E3DC97D1E5487A96A925D3127961。R4 source／pin及A4／C4原证据冻结，后继仅传真实reader SHA4562300E…607BD、pinC92A1AAF…10B71及正式Cold路径／SHA。
+
+## 2026-10-17 P22 Normal B双视角与完整归还
+
+Root核P22 pin90A2CCF7…600B4／两AST／36来源及C4完整父／实际输入／85根对23输出交集0，四件复制后十九后继写集真实校验通过。prepare2528输入，真实R4 reader／pin／正式Cold四身份绑定，manifest C39FD2E0…68BE06。标准UE132188／父120796，SessionFrontend核唯一实例，冻结py入口实际仅提交一次；初始AnimClass实际为ABP_Pyrios_SlotNative_AB，无运行时换类。
+
+[NormalB](../../Saved/Codex/PyriosProductionVisual_20261017_P22_Run_NormalB_R1/Visual.json)trial3a5f8adfa3bc4ea9b1c2a647f98e1f34，Front／Side2070×777均4332 Finalized，Root已看原图髋膝双腿。217原动作记录，GA full exit=true、cancelled=false、End、natural history完整、订阅释放；provider restored=true／error=null／pause=false。Visual success=true、2 captures、cleanup_errors／dirty空；原句柄exit0、共享进程／监听归还为空。最终[ProcessAfter](../../Saved/Codex/PyriosProductionVisual_20261017_P22_Run_NormalB_R1/ProcessAfter.json)14176934B／SHA3CBB1B47D9629245AB594532D0905D774321390AC96D2B451141CB266F02990D，success／unchanged=true、errors／三类unowned空，2546输入／85根。
+
+本次完成B运行与完整保护，不能替代Slot姿态去留。A/B原图可见整体高度差，AnimationRuntime牵头按实际源时刻、各层变换及骨骼坐标复核，不能沿旧63cm静态推断决定；仅Normal01代表，原numeric=null、raw_visual=false、GPU对应false保留，生产／设备／联机及其它动作未由此验收。所有原来源及本轮证据冻结。
+
+## 2026-10-17 Slot对照结论：保留A身体基准修正
+
+AnimationRuntime只读核A/B四原图及原观测。两次首条Idle均同动画／缓存时间0.8000000119，actor／胶囊世界Z=150、Mesh世界Z=126，相机／旋转／尺度相同；177骨旋转／尺度相同，B的163骨相对A统一增加组件空间(0,2.024763,62.994711)，其余14骨（Root／FX_Root／武器根等）完全不变。这是实际读回，支持当前ActionPoseSlot对Bip001身体基准归一的独有职责，不是旧63cm公式或胶囊／整体Mesh移位推断。
+
+Normal01均Main／segment0，截图源Montage时间A0.053687699s／B0.054090098s且权重不同，不能称逐骨同刻等价；捕获骨盆CS Z22.5390／85.2078、世界Z148.5390／211.2078，右脚趾世界Z52.1404／115.2033。两帧has_single_sequence_time=false、captured_source_pose=NotApplicable，不能用胶囊底Z62冒充真实地面接触。B的播放／自然／cleanup与完整保护通过，姿态基准迁移不通过；原numeric／raw_visual／GPU限制保留。
+
+统筹核收决定：本需求保留现有A，不直接删除ActionPoseSlot，也不把Mesh下移约63cm连带移动原本未偏移的14骨。Slot A/B验证与去留判断当次收尾；角色空间基准统一是未来可选简化，不新增E/R/F或历史矩阵门禁。原工程生产A未改，R6 B为封存诊断；所有旧失败／原图／机器证据保留，保护已归还且无在途。后继回到原工程A整合其余需求。
+
+## 2026-10-17 CR首稿基线复核与旧静态过程保留
+
+原活动条目的静态过程原文保留：
+
+当前可审查产物：[Kiro r1补丁](../../Saved/Codex/CR_20261015_KiroDraft_R1/CR_20261015_KiroDraft_R1_r1.patch)（35631B／A3D3D720…08D912）、[原输入与往返身份](../../Saved/Codex/CR_20261015_KiroDraft_R1/input_manifest_r1.json)。根实核11条身份（10既有源及1未创建测试），原/base/work/新apply_check_verified_r1均无差、补丁10文件实际变更、与N1完整父交集空；仅在全新Saved副本apply-check/apply为0、roundtrip为0。旧CRLF失败补丁及旧校验目录保留，相对递归删除命令已拒绝，安全重试无删除。新测试候选因需生产测试入口已由Kiro撤回；UHT／完整Target／叶／PIE未做，未应用真实Source，功能与语义尚不据此验收。后继应用前必须核原输入仍同并安排必要实际验证，原范围／契约不因草稿减少行数而自动通过。
+
+既有Kiro会话本次只读核11原身份：10既有Source SHA均同、已撤回测试仍缺席；R2 inputs为F6B3760215C250C2035ED95398585E0980041FFC0A9AA58F7252DC8A53AF939B，十Source映射与CR路径交集空，无需重基。原patch及Source／资产不改，无新报告／临时目录／构建／UE。删除／改名符号文本检索未见R2引用，不能扩大为逻辑独立、编译或行为兼容证明；BossAI校验及镜头等待真实Mode选择不变。实际应用时仍按真实调用链、CRLF和必要运行验证验收。
+
+## 2026-10-17 CR与R5源码集中应用及首轮规划失败
+
+CR r1十Source（八改两删）由Kiro原样应用并冻结；Root核十一postimage/缺席身份与原清单一致。R5 R2十Source随后由AbilitySystem原样应用并冻结，Root核全部postimages一致。两作者完整Source前后集确认范围外零改动、既有dirty保留；R5接续apply-check为0。原补丁/manifest及inputs保留原路径，未写生产资产、未提交。
+
+Rendering以当前原工程A准入完整父，确认相较旧父仅二十授权物理Source变化（四十别名、两删除）。R1入口为Saved/Codex/CRR5ProductionIntegration_20261017_Entry_R1/entry_pin.json，13863206B，SHA9AE00B5B3D52DDFCD5744C5B5784FCD4BAC4E407C02A90E28602B0B804183242，三脚本及入口冻结。
+
+Root运行Stage Plan，原shell33030最终exit1；其原UBT进程116516经保留原句柄观察exit0，UHT及WriteOutdatedActions成功，官方总执行11.85秒，无C++compile/link。八原产品已在Plan/Preserved保全。共享进程/监听归还为空。Plan/exit.json SHA144F72AD7FEC19E58331C1B4095C793EB7B1F46442C7048F7BA7EF9020587026。
+
+完整after已真实采集，13472865B，SHA851E44B8F047F4217FD2EFB36D297F9B699C206E22C462E145EA28493DD47912。保护未通过：十一未列生成物别名为GGYGO/GGYGOEditor的LiveCodingInfo.json/.old、Unity cpp.old、Editor dll/lib rsp.old；unowned_dynamic及root_type均0，changed中Source/Content/Config别名0。实际二十actions另有四个WriteMetadata输出位于UEFormat/GameplayMessageRouter/VisualStudioTools/Developer/RiderLink各自Plugins/.../Binaries/Win64/UnrealEditor.modules，旧仅Root Binaries/Intermediate的路径限制拒绝了它们。Plan/return.json为success=false，675B，SHA0D08C38832E0BA517E4549CBB66DCEEAED8FA36549B648DF7E7F472430C87804；旧pin、失败、原stderr乱码均保留，不能改写为通过。
+
+后继只授Rendering create-only Entry_R2，沿真实after/exit/actions及原产品备份核十一实际writer和四精确插件metadata路径，再绑定一次真正Build；不重跑Plan，不放宽Intermediate或Plugins全目录。R1中Production分支仍绑定旧R2/v2 Cold，未来新合并ABI尚未交付，故当前未核收/不运行，不阻塞Build或原生叶。Source/资产及全部旧证据保持冻结。
+
+## 2026-10-17 R2真实编译失败与const调用修复
+
+Root核R2入口E4AE1DD36AD457225C46821DAE5C120E78D9EF789D8005A396A6890294CF6102和admission398F7415A9A331C14CF739E33970C4E98896FA42548F0235047E27279A963BEA后，直接以官方ExecuteMode运行真实20 actions；原shell22643最终exit1。原UBT119408保留句柄退出码6，51.80秒，shared进程/监听均空。唯一主编译错误为ComboAbility.cpp:467编辑器IsDataValid在const方法调用UE5.8仅非const的TSubclassOf::GetGCPtr（SubclassOf.h:154），其余已产出物保留，不能验收Target/三DLL或运行Leaves。
+
+Build/after.json 13408683B，SHAE6E497754F77D87DF6CF2EFEB28FD72796663D38AAD50C20D94ADA09F7C48FCC：protection_success=true，unowned/dynamic/root-type及业务Source/Content/Config变化均0；success=false/exit6。Build/return.json 720B，SHA CAB8B9A41F496FA32DEEE5FEFB86D0BFF550818D3829254951EC4ECDCFE5FE58。旧错误文字“实际Execute成功退出但有action产物缺失”不代表成功，原始退出明确为6；全部原日志/失败不改。
+
+完整归还后，仅AbilitySystem获ComboAbility.cpp一文件修复窗。Root实核前像DDD7B9F5349725654BF1B4D2677DBC15259703E5487BD287A09926B7EBE0ABE2匹配旧R2冻结postimage；作者将原一行替换为同型局部副本ExplicitEffect=DamageEffect，再用ExplicitEffect.GetGCPtr().Get()。UE5.8同型复制保原Class，不经过Get类型过滤；非法显式类、真正None、共享GE与运行时路径均保留，不const_cast，无UHT/反射/资产ABI变化。作者完整Source前后集确认仅指定cpp变动，范围外改动/新增/删除0，自审/diff-check通过并冻结。Root逐行diff及后像已核：111983B，SHA5E13567ED827C96EE6E08CDDA196EB3DCEE293ECC34BBB37274449D7A629734F。旧草稿/旧postimage仍原样保留。
+
+后继Rendering仅获create-only Entry_R3准备：以真实R2 after和明确单一Source修复承接当前态，验证其它输入仍冻，沿受支持动作执行一次必要重建；Source/资产/UE/Build/Git暂不另开。R1/R2失败不改成功，不借此扩历史矩阵。
+
+### R2执行依赖缺口的后续核实
+
+完整stdout另有两条LNK1181：GGYGOEditor.lib及.dll在ViewportReadbackLibrary.cpp.obj编译前启动链接。UE5.8实源Action.cs:594仅导入PrerequisiteItems，:701导出PrerequisiteActions索引；ActionGraph.cs:993 Import逐项丢弃索引，:68–73只按PrerequisiteItems重连。R1实际20项无PrerequisiteItems，因此R2官方Execute入口虽存在，却没有恢复该导出格式依赖。R2还记录UBA在内存阈值下回收并重试一个compiler worker；不是Root强杀进程。原编译C2662、两链接失败及内存事件均保留。
+
+Root已实读日志与上述引擎片段，纠正执行路线：R3沿标准Build.bat GGYGOEditor Win64 Development原A一次增量，由原生Makefile调度；不再导入动作JSON，不修改引擎或另造依赖调度，不重跑Plan。BuildConfiguration.cs:119确认-MaxParallelActions，后继取2。真实actions仅作历史产物/失败参考；标准UBT明确缓存writer另按最小精确集核。当前仍仅R3准备窗，未启动新构建。
+
+## 2026-10-17 R3标准编译成功与单时间戳保护失败
+
+R3入口7315EF968721B88AB8AADAD46D88FB9B5D0DAD482E9AE3A7B910FB047D3B5AFA／admission490AE3408270C6CF6B2453CABD4FC5029340B83BA0CB36BE2904AAD29CB07E59由Root核收。标准Build.bat原A Target、原生依赖、MaxParallelActions=2运行；原UBT103736经保留句柄观察exit0，38.82秒，shared进程/监听空。原shell6130最终exit1，未启动Leaves。
+
+Build/after.json为13424807B，SHA41101589D7544EFD5C818003065C17B77AF7D3ED732286296D590384B41D88F6。标准Target编译及59当前保护产品/三项目模块已真实读回，但protection_success=false，唯一unowned为Intermediate/Build/Win64/GGYGOEditor/GGYGOEditor.uhttimestamps；unowned_dynamic/root-type为0，Source/Content/Config变化0。Build/return.json 719B，SHA B104C26D1E87907F1E37A3244642E4B9C502EE3FECE559A04CC3BB0A0B9C002B，success=false原样保留。产品列表中旧插件/patch受保护身份不等于本次新编译项目，三DLL/实际Target及当前完整身份分别消费。
+
+后继仅授Rendering create-only Entry_R4，核真实timestamp writer后以实际当前态独立admission冻结该身份；从原编译exit0/Source/产品建立最小软件与18Leaves消费，不回填R3保护成功，不重编译/Plan。AS三作者件仅并行准备，与R4软件最小ABI由Rendering牵头、AS消费；真实reader/hash及Animation四包归还在资产运行阶段绑定，不把未冻AS脚本或未来资产设为Leaves前置。源码/资产/UE/Build/Git继续冻结。
+
+## 2026-10-17 R4十八叶失败与旧日志清理证据
+
+R4 pin C8759F84E03EB8089BA19477E20ACCE664B67DBDF6C7AD4DC333F8E95E697D06及admission EC0D3916296E9AE6C4805720B7017837F6C4967067F69773365332DDA0FCB982由Root核收；当前软件读取实际验证938输入/364 Source/59保护产品/三模块，旧R3失败未改。原UE137896经保留句柄exit0，dirty前后内容/地图均clean，PIE[]，shared进程/监听空；原shell78687最终exit1。
+
+Automation/index.json与readback.json实际十八叶：9 Success无Warning、3 Success带Warning、6 Fail，notRun/inProcess均0。AS四失败为StrictBaseInputResolution、RuntimeHit.DamageMultiplier/BuilderFailureUncancelable/RequiredGEFailure；两Binding失败为OwnershipAndDeathGuards及RealDestroyRejectsCleanupReattach。全部原数值/清理/重入/诊断失败保留，不能报必要叶已过；生产伤害/Buff/自然链/视觉/网络verified均false。精确Error见R4/Leaves/readback.json，按叶筛Error即可，Info不入活动上下文。
+
+after.json 13626228B，SHA7BBD95ED92AFA2042CA7213E509592830DECEB19002B9BF6B437EB14B6B6204E；return.json 701B，SHA CF100F2170D0DBBA3C38AFD5EA226FF5BD432F326B5CCF2987EB5D06CBA75659。protection_success=false；唯一四unowned及四unowned_dynamic为原Saved/Logs的GGYGO-backup-2026.10.10-08.53.56.log、11.58.07.log、19.18.58.log及2026.10.11-13.22.43.log消失。root-type及Source/Content/Config变更0。另两AutoSDK旧备份消失沿原producer分类，未把四GGYGO日志改成豁免。
+
+UE实源LaunchEngineLoop.cpp:6518 AppInit内6869–6871调用DeleteOldLogs；FileHelper.cpp:1284–1358按GEngineIni/[LogFiles]遍历ProjectLogDir中所有-backup-文件。BaseEngine.ini默认为PurgeLogsDays=5、MaxLogFilesOnDisk=10，本轮未覆盖；AbsLog不改ProjectLogDir维护。后继进程须同时加-ini:Engine:[LogFiles]:PurgeLogsDays=-1及-ini:Engine:[LogFiles]:MaxLogFilesOnDisk=-1，原生token解析支持两项；只改Days会因外层OR和负年龄阈值继续删除。当前无UECC/UE4CC目录；该函数对旧崩溃目录的另一路无条件删除不被两设置覆盖。
+
+Root按原长度/哈希查项目Saved：95,582个文件及zip归档无同哈希副本，0读取错误；实际扫描证据Saved/Codex/CRR5LogsRecovery_20261017_R1/scan.json。四原长度/sha依次1287754/B16A4BDFFEEAC819713D42470DD6B876A87D2B8638C49FA43716980BB744FDFF、1022483/D35123B20478FBCCC5959DC25DB04F23F6C95DD7BBA2AC52F495A7C5D0BDFEBD、859182/62DFDB89A50EFE747EDBA40BD2E9971A87E6CDB7409EE6B48B231A8F4FE7180C、558920/E293C8BCB281A5E41037F9CBD916B38270E68FFAAC900ED052A8B6181DC21173。现有系统恢复工具未发现；Win32_ShadowCopy初始化失败，vssadmin只读查询要求OS管理员权限，不能据此声称无卷影。四日志尚未恢复，用户外部备份目录问题已提出，不以时间经过当作答复/授权；恢复线与不依赖旧日志的代码修复分列。Root已说明启动前未关闭清理的疏漏，所有本轮运行证据保留。
+
+AS四失败只读归因是夹具GI/Router缺失、故障专项Coexist不允许拒绝取消及主动拒绝诊断登记缺失，生产倍率/cleanup断言本轮未见失败，仍需修后重跑。Combatants核实两Binding叶为旧诊断匹配及已过期Released状态：真实BeginPlay已有，关闭宿主ClearActorInfo，退休H/清复制Avatar/退订后才Released；不得为旧夹具恢复PreserveOwner。Root仅先授AS两测试CPP，后继Kiro一Binding测试CPP，生产代码不动，原外部严格结果用正确时点/原H/清后同Context严格重写，不删用例或降低日志级别。
+
+## 2026-10-17 CR与R5活动条目减量及三测试修复冻结
+
+以下四条为减量前活动原文，按原行字节迁存；不是当前授权或验收。
+
+状态：真人将过往冗余整理修复交给既有Kiro代码审查会话（Opus5.5／high）。首批十一Source逻辑范围及受影响契约已收敛，Saved/Codex/CR_20261015_KiroDraft_R1受控镜像与补丁已冻结。完整业务保护已正常归还，Root实核十一原身份与两补丁apply-check通过；Kiro已原样应用r1十Source（八改两删）并自审冻结，Root实核十一postimage／缺席身份均匹配；作者完整范围前后集确认无额外变化。UHT通过；R2编译/动作导入失败已保留，R3标准Target编译阶段exit0，完整保护/软件归还及CR叶／PIE仍待，不能报CR已验收。原模块作者提供接口与必要失败依据，Kiro直接实施／自审，根负责窗口／核收，不复制实现。玩法新增项由根统筹原模块；两轮规范复核及最小条款已写入[CodeConventions](../Architecture/CodeConventions.md)并归档。不新建会话或第二排程，不阻塞主线；共享资源按[当前排程](Module_Repair_Parallel_Schedule.md)协调。
+
+当前可审查产物：[Kiro r1补丁](../../Saved/Codex/CR_20261015_KiroDraft_R1/CR_20261015_KiroDraft_R1_r1.patch)（35631B／A3D3D720…08D912）、[原输入与往返身份](../../Saved/Codex/CR_20261015_KiroDraft_R1/input_manifest_r1.json)。Kiro于2026-10-17只读实核11条原身份与当前Source均一致，和R5 R2十Source映射无路径交集，当前无需重基。r1已原样应用，CRLF保持，撤回测试未创建。静态符号检索不证明逻辑独立或编译兼容；UHT已过，R3标准Target编译阶段成功；完整保护/软件归还、叶／真实生产装配仍待。[旧静态过程及本次核收](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-cr首稿基线复核与旧静态过程保留)保留，不因减少行数放行。
+
+| R5 属性与伤害 | AbilitySystem／Combat动作／BossAI | 真人已定基础攻击10、三段倍率1／2／3，Buff前伤害10／20／30，攻击Buff作用于各段。[R2十三件草稿](../../Saved/Codex/DamageSegmentMultiplier_20261016_Draft_R2/inputs.json)重冻SHA F6B37602…F939B，Root核10原Source／10postimages及patch／原author脚本；Root／R6原包分立。已合并同栈倍率／Poise重复检查，数值在CDO返回后只查一次；无GE原拒绝、Can→提交前跨BP重验、Spec后原身份清理保留。作者严格apply-check／十postimages重建／Python语法及契约自审通过，6条补充断言未执行；CR归还后Root实核十原输入无漂移、apply-check为0，AbilitySystem已将十Source原样应用到原工程A并自审冻结，Root实核十postimages一致；作者完整320文件前后集确认仅十授权变化、无新增／删除且既有dirty保留。联合Target已执行、因IsDataValid内const GetGCPtr误用报C2662失败；完整保护通过。AS已仅改该cpp同型局部副本两行并自审冻结，Root核后像5E13567E…629734F及唯一差异；不影响UHT/反射/资产ABI，R3标准Target编译阶段exit0/38.82s，完整保护/软件归还和必要叶尚待；旧草稿/失败保留。合并作者/Cold三件已在PyriosProductionDamageMoveMerge_20261017_Entry_R1实现自审冻结，Root核pin1717CB08…D004A58、两文件/六引用；运行尚未授权，软件R4公开参数接口/同Editor Animation四包作者结果/完整guard均为真实运行前置。资产作者／Cold／数值运行未执行。配置沿原Slot→AbilitySet初始化GE写CombatSet一次，新倍率GE显式模式、GA独立倍率；保留旧绝对模式、持续GE、每命中新Spec及独立削韧。生产GA由AbilitySystem唯一作者合并G1六移动门＋倍率1/2/3＋GE/shared两属性共11位置，完整CDO/图及其它Step字段保护；旧R2/G1入口冻结，新入口沿当前原A软件。Animation先迁A ABP＋三AM；同Editor实读MainEnd/原攻击点后保存R5四包，正常退出，再一次独立Cold核最终8包，不机械保留旧中间Cold。此前[Ready](../../Saved/Codex/PyriosProductionVisual_20261016_P18_Run_TurnBackSourceYaw_R1/PlayerReady_TurnBackSourceYaw.json)读回0／0且无初始化GE，过去写入仍unknown。Boss既有Kevin/测试GA及GE仍是旧绝对模式消费者，本批不套Pyrios参数；新软件CDO/Spec兼容、生产接线和运行仍待；Source已应用，构建／资产待串行窗，旧R1及边界留[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-16-r5独立段倍率草稿冻结)。 |
+
+| R6 输入与相机 | Input／Camera，Character参与；X7／C1 | 相机等待真实模式就绪已确认保留。既有Kiro现只读核当前等待／发布／清理的同事实同寿命重复，Source仍冻结，最小实施范围／必要验证待交；不阻塞本轮联合构建。输入仍按具体等价／差异收敛，原语义保持；真实外调后的必要核验与无外调重复分开。 |
+
+## 2026-10-17 R5标准构建与六叶复测
+
+R5标准Build原UBT127380 exit0／40.24s，shell62969 exit0；59受保护产品／3模块，保护归还true，业务及未声明变更0。证据：`Saved/Codex/CRR5ProductionIntegration_20261017_Entry_R5/Build/return.json`、对应before／after，原R1–R4失败不改。
+
+R5原六失败复测：StrictBaseInputResolution、OwnershipAndDeathGuards、RealDestroyRejectsCleanupReattach通过；RuntimeHit的BuilderFailureUncancelable／DamageMultiplier／RequiredGEFailure仅原始日志观察计数0，&&后未执行子场景不算通过。原UE146108 exit0，clean前后／PIE空，两LogFiles GetIni实读-1；无新增日志丢失／Source-Content-Config变化。运行保护false仅Rider FileSystemMappings.ini未声明变更，原after9896C409…5F5A63D及return6E099E7C…ED717F1保留，禁止追授翻绿。
+
+AS只读确认GWarn预期正文提前匹配后降Verbose；最小修法为类别前缀＋完整正文的AddExpectedMessagePlain(Error,Exact,1)，观察器及严格断言保留。Rendering只读确认RiderShaderInfo.cpp::StartupModule真实writer，R5复用时漏传R4的两个精确Mapper路径；后继须显式携带，不能扩目录。四历史日志仍未恢复，historical_protection_complete=false／recovery_pending=true。
+
+## 2026-10-17 R6日志登记修复与三叶通过
+
+AS仅改PlayerComboLifecycleTest.cpp预期登记，后像275018B／11ADA88D…4978F55；GWarn不再提前匹配降级，原完整正文、类别／Error、次数、观察器及cleanup断言保持。R6入口pinFEBEFDA8…B68A3F2，旧R1–R5失败不改。
+
+标准Build原UBT131560 exit0／44.72s，shell78987 exit0；after13451044／DF5E25B1…C7F95E3，returnCBC91BEA…41F1F9D1，59产品／3模块。原三RuntimeHit均Success／0E／0W，原Editor142140 exit0、shell39637 exit0；两日志保留值实读-1，前后clean／PIE空。Leaves after13489419／99D2D44B…D45D701，return1638／DF87C5B3…334C0C7。Build和Leaves保护均true，unowned／dynamic／root-type／dynamic-missing均0，无Source／Content／Config变更。证据入口：`Saved/Codex/CRR5ProductionIntegration_20261017_Entry_R6/Build/return.json`、`Leaves/return.json`、`Leaves/Automation/index.json`。
+
+本轮只闭合日志登记及三个原失败；结合此前十五必要叶，各项已有相应通过证据，未冒称十八叶在同一轮执行。生产资产、三段10／20／30及Buff20／40／60、真实自然链、视觉和联机尚未验。四旧日志未恢复，historical_protection_complete=false／recovery_pending=true继续保留。
+
+旧活动入口原文（R6最新复测已替代其中“当前复测未执行”，旧测试身份仅作历史）：
+
+当前可审查产物：[r1补丁](../../Saved/Codex/CR_20261015_KiroDraft_R1/CR_20261015_KiroDraft_R1_r1.patch)及[应用身份](../../Saved/Codex/CR_20261015_KiroDraft_R1/input_manifest_r1.json)保持冻结，r1八改／两删及撤回测试缺席Root均已核。三测试修后像：StrictInput 60BBBE3F…D55926、ComboLifecycle F9F01920…FF2383、BindingLifecycle 48C68BF6…87540A。诊断迁移不替代外部严格结果，当前复测未执行；生产PIE／联机仍未验。过程及旧准确身份按[历史](Module_Repair_Parallel_Schedule_History_20261013.md)查询。
+
+## 2026-10-17 生产八包迁回保存与独立Cold
+
+统一宿主入口pinE904775C…B21ED45，真实运行目录`Saved/Codex/PyriosProductionMerge_20261017_Run_R1`。Migrate准确备份原A四包并迁回已冻结A ABP／三Normal，后像全部与供体相符，原角色BP41539B／30222669…A5810D未变，未复制R6 B。Migrate shell56262 exit0，after6AB58E13…F525E79，return6D9E54C2…AC76708。
+
+Author原Editor145964按Animation真save4→clean／完整父→AS真save4完成。AN六导出、AS两导出，GA原父类ScriptMethod已实际调用核验；原攻击点／未知Step-CDO-图／原授予保持，初始化10一次、三段倍率1/2/3、独立移动六门及显式GE保存。两阶段及退出保护均通过；Editor原exit0、前后clean／PIE空，shell80647 exit0。after13441382／FA9C6BA0…3240AF9C，return2095／DD59BE32…ADA73C74。
+
+Cold独立Editor142480仅只读最终八包，AN三导出／AS一导出、saved均空，配置实读base_damage=10、multipliers=[1,2,3]、use_shared=false，原盘八包身份全核相符；Editor原exit0/shared空，shell89112 exit0。after13447219／8108E438…3936975，return2093／EB05B725…2C8385C。三阶段unowned／dynamic／root-type均0，实际日志保留值均-1。历史四日志未恢复，历史false/recovery_pending保留。生产实打数值／自然链／输入行为／视觉／联机未由本批替代。
+
+数值provider R1离线消费发现本体与旧action查询helper使用C++名而非正式ScriptName，未执行UE。R1三件及旧helper原字节保持，改由R2公开ASC/Spec只读查询＋正式AbilitySystemLibrary，旧action仅纯natural_history_complete；R2 pin397973DD…FB8EDC4已核冻。Rendering数值宿主准备中；尚无已确认满足Health/Poise余量及无AI干扰的明确目标，Character／Combatants只读核装配。诊断GE精确声明但尚未创建，禁止以scene ready或Cold冒称实打通过。
+
+迁出原R5活动条目：
+
+| R5 属性与伤害 | AbilitySystem／Combat动作／BossAI | 真人基础攻击10、三段倍率1／2／3，Buff作用各段，目标10／20／30。十Source及const校验修复已落原工程，R6标准Target编译及三RuntimeHit全过，StrictBaseInputResolution此前已过；原数值/无Apply-Cue/原身份cleanup断言保留，日志登记根因已修，不改生产语义。倍率机制专项通过不替代生产角色三段/Buff数值验收。单一合并作者[三件入口](../../Saved/Codex/PyriosProductionDamageMoveMerge_20261017_Entry_R1/entry_pin.json)pin1717CB08…D004A58已Root核；运行四包/最终八包Cold尚未执行，真实软件参数、同Editor Animation保存四包结果及完整guard必需。唯一AS作者合并GA六移动门＋倍率1/2/3＋GE/shared两属性11位置，完整CDO/图/其余Step保护；AbilitySet保原授予只追加BaseDamage10初始化GE一次。显式倍率GE、旧绝对模式/持续GE/每命中新Spec/独立削韧保持；Boss旧GE不套Pyrios参数。Animation先迁A ABP＋三AM，同Editor实际save4→AS save4，正常退出后一次八包Cold，随后真实ASC三段/Buff数值及cleanup验收；生产BP仍A。旧稿及全部未验/失败只作[历史证据](Module_Repair_Parallel_Schedule_History_20261013.md)，不充当前生产接线。 |
+
+
+## 2026-10-17 诊断Buff保存恢复与正常退出
+
+原BuffAuthor在保存前访问UE5.8隐藏兼容名ADDITIVE失败，正确公开名为ADD_BASE，原CDO值无需重写。原readback93326B／C7D81E7C…A8938保持false。R2恢复prepare仅因Rider物理名传参错误被保护拒绝，未保存；R3只修该传参，保留原Rider基线及差异，不扩大writer。旧入口与失败均未覆盖。
+
+R3冻结入口pin6AC7BD58…529B5A，实际[恢复目录](../../Saved/Codex/PyriosDamageBuffRecovery_20261017_Run_R3/return.json)。Root经Session Frontend只发pure-UE状态probe及正常退出；外部检查原PID／出生／三DLL与完整父，正式MCP准确一次save_assets([GE_Diagnostic_AttackPlus10])，拒绝空数组。保存前唯一dirty为该包、无地图／PIE；保存后全局clean，原37属性／类／CDO／tags逐项等值。uasset13349B／2EDBA0AC…4840799，sidecars空；生产八包未变。before13612192／789A5699…35A6E20，verified1142／486A2CD7…474A02F。
+
+原Editor122172／启动FILETIME134366746037695373通过原句柄确认exit0、shared空；原shell56136终态exit1、旧after与return继续false，但其protection_success=true、未授权差集0。恢复最终after13460170／4A8D8A19…06AA730B，return1395／CFB1C7E5…88EB2184，success／protection均true，unowned／dynamic／root-type／missing／extras均空，完整八件receipts不含return自身。四旧日志未恢复，historical_protection_complete=false／recovery_pending=true保持。
+
+AS R4修正式enum，R5补实际公开API预检，R6明确MCP保存与新宿主只读两份来源；R6 pinA2B67D39…5E0CA1E已核冻，原数值／来源／Poise／生命周期断言保持。仅诊断Buff保存恢复闭合，TargetVitals尚未写、未Spawn靶子、未按键／实打；三段10／20／30与Buff20／40／60及自然退出／联机仍未验。
+
+
+## 2026-10-17 TargetVitals保存与宿主同步重入
+
+Runtime_R2 pin8C5AAD40…665A9B6的TargetAuthor真实保存GE_Diagnostic_TargetVitals，MaxHealth→Health→MaxPoise→Poise各Override1000。原作者target.json102559B／BD8D1607…34CDB19为success=true、saved唯一、dirty前后空；uasset26760B／951EFE9E…338AE68B。
+
+UE保存对话内部同步pump Slate，宿主on_frame重入boot、误把本轮在写包当入场dirty，先CreateNew写false；外层仍完成保存，再次finish写读回被FileExists拒绝。原readback92894／848B6F4A…5F480E18保持false；不能将实际单包保存等同宿主成功。Root通过Frontend仅在原PID142828／原工程／全局clean／PIE空断言后正常退出；原句柄exit0、shared空，exit449／CDA4EBAA…3ACCF7CE。
+
+[原完整归还](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R2/TargetAuthor/return.json)：after13467064／410866CC…D270C77F与return1935／C1399FFD…03F90557继续false，唯一阶段错误为作者或真实数值验证失败；protection_success=true，unowned／dynamic／root-type空。两个AutoSDKInfo备份的dynamic_missing按既有writer归属如实保留，不冒称空。ConsoleHistory在恢复前后及本次正常关闭前均75497B／E379B71B…5ACA236。四旧日志未恢复边界保持。
+
+后继Runtime_R3五件仅消费原目标保存成功及原宿主false／完整保护／正常exit，两个作者CLI均拒绝，不重建或重存诊断包。唯一宿主自然回调增加自有in_callback＋callback=None检查及finally释放，阻止原生同步pump重入；不新增Tick，不改原数值／释放／结束断言。独立UE原生读回后才能Numeric；本节未包含按键／实打／联机验收。
+
+
+## 2026-10-17 Numeric首轮读回签名失败
+
+Runtime_R3 Numeric原UE130012在PIE前调用AS R6新增readback时，get_pie_worlds()缺必填include_dedicated_server参数而失败；尚无Buff／Target原生读回凭据、没有PIE／按键／实打，numeric=None、全局clean。原readback92927B／9DD37617…7ECA8778保持false。Root仅在原PID／原工程／全局clean／无PIE断言后正常quit，原句柄exit0、shared空，exit444B／B03D4167…6815433A。
+
+[原完整归还](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R3/Numeric/return.json)：after13470138B／FBFBFA5F…CBC7533E与return1928B／A4213BFA…223BBEA继续false；protection_success=true，三类unowned差集空；两AutoSDKInfo-backup-2026.10.12-15.39.57.json/txt的dynamic_missing沿既有writer归属保留，不称missing空。Source／八生产包／两诊断包未变；旧业务失败与四历史日志未恢复边界保持。
+
+AS同时静态发现新增两处_buff_native_snapshot定义两参而调用三参，未等后继UE再失败。R7三件pinB83A1678…CED091B已Root核冻，源码69003B／E32001F9…533E5BC仅四行调用修正；新增读回／消费的可达本地及公开UE调用签名核对通过，原数值／Poise／来源／生命周期断言不变。后继R4显式消费当前false／完整保护after与既有真实保存来源，不将本次入场读回当实打通过。
+
+
+## 2026-10-18 窗口间生成输出差集与当前态准入
+
+Runtime_R4 preflight在进程外严格拒绝旧父漂移（Root shell17575 exit1），Run_R4未创建、未启动UE。原软件364输入／59产物／三模块及八生产＋两诊断包逐值不变；完整差集为43物理路径，涉及UBT Trace、AssetRegistry、Rider Mapper、AutoSDK及GGYGO生成日志。原严格差集changed17（含missing9）、tool_pool10、unowned aliases27、dynamic新增10／缺失17／unowned27、root-type0，未被改成通过或目录豁免。
+
+原生writer源码与有限身份表冻结于Runtime_R5 pinB86B7966…FCF755A6。Root独立核43项旧身份：17内容FP准确、12只有旧membership而identity_unknown、14原不存在；旧main内容在对应备份逐字节找到。此处缺失工具输出及历史四日志不宣称恢复，也不补造窗口外进程正常退出。
+
+Root仅执行外部admit-current（shell13863 exit0），create-only生成[原始差集](../../Saved/Codex/PyriosProductionDamageCurrentCheckpoint_20261018_R1/raw_delta.json)120323B／AAF99D54…B604D629与[当前检查点](../../Saved/Codex/PyriosProductionDamageCurrentCheckpoint_20261018_R1/checkpoint.json)13557484B／77F20A8C…9F1F9D9F。实际旧差集须恰符批准全集／当前身份，软件／十包仍准确；独立再次strict全父九类差集全部空后才生成checkpoint。仅证明新窗口当前态冻结，predecessor匹配／R4接受／原Numeric成功／historical_protection_complete均false。
+
+Source／Content／缓存／旧入口0写，Host／target／launch沿R4，AS R7及原数值／来源／Poise／清理断言不变。后继R5 Numeric消费真实checkpoint并再次进程外全父核验；本节不含PIE／按键／实打／设备／视觉或联机结论。
+
+
+## 2026-10-18 CR-R4输入查询离线稿与前置边界
+
+固定Kiro仅新[离线稿](../../Saved/Codex/CR_20261018_InputQueryDraft_R4/apply_identity.json)准备PlayerInput.h/.cpp、HeroComponent.cpp及InputTestTypes.cpp四源迁移：退役非反射GetMovementInputRequest bool包装，复用既有四态Query。Input原作者合同明确NotHeld仍MovementRequestUnavailable并给指定中文detail，其他两拒绝态保Query原Error、Held及返栈／物理证明／qualified Held／释放再按不变。四测试改显式Held／AwaitingPhysicalProof／NotHeld／Unavailable，尚未实际编译或运行。
+
+patch8003B／B22EE432…785F50C2，identity1906B／1448779A…BB76F91E；隔离apply-check／apply为0、roundtrip=true。Root逐diff与实际前后SHA核对四Source原文件／base仍前像、work为后像，生产Source未应用。与X6同Hero文件后继串行，不扩R3／R7。
+
+Kiro明确原开工仅路径级求交／链接排查，没有完整逐项immutable／动态根／冻稿物理比对记录，不能认作完整前置通过；未补写旧稿／identity／历史。Root事后只读独立核15实际写文件：R5完整父别名、immutable、动态根均交集0；对其余61350个Saved/Codex文件物理名亦0，15文件单链接且路径祖先无reparse。此为当前安全及未来Source窗依据，不能回填原前置。既有AGENTS完整父前置规则保持，不另造重复规范。
+
+离线稿冻结／部分交回，不等于CR-R4需求完成；实际Source应用、一次批量Build、必要Input／RetryIdentity叶及生产NativeHeld验证仍待。
+
+## 2026-10-18 CR-R3-1 Context值比较离线稿
+
+Kiro request031已交三Source／12文件离线稿：[补丁](../../Saved/Codex/CR_20261018_ContextCompareDraft_R3_1/CR_20261018_ContextCompareDraft_R3_1.patch)5887B／93567B0E…C6B7C8F8，[应用身份及真实前置核验](../../Saved/Codex/CR_20261018_ContextCompareDraft_R3_1/apply_identity.json)4085B／7C515EAC…23B5A62B。仅把GA一组与ASC四调用共用HasSameValue；默认／失效身份仍按四字段原值比较，HasSameContext／Bootstrap／外侧保护及R3-2/3不动。原三Source未改，base／work／隔离apply往返身份核过；Root交付后独立对实际R5父35488条绝对路径求交0、12文件均单硬链接、读错0，这不代事前核验。首扫变量名冲突未写，修正后才做真实写前核验，边界保留在身份文件。未应用生产、未Build／专项，值语义覆盖仍只有静态依据；后继沿既有有限专项验。
+
+## 2026-10-18 Numeric R5正常退出与外部重开差集
+
+原R5未创建首个目标对象、未按键／无provider，93675B／9ABD7E2D…FD18原false读回不改。Root在Frontend只选92992，先核原PID／唯一原PIE／全局无dirty后正常EndPIE，再独立核无PIE／全局clean后quit；原日志2503／2518行断言至2584 Exiting保留。原句柄[exit.json](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R5/Numeric/exit.json)917B／E802729A…AF153，原92992 exit0；shared_after如实含真人新开111044及其LiveCoding105696，未操作两者。shell97391随后after终态1，不等于原UE异常退出。
+
+原[after](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R5/Numeric/after.json)13479402B／A40C4435…495D7，success与protection均false；[return](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R5/Numeric/return.json)2322B／34DFC2E4…DC11A为false。原错误“未通过原句柄正常归还”含shared为空条件，不能据此改称92992非正常退出。差集changed11／missing3／tool_pool2／dynamic+6/-7／unowned6／unowned_dynamic5／root_type0，去重8物理路径为GGYGO.main、Cache_0.ref、旧292E bin缺失、Discovery.bin、两旧GGYGO backup缺失、新B4C4 bin及新backup10.17-11.17.24。其余Trace2、Mapper、AutoSDK变化沿原owner核收，未增豁免。该次after.changed未见Source／DLL／Content变化；真人UE仍在，不能据此宣称稳定新现状。R6要求的原3errors、保护true和shared空不满足，故旧R6冻结不执行；后续只能另作真实当前态准入，旧失败／缺失保留。
+
+新增缺失两日志（非此前四项已恢复）：
+
+- Saved/Logs/GGYGO-backup-2026.10.12-11.33.36.log：1051295B，SHA256 10C8AA25F50D492E1D44A4355DBA253DE9A47F1A429F923A5B6C92CF4E85777D。
+- Saved/Logs/GGYGO-backup-2026.10.13-02.18.39.log：691060B，SHA256 CC304240B9604FD7AA99FE91C4A31A84EF0531F1547EFBD4637E2A9928474E41。
+
+Root只读按两原大小／SHA检索GGYGO/Saved：95891文件、zip entries0、大小候选0、匹配0、读错0、写0。此范围内未找到副本，不推断外部备份不存在；原四旧日志及新增两路径仍未恢复，historical_protection_complete=false保持。
+
+111044后继正常收尾：真人表达已关闭UE后，Root独立句柄与CIM仍见原111044存活；Frontend仅选该PID，原生只读回显pie=[]、dirty_content=[]、dirty_maps=[]，再独立断言无PIE／全局clean后正常quit。保存的同出生进程句柄确认exit0，LiveCoding105696随后退出；提升共享复核均空。Saved/Logs/GGYGO.log的ROOT_111044_READONLY_STATUS／ROOT_111044_QUIT_NO_PIE_GLOBAL_CLEAN及Exiting为原生回执。此为当前资源归还，不改变R5历史exit.shared_after非空、业务／保护false或任何缺失。
+
+## 2026-10-18 Numeric当前态R2与R7归还
+
+[CurrentCheckpoint_R2](../../Saved/Codex/PyriosProductionDamageCurrentCheckpoint_20261018_R2/checkpoint.json)13579363B／F0A2F6C8…F1789CA：仅GGYGO.log正常退出追加段，原前缀准确；364源、59产物、3模块和十包精确，重新采样完整九差集归零。只冻结当前状态，旧R5业务／保护false、原共享非空与六日志缺失不回写。
+
+R7实际进入PIE，两诊断GE只读通过、saved=[]；target.py在构造初始化GE结构体时被EditDefaultsOnly实例限制拒绝，尚无目标、provider、按键或数值。原[readback](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R7/Numeric/readback.json)93476B／D118C569…B183A2为false，NoOwnedEncounter释放结果保留。Root独立核原115100／唯一原PIE／全局clean后正常EndPIE，再核无PIE／全局clean后quit；[原句柄退出](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R7/Numeric/exit.json)444B／AFE102D3…78，exit0、shared进程／监听均空。shell82195 exit1对应业务失败。[after](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R7/Numeric/after.json)13484875B／94D34CF5…DFB2为业务false／保护true，三unowned集合均空；[return](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R7/Numeric/return.json)2318B／9DE3B187…61C为false。
+
+根因核查确认三Struct可用新值构造，而Transient DataAsset后续默认字段也不可赋值；后继改用三份独立诊断DataAsset正常创建／保存、独立Cold及Numeric只读加载。保留原反射规格、CDO及现存生产／Boss测试资产；不再重复无效Transient setter。此处不含R8作者、Cold、真实伤害或视觉／网络验收。
+
+## 2026-10-18 Numeric诊断R8真实绑定与正常归还
+
+R8 Author完整前阶段检查通过；原UE111168／父113692／出生FILETIME134368045467537609，在首资产前报TypeError: call() takes at most 0 arguments (2 given)。[target_data](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R8/Author/target_data.json)90676B／DD009875…74488，false、saved=[]，三诊断包均不存在；[原readback](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R8/Author/readback.json)93137B／DF22BFB9…E0100为false、全局clean且pie=[]。
+
+Root在同宿主Frontend执行原作者纯新值探针：[editor.log](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R8/Author/editor.log)2511行ROOT_R8_VALUE_PROBE_JSON完整保留。仅Grant关键字构造失败，script_fields=[]；其公开import_text在新Struct上读回实际GE类与非默认Level1.25通过。Form／Phase关键字及import_text共另四项通过（Phase阈值.875），前后全局clean、无PIE。不能从Editor Properties可读写推定Struct关键字构造存在；后继仅修确证缺口，不改反射／CDO或增加失败兜底。
+
+Root独立断言原PID／无PIE／全局无dirty后正常quit；[exit](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R8/Author/exit.json)443B／12B30850…C7620，原句柄exit0、共享进程／监听空。原shell89344随后exit1对应业务失败。[after](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R8/Author/after.json)13496260B／128DB01C…5F67E，业务false／保护true，三unowned均空；[return](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R8/Author/return.json)6027B／75DF32F9…1195C为false。此前历史失败与六日志缺失不回写；此节无资产保存、Cold、真实普攻／Buff结论。
+
+## 2026-10-18 三诊断配置保存与独立Cold
+
+[Entry_R9](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Entry_R9/entry_pin.json)221977B／0FD1DE2B…29A5E及820依赖由Root核过；仅Grant改用真实已验的新Struct import_text初始化，保留原异常调用栈，原失败reader准确消费不存在data_result的事实。Host／launch与其余配置／数值合同保持；R5／R7／R8原false及六日志缺失不回写。
+
+Author实际新建并准确保存既有AI/Boss/Test目录下DA_AbilitySet_Diagnostic_TargetVitals（1959B）、DA_Pawn_Diagnostic_TargetVitals（2031B）、DA_Boss_Diagnostic_TargetVitals（2780B），无sidecar。原生类／单初始化GE一级／明确MovementSet／单Default形态和One阶段及空能力、镜头、ActionSet、行为树均按契约读回，完整配置及包身份在[target_data](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R9/Author/target_data.json)92868B／C820C0F9…07652；原113372 exit0、shared空。Author [after](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R9/Author/after.json)13504502B／DD7E72BE…74BE9业务／保护true，三unowned空；[return](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R9/Author/return.json)7060B／4F1F616A…77131为true。
+
+独立Cold原114044／父114680／出生FILETIME134368069754902434，仅只读重载、saved=[]，完整native及三包家族与实际Author相同，全局clean、无PIE；[target_data](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R9/Cold/target_data.json)93074B／C3FAA4E6…6DED0。原进程正常exit0、shared空、shell53059 exit0；[after](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R9/Cold/after.json)13506551B／5109DCEC…44B0F业务／保护true，三unowned空；[return](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R9/Cold/return.json)7058B／A5F98780…134F6为true。本诊断配置步骤已完成，不等于目标装配、按键、普攻／Buff、清理或整需求验收；后继Numeric准确消费本Cold完整after。
+## 2026-10-18 CR-R3-2失败初始化清理离线稿
+
+仅隔离稿准备完成，CR整需求、生产应用、编译与新叶运行均未完成。复用原Kiro代理及Combatants真实partial Init合同；九件位于`Saved/Codex/CR_20261018_FailedInitCleanupDraft_R3_2`，patch 9397B／11D0296C484557F75C0E753965D018E2AB32B4FD6E041E663257F69830580466，identity 3685B／AD2633EE69F02F299B1EC3F48D07DF44433AEC5A123557BE3BFE8E9F5943EF1A。作者静态apply-check、隔离apply及往返通过，原工程未写。
+
+ASC仅收敛失败Init清理窗口前重复Validate及无效Operation参数，保入口、窗口内首查、调用方谓词两侧复核、CheckCleared及RAII。新增一条`GGYGO.Combatants.Binding.FailedInitCleanupAfterNativeRevocation`，复用真实GiveAbility／OnAvatarSet探针，从owner-only C0经公共Host Initialize，在native Avatar已写且Busy时仅撤销C0，预期自动清理原partial Init；保不同Operation、无假Ready／Released、缓存清空及重复清理拒绝断言。原Combatants已只读确认确走Host→原586自动清理，接口／const／SharedRef匹配，未见静态编译阻断；仍未编译／运行。后继Source批次由Kiro在订阅后断言NoticeHandle.IsValid，将Owner／Avatar的!IsValid收紧为IsExplicitlyNull，以免零通知空通过或失效弱引用假清空；连同include顺序一并修正，不改九件冻稿，不另造修订报告。
+
+必须先R3-1再R3-2：ASC base为R3-1冻稿后像68E31D9E…9400DF，R3-2 work及apply_check为5FDB3A08…B3268E；当前Source ASC仍9885CEB2…A0E98。测试base／当前Source为48C68BF6…7540A，隔离后像CBD67026…A01FD。新项目头include位置待集成时按CodeConventions移至引擎头之前，不改冻结稿。
+
+作者声明14:26:15–14:28:00Z落稿前逐核Author.after、Cold.before、Entry含820依赖及Author.before，九文件／十三目录／祖先对完整父、85动态根及物理别名交集0。Root另于当前Numeric.before及Entry共33591路径独立后核：九件哈希、两base/work/apply_check、当前Source、R3-1后像一致，普通目录／单硬链，词法及物理交集0；后核不冒称作者落盘前执行。原失败、旧稿及Source保持冻结，R3-3仍待R4串行集成。
+## 2026-10-18 Numeric R9失败及独立当前态R3
+
+R9三诊断包已保存／独立Cold的结论不变。Numeric原UE106124、父104324、出生ticks134368078640507754；实际进入唯一PIE，原生AssemblyOnly Encounter/State/Controller/Avatar装配且Health/MaxHealth/Poise/MaxPoise均1000。provider.prepare在GameplayStatics.break_hit_result实际绑定预检失败，0攻击／0 Spec、numeric=null。provider released/restored=true、cleanup_errors[]；自有目标remaining[]、dirty content/maps[]、PIE[]。readback 94710B／430D114A3FE6A336AB3F0F141C11CF4DAC8F4760E352F800B6D81C933511DA3E。
+
+续接exec51793已缺失，实际原UE和父均不存活，日志止14:42:38Z，无正常退出尾。原Run_R9/Numeric的exit.json、after.json、return.json均缺失，保持原样；不能声称原句柄退出0或原窗口完整归还，不猜进程结束原因。business=false、production_numeric_verified=false、original_exit_observed=false、exit_code=null、original_window_closure_verified=false，原六日志缺失保留。
+
+独立当前态两件已冻结，Root读回身份与所有原回执及快照自身份通过：`Saved/Codex/PyriosProductionDamageCurrentCheckpoint_20261018_R3/raw_delta.json`127970B／CF59E591339EB4C11046EA5374D3A9361E5147C759E30362D8B66286266B88F2；`checkpoint.json`13613978B／367D76C965836355C5089016CE6E5BCCA401A15A2A6FA101001D2391C17037B8。沿实际Numeric.before完整父及85动态根，当前保护true/errors[]，前后共享进程／监听均[]；九差集5/0/2/2/0/2/0/0/0。仅原Trace工具池两件、Rider mapping、AutoSDKInfo当前两件及备份新增两件；无保护项移除／未归属改动。364 Source、59产品、3模块、原十包和三诊断包不变。checkpoint在真实audit快照上仅加原Numeric输出、精确EngineCache和raw身份，未把原false或未知退出升级成功。
+
+AS新Provider_R8准备完成：`Saved/Codex/PyriosProductionDamageVerify_20261017_Entry_R8/entry_pin.json`5696B／AE5B231E4EAFC8F391EC393F792C242E107729C5D7E136B0552EA3A4D813030D，script69698B／BD94719FC229FBD30AC896083E4AA4BE49AA59AE3A0C7CE54B7A35AF032F02D3，inputs31009B／E95795133C8E976FF5CF512DB89B8EE50E21329FF0E7F59702C680C2469BDFD1。Root核准确diff及check_entry32依赖，DamageProvider/consume AST未改。UE5.8 NativeBreakFunc不导出普通库方法，三处改为HitResult.to_tuple；现有公开readback_diagnostic_buff在非PIE记录hit_result_structure_probe并严格核18项／两bool，prepare保复核，不新增第二接口。三件仅离线，真实结构探针／6 Spec尚未运行；旧R7及所有失败保持。后继R10直接消费原R9三DA谱系与本当前态，不重做保存／Cold，不以结构探针替代真实命中。
+## 2026-10-18 Numeric R10运行入口冻结
+
+仅入口准备完成，实际数值／自然清理／运行保护尚未验收。Rendering新四件位于`Saved/Codex/PyriosProductionDamageRuntime_20261017_Entry_R10`；Root独立核准确身份、876依赖、Host仅boot/attach/guard变化，其余方法AST均与R9相同。runtime只Numeric、只读复用R9 target.py，直接消费已验三DA Author/Cold原0FD1DE2B…29A5E数据谱系及独立当前态R3，真实非PIE结构探针通过后才PIE，原6Spec／自然输入／Finalize／完整清理断言保持，不重做诊断保存／Cold。
+
+最终entry_pin 195816B／AE9FA1A8D42174713608A0D67A29930F4386EFB9676B4256FAA60D5650D8C1E9；runtime.py13051B／FEBE746F027804748E46606BA4AB7042138AB6F01B948F15965C8E9D30CDEDB0；editor_host.py22569B／59C95FA49FF6D9EF0F68F3D5B25378A6C02CE25A33B4387B9FD879634A172812；launch.ps14303B／1739BF19E38EDC0E7ED79EAD5CBD4412468DB95F0E7589837A2E00FD83BBD642。当前父R3 checkpoint367D76C9…037B8及raw CF59E591…6B88F2、新Provider_R8均入真实依赖；作者落笔前核实际完整父／85根／全读集交集0，Root另核待写集相对当前R9父／新五输入词法及物理交集0。
+
+首个未执行pin195973B／68F042F6565F65BF015BDF4CF3686AFC99447B21999689AE2F2CF34321DCB688含两处旧阶段元数据。Root核收前授权原作者仅修当前pin：attenuation_contract的Provider改实际R8 AE5B231E…3030D，删除未消费recovery.runtime_binding旧TargetAuthor说明。三个脚本字节未改，未另造新版本／报告；Root由最终JSON反向补回两字段、保原CRLF后精确重构原SHA。此更正发生于Run_R10建立前，不修改旧R9或任何CR冻稿。运行权限及当前阶段只看活动排程。
+
+## 2026-10-19 Numeric R10失败退出与实际父归还
+
+`Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R10/Numeric`原UE128244／父113496／FILETIME134368121107228388，before 13791775B／7EAFA021930308F5771C6FC794217F36BE3CCEE3C512541CCF477E0A2954F1BC。真实非PIE HitResult.to_tuple探针18项、前两项bool通过；三DA只读、AssemblyOnly目标装配及四Vitals1000通过。prepare因异步GE工厂不导出普通Python方法失败，0攻击／0 Spec／numeric=null；Host依赖未发布facts推断pawn=None，release身份检查二次失败。原false、未确认自有目标及PIE保留，dirty content/maps[]；没有provider.json，不能声称恢复成功。
+
+ComputerUse重试及重置均native pipe unavailable，未发现已启用控制入口。真人答正常关闭后原进程仍存活且无可见主窗，随后明确授权本次仅终止原PID。Root核同一FILETIME、父进程及本轮命令行后只终止128244；原启动父及session12427保存真实exit=-1、observed_via_original_process_handle=true，shared_after进程／监听均[]。不将终止当正常退出或资源释放。
+
+完整after 13518063B／70580E646D57F3E39CBE540B07A891DFF5479F1542C3E5CC1BBA9406022DC540；return 8340B／A89C8080754252A9CD3B3DA21C44EF90F0E5BF3FA05AB8EFCCADCBF43B3A9430。business及production_numeric_verified均false，保留原退出、宿主clean/noPIE、6Spec归还、自有Encounter归还四错误。九差集7/2/2/2/0/2/2/0/0；两Trace工具池、Rider mapping、AutoSDK当前及备份轮转，364 Source／59产品／3模块／13包无改变。protection_success=true仅为该执行者分类，新增缺失`Saved/Logs/AutoSDKInfo-backup-2026.10.17-03.11.38.{json,txt}`须保留原身份、核精确副本，不能当无差异；更早六缺失日志及R9未知退出不变。
+
+AS与Rendering只读收敛后继合同：factory及Activate经公开Object.call_method反射，保存原Async引用、原委托逐项归还并调用EndAction；构造固定world/player_pawn，partial只清已取得资源，不以original存在或ability=None推完整／空试次。已提交输入保原自然GA／Task／Trace／CMC清理。业务false也须在资源归还／noPIE／dirty[]全部证明后正常quit，未知仍留现场。后继必须先验证原PID原生MCP的真实只读入口再触发Host／PIE；不再自动启动无控制入口的隐藏宿主。新Provider_R9三件与Runtime_R11四件离线授权，Root写前对实际R10完整父33666路径／85根及物理别名求交0；仅准备授权，不代表运行通过。
+
+## 2026-10-19 Numeric Provider R9清理稿核冻
+
+`Saved/Codex/PyriosProductionDamageVerify_20261017_Entry_R9`仅三件：entry_pin 8261B／D776B64F3CF9196D41FDB997BE4FA88923902173B6EDF6F1166BDD300461F68C；script 72055B／3E7C03461720F30988301B4EFA09CA39B0405C71E22DF90A04009C125974DB51；inputs 40094B／9487A869FF3AF72F6E0056CF5E9EACD04D4FEE16ACE22F11FEC9A566A8819C86。Root核准确字节、nlink=1、check_entry及45依赖；与R8只有constructor／prepare／stop_subscriptions／release／create_provider AST改变，原hold、6Spec、伤害／Poise／Context／HitResult及自然链未变。
+
+固定构造期world/player_pawn，prepare只复核同一装配；partial仅释放实际引用，解绑失败仍独立尝试EndAction，未知保持restored=false及原引用。输入已提交或键状态unknown而未捕GA不能冒称空试次。作者八条内存替身／故障注入通过，Root另读真实受影响调用链；未运行UE，真实Async调用、六次命中与自然清理仍未验。实际R10 before／after／return／readback／exit身份及失败、两SDK新增缺失已入真实依赖。
+
+R11控制接口在离线核实后改选引擎Python Remote Execution：旧MCP实际schema无通用Python及正常退出，ProgrammaticToolset仅是受限工具编排，不注册另一临时Toolset。仅临时Engine命令行开启、loopback／TTL0；实际双向连接及原PID／FILETIME／项目／noPIE／dirty核过再触发Host。拟16运行回执及22 SDK精确原字节副本共38文件，Root相对实际R10完整父／AS新输入33680路径、85根及物理别名核交集0，22日志198123B均在父集合；这是拟写集准入，尚未创建新Run或启动UE。八旧缺失、原失败与原退出身份保持，不用新副本冒称历史恢复。
+
+## 2026-10-19 Numeric R11核收前纠正
+
+R11初稿四件已交、未执行：pin 212703B／5980743F3B430B973C9457BC933C1913465FBF0FCC918364091F07FF9257AB79，runtime 33771B／6A87FB3186ED5E39CA9156547B8825194A255A9398D0B698D03F436468D13466，Host 26520B／FF9D6D069978B3674AF964B7476454F2A7A59352C29F8664FF99881367B41E6D，launch 5118B／F1B7C2C1BCF93A9FD403DFE04D4033255D73DB6B33724875892C419B5A4237C4。Root核908依赖／Python AST／PowerShell语法，elapsed、prepare、hold、ending及原6Spec未改。作者9清理、6启动交接、6控制身份内存用例通过，均不证明真实Remote／UE／数值。
+
+Root随后对同一真实pwsh PID130064只读实测：Get-Process.StartTime FILETIME=134368170251951902，CIM.CreationDate=134368170251951900，精确相等为false。初稿_shared出生比较使用CIM，会因丢失100ns精度误拒原进程，故未准入UE。另核PIE结束后exit_safety仍解引用原Pawn.get_path_name，及控制probe未证明原启动callback已就绪；PyWrapperObject.cpp81／671表明失效包装对象会拒绝访问，不能要求World销毁后仍可解引用。
+
+仅授权原Rendering作者在未执行的同R11内修runtime／Host／pin，保launch和AS_R9／旧稿／Source／13包；要求原生精确出生，不用容差或取整，退出用活期捕获身份及公开归还证据，启动就绪用原controller实际callback。有界等待真实异步，不新增协议／报告／另一个版本。旧初稿身份与本次发现保留在此；新Run尚未创建，不将初稿静态检查当运行准入。
+
+修正已核冻：pin 215529B／34F020E6BB6A060DF4D886FB261FA41708E7B659E5B7A3FFED087E8E32344D07，runtime 37329B／30E427249D2F9CCFFC8827922C877A47E87BDBAA504E4668CFE2CEC4461D57CC，Host 26989B／95456994385C1C8F4FD202D4D3CA0070691C1344002053878246930FC645E0A1；launch字节不变。Root核四件nlink1／准确hash／908依赖，新增失效Pawn及延迟启动内存用例通过；GetProcessTimes与Get-Process实际自进程出生均134368178159859243，CIM为134368178159859240，仅作元数据。中间pin C5B96515…502804的四个自检证据数字经JS重写失精度，已回原始输出核实后改十进制字符串，不执行该中间pin。正式运行前共享UE／构建／控制端口为空；仅本34F020E6版进入实际运行，离线修正不作业务完成证据。
+
+## 2026-10-19 Numeric R11实际六Spec与恢复归还
+
+R11实际before 13828771B／786BE07BB0E1970873A78F881E3191AD85547F04BFF64BC846C7185176517ACB；原UE127380、parent124936、出生134368184986467617，Root以原session40500持句柄。原生Remote的control-probe／start-host已真实通过，node D0D0A5AE41912C1756B8F1AC095064BE；两组三普攻自然结束，实际health／applied为10／20／30和Buff20／40／60，poise均10／10／10，六Spec verified，Buff移除回攻击10。软件输入／数值及原自然链不证明物理设备、画面、音频或联机。
+
+原provider／Host写JSON失败于InputDeviceConnectionState，截断文件原样保留：[provider](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R11/Numeric/provider.json) 1216539B／4F49FECA224F65FDD3B614006BCF777C511F587BB5A039597EC3A401C8367083；[readback](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R11/Numeric/readback.json) 1218322B／92A0BE42C825601E443BCD399DF56853074FE46FF9A202835DAC4945745F67CD。Input原接口只承诺UE枚举；四明确成员Invalid／Unknown／Disconnected／Connected，不用generic str或未知→Unknown。未来producer须在真实key_state记录后仅投影已知字段，writer先完整预编码再create-only，原提交／清理责任保持。
+
+Recovery_R1原三件冻结：source36E579BF…B8CB8A／pin3F4B3A81…CA20D3D，before199113B／B42846736E05E0930378736DEED34BCF4A879549DBE5A18EEC5892E23D85D2D4。capture误把仅挂host的包装ModuleType作含dirty函数，止于落盘／释放前；Root与作者均漏审，真实AttributeError留原editor.log。Recovery_R2同八件、948真实输入；原node实核UE公开dirty getters、四枚举及包装实际keys。R2初版未执行的A26E02CE…BDB02A／33924DF0…72DD38留pin；随后以存活时actor路径及原fixture公开归还替代销毁后的wrapper查询，后继World用Python对象identity拒绝，最终source24820B／7E53ED47F690352280BC88FABECFAB74ADE413B7E08BA6CA8B4E769A9D75E389、pin204641B／7C46E613DD8BD6B7D74B9F9B032AB2F9A1A3D15494BBEDC72D5AFCE06EADDFC9。
+
+R2实际两缓存均预编码和bytes读回成功，后因Host.natural_observation.last_frame合法tuple→JSON array而直接内存比较失败，止于Cleanup注册前。五件保持冻结；原PID／出生／node／TCP和缓存再次实核，精确差异只有该tuple→list，严格encode→loads与两落盘original完全相等。Root授权同R2接原Cleanup类，仅补余三件，无新版本／输入／patch模块函数。完整[provider恢复缓存](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Recovery_R2/provider_recovered.json) 2563105B／05E249949A0F798EB6B49D490155167EB34065EFCE2B820D9FD0E3B27B931CC1；[Host恢复缓存](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Recovery_R2/host_recovered.json) 1347106B／D9850D03A82478311A2B8F12F7DE8B49BA7F0FF0DBBDB252B397D98163974B45。各12定点连接状态CONNECTED，六Spec及数值／原自然链完整，原失败均留日志。
+
+[cleanup](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Recovery_R2/cleanup.json) 1685B／BB8CA83B7DBDE21582C44F4A1F4033654A905A6085A981341FC2D7AC4FBE732D：原四actor路径配对、restored、remaining[]，provider及旧／恢复callback均归还，noPIE、dirty[]。Root原launcher真实[exit](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Run_R11/Numeric/exit.json) 444B／EE9257548255FC0C9D92F100D1423F9722316E8A8FF02765D9DB2ED01B24C5AD，exit0／原句柄true／共享[]；原after因截断JSONDecodeError失败，原after／return仍不存在，session40500最终exit1不等于Editor异常退出。
+
+最终[R2 after](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Recovery_R2/after.json) 13366221B／EEBB1C27498993741275A7900B9578024D33C42BEC39E072DE5C2FC71D6150D4、[return](../../Saved/Codex/PyriosProductionDamageRuntime_20261017_Recovery_R2/return.json) 10494B／A210F541AB0F933CB4BCB1CACF17D9E386ACC5183E088070993FE08D28EB896C。Root核八件恰齐、7回执SHA及完整父／85根；recovery／protection／cleanup／original_exit verified全true，raw9=7／2／2／2／0／2／2／0／0，三unowned[]。本轮Source／DLL／13包未变。两新增SDK原路径缺失为AutoSDKInfo-backup-2026.10.17-05.03.19.json／txt，22份ProtectedSdkLogs原字节均已独立核实，二者有准确副本，未Restore原路径；旧六＋R10旧二缺失另保留，historical_protection_complete=false。
+
+原success／business／production_numeric仍false；接受的是上述实际数值、自然链及补充恢复归还证据，不改写原driver失败。后继只沿实际R2 after/return，后续改动所影响的生产与联机仍须验证。已结束准备／恢复过程迁入本节，活动入口只留结果及下一Source窗口。
+
+
+## 2026-10-19 CR首批源码准备过程归档
+
+以下为已结束的首批候选与准备过程，保留当时原文。当前事实以活动修复清单及共享排程为准，不作为当前授权或整批验收结果。
+
+当前首批：Kiro最终范围回执turn `01a1398d-7854-7ff1-bb6b-cdeb8c034890`。拟去三处ClearAbilityInput后的重复复核须核中间写入／谓词依赖；非反射无消费者的CancelInputActivatedAbilities／ClearLocalAvatarBinding／旧AnimCurveSampler及过期注释可按准确写集移交。原九源中BT直接删除全量校验方案已撤回：BossAI实核Actions公开可写，ClearValue可同步触发observer，将BaseWeight改NaN会漏过现<=0检查；仅静态可达反例，未动态复现。保原整表无效即拒绝，等价收敛由Root会同原作者分析。CR状态由根维护，r1准确十Source已原样应用并冻结，其余候选仍未写入／未授权；必要叶不重跑历史全量矩阵。
+
+现行规范已由原审查会话补齐可读性，并强调同栈去重须核中间写入与谓词依赖；根已读取实际条文。首批之后的深入可读性整改由Root按现行规范审核、原模块作者收敛具体写集，完整主流程／生命周期合同与原严格复现保持，不新增逐步报告或第二任务记录。
+
+最新拟扩围R-A：编队存档／LocalPlayer读取主流程，新增对应首次读取、缓存命中、次级玩家拒绝、坏档拒绝叶。Kiro已读取新规范并消费BossAI合同（completed job `cdeadc81-d10b-4f18-a9bb-84ffac8a5724`）；BT直接删校验及ChooseBossAction三次校验候选已撤回，不需BossAI冻结整改文件。明确列举首批八源加R-A三源共十一Source路径，CR状态文档仍由根维护，不按报数放行未列文件。首批r1已在准确十Source应用并冻结，原Player／Teams参与合同保持；构建／必要叶随R5接续后安排，R-B／R-C待合同或主线写集让出。
+
+
+## 2026-10-19 Source36首版准备与嵌套事实修复
+
+Source36首版集合为2C99A5C9826F081BBFC5BED27D418AF0A91347A35916E9D906C9A62638541B42。Rendering仅在CRSource36Integration_20261019_Entry_R1创建五件准备，未Build／UE／运行。首个14叶pin回执614EB7416ED040DF7C4B8B12E95FCDCF4C0AD2FBD6119594D225611F345D1BB3；Root核遗漏的本批调用链后补四叶，当前18叶pin为3DFEEFD292190FA882D7D331B522FD58E84723824834DCC96CD67F5729B944CA，原回执保留，不称14叶已执行。R1五件现原样冻结，入口为[旧准备](../../Saved/Codex/CRSource36Integration_20261019_Entry_R1/entry_pin.json)。
+
+Root已读三脚本并离线调用源码转换：36条准确31改＋5增，72源码别名；作者完整父／85根审计九项差集0。最终三脚本身份为18E3B19E…A2BD2A9、53CAD6C7…B80A30B、A84B53F6…5C957D9；admission为D15AB115593704C168FE4B09E0656DC7348AD5AABDF965C4147EA5A780784A91。Root复核5561生成候选均在生成域，重建路径集合相同；生成物父别名562，合并root tool写集后563。候选写集从未获执行授权。
+
+补查发现公共Task单槽在同Task A→B后被B清空，仍在A同步回调内的A认证失效并跳过BP门禁，原叶只数事实未覆盖该返栈。AS只读确认后，Root先核R1准备窗正常归还且Build／Leaves目录不存在，再仅重开原Task.cpp和TaskLifecycleTest.cpp。实现保存本栈前值，仅本帧仍匹配才恢复，重核前层合法性；销毁／取消／播放／声明失效不复活，serial单调、弱token去重及注册门禁保持。原叶补A返栈资格、B历史失效、重发去重及B内EndTask负分支；实际BP接收计数、运行均未由源码证明。
+
+两件重冻后像为Task.cpp 76831B／C0AB233FC402AB59B23ACD49D7DBF7A7E8FB36AD37669B27DA24E4434C9F26C4，TaskLifecycleTest.cpp 108603B／F645DE394A1BA270534C65DD3AC4E7C9B872CD0B907E7B62F28865A6BBA63ADE。Root实读及36后像核对无差异，其余34未改。新集合3992EE9F5EAA04CE751BA14083BA3DB7412F08605F02D348CDBF7481590CD037，后继R2准备另接；旧R1不执行，不用旧checked验证已合法变化的Source。源码核收及准备归还均不等于需求完成。
+
+
+## 2026-10-19 Source36构建预检失败
+
+R2的Root启动预检已失败归还：`prior.shared()`在真实复用模块不存在，未到Start-Process，Build／Leaves目录均未创建，非沙箱CIM进程／控制端口[]。Root漏核实际API，本次[失败原回执](../../Saved/Codex/CRSource36Integration_20261019_R2_PreflightFailure.json)及旧五件原样冻结。原563父交接／不可变输入交集0／现存输出单硬链接已核，但编译未执行。Rendering实核50处调用，唯一缺失为该无独立职责的重复共享检查；共享窗由唯一launcher原生前／后检查负责。
+
+
+## 2026-10-19 Source36首次构建失败与原字节恢复
+
+R3标准Build已失败退出：原句柄125268／exit6，86.50秒，真实before及after／return均写出；C4150由FX发布对象缺FVTableHelper构造导致，另有两处NonInstanced弃用警告。完整父审计发现两个未授路径变化：GGYGO的`LiveCodingInfo.json`及`.old`，故protection=false；after为`DAF3C96BA7FB67DB8595C9C456DFE2D99D1CB4A53B57B10939DE865055AFC569`，return为`73473FD023D4681ED3AA0FD7C8D72DF3FBF1FC1F18243525508B93105C1B2513`。其余变化均原授生成候选或trace；Source36仍为3992集合。Root重新实核共享进程／端口[]。原失败及五件／Build全部冻结，不把漏列路径追认为本轮豁免。两文件原字节已从R5的`PreservedInputs/.../ggygo/livecodinginfo.json[.old]`实际核出，均匹配R3 before且副本原已受保护。当前仅授Rendering先保留两失败后像，再逐字节恢复两个原目标；只准create `Saved/Codex/CRSource36Integration_20261019_R3_LiveCodingRecovery/` 下 `failed/LiveCodingInfo.json`、`failed/LiveCodingInfo.json.old`、`before.json`、`after.json`、`return.json` 五件。Root核两个目标单硬链接／准确父别名2；五新增件完整父交集0／85根内0／均不存在。完整复核沿原R3 before及原授候选，不新增LiveCoding豁免；FX两Source继续冻结。未授Build／Leaves／UE／Git，后继18叶及生产／联机未运行。
+
+Root已核恢复五件：after 14025766B／69543E663250BAA28EE2EE95F612CE35E4E9ED838230E7D85E1F18959737D0D5；return 19815B／E82A7550006C9F5AFBB14B277C4AB97AF6BCE45F4152AE79EED2A858466954C3。沿原R3 before及原授候选复核，raw9为66/3/2/2/0/4/3/0/0，三类unowned均空；两原目标及两个失败后像均逐字节核对，Source36 3992集合未变，新非沙箱共享进程／端口[]。原R3 exit6／Build=false／原运行保护false保留，恢复保护true不代表编译成功；三项既授PDB/lib缺失及四项UHT新增保留原差集。
+
+
+## 2026-10-19 R4标准构建与首轮十八叶
+
+R3实际编译失败及两个LiveCodingInfo原字节恢复已[完整归档](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-source36首次构建失败与原字节恢复)，原失败不改。当前真实父为`Saved/Codex/CRSource36Integration_20261019_R3_LiveCodingRecovery/after.json` SHA `69543E663250BAA28EE2EE95F612CE35E4E9ED838230E7D85E1F18959737D0D5`及return SHA `E82A7550006C9F5AFBB14B277C4AB97AF6BCE45F4152AE79EED2A858466954C3`，恢复保护true、三类unowned为空、两原目标／失败后像及3992集合实核无误，共享进程／端口[]。FX两文件构造修复已核收重冻，默认构造／Data所有权／业务及测试不变。R4入口`Saved/Codex/CRSource36Integration_20261019_Entry_R4/entry_pin.json` SHA `088742CB379DD2A79CEEBD5F83FBDC024482839C155B467E8B2B10A7557C3155`保持冻结。标准Build已真实归还：after 14068046B／`E4D0BF5CF324D7CC03E143A5C3498594AEA87A683A73E87314575DBC843F153F`，return 37816B／`6B2C2706722A4CAB811FD92BC21516B1E383D2CEE34579E43FF99458B896B29A`，原句柄exit0／success与protection均true；Root实际调用software按此Build return验全部产品／模块／369 Source输入通过，源码F09A55保持。raw9为30/1/2/3/0/3/0/0/0，唯一missing是预授trace工具池备份，三个新动态成员是已恢复PDB／lib；原R3失败及恢复边界保留。Leaves已实际归还：after 13490724B／`E414322DDC63638AA99741EF4E380214032206067A87B665DE23B9507E1E26D1`，return 38720B／`AAE5E004F5CE8B4DDD59E38D3965F9B7B30605E0D5B375AB090863B4BE78C085`，success=false／protection=true；原18项13过5失败，真实报告73822B／0EC1C6DD…193E2，UE124312原句柄exit0、clean/noPIE／共享[]及F09集合均实核，raw9为7/3/2/3/0/2/2/0/0。AS牵头与Combat／Boss／Combatants只读核结束／绑定共因，reason15实际为UnsupportedEntry；Input牵头与Camera核初始PIE装配／原生出票。不得把夹具差异或生产缺口预判成已修复。
+
+
+## 2026-10-19 Source37首轮运行失败修复源码
+
+本条仅源码实施及静态核收，原18项复验未运行，不代表整需求验收。
+
+Root核原7源14物理别名及Boss原测试追加2别名，合8源16别名，四作者独立写入：AS仅GA.h／GA.cpp／ASC.cpp，分离旧返回义务／完整Completed与GAS已结束后新激活权，保raw／controlled合法原生End及五个原重入场景；另仅MontageTaskLifecycleTest.cpp精确登记有意Superseded旧Task诊断并加强旧Task结束，不减后继断言。Combatants仅BindingLifecycleTest.cpp补正常World初始化时点，C0及后续断言原样。Input仅InputTestTypes.h／cpp，补专用GameMode并一致接现TestController，NativeBirth探针唯一拥有Source Session与公开IMC注册／归还，完整Hero LocalSessionReady模式保持；原Native出生／Cold／claim／首次数字InputKey／四Query／Released→Neutral→新请求及清理断言保持，不重新造Cold或放宽Source／Camera／Hero。Root已读原探针receiver为InputComponent，原本只证明Source机制；不加测试专用生产接口或冒称完整Hero首移动，后继生产／设备验证仍必做。Boss仅原EndReentryTest.cpp，对回调raw后继的最终显式完成请求精准登记真实Unsupported诊断，保原raw重入／后继隔离／最终Mesh恢复断言；清理测试内可用既有公共事实核无业务Completed，不改生产Boss／测试头／机制，也不把真实失败改成功，并更新相邻过时Busy政策注释。其余29 Source及所有资产／DLL／旧脚本／失败／Build产物冻结，无UE／Build／N3／SDK／Git／草稿／文档写权。旧36 F09集合为修复前身份；Combatants一件、Input两件及AS四件均已由Root按实际调用链／后像静态核收冻结，尚未构建／运行；仅Boss最后负例登记一件在途。待8件全部自审冻结后Root核新37集合，再批量构建与原18项必要验证。
+
+Root最终实核：37条仅8件变化，其余29及软件输入中范围外差集0；集合D02D7918BCAE8F8F0FA7370BB117E5D4BB3D574938AEA0C2E74FE2AC69E8ADB1。全部重冻，转后继准备。
+
+
+## 2026-10-19 R5标准构建与保护归还
+
+当前修复父为R4 Leaves的[after](../../Saved/Codex/CRSource36Integration_20261019_Entry_R4/Leaves/after.json)（E414322D…E26D1）及[return](../../Saved/Codex/CRSource36Integration_20261019_Entry_R4/Leaves/return.json)（AAE5E004…8C085）。R4标准编译及保护通过；18基础叶实际13过5失败，UE正常退出且clean/noPIE／保护通过／共享[]，原Source36 F09无差。完整[构建／首轮失败及归还](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r4标准构建与首轮十八叶)按需查询，失败不改写。首轮运行失败的8件源码修复及静态核收已[迁入历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-source37首轮运行失败修复源码)，尚未构建／复验。Root实核37后像仅原8件变化，其余29条及全部其他软件输入无差；新集合为`D02D7918BCAE8F8F0FA7370BB117E5D4BB3D574938AEA0C2E74FE2AC69E8ADB1`，全部冻结。旧记录只等旧proof的完整返栈／完成，不阻止GAS真实结束后合法后继；raw清理不伪业务Completed。原五重入及所有后继断言保持，Source探针仍只证原机制，完整Hero／CMC／真实设备首次移动仍须生产验证。R5五件已核收冻结，入口`Saved/Codex/CRSource36Integration_20261019_Entry_R5/entry_pin.json` SHA `250BCBDAB32E837349F59F0A60AEF680B15D2A4AFAE612376AAF9E7717E8D397`。Root实际核父记录schema／失败与独立清理／退出／保护、37源码8转换16别名／其余29及动态成员不变；原18项与5567候选集合不变，launch／host字节不变，真实辅助API绑定已核。checked通过164只读依赖、943软件／340原生输入及D02集合；完整父／85根九项差集0，572父别名交接／不可变输入交集0／现存输出单硬链接已核，原13过5失败及全部旧输入受保护。新非沙箱共享进程／端口[]。当前仅授Root以该pin运行标准Build.bat，限pin原生候选产物、两Root工具路径及Build回执；Source／资产／旧输入冻结，不授UE／Leaves／SDK／Git。构建真实成功及完整归还后再开同18专项窗。
+
+R5标准Build已实际运行；原PID135928／句柄exit0、80.83秒、16项动作成功，保留两处NonInstanced弃用警告。Root实际调用本轮software并核收59产物、3项目模块、369源码身份。完整before／原退出／保护均true；九项原差集为32／1／2／3／0／0／0／0／0，缺失1项为允许的UBT Trace池旧备份，未授权项均0；新共享进程及端口[]。before 13488531B／4448169EC258DB090F8196506CEF6CB9A1444152913C3775DCDC46B009EFB761；after 14117068B／0AA612C3A1DC8BA56524576DF59A8CE47EA8D71E7F8F93F949767CB037DC3C38；return 69221B／A43E59AA769614D28E4830A239A19A6D473BB262A0B2638393F5BCD49B3C62E3。三者均位于Saved/Codex/CRSource36Integration_20261019_Entry_R5/Build。全部原回执冻结；本归档只关闭准备及构建步骤，18项修复复验、生产、视觉、设备及联机尚未验。
+
+
+## 2026-10-19 R5十八叶与保护归还
+
+当前修复父及首轮失败见R4 Leaves [after](../../Saved/Codex/CRSource36Integration_20261019_Entry_R4/Leaves/after.json)／[return](../../Saved/Codex/CRSource36Integration_20261019_Entry_R4/Leaves/return.json)；8件修复及静态核收见[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-source37首轮运行失败修复源码)。R5五件冻结，入口`Saved/Codex/CRSource36Integration_20261019_Entry_R5/entry_pin.json` SHA `250BCBDAB32E837349F59F0A60AEF680B15D2A4AFAE612376AAF9E7717E8D397`。R5标准Build原PID135928／句柄exit0、80.83秒；Root实核59产物／3模块／369源码及software，完整保护true、无未授权差集，共享进程／端口[]。[Build after](../../Saved/Codex/CRSource36Integration_20261019_Entry_R5/Build/after.json) `0AA612C3…DC3C38`；[Build return](../../Saved/Codex/CRSource36Integration_20261019_Entry_R5/Build/return.json) `A43E59AA769614D28E4830A239A19A6D473BB262A0B2638393F5BCD49B3C62E3`。完整准备／构建过程已[归档](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r5标准构建与保护归还)。当前仅授Root用同pin及实际Build return启动Leaves，原18项及全部原断言保持；仅该宿主、声明输出、两Root工具路径及Leaves回执可写，全部Source／资产／旧输入／额外UE／SDK／Git冻结。实际原生报告、clean/noPIE、正常退出及完整归还均通过后再接生产核验；修复未报运行完成。
+
+| R7 表现与时间线 | Root审核，FX牵头，AS／公共Task／Animation／Combat／Character提供原合同；F1／AN2 | 原36集合及FX构造已过R4标准编译／保护（两处弃用警告）；18基础叶13过5失败，UE正常退出且clean/noPIE及完整保护通过。当前Source范围37，仅原作者8件修复：AS分离旧返回／Completed与后继激活，保五原重入场景；Rate精确登记有意Superseded负例，Combatants补World初始化；Input修专用GameMode及Source探针单会话所有权，全部原出生／四Query／清理断言保持。8件均静态核收冻结，37集合D02D7918…E8ADB1；R5标准构建／原句柄exit0及完整保护已过，保留两处弃用警告；当前仅Root同18专项窗，修复尚未复验。四FX发布叶与NamedNotifyContract已实际通过，生产／视觉／联机未验；旧构建／首轮失败过程见排程历史。已接typed同步窗口、真实BranchingPoint且保原BP／公开Payload、纯退休携出义务后安全派发、反射active状态＋可靠Terminal、单远端Niagara及角色事实桥；来源去重、弱Task Unknown及过期Avatar订阅清理已补。攻击／移动／MainEnd、GAS／CMC权威、缺End／混出／终止／尾粒子合同保持，不增Cue／Tag／Iris包装。真人晚加入／重获相关性的剩余FX与正确Age仍须真实验证；五Montage／两GA的Queued／NoMerge、FX.Mode／Trace、图委托和两Remote参数仍待实际读回，准确原清单turn 01a14fbf-01c2-7502-b81f-350172f8627c。旧协议取舍回执Kiro040 turn 01a1500d-aa46-7e80-a2f1-4e9b708c171b仅按需参考，不再调用Kiro；窗口及机器身份只见当前排程。 |
+
+R5原18基础叶已实际执行，原UE136956自2026-10-18T23:44:04.2320597Z至23:45:43.3363566Z，原句柄exit0，dirty前后空、PIE空、normal_quit_requested=true，宿主自身errors=[]。原生16Success／2Fail，严格14项0E／0W；四未过项为Combo ActivationCommitAndEndReentry 7E、Input NativeBirthFirstDigitalPress 1E／2W、Combatants FailedInitCleanupAfterNativeRevocation Success＋3W、RealDestroyRejectsCleanupReattach Success＋1W。R4 RealDestroy也为Success＋1W，历史13／5是原生状态计数，不表示十三项零警告。原失败保留，不登记吞掉真实错误。
+
+Root实核全部回执及当前D02输入，before／original_exit／protection均true，九项原差集7／3／2／3／0／2／2／0／0，未授权差集0；新共享进程／端口[]。before 13653475B／C3D3F643E7E8C765BEE000B272A09FE6507689ADE449B347351080108A1FF68C；after 13535023B／7101E024C0DF480E9FCD3062579EA7D2D77DFB8AC954AF1CA49E4B8A2F0F1F74；return 70125B／6F1B1D3F3A91F15A9ABDA9CFE1825EE9C5BF8922BD0177FA136F0CDDC9B7F52C；readback 68215B／E69A2FBD334020646A7AFFB16A8202DD21E83F299212691F681199FDD48D6674；Automation/index.json 69225B／916E614D962587C8387A0AE311F39AC2641740B5AB4F2C4350B7DD9C5C00B449。均在Saved/Codex/CRSource36Integration_20261019_Entry_R5/Leaves。after通用“必要叶/原宿主清理未通过”由叶失败触发，实际清理和退出已通过，不改写成清理失败。本步骤结束归档，需求和修复尚未完成。
+
+
+## 2026-10-19 活动入口过程减量
+
+整理前快照（含当时未完成边界）；当前排程已替代其中旧授权，迁出不作验收完成，不恢复历史写窗。未完成项在活动入口继续保留。
+
+### 当前Source批：CR R3／R4／R6及R7集成
+
+本批Runtime待收口范围为下列38条Source（33现有＋5新增），根为`Source/GGYGO/`；表仅定位原作者。FX原h／cpp构造修复已核；已编译37条以D02集合为基线，当前仅下文原作者13件Source修复／观察接线；R3失败及原字节恢复已归还，当前修复父见下文R5 Leaves after／return。Numeric及旧R1／R2／R3全部冻结，不再调用旧after校验当前Source。
+
+| 原作者 | 唯一写集（均相对此根） |
+| --- | --- |
+| AbilitySystem | `AbilitySystem/GGYGOAbilitySystemComponent.h`、`AbilitySystem/GGYGOAbilitySystemComponent.cpp`、`AbilitySystem/Abilities/GGYGOGameplayAbility.h`、`AbilitySystem/Abilities/GGYGOGameplayAbility.cpp`、`AbilitySystem/GGYGOAvatarBindingTypes.h`、`AbilitySystem/Tasks/GGYGOAbilityTask_PlayMontageAndWaitForEvent.h`、`AbilitySystem/Tasks/GGYGOAbilityTask_PlayMontageAndWaitForEvent.cpp`、`AbilitySystem/Tests/GGYGOMontageTaskLifecycleTest.cpp` |
+| Combatants | `Combatants/Tests/GGYGOCombatantBindingLifecycleTest.cpp`、`Combatants/GGYGOCombatantState.cpp` |
+| Input | `Character/Components/GGYGOHeroComponent.cpp`、`Input/GGYGOPlayerInput.h`、`Input/GGYGOPlayerInput.cpp`、`Input/Tests/GGYGOInputTestTypes.h`、`Input/Tests/GGYGOInputTestTypes.cpp` |
+| Camera | `Player/GGYGOLocalPlayer.cpp` |
+| Combat动作 | `AbilitySystem/Abilities/GGYGOMontageActionResources.h`、`AbilitySystem/Abilities/GGYGOMontageActionResources.cpp`、`AbilitySystem/Abilities/GGYGOPlayerComboAbility.h`、`AbilitySystem/Abilities/GGYGOPlayerComboAbility.cpp`、`AbilitySystem/Abilities/GGYGOMontageWindowFXTypes.h`、`AbilitySystem/Tests/GGYGOMontageWindowFXTest.cpp`、`AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp`、`AbilitySystem/Tests/GGYGOPlayerComboLifecycleTestTypes.h` |
+| FX | `FX/GGYGOMontageFXPublication.h`、`FX/GGYGOMontageFXPublication.cpp`、`FX/Components/GGYGORemoteMontageFXComponent.h`、`FX/Components/GGYGORemoteMontageFXComponent.cpp`、`FX/Tests/GGYGOMontageFXPublicationTest.cpp`、`FX/Tasks/GGYGOAbilityTask_PlayNiagaraEffect.h`、`FX/Tasks/GGYGOAbilityTask_PlayNiagaraEffect.cpp` |
+| Animation Runtime | `Animation/Notifies/GGYGOAnimNotifyState_GameplayEventWindow.h`、`Animation/Notifies/GGYGOAnimNotifyState_GameplayEventWindow.cpp` |
+| BossAI | `AI/Boss/Abilities/GGYGOBossMeleeAbility.h`、`AI/Boss/Abilities/GGYGOBossMeleeAbility.cpp`、`AI/Boss/Tests/GGYGOBossMeleeEndReentryTest.cpp` |
+| Character | `Character/GGYGOCharacterBase.h`、`Character/GGYGOCharacterBase.cpp` |
+
+AS先按已核R3-1→R3-2后像接续，再做自身R7；Combatants接R3-2真实失败初始化叶及三项静态修正；另仅Host.cpp两处真实Invalidate调用，把纯Prepare旧关闭义务显式带到原成员／History写完的安全出口，再Dispatch并弱重核，不把同步外调藏进旧纯失效入口。Input仅接已冻R4四Source，Hero在本窗仅Input写；Camera仅接已冻R6单Source。R7参与者按已收最小typed窗口／发布与终结／原资源释放及无生产事实合同直接收敛，不新增逐方法审批；必要签名在原参与会话传差异，不复制全量背景。
+
+当前源码里程碑：已编译37条的集合为`D02D7918BCAE8F8F0FA7370BB117E5D4BB3D574938AEA0C2E74FE2AC69E8ADB1`；R5标准Build／完整保护通过，原18项实际16Success／2Fail，其中另2项有警告，严格零错零警告14项通过。Combo Ready重入、Input拆卸及Combatants负例诊断仍须修正，后两原重入场景仍须实际跑到。当前五件修复增加原Combo测试头纳入批次，修后38条集合待冻结；未报运行完成。生产／设备／视觉／联机仍未验。
+
+另4件既有Editor源码由Rendering独占：`Source/GGYGOEditor/Public/GGYGOViewportReadbackLibrary.h`、`Source/GGYGOEditor/Private/GGYGOViewportReadbackLibrary.cpp`、`Source/GGYGOEditor/Public/GGYGOPlayerActionObservation.h`、`Source/GGYGOEditor/Private/GGYGOPlayerActionObservation.cpp`。前两件复用自然SetupView与原viewport任务，首Draw前布防并固定原玩家身份，区分首次观察与已错过首次确认；后两件复用原有限观察宿主，接真实发布键／终结／原ControllerAge和资源归还。FX独占表中Publication及RemoteComponent原h／cpp四件，仅提供原事实只读视图与安全出口的瞬时观察；Camera只读提供原生合同，不改源码。八路径完整父16别名及单硬链接已核；不新增生产权威／帧调度／长期历史／假Python接口，PrepareClose保持纯写，尾粒子销毁与原持有权归还分列。原作者直接收敛最小C++合同后实现，独立于当前五件修复；全批为38 Runtime＋4 Editor共42件（37现有＋5新增），新集合及统一Build入口待全部作者冻结后核收。
+
+同文件一作者，重叠改动在同会话串行。AS须复核R7不破坏R3-2的NativeWrite入口纯写依据；CPP正常／失败／清理连续可读，不用角色特判或隐式兜底。通用BP委托及未核资产接口保留；角色／招式参数仍在资产，未知值不猜。各自自审按CodeConventions交实际文件／接口差异及未验项，冻结后Root一次批量Build与受影响专项／生产／联机。
+
+R2启动预检失败（无效`prior.shared`，编译未启动）已[原文归档](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-source36构建预检失败)，原五件和失败回执冻结。R3执行前已核49处真实API／参数绑定；当前失败与恢复按下文维护。
+
+最新执行父为R5 Leaves [after](../../Saved/Codex/CRSource36Integration_20261019_Entry_R5/Leaves/after.json) `7101E024C0DF480E9FCD3062579EA7D2D77DFB8AC954AF1CA49E4B8A2F0F1F74`／[return](../../Saved/Codex/CRSource36Integration_20261019_Entry_R5/Leaves/return.json) `6F1B1D3F3A91F15A9ABDA9CFE1825EE9C5BF8922BD0177FA136F0CDDC9B7F52C`。Root已核原UE136956句柄exit0、clean/noPIE、完整保护true及新共享进程／端口[]；运行失败按原样保留，[完整结果及构建](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r5十八叶与保护归还)按需查。当前仅授原作者五件Source修复：Combat动作写`AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp`及原`GGYGOPlayerComboLifecycleTestTypes.h`，复用现有真实Started observer并退役本类旧AfterSuper钩子，原正常计数消费者、五场景及后继强断言保留；Input写`Input/Tests/GGYGOInputTestTypes.cpp`归还IMC早于销毁，及`Input/GGYGOPlayerInput.cpp`仅区分BeginDestroy已终态无会话的重复退役诊断，原活会话／运行期失效与全部清理保持；Combatants仅写原`Combatants/Tests/GGYGOCombatantBindingLifecycleTest.cpp`精确登记原对象／结果／各一次的故意负例诊断。五路径在完整执行父10别名已核，原37其余文件及全部旧输入／生产资产冻结；不授UE／Build／SDK／Git。真实Started相位不冒称覆盖旧Guard已Returned的自定义后钩成功，不放宽PostWriteRejected。Camera／FX已确认真实观测缺口，现同批授下列八件既有源码接线；Camera保持只读顾问。全部作者冻结后统一集成构建／原专项及生产验证。
+
+
+
+Material已完整归还并由FX消费，见[读取历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-16-material单次读取与完整归还)。缓存贴图解码四作者件已冻：`F:/AnimeStudio/_work/pyrois_decal_texture_cache_decode_20261017/entry_pin.json` SHA4F5526F6…4B3F9。两标准SDK评估及保护已归还、十产物冻结；[评估证据与75新增输入边界](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-缓存贴图sdk评估)。当前Source36集成优先，未授Restore／Build／Decode。Resource已静态核出GLTextureSettings丢弃V/W；Root读真实解析器及既有四份204～212B .dat元数据，V/W分别为0/0、1/1、0/0、0/0，无需重导出或读.texturedata。`F:/AnimeStudio/AnimeStudio/AnimeStudio/Classes/Texture2D.cs`已由Resource修复并冻结：2017+保存可空V/W，旧版未知、原U不变；14326B／0744DA53AEA2DD41B87A00A9C9CB3D17C33D53478573EB297EBB198984FC00D4，Root实读并逆向还原原SHA通过。该文件完整父交集0，未编译，不影响Source36／R4；旧worker／pin／缓存／素材未改，未启动工具链或新增报告／测试，当前无资源写窗。完整Restore/Build/OS读依赖及Native ABI／实际采样仍未闭合；后继补读四 .dat须连同原75输入准入，并仅为Decode子进程显式满足冻结PATH／PSModulePath，不改全局环境。源码／静态补值不作解码或视觉验收。
+
+Decal离线稿：仅Resource／FX原作者create `Saved/Codex/PyriosSpecialDecalConsumerDraft_20261017/projected/` 九件：AnimeStudio的`ShaderConverter.cs`，GGYGO既有Scripts的`zzz_fx_build.py`、`zzz_fx_material.py`、`zzz_fx_native_shader.py`、`zzz_dxbc_hlsl.py`、`zzz_fx_material_ue.py`及tests中native_shader／dxbc_liveness／batch_safety三测试投影。Root已核九路径对当前完整父／实输入／85根交集0。九件已冻结；原两失败修复后R4三既有测试104／104通过，单目录23输入、自然Globals，原断言保留，无生产应用；旧失败及R3布局保留，成功R4已安全清理。原Source及旧稿冻结，不编译C#／HLSL、UE或额外报告。保真Pass与分stage身份、BUF／structured读取／cube-array／中途ret；缺Decal渲染契约或场景provider必须在UE操作前显式拒绝，不宣称可播或还原。运行写集另核。
+
+
+## 2026-10-19 当前入口重复状态收口
+
+以下为收口前被替换的原段落，完整保留原事实、失败及未验边界；历史权限不恢复，当前状态仅以活动入口为准。
+
+三Normal移动通知及唯一Combo GA保存／Cold已归还；三类独立打断代表试次通过。必要契约仍为原攻击点保留、MainEnd后才开放移动；生产运行／设备／网络未验，准确结果见[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-16-mainend后新按移动键试次通过)。
+
+跨需求索引：[CR-20261014业务冗余／职责收口](Module_Audit_Repair_Ledger.md)：真人已停止Kiro调用，后续由Root按既有规范审查；既有首批r1十Source已应用冻结，联合构建及必要叶已分批通过，生产装配仍未验。R5十Source亦已接续应用冻结，详细原输入与范围见CR／R5条目；Kiro R6相机六件离线稿已核冻、生产未应用，本轮R3-1／R3-2／R4／R6及R7按下表Source36窗接续，其它整改未授写窗。原作者提供契约，详细边界留CR唯一条目，不复制需求正文。
+
+后继仅消费当前实际Source／DLL／资产身份，原输入与生命周期权威保持冻结；E／R／F后延，不因旧阶段记录新增前置。
+
+当前执行窗：Numeric_R11与同R2补充恢复已归还，Root实核原UE exit0／共享进程端口[]、fixture／PIE／callbacks／dirty清空、完整父及85根保护通过。实际两组10／20／30、Buff20／40／60及六Spec／自然链已保存；原driver序列化失败及R1／R2失败不改写，旧八日志缺失、新两SDK原路径缺失但22副本字节保全分列，详见[完整归还及失败](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-numeric-r11实际六spec与恢复归还)。Root接当前Source36批，原作者唯一写入、当前原资产及全部旧稿冻结；不调用Kiro，R3标准Build失败及原字节恢复均已归还，已编译37条D02仅作为修复基线，当前13件按原作者窗口接续，R4十八基础叶已失败归还且保护通过，本轮13件差集全部作者已冻结，Root核收中，其他Source／资产／旧输入／UE／Build／Git／纹理Restore冻结。
+
+AbilitySystem R2十三件已冻结，十Source已在原工程应用；四包生产接线及最终八包Cold已过，Numeric_R11实际六Spec及自然链已保存，原driver失败与后继验证边界按[R5](Module_Audit_Repair_Ledger.md)维护。真人文档分工已同步既有[文档技能](../../.kiro/skills/obsidian-canvas-diagram/SKILL.md)及引用细则，不把草稿写成已实现。
+
+运行证据边界沿原条目：暂停采图numeric=null，图片／动作自然结束／cleanup／完整保护分列；GPU姿态对应、设备、生产与联机未由已过单人专项替代。
+
+M3／R10、必要Native及各专项结果留[历史](Module_Repair_Parallel_Schedule_History_20261013.md)；CR／R5当前Source标准Build及必要叶均已有通过证据，三个RuntimeHit最新复测全过。原失败完整保留，生产及联机边界仍未验。
+
+## 当前事实、作者与必要前置
+
+| 原工作线 | 最新正式事实／验证层 | 下一交付与真正前置 | 证据入口 |
+| --- | --- | --- | --- |
+| Rendering完整构建 | R10、两必要Native、C6_R2、P18 TurnBack、P20 NormalA及P21 Lean60_R2完整保护已归还，原失败保留 | A4／C4／B双图及全父已核收；保留A，转其余需求集成 | [最新归还](../../Saved/Codex/PyriosProductionVisual_20261017_P21_Run_Lean60_R2/ProcessAfter.json)、[准备失败](../../Saved/Codex/PyriosProductionVisual_20261016_P19_Run_NormalA_R1/PreparationFailure.json) |
+| Animation Runtime | S1两Source／R8实际DLL保持；Lean20_R2五项真实范围检查通过 | 保持冻结；默认／范围／空尾／非法／非空exact index已实际通过，整身／完整Yaw仍按各场景验收 | [S1归还](../../Saved/Codex/AnimationObservationRange_20261016_S1/return.json) |
+| Input | P2五包保存／Cold、R8桥接及P9 Ready已交，仅相应证据层；原生产未升级。新P1原装配／opaque设备／Press→自然帧→Release入口冻结，Submit实际二元组／None协议已核，键尚未提交 | 三源／原包停写；真实E/IA/ASC／qualified Held／自然结束待当前宿主，不把submitted/handled当能力或物理设备证明 | [当前输入入口](../../Saved/Codex/PlayerInputOperations_20261014_P1/README.md)、[P2](../../Saved/Codex/PyriosSkillInputs_20261013_P2/return.json)、[旧失败](../../Saved/Codex/PyriosSkillInputs_20261013_P1/return.json) |
+| 公共Task／Combat动作 | 三MainEnd移动点及GA六字段保存／C2 Cold；三类连续自然输入代表试次均通过，原攻击点／Task／ASC／CMC权威保持 | 生产接线及八包Cold已过，实际输入／后继联机仍待；E／R／F后延，单人结果不外推设备／视觉 | [三类结果](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-16-mainend后新按移动键试次通过)、[C2](../../Saved/Codex/PlayerBridgeIntegration_20261013_R6/Project/Saved/Codex/PyriosRuntimeAssetCold_20261016_C2/return.json) |
+| Animation资产／Audio | A／B及三Normal移动点保存／独立Cold已核收，全部原配置／旧通知保留，窗口归还 | A ABP＋三Normal及AS四包已实际保存、独立八包Cold通过；BP生产初始A字节未变。E／试听后延，生产运行／联机仍待 | [Montage Cold](../../Saved/Codex/PlayerBridgeIntegration_20261013_R6/Project/Saved/Codex/NormalMoveNotify_20261015_N1/Attempt_R2/cold/return.json)、[B Cold](../../Saved/Codex/PlayerBridgeIntegration_20261013_R6/Project/Saved/Codex/PyriosLocomotionPose_20261014_R2/PoseGraph_R3_20261014_AB4/B/cold/return.json) |
+| Movement／Rendering视觉 | 连续起停、S1、完整Yaw、NormalA已有专项结果；Lean60侧倾代表专项及A/B真实运行已核收；Slot保留A | 本视觉验证批已归档；生产资产保存／Cold已过，生产运行／联机仍未验 | [Lean60](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-lean60-r2双视角与完整归还)、[NormalA](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-16-p20-normal-a双视角与完整归还) |
+| FX／资源 | 九失败／Recovery仍未Cold／Visual／动作验收；八类锚点及Main_Distor静态TRS已核，cue／挂点／控制未明。Material两consumer补丁静态检查通过、0应用；单次Read真实5652B／唯一目标，171数值／19颜色／4非空贴图引用，原句柄exit0及全父／846运行输入保护无差异；旧失败保留 | FX只读消费真实输出，区分静态参数与时序；外部Shader／Texture依赖、cue／生命期仍未闭合。先前84B／104B／Clip2892B已单读完整归还；Clip只有0～0.166667秒内部旋转11键，无外部cue证明。Source补丁待批次，不擅自扩读／写UE | [本次Material](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-16-material单次读取与完整归还)、[两consumer补丁](../../Saved/Codex/PyriosMaterialConsumerSourcePatch_20261014/material-input.patch)、[FX交接](../Modules/Character/Rendering/ZZZ_FX_Handoff.md) |
+
+
+## 交接与持续维护
+
+只原位更新本页的当前事实、未完成项和必要依赖；稳定规则不在排程重复。已完成迁移及旧上下文测量见历史，不再作为当前前置。归档由统筹按AGENTS.md自主判断，完成后向用户给短回执。
+
+20261013-模块历史正文归档已完成（6／6），原文保全及链接／锚点已核；结果和证据见[历史交付](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-13-模块历史正文归档交付)。本批业务未完成项继续原位维护在本页。
+
+CTX-20261016上下文入口整理已完成：总览／修复清单／Obsidian实施状态及两跨模块契约合计575KB→64KB，历史和未验边界保全，详见[归档结果](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-16-活动入口减量与p16首轮启动失败保留)。后续续接仍先读本页，历史、旧Validation／Findings及机器快照按必要字段查询。
+
+<!-- 本次迁出原文结束 -->
+
+
+## 2026-10-19 Source42静态核收与R6构建失败归还
+
+R6实际标准Build因Editor引用不存在的GGYGOCameraModeStack.h而失败，83.21秒；原cmd135968/父122536/出生134368502515549710，原句柄exit6、shared_after进程/监听[]，Root原工具会话17219终态exit1。Root实核30原回执及当前42源码身份；success=false/protection_success=true、runtime_before_verified/original_exit_verified=true。九原差集35/3/2/3/0/0/2/0/0，未授权项均0，fresh共享进程/监听[]。未运行Leaves，未发布本批成功软件；两处既有NonInstanced弃用警告、产品发布拒绝及原错误保留。
+
+准确回执位于Saved/Codex/CRSource42Integration_20261019_Entry_R6/Build：before 13554538B/93A37372428AECC2AAF713AF6BC192D8B2569E9E0CA5B84F18DFC9C4B83780A5；host 559B/1EBFBE345B635C6D52F20A6D04872FD5530895C27E5EC69636650F30B1754772；exit 442B/1F95A4116F0904ACCB966BE0D88EF1C613DEE5BA9191B278F9C3312224B19483；after 14155027B/F92D308DA1D6ED11EF81E165B43423B677A20B5D5B0F66B66FA54F564810D99D；return 100785B/41E40E8B403E51EF9C145D907AB4166AC6782A012F0169765DEBEBC5770099C8。
+
+以下为本阶段活动段落的原样迁出快照；其中阶段权限／在途状态已经结束，当前写窗只读活动排程。Source静态核收不等于编译／生产／网络完成。当前仅原Rendering单CPP修复及R7新五件准备，整需求未完成。
+
+### 当前Source批：CR R3／R4／R6及R7集成
+
+最后完整成功编译基线是R5的37条D02集合；Build成功（两处弃用警告），原18项为16Success／2Fail，严格14项0E／0W。原UE正常exit0、clean/noPIE、完整保护通过。余下Combo／Input／Combatants问题的五件修复已静态核收冻结，尚未复验。新批共42件（38 Runtime＋4 Editor），R6构建实际83.21秒后因一处Editor头引用C1083失败；[原退出](../../Saved/Codex/CRSource42Integration_20261019_Entry_R6/Build/exit.json)已保存，完整保护尚待原宿主归还，未启动18项。其余29条不写。
+
+准确执行父：[R5 Leaves after](../../Saved/Codex/CRSource36Integration_20261019_Entry_R5/Leaves/after.json) `7101E024C0DF480E9FCD3062579EA7D2D77DFB8AC954AF1CA49E4B8A2F0F1F74`／[return](../../Saved/Codex/CRSource36Integration_20261019_Entry_R5/Leaves/return.json) `6F1B1D3F3A91F15A9ABDA9CFE1825EE9C5BF8922BD0177FA136F0CDDC9B7F52C`。完整原写集、失败和阶段过程按需查[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-活动入口过程减量)；基线37条及机器身份见同R5 `entry_pin.json`，不调用旧checked／after校验新源码。
+
+本轮差集13件，路径相对`Source/`；全部作者及Root已完成静态核收冻结。新42集合SHA `73B62DF1BD9CBF214D3148507B6EA6FC26DBC8F8470B7F8C9FF5989BC8F5C0D3`（Ordinal路径、`path|bytes|UPPER_SHA`、UTF8无BOM及LF末行）；943软件输入恰好13件授权差异，无缺失／其它差异。当前无源码写入窗：
+
+| 原作者 | 本轮准确差集 | 当前状态 |
+| --- | --- | --- |
+| Combat动作 | `GGYGO/AbilitySystem/Tests/GGYGOPlayerComboLifecycleTest.cpp`、`GGYGO/AbilitySystem/Tests/GGYGOPlayerComboLifecycleTestTypes.h` | 已静态核收冻结；真实Started／原生实例数，旧AfterSuper入口退役，Guard正返回计数另名；保五场景及后继强断言，后两场景仍须实际跑到 |
+| Input | `GGYGO/Input/GGYGOPlayerInput.cpp`、`GGYGO/Input/Tests/GGYGOInputTestTypes.cpp` | 已静态核收冻结；先归还原IMC再销毁，仅区分已终态无会话的重复诊断，原活会话保护及所有清理／首按／四Query断言保持 |
+| Combatants | `GGYGO/Combatants/Tests/GGYGOCombatantBindingLifecycleTest.cpp` | 已静态核收冻结；故意负例原对象／结果／各一次诊断；不预测Operation序号，真实Init／Cleanup同身份及物理清理断言保持 |
+| FX | `GGYGO/FX/GGYGOMontageFXPublication.h`、`GGYGO/FX/GGYGOMontageFXPublication.cpp`、`GGYGO/FX/Components/GGYGORemoteMontageFXComponent.h`、`GGYGO/FX/Components/GGYGORemoteMontageFXComponent.cpp` | 已交付冻结；Root已核只读弱窗、容量失败、真实Age及归还／尾部／销毁边界；定义注释已补，未编译／运行 |
+| Rendering | `GGYGOEditor/Public/GGYGOViewportReadbackLibrary.h`、`GGYGOEditor/Private/GGYGOViewportReadbackLibrary.cpp`、`GGYGOEditor/Public/GGYGOPlayerActionObservation.h`、`GGYGOEditor/Private/GGYGOPlayerActionObservation.cpp` | 已由Root静态核收冻结；原生投影实际成功返还后才到SetupView，模式资格独立，未知Terminal保留；未编译／运行 |
+
+以上13路径完整执行父26别名及观察接线单硬链接已核。[R6入口](../../Saved/Codex/CRSource42Integration_20261019_Entry_R6/entry_pin.json) SHA `8458A28AC9E3C82E3F22029C9B1D1669E57A25DA2EE159523E5E3CAE1C21DBED`已由Root独立checked／实际R5执行父／13迁移／完整审计核收，九差集均0；236依赖、943软件输入、340原生写入输入、5567原生写入及两Root工具路径保持，85动态根与18原专项已核。当前仅Root原工具会话完成R6失败保护归还；全部Source／生产资产／旧输入冻结，本轮完整构建未通过、18项未运行。
+
+必须保持：原五重入及后继断言，真实Started不冒称覆盖Guard已Returned的自定义后钩成功，PostWriteRejected不放宽；PrepareClose纯写及GAS／CMC权威不变。Editor沿自然SetupView观察完整投影成功，首Draw前布防／固定原玩家，错过首次确认只报首次观察；FX仅记录原事实，ControllerAge／DesiredAge、NativeFrame／Drain、资源归还／尾部／实际销毁分列，未知Terminal保留未知归属，不增生产权威／调度／长期历史。实际Python反射与生产参数仍须真实Editor读回。
+
+<!-- 本阶段原文结束 -->

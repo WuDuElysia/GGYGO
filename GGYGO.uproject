@@ -13,6 +13,14 @@
 			]
 		},
 		{
+			"Name": "GGYGOAnimGraph",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default",
+			"TargetAllowList": [
+				"Editor"
+			]
+		},
+		{
 			"Name": "GGYGOEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
@@ -49,6 +57,10 @@
 		},
 		{
 			"Name": "GASToolsets",
+			"Enabled": true
+		},
+		{
+			"Name": "ToolsetRegistry",
 			"Enabled": true
 		},
 		{

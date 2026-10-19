@@ -1,350 +1,80 @@
-# ZZZ / Pyrios 特效还原交接（2026-10-08）
+# ZZZ / Pyrios FX 当前交接
 
-给接手会话用：目标、已完成、管线、数据格式、坑、边界、下一步。设计细节另见 Obsidian `GGYGO架构规划/Character/渲染实现.md`「身体 FX」「技能特效」两节。
+当前需求、共享窗口和原作者安排以[当前排程](../../../Coordination/Module_Repair_Parallel_Schedule.md#当前窗口与关键路径)为准。本页保留必要契约、未完成项和证据入口；已结束过程及旧租约移至[历史原文](ZZZ_FX_Handoff_History_20261013.md)，不据历史命令操作当前工程。后续交付覆盖当前结论与入口，已结束过程及时归档。
 
-## 0. 目标与硬约束
+## 当前任务与未完成项
 
-- 用绝区零（Unity 2019.4.40f1，miHoYo 改版）导出的数据在 UE 5.8 重建 Pyrios 的身体 FX 与技能特效。
-- 数据驱动：数值来自导出数据。完整预制体任一启用的可见分支不受支持，整批预检失败、资产零写入；不跳过分支后报告完整还原。明确选择的源子树可以独立做 `NS_PREVIEW`，必须保留完整祖先变换，并标明父预制体未完成、动作接入未验。
-- 角色/特效材质一律 Unlit，不走 UE 光照第二遍。
-- 编辑器开着（带 `-ModelContextProtocolStartServer -ModelContextProtocolPort=8000`）时，所有导入、改资产、存盘走 MCP，在用户的编辑器里做；不要另起 `UnrealEditor-Cmd` 写同一批资产。
-- `Content/` 只放 `.uasset/.umap`；源数据留在批准的导出/资料目录。批准清单中的新包才可创建、修改和保存；开始前既有包不可复用、覆盖或删除。失败的新包保留供诊断，不自动清理资产。
-- 构建、UE 窗口和 Git 由统筹安排。不得 SaveAll、自动提交或强制添加整个被忽略的资源目录。FX109 七包、FX110 八包与 FX112 八包共 23 个本地预览包均已保存冻结；FX111 只读观察与 FX112 执行窗口已归还，不能按本文命令重新写入。
-- 实际图像检查与数值对照共同保留；编译、粒子存活、隔离探针和原效果一致性分别记录。此次证据保存在 `Saved/AutomationReports/`，见 §1。
+目标为 Special、ExSpecial、Rush、三普攻及现有冲刺闪避／TurnBack 的可定位 FX，还原到角色及动作中。斗篷上沿固定缺口仍只读暂挂，由 Character Rendering 牵头；延期 Dodge GA／CMC 不恢复。本批完整还原未完成。
 
-## 1. 当前状态
-
-| 项 | 状态 |
+| 工作线 | 已有证据及当前缺口 |
 | --- | --- |
-| 身体 FX（`MI_Pyrois_Body_FX`，三层溶解遮罩叠加） | 历史生成、SM6 编译和保存检查通过；原游戏视觉未验收。用户截图的斗篷上沿固定缺口仍未关闭，见 §14 |
-| 表面 Toon（NapAvatarStandard 逐行移植） | 另一工作线的历史实现与截图修正，验证范围见 `Pyrios_Renderer_Implementation.md`；本批不修改或重新验收 |
-| 历史技能试点 `Eff_Pyrois_Attack_Normal_01_01_Trail` | 旧 `NS_Eff_Pyrois_Attack_Normal_01_01_Trail` 生成了 7/8 发射器，曾编译 UpToDate、0 堆栈问题；属于不完整历史资产，未挂攻击、未做原游戏对照。当前完整预检仍阻塞，不沿用历史“跳过”策略 |
-| 普通烟雾子树 `Smoke_Cone01 (2)`（2026-10-08） | 独立 `NS_PREVIEW` 七包已创建、保存；材质与 Niagara 编译通过，原材质实际有很淡的绘制输出。父预制体、普攻/技能/闪避整条链路未完成，原游戏同帧一致性未验 |
-| Back03 子树 `root/smoke_flow`（2026-10-08） | FX110 旧八包保留；FX111 确认真正有粒子且核心绑定正确。共享下标依赖缺陷修正后，FX112 新八包创建、保存、编译及 Code/参数读回通过，但原材质仍近乎空白，实际烟雾输出未确认。完整 prefab、源运行态选择/全局值与动作接入未验 |
-| 试点 `..._weapon` | 只有一个 MeshRenderer 节点，未生成系统 |
-| 其余动作来源 | 资源组已交付 30 个根的完整组件/资源证据；不等于执行语义、触发时间和挂点已还原。v2 读取与单子树的显式 native 候选消费已接入，其余源分支和运行态取证仍未完成 |
-| 历史提交 | `2cdca88`（源数据移出 Content）、`6e38fe5`（技能特效管线）；本轮未自行 Git |
-| AnimeStudio 改动 | 未提交（见 §6） |
+| 斗篷布料 | 历史源对象／槽位和 FBX 核对未定位明确漏项，不能证明当前 UE 蒙皮、覆盖或深度等价；缺口根因与同姿态复现仍未验，见[身体 FX 历史证据](ZZZ_FX_Handoff_History_20261013.md#14-身体-fx历史生成检查通过斗篷缺口仍开放) |
+| Normal01 | 七层历史系统有编译／保存／Cold／有限生产叶证据；源八层中的 `Main_Distor` 未恢复。当前时序属 `project_test`，原 cue、完整源及原游戏同帧视觉未验，见[有限检查点](ZZZ_FX_Handoff_History_20261013.md#normal01-有限生产链检查点2026-10-09) |
+| Normal03_02 残影 | 原九失败包及保全仍保留；R5 同九资源 Recovery 只认资源读回，Cold／GPU／可见图／动作未验。R7 仅有旧 A2 宿主离线适配，不代当前宿主准入或后继 Gameplay |
+| Special Decal | 两缓存7924B及唯一Material5652B均已实际读回；真实Material数据通过离线严格适配，正式consumer仍未应用。默认Mesh、Shader正文及四非空Texture的完整消费链仍缺；不由静态值证明cue／fade／stop |
+| 其它动作／Back03 | 触发帧、段序／Main/End／Hit 分配、挂点、TRS、Follow、Age、Fade、Stop 的真实来源仍缺；Back03 历史修正后实际烟雾可见性仍未闭合。已有包或离线计划不代动作还原 |
 
-历史试点七个发射器：`root/Trail/rot/{HighLight, light_edge, Smoke_trail, Smoke Head, bloom, Shining}`、`Smoke_Cone01 (2)`；当时遗漏了 `Main_Distor`。当前完整源预检对屏幕扭曲以及不支持的变换剪切明确失败，不创建部分生产预制体。
+## 稳定契约
 
-### 普通 PREVIEW 小批的已验证检查点
+- GA 管动作生命周期；Animation 管姿态／窗口，Combat 管原 Task 身份及命中，FX Task 管自有组件、Niagara 管模拟／绘制。不得用新 Tick、动画时钟或第二套调度竞争权威状态。
+- 数值取自真实导出。完整 prefab 任一启用可见分支或必要源／消费者无效，整批预检失败、资产零写入；不能省略分支冒称完整还原。明确选定子树的 `NS_PREVIEW` 保留祖先变换，并标明父 prefab、原时序与动作未验。
+- 未知项明确保留未知；不猜 Notify 帧／socket，不拿 HitWindow、Clip 长度或音频名称关联代 cue，不用默认 Mesh、替代效果或未读脚本补闭包。元数据、正文解析、编译、保存、Cold、画面及动作分别验收。
+- 角色／FX 材质使用 Unlit。身体 FX 保持独立槽与三层合成职责；源／UE 深度和屏幕 UV 等价尚未确认，不把 soft-fade 候选当斗篷已证根因。
+- 取消、自然结束、切步、切角色及 PIE 退出须按原身份释放自有实例、委托和持有资源；源码接线或资源图不能替代整链清理与运行验收。
 
-- 源文件：`F:\AnimeStudio\Exports\ZZZ\Pyrois_SkillFX\Raw\3077361824\fx_json\Eff_Pyrois_Attack_Normal_01_01_Trail.fx.json`，同目录 `.deps.json`；选定节点 `Smoke_Cone01 (2)`，修订标识 `gateFX109`。
-- 离线入口 `zzz_fx_preview.py`，执行入口 `zzz_fx_preview_apply.py`。最终只有下列七个包，旧版目标因 mip 设置修正已撤回且零创建：
+## 最小来源缺口
 
-```text
-/Game/Characters/Player/Pyrios/FX/Skill/NS_PREVIEW_Eff_Pyrois_Attack_Normal_01_01_Trail_Smoke_Cone01__2__62a61f7b2dae
-/Game/Characters/Shared/FX/ZZZ/MaterialInstances/MI_Eff_Others_LKJ_120_2236c13ef57c
-/Game/Characters/Shared/FX/ZZZ/Materials/M_ZZZFX_Particles_Dust_a537e4f8_e3da3896754c
-/Game/Characters/Shared/FX/ZZZ/Meshes/Eff_Cone_01_6a19ddf1a61f
-/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Noise_030_1cb670f2f7fd
-/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Noise_031_8e489bbd7796
-/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Smoke_002_3f1413552da9
-```
+Special 节点为 `Eff_Pyrois_Attack_Special_01_05_Decal/root (1)/decal`。既有解析输出已证 PS 的 `looping=false`、`playOnAwake=true`、`prewarm=false`、`lengthInSec=0.10000000149011612`、`stopAction=0`；`startDelay` 为 state0、scalar/minScalar 均 0，`startLifetime` 为 state0、scalar `0.6000000238418579`、minScalar `5`。这些仅为静态 PS 参数，不填 Notify、动作 Stop 或宿主回收时刻。最小生命周期前置为源宿主创建／启用触发、动态 TRS／Follow，以及正常结束／取消时源 Stop-release 对应的对象和字段，仍 unknown。
 
-- 三张源贴图的实际 `m_MipCount` 为 9/10/9，旧读取器 `m_MipMap=false` 不能表示没有 mip；本批改为 `TMGS_FromTextureGroup` 并回读一致。这是 UE 重新生成 mip，未声称保留原始逐级 mip 字节。
-- 实际材质重编译通过；最终 Niagara `UpToDate`、无 Error/Warning、不在编译、不 stale。原生编辑器 .20 秒捕获一个粒子：Lifetime .219、Age .167、Color `(0,0,0,.06)`，数值为 UI 四舍五入读数。线框和隔离探针只用于诊断。
-- 初看正常材质似乎空白，已纠正：恢复原 Custom 公式、逐字符回读一致并保存后，存活帧 .07 秒与消亡帧 .50 秒的图像 ROI `(100,320,390,510)` 有 743 个像素最大 RGB 差超过 8/255，最大差 67。原材质有很淡的实际绘制；无原游戏同帧对照，不能称视觉还原通过。
-- Cone 网格边界回读与预期轴约定一致；源 X/Y 对称，因此 AABB 不足以证明反射符号或手性。源顶点色全白，UE 导入器去掉常量白色缓冲，不能据此判断丢失有效颜色。
-- 结果：[构建与原生预览报告](../../../../Saved/AutomationReports/GGYGO_FX_OrdinaryPreview_20261008_0128.json)、[原材质存活帧](../../../../Saved/AutomationReports/FX109_OriginalMaterial_Alive_20261008.png)、[原材质消亡帧](../../../../Saved/AutomationReports/FX109_OriginalMaterial_Dead_20261008.png)。报告 `phase=asset_build_passed` 仅表示构建；`native_preview` 单独保留实际渲染、清理和未验收范围。`executed_script_sha256` 是执行前全部 `zzz_fx*.py` 文件快照，不表示每个文件都实际执行过。
-- 只做非 PIE 的 Niagara 资产编辑器预览；未放 Actor、未改地图/GA/Montage/ABP/Toon/身体 FX。三个临时着色探针未保存，原公式恢复并保存成功。自身 observer_4/5 已撤销，observer_6 在属性窗口关闭后已不存在；Performance/Particle Counts 关闭、Lit 恢复，预览暂停 .10 秒，无业务回调或 FX 句柄。
-- 归还时 PIE=false，地图 `/Game/Map/L_Movement_Test.L_Movement_Test`，`dirty_content=[]`、`dirty_maps=[]`。实际日志 `Saved/Logs/GGYGO_Gate106_R3_WalkRunSteering_Editor_20261007.log` 的 `FX109_RETURN_STATE` 留存。统筹已接回窗口，本批资产停写。
+已读 PSR 的 `m_Mesh` 为 `fileID=6`、`pathID="10202"`；[Catalog 993312222](F:/AnimeStudio/Exports/ZZZ/Pyrois_SkillFX_Evidence/Catalog/993312222.json) 的 external6 指向 `unity default resources`，source／block 为 null，目标文件及对象身份未定位。不能按编号猜 Cube／Plane／Quad；已有源 CAB 中未找到该 PID 也不定位外部默认资源。
 
-### Back03 native 候选小批的编译检查点（视觉未闭合）
+同 Catalog 的 external7 映射 Material 至 `1304474969 / CAB-48fb2c6b91d0e82477fd602c79359f71 / "-6558761215025503264"`。[Material Catalog](F:/AnimeStudio/Exports/ZZZ/Pyrois_SkillFX_Evidence/Catalog/1304474969.json) 的 `files[231]` 为 class21、5652B。v3 已按 Core `pathID==0 || fileID<0` 输出精确 `IsNull`，合法空引用不进入 external 表；这不证明实际 Material、Shader、贴图或运行依赖闭包已读。
 
-- 源：新版证据根 `Prefabs/Eff_Pyrois_Evade_Back_03_Trail.fx.json` 与同名 `.deps.v2.json`；只选 `root/smoke_flow`，修订 `gateFX110`。仅以下八个新包，先前中间版本清单零创建：
+唯一Material的[实际输出](F:/AnimeStudio/_work/pyrois_special_decal_material_prepare_20261013/Exports/Read_20261016_R1/worker.stdout.json)已核收（SHA`5BD64A7AB236DF5804A48A214450813B23CA4CFF7A749AA0D05299022EA7F71F`），5652B完整解析、原98160句柄exit0、[保护回执](F:/AnimeStudio/_work/pyrois_special_decal_material_prepare_20261013/Runtime/logs/MaterialRead_20261016_R1/after.json)前后公共／动态／runtime差集0。真实171float／19color／9Texture槽经冻结投影适配无损消费（624290），原数据不改、真实plan未调用；queue3000、三个关键词及`_OpaquenessFadeByScript=1`仅静态字段。Shader引用PID`3236134733678291145`；非空仅`_BumpMap/1739144626348892680`、`_DissolveTex/623606353444750246`、`_MainTex/8075034578055661614`、`_MaskMap/-8879785284717540773`，按该输出externals取CAB，不复读源块。
 
-```text
-/Game/Characters/Player/Pyrios/FX/Skill/NS_PREVIEW_Eff_Pyrois_Evade_Back_03_Trail_root_smoke_flow_58dc364beabe
-/Game/Characters/Shared/FX/ZZZ/MaterialInstances/MI_Eff_Objects_MSH_GUID53029b4738568da4e9cc9c9b20eae7da_743d32191c9c
-/Game/Characters/Shared/FX/ZZZ/Materials/M_ZZZFX_Particles_Dissolve_CustomColor_Mask_df1104ec_b421cb1775a6
-/Game/Characters/Shared/FX/ZZZ/Meshes/FXMD_TRAIL_9c24650bfe62
-/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Mask_036_YZ_02_aa73133347c1
-/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Mask_556_a266c0532e3f
-/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Noise_114_2a195f585094
-/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Smoke_305_26c3a19235ca
-```
+现存Shader输出已定位为`Assets/132714511/CAB-91fe6c8dbdab2dbcc8fe53cb669f78b3/Shader/3236134733678291145.{native.json,shader}`（均在`Pyrois_SkillFX_Evidence`下）：真实name=`miHoYo/Particles/Particles_Decal`，126 Properties，唯一Pass=`TransparentHalfResDecal`，Cull Front／ZTest Greater／ZWrite Off，实际HalfRes四因子1／5／7／0。旧文本流式投影可保留blob关键词：D3D11 VP2／FP3840；指定标签条件下VP空标签与FP global三材质词／local空各1候选，位于154／9507行，disassembly hash分别`a40afa16a4c322`／`d7fdbec172180b22`，Resource按Converter顺序回联native VP0/blob0、FP18/blob20。未闭合DXBC字节或原运行选择；832个FP超集不能当同一变体。该FP候选666条asm中四材质槽均有采样指令，但只认候选程序事实；其它场景深度／法线／阴影／GBuffer／环境与LUT依赖不取默认。
 
-- 候选配置明确为 `purpose=source_program_preview`、Pass 0 `TransparentFullRes`、global keywords `[]`。材质五个本地关键字与 CAB/PPtr 身份、原生状态、反射/程序签名和真实文件字节一致；这不是原作实际运行态选择或全局常量证明。
-- 旧 `Back03_shader_selection.json` 的 18 个程序摘要仍全部不符实际文件字节：旧摘要基于写盘前 LF，Windows 写盘转 CRLF。资源作者另交 `Back03_shader_selection.bytes-v3.json` 与 `Back03_ShaderVariants.bytes-v3.frozen.json`，本批执行前实际校验其覆盖的 20 个冻结文件字节；未改旧程序文件、旧审计或整套资源闭包。
-- 八包实际创建、精确保存，注册表/内存/磁盘存在读回一致。材质原生重编译成功；冻结 `plan['code']` 为 28538 字符，既有构建器补入 40 字符的 VCol 输入拼装前导后，最终生成 Code 为 28578 字符。UE Custom Code 与这一最终生成 Code 逐字符及 SHA-256 相同，比较对象不是裸 `plan['code']`。Niagara 初次及恢复临时 Performance 后均 `UpToDate`、0 Error/Warning、非 compiling/stale。FBXImport 的“无平滑组”警告保留，源法线/UV/顶点色的视觉等价未验收。
-- 原材质 .25 秒与 1.22 秒两张原生图像近乎空白；ROI `(10,85,250,360)` 超过 8/255 的差异像素为 0，最大差 7，不能证明烟雾绘制。只读组件读回确认新系统在 `Transient.World_5`，模拟边界中心 `(-22,-63,34)` cm、extent `284.8947` cm；没有取得运行时粒子数。未改 Shader 做可见性探针，未用图像差异替代原作同帧对照。
-- 结果：[本批构建与预览报告](../../../../Saved/AutomationReports/GGYGO_FX_Back03_NativePreview_20261008_FX110.json)、[候选存活时段](../../../../Saved/AutomationReports/FX110_OriginalMaterial_Alive_20261008.png)、[候选消亡时段](../../../../Saved/AutomationReports/FX110_OriginalMaterial_Dead_20261008.png)。`phase=asset_build_passed_visual_unconfirmed` 明确区分编译与实际视觉。完整 prefab、动作时间轴/挂点与源运行态仍未完成。
-- 收尾非 PIE，地图 `/Game/Map/L_Movement_Test`，全局 content/map dirty 均空，日志 `FX110_RETURN` 留存。Performance 已关闭，ParticleCounts 保持原 false、Lit、暂停 .25 秒；本次 observer_7 已注销，只留引擎根 observer_1，没有注册回调。八包及执行脚本停写并归还窗口；旧七包、地图/Actor/GA/Montage/ABP/Toon/bodyFX 保持。
+实际consumer三阻断已核：`material.pick_pass`拒绝HalfResDecal（dce638）；`native_shader.render_state:93`拒cull1／ztest5；`select_native`把完整材质词当作各stage local，按现存候选标签两stage均匹配0（37b7a3），而只读`inspect_program_candidates`已区分各候选声明，不能把审计投影当运行选型。另native JSON已有buffer slots4/5/6：`g_vLightListGlobal/g_vLayeredOffsetsBuffer/_EnvLightDatas`；旧disassembly的stride为4／4／52及5条结构化读取，Converter遗漏m_BufferParams绑定输出，T解析仅cb/tex/smp、无buffer类别，当前翻译器也无该structured-load与cube-array消费支持。最小后继离线保真写集候选为Resource的`ShaderConverter.cs`绑定输出＋FX的`zzz_dxbc_hlsl.py`绑定解析；Pass／执行关键词及decal环境须另行收敛，不能只加白名单或套相近Pass。本轮不改码、不造新audit/wrapper/报告。
 
-### Back03 实际粒子分流与共享转换器修正（FX111 / FX112）
+四份已存Texture native.json已逐一核SHA及消费字段（1e2539）：Bump为512×2048／mip12／ColorSpace0，Dissolve为256²／mip9／ColorSpace1，Main和Mask均512×2048／mip12／ColorSpace1；全部format25／Filter1／Aniso1／MipBias0。已知旧WrapMode(U)依次0／1／0／0，V/W被原parser丢弃；现consumer复制U/V不证明原V，不补值。resS声明均offset0、size依次1398160／87408／1398160／1398160，pixel／texturedata未读。四精确引用的像素解码准备可独立推进，不以Shader实际采样作前置；实际PNG导出仍须独立窗，导出／绑定／采样分列。缺V/W的最小读取范围由Resource按既有精确缓存头定位，尚未授权新正文。保持R3／P20／P21及业务保护，无Source／资产／UE／构建写窗。
 
-- FX111 在 FX110 原材质暂停 .25 秒时，取得有效、单帧、起点 .25 秒的瞬态 NiagaraSimCache；同步复制当前模拟，`advance_simulation=false`，没有推进、重置或回放缓存。九个实际属性数组均长度 1：粒子 Age `.2333333343`、Lifetime `.8999999762`、NormalizedAge `.2592592537`、Color `(1,1,1,.9232843518)`，Scale `(1,-1,.8999999762)`；四元数与 DynamicParameter 0/1/2 也实际读回。UI 时间与粒子 Age 相差一模拟步，不能用 UI 时间推算值冒充实测。
-- 同批原生读回确认发射器 CPUSim/enabled、Mesh Renderer enabled、原网格/MI 与 Position/Color/Orientation/Scale/DP0..2 绑定存在，无距离/视锥剔除。由此排除“该时刻没有粒子或核心绑定缺失”，不证明 GPU 材质运算正确。报告：[FX111 只读运行证据](../../../../Saved/AutomationReports/GGYGO_FX_Back03_RuntimeReadOnly_20261008_FX111.json)，其 `...defect_unfixed` 阶段保留当时事实。
-- 可复核的共享译码缺陷：原 FP `pass_0_fp_04.txt:69` 的 `ftou r0.y, cb1[64].y` 被活跃性裁剪删除，但下一条 `mov x0[r0.y + 0].x, v8.y` 保留；旧生成代码把此前 front-face 的浮点位值当作五项数组下标。同一问题也删除了 VP 的 `ftou r0.zw, cb2[64].xxxy`。根因是动态目的地址的寄存器读取没有进入依赖集合，不能用默认下标、钳制或关闭裁剪替代修正。
-- Character Rendering 作为共享脚本唯一作者，修正 `zzz_dxbc_hlsl.py` 的统一 `address_uses` / 赋值依赖处理，覆盖运算、转换、比较、采样及 `sincos` 多目的输出；同时区分循环回边和最近循环 `break/continue` 出口的活跃性，保留退出路径所需值。公共 `translate()` 契约保持。新增 `tests/test_zzz_dxbc_liveness.py` 的 22 项专项，连同相关既有 25 项共 47/47 离线验证通过，统筹同组复核通过；未运行全项目矩阵。共享脚本已冻结，SHA-256 `6df01a2b0baf2f4dee2e723a7681c1874e3bfc9e7deb028dabee09d1fcda72f3`。
-- FX112 使用冻结管线重算同一源、同一 `root/smoke_flow`，修订 `gateFX112`。候选仍为 Pass 0 / global `[]` 的显式 `source_program_preview`，原 VP/FP 文件、关键字、模拟 spec 与源参数值保持；计划仅恢复依赖所需的 `_CustomData1Z=0` / `_CustomData1W=0` 两个材质参数。真实 v3 证书覆盖的 20 个文件字节、共享/执行脚本冻结摘要、全局脏包及目标 registry/memory/disk 不存在均在写前通过；旧 15 包不复用、覆盖或删除。
+Material v3 的属性数组不能直接传入现有 `zzz_fx_material.material_value`：合成消费已复现真实属性被误认缺失、转取 Shader 默认值。消费前须将三类属性按 `name` 转为字典，保持颜色 `r/g/b/a`，将 Tiling／Offset 的 `x/y` 改为 `X/Y`，Texture 指针保留 `m_FileID`、完整十进制字符串 `m_PathID` 和精确 `IsNull`。同类重复名、缺必需字段、非有限数值或矛盾空引用拒绝；真实空数组才转空字典。约定映射的合成消费已核数值、UV 和指针精度，真实 Material.plan 未调用，Shader 名称／Properties 及 cue 不推断。
 
-```text
-/Game/Characters/Player/Pyrios/FX/Skill/NS_PREVIEW_Eff_Pyrois_Evade_Back_03_Trail_root_smoke_flow_2c5515eed71b
-/Game/Characters/Shared/FX/ZZZ/MaterialInstances/MI_Eff_Objects_MSH_GUID53029b4738568da4e9cc9c9b20eae7da_557274c793e4
-/Game/Characters/Shared/FX/ZZZ/Materials/M_ZZZFX_Particles_Dissolve_CustomColor_Mask_6a1a1c20_2b737514d87d
-/Game/Characters/Shared/FX/ZZZ/Meshes/FXMD_TRAIL_652ceb46c43d
-/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Mask_036_YZ_02_eecbc9181806
-/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Mask_556_d7306a2139b9
-/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Noise_114_7c3d94a86575
-/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Smoke_305_36f1160019cf
-```
+自有新 Saved 的[离线适配原型](../../../../Saved/Codex/PyriosMaterialConsumerAdapter_20261014/adapter.py)只接收显式 `result.material`，不读文件或依赖；[合成消费探针](../../../../Saved/Codex/PyriosMaterialConsumerAdapter_20261014/probe.py)通过原 `material_value` 与构建入口的隔离 AST，已核源值、UV、完整 Int64、合法空引用／Shader 默认和18项拒绝。实际 `plan`／Shader/native 未调用，无新源正文读取，旧 consumer 文件未改。此为正式接线准备，不认生产修复。
 
-- 上列八包的 targets/created/saved 与 registry/memory/disk 一致。材质原生编译成功，Niagara `UpToDate`、0 Error/Warning、非 compiling/stale。裸计划 Code 28625 字符 + 既有 VCol 前导 40 字符 = 最终 28665；UE Custom 与最终生成 Code 逐字符及 SHA-256 相等：`6d104626c52c73f23f714018225ab18783d2c088a89bc2c730e1faf62b981ae3`。VP/FP 的下标计算、Custom 输入连线、对应 Scalar 节点默认值和 MI 两参数 0 均真实读回，修正已进入 UE 资产。
-- 原材质 .25 秒存活 / 1.20 秒消亡原生图像仍近乎空白。两图中实际 Niagara 预览 ROI `(320,260,472,416)` 的最大 RGB 差超过 8/255 的像素为 0，最大差 6。此次原生捕获包含主编辑器及较小资产窗口，使用该布局的实际预览区域；不套用 FX110 的旧 ROI，不宣称跨版本逐像素相等或原游戏同帧通过。没有修改原 Shader、亮度或关闭 soft-fade 做探针。
-- FX112 再次取得 .25 秒有效单帧快照，九字段各一粒子；Age/Lifetime/NormalizedAge/Color/Scale/Orientation/DP0/DP1 与 FX111 相同，DP2 的四个随机数不同。新网格/MI 和核心 Renderer 绑定正确。这证明译码修正后粒子仍存活，**烟雾实际可见性原因仍未关闭**；不能把该缺陷认作唯一原因，更不能用于关闭斗篷缺口。FBX“无平滑组”警告继续保留，网格法线/UV/顶点色的视觉等价未验。
-- 完整证据：[FX112 离线预检](../../../../Saved/AutomationReports/GGYGO_FX_Back03_DxbcFix_Preflight_20261008_FX112.json)、[原执行报告](../../../../Saved/AutomationReports/GGYGO_FX_Back03_DxbcFixPreview_20261008_FX112.json)、[原生 Code/Renderer/运行/收尾验证](../../../../Saved/AutomationReports/GGYGO_FX_Back03_DxbcFixValidation_20261008_FX112.json)、[原材质存活时段](../../../../Saved/AutomationReports/FX112_OriginalMaterial_Alive_20261008.png)、[原材质消亡时段](../../../../Saved/AutomationReports/FX112_OriginalMaterial_Dead_20261008.png)。补充报告 `phase=asset_build_passed_shader_dependency_fixed_visual_unconfirmed`；旧 FX109/FX110/FX111 报告不改绿、不覆盖。
-- FX112 收尾日志 `FX112_RETURN`（原 Gate106-R3 编辑器日志第 11006 行）为 content/map dirty 均空、全部八目标 registry/memory 存在、自身控制台引用为空。原生 PIE=false、地图 `L_Movement_Test`、仅 engine root observer_1；没有新增观察器或回调，缓存未保存/推进/重置/回放/强制 GC，释放自身引用后交正常引擎 GC。Lit、暂停 .25 秒，Performance/ParticleCounts 本批未切换；最终窗口最大化。资产、共享/自有脚本停写并向统筹归还窗口，后继分析只读。
+正式两脚本的[离线补丁](../../../../Saved/Codex/PyriosMaterialConsumerSourcePatch_20261014/material-input.patch)已准备（SHA`f7e08682c3afbbf44b465efb05935ef2dc13e22078bb50facd5edfb10d85c25e`）：复用已核严格适配到唯一`material_input`，接入`build.material_plan`、`build.inspect_source_programs`两处Shader PID查询之前及`material.plan`的JSON读取后。[准确前后身份](../../../../Saved/Codex/PyriosMaterialConsumerSourcePatch_20261014/source_identity.json)与[必要检查](../../../../Saved/Codex/PyriosMaterialConsumerSourcePatch_20261014/check_result.json)已交统筹；7组／18拒绝及`git apply --check`通过，正式0应用，旧字典／仅Shader头、合法空Shader／默认／native分支保留，未知Cue／TRS／Follow／Stop未改。旧Scripts仍冻结，原FX作者待统筹同波次应用；Rendering表面材质走独立`pyrios_material_plan.py`，其它源未获FX写权。
 
-## 2. 路径速查
+[Special 音频 mapping](F:/AnimeStudio/Exports/ZZZ/Avatar_Male_Size03_Pyrois_Model/Audio/Avatar_Male_Size03_Pyrois_Ani_Attack_Special_01/mapping.json) 只提供名称关联，不含 Notify timing。Mono 的 `WinError5` 和未读正文边界保留。R2 一次外读仍待原真人，不继承给 Material／Mono／Shader／Clip／外 stream；已消费的两 `.dat` 不重读。
 
-| 用途 | 路径 |
+Normal01 缺层准确入口为 [I307](F:/AnimeStudio/Exports/ZZZ/Pyrois_SkillFX/Raw/3077361824/fx_index.json) 的 `Eff_Pyrois_Attack_Normal_01_01_Trail/root/Trail/rot/Main_Distor`，Catalog `3077361824/files[139] / CAB-c174039fb56f184426cf7cb22563b8a3`。GO `"-5299499679591739929"`、Transform `"-1426497381650600290"`；PS `"-4851021293888173413"`（class198、start23504／7804B）、PSR `"2502405610036890719"`（class199、start75128／312B）、Mono `"-3750547025713878578"`（class114、start32024／272B）均已按元数据核对。
+
+该节点五层静态`pos/rot/scale`链齐全；源根`pos.z=4.778565883636475`不作为角色局部偏移。内部`root/Trail/rot`旋转曲线现已读回，根实例绑定、动态Follow及停止业务仍未解。prefab根有九个Mono和一个Animation，`root/Trail/rot`各一个Mono；根Animation及公共Mono标准头已读，其余字段／控制职责仍未明，叶272B不作cue／生命周期来源，也不据静态父子关系选择socket。八类代表节点的索引／Catalog身份仍只认候选，不证明动作选用了相应prefab；TurnBack名称匹配0只覆盖已有两个索引及原manifest，不推断游戏无FX。
+
+八类代表根另按 Catalog 的 `(scriptID, oldTypeHash)` 核出五组共同 Mono 类型；`typeID` 只在各 CAB 内使用，不能跨文件当脚本身份。共同类型用于收敛下一读取候选，Script 名称、enabled／正文及控制职责仍 unknown，不能按字节数或共同出现推定 cue／Follow／Stop。
+
+[84B读取证据](F:/AnimeStudio/_work/pyrois_source_read_prepare_20261014/Runs/Read_01/diagnostic.json)已实际核收，SHA256 `A52FB4A86F4909E7C90E640F59DA77AB948766471926257CD8754A33DA1C5A50`：根 Animation56B、根 Mono 标准头28B各单次打开／读取，exit0、stderr0；完整共享父保护差集为空，runtime及缓存身份不变。Animation采用布局A完整消耗，默认与唯一Clip均为`fileID=11/PID="8995184058150946407"`；两个组件GO均为`fileID=0/PID="-8525558595298345743"`，Mono头Script为`fileID=0/PID="-5782287170244253598"`。Animation的enabled=1／playAutomatically=true及Mono原始enabledByte=1仅认静态字段；cue／挂点／动态TRS／Follow／Stop仍unknown。Mono余下96B、叶272B和引用正文未读，不重复84B读取。
+
+真实 Script 引用已联结同CAB的 class115／type0／start4096／104B；Clip引用另按[Catalog3817944121](F:/AnimeStudio/Exports/ZZZ/Pyrois_SkillFX_Evidence/Catalog/3817944121.json)核为`files[41] / CAB-87f04295dea13afff46f39458be59dca`、class74／type1／start4272／2892B。两目标Raw缓存仅文件属性核对为存在且大小匹配，正文均未读。旧diagnostic的外部未联结记录保持原样。
+
+[104B实读证据](F:/AnimeStudio/_work/pyrois_reference_read_prepare_20261014/Script_Read_01/diagnostic.json)已核收，SHA256`9D941FA453E22C0307DA4EE083A97BEDC05923CC4EF31766E8E67566070B10A7`：各open/read一次，exit0／6.172s／stderr0，完整消耗；AM独立Cold新完整24组前后无差，runtime及缓存身份不变。原始name/class均为`MonoEffectPluginFollow`、namespace=`MoleMole`、assembly=`Logic.dll`；PropertiesHash`438f2807504e8913dbe22599a4f7790d`与根Mono组件类型哈希一致。只证明类型身份，未加载assembly或引用，Follow／role／cue／挂点／Stop仍unknown；组件余96B未读，不重复104B读取。[当时读取方案](F:/AnimeStudio/_work/pyrois_reference_read_prepare_20261014/read_plan.md)保留为冻结执行输入，不以其旧准备状态替代该实读收据。
+
+[2892B实读证据](F:/AnimeStudio/_work/pyrois_clip_read_prepare_20261014/Clip_Read_01/diagnostic.json)已核收，SHA`D16E3E1BF997FCAB01D8619203A01C0727B3ED897853DC0E57498ACD857E69FB`：单open/read、完整消耗、exit0／6.485s／stderr0，runtime／缓存不变，S1当前25组前后空；S1失败after=false／normalExit=false／UEexit=-1原样保留，不由本次child成功替代。实际名`Eff_Pyrois_Attack_Normal_01_Trail`、legacy=true／compressed=false／sample60／wrap0；仅一条`root/Trail/rot`四元数旋转曲线、11键、0至`0.1666666716337204`，pre/post均2、weightedMode均0。其它曲线／Events／genericBindings／pptrMappings为空，StreamData为空0／0，ACL两blob为空，外流／引用／codec读取0。`m_MuscleClip.m_StopTime=1.0`不作为该键范围或动作总时长，不重复2892B读取。
+
+曲线目标Transform为`"4026277479175883537"`，其子节点含Main_Distor；索引静态旋转等于曲线末帧而非首帧。既有`zzz_fx_niagara.node_chain`隔离AST按`System.Age`实际消费11键，生成动画链且目标rot无切变（工具证据3fe04f）；没有新时钟，未做UE／Niagara编译／生产接线或范围外wrap验证。现有七层是否已绑定同一原Clip仍须按实际生产输入核对。下一外观最小候选为Main_Distor PSR312B的真实render／Material／Mesh，PS7804B后继；资源原作者准备准确范围／支持，余96B不读以猜Follow，外部cue／挂点／生命周期仍unknown。
+
+[Main_Distor PSR312B方案](F:/AnimeStudio/_work/pyrois_main_distor_psr_prepare_20261014/read_plan.md)已核，SHA`1ffc0237ff5be1c317f1396ed4165846fb9a7f0b2b1cf6125c2f760c87b82e0b`；static.freeze SHA`e1e82da494013573c97c6d5c6a6d88b8bd286ab3324d27edae1a60ffa3f50124`／4549文件，[静态证据](F:/AnimeStudio/_work/pyrois_main_distor_psr_prepare_20261014/static.self_test.json)4＋1项／312B夹具A／8.172s／exit0／stderr0。对象class199／type3／start75128／312B与GO`"-5299499679591739929"`匹配；仅拟单次标准A/B全消费、精确PPtr及该Catalog元数据，不读引用或猜默认Mesh形状。Core无独立完整PSR构造器不冒称支持。实际312B仍0／范围窗口未授／fresh父false；当轮使用统筹交回的V3完整after（输出路径仍名Execution_V2），不与writer并读或沿S1／AM旧基线豁免差异。PS7804B、余96B不加入本次范围。
+
+## 验证与权限入口
+
+| 入口 | 可支持的结论 |
 | --- | --- |
-| AnimeStudio CLI | `F:\AnimeStudio\AnimeStudio\AnimeStudio.CLI\bin\Release\net9.0-windows\AnimeStudio.CLI.exe` |
-| 重编 CLI | `dotnet build F:\AnimeStudio\AnimeStudio\AnimeStudio.CLI\AnimeStudio.CLI.csproj -c Release -v q -nologo` |
-| 游戏资源块 | `F:\ZenlessZoneZero Game\ZenlessZoneZero_Data\StreamingAssets\Blocks\*.blk`（约 1 万个） |
-| 全局 AssetMap | `F:\AnimeStudio\Exports\ZZZ\AssetMapAll\zzz_assets.json`（40 万条，148MB）+ 首次查询生成的 `zzz_assets.tsv` |
-| 技能特效中间数据 | `F:\AnimeStudio\Exports\ZZZ\Pyrois_SkillFX\`：`blocks/`（8 个块硬链接）、`Raw/<块>/<类型>/<PathID>.dat`、`Raw/<块>/fx_index.json`、`Raw/<块>/fx_json/*.fx.json / *.deps.json / ue_assets.json / *.ue_report.json`、`Typed/<块>/<类型>/<名>#<PathID>.*` |
-| 新版资源证据 | `F:\AnimeStudio\Exports\ZZZ\Pyrois_SkillFX_Evidence\`：`Prefabs/*.fx.json / *.deps.v2.json / *.resource_closure.v2.json`、精确 CAB 原始组件与资源、`Converted_v2/`、`Review/`；由资源组冻结，不能覆盖旧导出 |
-| Shader 变体反汇编 | `F:\AnimeStudio\Exports\Shader\ZZZ_20260925\FXVariants\<Shader>\<关键字md5前8位或none>\Shader\*.shader` |
-| UE 共享特效资产 | `/Game/Characters/Shared/FX/ZZZ/{Textures, Meshes, Materials, MaterialInstances}` |
-| UE Niagara 系统 | `/Game/Characters/Player/Pyrios/FX/Skill/NS_<预制体名>` |
-| 身体 FX | master `/Game/Characters/Shared/FX/Materials/M_FX_DissolveMaskLayers`，MI `/Game/Characters/Player/Pyrios/Materials/Generated/MI_Pyrois_Body_FX` |
-| Unity 材质源数据 | `AAADocs/Assets/Pyrios/Rendering/UnityMaterials/`（`MAT_*.json`、`FXObjects/`、`TextureSettings/`） |
-| 特效全局常量取值 | `AAADocs/Assets/Shared/FX/ZZZ_FX_Globals.json` |
-| 脚本 | `AAADocs/Scripts/zzz_*.py`、`ue_mcp.py`、`build_pyrios_body_fx.py`、`pyrios_fx_plan.py`、`fx_dissolve_mask_layer.hlsl` |
+| [原九包失败](../../../../Saved/Codex/PyriosGhostNative_20261012_R3/Build_failure.json)、[失败保全](../../../../Saved/Codex/PyriosGhostNative_20261012_R3/Failure_preserve.json) | 保留原失败，不改绿或删除 |
+| [R5 Recovery](../../../../Saved/Codex/PyriosGhostNative_20261012_R5/Recovery.json)、[正常归还](../../../../Saved/Codex/PyriosGhostNative_20261012_R5/Return_check.json) | 同九资源只读读回；无新保存，不代 Cold／Visual／动作 |
+| [R7 离线入口](../../../../Saved/Codex/PyriosGhostNative_20261013_R7_A2/prepare_manifest.py) | 仅旧 A2 适配及离线门槛；后继需核当前真实构建、包差集和完整父保护，不用旧 DLL 冒验新源码 |
+| [两缓存读取入口](../../../../Saved/Codex/PyriosSpecialDecal_ReadRequest_20261013/read_cached_components.py)、[已有解析输出](C:/Users/Kaven/.kiro/sessions/0c76a6d5f3ba0b72/sess_d4e92672-ac10-41f2-ab6c-547306fbebe7/tool-outputs/execute_pwsh-56c5d163.txt) | 一次两组件解析，脚本／默认 Mesh／材质闭包未完成；入口不授权重跑 |
+| [Material v3 冻结](F:/AnimeStudio/_work/pyrois_special_decal_material_prepare_20261013/Runtime/freeze.v3.json) | 历史软件支持／26项合成记录；实际单次读取以本页5652B输出及Root归还为准，不复启旧入口 |
+| [准确权限与旧失败](../../../Coordination/Module_Repair_Parallel_Schedule_History_20261013.md) | 查询具体旧失败及已授范围，历史租约不授权现在开工 |
 
-技能特效 8 个资源块：`3817944121 1376282251 3077361824 4121720671 3979351637 993312222 2898863557 3288692478`。试点在 `3077361824`。
+当前宿主及窗口由统筹按排程协调，不接用户 MCP／LiveCoding。原 Source、DLL、输入、资产及已冻工具保持；真正写集先与完整父保护求交，重叠只等相关保护正常归还。实际入场仍须 fresh 用户 Editor／未保存工作及正常审批；不 kill、不 SaveAll、不 discard，也不换路径／工具绕过 OS 或真实外读拒绝。
 
-## 3. 当前生成管线与执行边界
-
-```
-# A. 原始导出（每个资源块一次，CLI 直接跑，不涉及 UE）
-set ANIMESTUDIO_EXPORT_ALL=1 ; set ANIMESTUDIO_RAW_PATHID=1
-AnimeStudio.CLI <块.blk> Raw/<块> --game ZZZ --export_type Raw --silent
-python zzz_fx_index.py Raw/<块>                       # → fx_index.json（预制体根 → 子节点 → 组件）
-python zzz_fx_summary.py Raw/<块>/fx_index.json Pyrois # 列出各根的组件统计；加 <根名> --tree 看层级
-python zzz_fx_extract.py Raw/<块> "<根名正则>"         # → fx_json/<根>.fx.json
-python zzz_fx_describe.py <根>.fx.json                 # 人读摘要：时长/Burst/渲染模式/启用模块
-
-# B. 依赖（CLI，不涉及 UE）
-python zzz_fx_fetch.py <根>.fx.json                    # 查 AssetMap，导出材质/网格/动画/贴图；网格 JSON→FBX；→ <根>.deps.json
-
-# C. 默认只做离线预检，不连接 UE、不创建资产
-python -B zzz_fx_import_assets.py <根>.deps.json --revision <修订>
-python -B zzz_fx_build.py <根>.fx.json --plan-imports --revision <修订>
-python -B zzz_fx_preview.py <根>.fx.json "Smoke_Cone01 (2)" --revision <修订>
-```
-
-`zzz_fx_build.py` / `zzz_fx_import_assets.py` 只有显式 `--apply --endpoint --approved-targets <精确清单>` 才执行。PREVIEW 执行入口要求 `--endpoint --approved-targets-json --result`，规划目标必须与批准集合完全一致，结果必须是 `Saved/AutomationReports/` 下的新文件。以上不是新 UE 窗口授权；本批当前已冻结。
-
-生成顺序：
-
-```
-离线读取源、继承祖先 active、枚举全部启用分支与运行控制来源
-每个可见分支完整生成 material plan 与 emitter spec
-任何不支持的分支/源缺失 → PreflightError，整批零写入
-汇总全部源文件、内容版本目标、依赖与唯一写入范围
-统筹分配精确新包清单和非 PIE 窗口
-AssetSession：写前确认所有目标不存在；每个创建前再次确认
-导入 → 设置并回读 → 材质 → 有序 Niagara 堆栈 → 实际编译
-只保存本批创建的包；保留失败结果与已创建资产，不删旧系统
-实际原材质预览 → 保留未验边界 → 清理自身资源 → 归还窗口
-```
-
-七包归还后完成了独立离线适配：`schemaVersion=2` 自动选择同名 `.deps.v2.json`，缺失即失败、不回落旧 `.deps.json`；读取该源自身 `components/componentListProof`，不访问旧块的 `fx_index.json`。旧 schema 1 管线继续使用旧源。build/preview/preview_apply 可显式传 `--deps-path`；build 的此选项只允许单源，未知 schema 明确拒绝。
-
-`zzz_fx_native_shader.py` 已接入单子树的显式候选选择：`--native-selections-json` 指定审计文件、purpose、pass index 与精确 global 集合，按 CAB/材质身份、本地关键字、native 状态、实际字节 SHA、程序签名及反射一致性验证。缺少选择或遇到未实现的独立 Alpha/MRT/Stencil/DepthOffset 等契约即失败，不假用同名旧变体缓存。完整生产预检拒绝 preview 候选配置；Back03 此次只编译一个源子树，不能把 30 根资源闭包交付写成 30 根生产预检通过。旧普通 PREVIEW 七包的离线计划保持。
-
-## 4. 数据解析：无类型树对象（zzz_schema.py）
-
-- ZZZ 资源包剥离了类型树，AnimeStudio 没实现 ParticleSystem 等类，只能 Raw 导出字节。
-- 做法：UnityPy 1.10.18 的 TPK 里取 2019.4.40f1 内置类型树，叠加逐字节核对出的 miHoYo 补丁（`ZZZ_PATCHES`），自己写读取器；**必须恰好读完全部字节**，否则 `LayoutError`。
-- 两套布局：`LAYOUTS = {"A", "B"}`，不同游戏版本构建的块不同；B 比 A 多 `LightsModule` ratio 后 1 个字、`ParticleSystemRenderer` 末尾多 7 个字。读取时逐个尝试，取恰好读完的那套。
-- 已打补丁、8 块抽样全部读通的类：`ParticleSystem`、`ParticleSystemRenderer`、`MeshRenderer`、`Light`；原生即可读：`GameObject`、`Transform`、`MeshFilter`、`Animation`、`MonoScript`。
-- 补丁要点：ParticleSystem 在 `lengthInSec` 前多 4 字、`stopAction` 后多 1 字、`EmissionModule.m_Bursts` 后多 7 字、末尾 17 字；Renderer 基类同 AnimeStudio `Renderer.cs` 的 ZZZ 分支（`m_RayTraceProcedural`、SortingOrder 后 3 个 bool + `m_CullingDistance`）。`zzz_unk*` 字段只确认了类型和位置，语义未知，不参与重建。
-- 定位新布局分歧的工具：`zzz_schema_trace.py trace|stat`（逐字段偏移 / 目录成功率）、`zzz_schema_words.py`（从某字段起多样本并排打印字）、`zzz_schema_dist.py`（字段取值分布，看 bool 是否只出现 0/1）。
-- MonoBehaviour（`MonoEffect*`、`NapEffectSimulatorComponent` 等，`Logic.dll`）没有类型树，只解析了基类头，脚本字段以 `payload_hex` 原样保留。
-
-## 5. 预制体结构（以试点为例）
-
-```
-Eff_Pyrois_Attack_Normal_01_01_Trail   [MonoEffect, PluginFollow/Destroy/Fade, NapEffectSimulator..., Animation]
-  root
-    Trail                (scale 0.85,0.9,0.85 → 非均匀缩放)
-      rot                ← Legacy Animation 旋转曲线（0~0.167s 快速转动）
-        Main_Distor / HighLight / light_edge / Smoke_trail / Smoke Head / bloom / Shining   各一个 ParticleSystem（Mesh 渲染）
-  RaycastBase (inactive)
-  Smoke_Cone01 (2)       世界空间、startDelay 0.05
-```
-
-- 每个预制体根节点通常带一个 Legacy `Animation`（`m_Legacy: 1`），驱动子节点旋转/位置；`zzz_unity_anim.py` 解析 YAML 并按 Unity Hermite 求值。
-- 大部分子发射器：`lengthInSec` 极短、单个 Burst(t=0, count=1)、`m_RenderMode=4`（Mesh）、`m_RenderAlignment=2`（Local）、`moveWithTransform=0`（Local 模拟）、开 CustomData。
-- 旧 fetch 通过 PathID 查全局 AssetMap；新版证据按 sourceBlock/CAB/PPtr 精确闭包。已发现同 PathID 不同 CAB 的源字节差异，不能把 PathID 单独当成全局唯一来源。旧试点依赖 40 个（材质 8、网格 3、动画 1、贴图 24、Shader 4）。
-
-## 6. AnimeStudio 本地改动（仓库 `F:\AnimeStudio\AnimeStudio`，均未提交）
-
-| 文件 | 改动 | 用途 |
-| --- | --- | --- |
-| `AnimeStudio.CLI/Studio.cs` | `ANIMESTUDIO_EXPORT_ALL=1` 导出所有对象 | 无模型 GameObject、ParticleSystem 等也能 Raw 导出 |
-| `AnimeStudio.CLI/Exporter.cs` | `ANIMESTUDIO_RAW_PATHID=1`：Raw 文件名 = `<PathID>.dat`，其它类型 = `<名>#<PathID>.<ext>` | 同名对象不再互相覆盖；按 PPtr 定位 |
-| `AnimeStudio/Classes/Texture2D.cs` | JSON 带 `m_ColorSpace` | 贴图 sRGB 照抄 Unity |
-| `AnimeStudio/Classes/Material.cs` | 公开 `m_ShaderKeywords`、`m_DisabledShaderPasses`、`m_EnabledPassMask` | 选 Shader 变体与 Pass |
-| `AnimeStudio.Utility/ShaderConverter.cs` | ① `ANIMESTUDIO_SHADER_KEYWORDS="KW1 KW2"`（`NONE`=空集）只导出该关键字集合选中的子程序；② 每个子程序后输出 `//@ CBBIND/CB/V/M/TEX/SMP` 反射绑定表；③ 混合/ZTest/ZWrite/Cull 由属性驱动时打印 `[属性名]`；④ 修复反汇编指针 bug（`GetPinnableReference()` 被当首字节数值传成指针 → 0xC0000005），改为 `fixed` 取地址；⑤ 非 DXBC 数据先找魔数 | uber shader 上万变体不必全导；翻译器不用猜 cbuffer 布局 |
-
-## 7. 材质：反汇编直译（zzz_dxbc_hlsl.py + zzz_fx_material.py）
-
-```
-plan(材质 JSON, renderer, tex_assets):
-  旧源变体/Pass = 只读已导出的 m_ShaderKeywords 对应变体；按 COLOR_PASSES 选择未禁用 Pass
-  native 候选 = 仅显式源子树预览配置；严格核对 CAB、原生状态、审计与实际程序字节
-                缺源/未选择/契约不支持 → 失败，不启动导出或借用旧缓存
-  ps     = translate(Pass.fp, 需要 o0)
-  vs     = translate(Pass.vp, 只要 PS 实际读到的插值)     # SV_POSITION 不翻，像素位置用 UE 的
-  av#    = 按渲染器 m_VertexStreams 打包成 VS 输入（Unity 规则：固定语义 + 其余挤进 TEXCOORD 分量）
-  混合   = Pass 的 Blend [_SrcFactor] [_DstFactor] 取材质值，映射 BLEND_MAP
-  参数   = 保留代码读到的 UnityPerMaterial 属性；Color 走 Unity 线性化；缺失属性取 Properties 默认值
-  贴图   = 保留代码采样到的贴图 → ue_assets；空贴图 → 报错
-```
-
-翻译器规则：
-
-- 寄存器一律 `uint4` 存位模式，指令按类型 `asfloat/asint/asuint`：DXBC 无类型，比较结果是 `0xFFFFFFFF`，用 float 存会变 NaN。
-- `cbN[i].c` 由 `//@` 反射表还原：`UnityPerMaterial` → 同名材质参数；其它（`$Globals`、`UnityPerDraw`）→ provider 表（`ZZZ_FX_Globals.json`），**死代码消除后仍引用且没有 provider 的全局量 → 报错**。
-- 采样走前导里的 `F.S/F.SL/F.SB`，负责 Unity→UE 的 V 翻转；`_CameraDepthTexture` 换成 `CalcSceneDepth`，编码成 `1/眼深(米)` 与 `_ZBufferParams=(0,0,1,0)` 配套。
-- 旧 provider 表存在场景雾、亮度压缩、饱和度等固定中性取值；它们不是源游戏运行态证明，不能据此称完整等价。带 `disabled_by` 的只在对应开关关闭时成立，否则报错。原游戏 runtime global keyword、相机/后处理常量仍须取证。矩阵、相机方向和世界坐标按 Unity→UE 的同一换算处理。
-- 颜色输出与原始 distortion field 是不同契约：普通颜色计划拒绝 MRT；离线 field 计划选择原 Pass 的实际目标寄存器并保留数据，UE 材质生成器在创建前拒绝未实现的 field。`_SoftParticles=1` 不证明实际开启 `_SOFTPARTICLES_ON` 变体。
-
-顶点流映射（Niagara 网格粒子）：
-
-| Unity 流 | Custom 输入 |
-| --- | --- |
-| Position / Normal | `WorldPos` / `VertexNormalWS`（转 Unity 约定，米） |
-| Color | `ParticleColor × VertexColor`（网格粒子） |
-| UV..UV4 | `TexCoord[k]`，`v = 1 - v`；网格缺的 UV 层送 0 |
-| Center | `ParticlePositionWS` |
-| Custom1 / Custom2 | DynamicParameter 0 / 1 |
-| StableRandom* | DynamicParameter 2 |
-| Size* / InvStartLifetime | DynamicParameter 3 |
-| 未提供的流 | 0（与 Unity 未绑定输入一致），记 warning |
-
-UE 侧（zzz_fx_material_ue.py，全走 MCP MaterialTools/ObjectTools）：
-
-- master：Unlit、`BlendMode` 按方案、`TwoSided` 按 `_Cull==0`，**只开 `bUsedWithNiagaraMeshParticles`，关 `bAutomaticallySetUsageInEditor`**。
-- 一个 Custom 节点（`CMOT_Float4`），输入 = 内置节点 + Scalar/Vector/TextureObject 参数；Custom → Emissive，A 通道经 ComponentMask → Opacity。
-- master/MI 名带内容版本哈希；只允许复用本批刚创建的同方案 master，不读取、修改或复用开始前既有资产。本批实测 ParticleColor/DynamicParameter 使用完整 RGBA，VertexColor 的 RGB/A 分别接入。
-
-## 8. 发射器：Unity 公式写成 Set Parameters（zzz_fx_niagara.py + _ue.py）
-
-```
-发射器更新  Emitter State(Self, Once/Infinite, Loop Duration=lengthInSec, Loop Delay=startDelay)
-            Spawn Burst_Instantaneous × 每个 burst（展开 cycleCount） / Spawn Rate
-粒子生成    Particles.URand*（按需分配的每粒子随机数）、Lifetime、UStartColor、UStartSize、URot、
-            UStable（StableRandom）、USpeed；世界空间时还有 UWorldOrigin / UWorldDir
-粒子更新    Particle State
-            URot += 角速度·dt；USize = 起始尺寸 × SizeModule；Color = 起始色 × ColorModule（ApplyActiveColorSpace → sRGB 转线性）
-            节点链 UChain*P/Q：预制体根→节点的 TRS，带动画的节点按 System.Age 求曲线
-            Position = 链(本地 +Z·speed·age)；MeshOrientation = 链旋转 ⊗ Euler_ZXY(URot)；Scale = USize × lossyScale
-            DynamicMaterialParameter0..3 = CustomData1 / CustomData2 / UStable / (Size, 1/Lifetime)
-渲染器      Mesh 渲染器，OverrideMaterials = MI，SortOrderHint = m_SortingOrder
-```
-
-- 坐标：Unity (x,y,z) 米 → UE (-x, z, y)×100；四元数 (x,y,z,w) → (-x,z,y,w)；缩放 (sx,sy,sz) → (sx,sz,sy)。旧四元数公式已修正并通过向量旋转换算回归；原游戏画面对照仍未验。
-- MinMaxCurve 模式 0 常量 / 1 曲线 / 2 双曲线随机 / 3 双常量随机；Gradient 线性或阶跃，时间 `ctime/atime ÷ 65535`。
-- 曲线：普通段 Hermite；加权段保留三次贝塞尔，用 24 次二分反求时间参数后求值，已移除 16 段折线近似，非法权重明确失败。
-- 父级非均匀缩放与子旋转按源变换契约检查；已删除 `lossyScale` 对角近似。无法由当前 Niagara TRS 表达的层级剪切、运动剪切等明确阻塞，不能把缺失分支掩盖成正常还原。
-- 中间结果写成粒子属性（UChain0P、UChain1Q…）而不是嵌套表达式，否则四元数乘法会把表达式长度成倍放大。
-
-## 9. 资产导入（zzz_mesh_fbx.py + zzz_fx_import_assets.py）
-
-- 网格：AnimeStudio 的 OBJ 只有 UV0、无顶点色，特效 shader 会读顶点色和 UV1+，所以用 Mesh JSON 自写 FBX 7.4 ASCII。
-  - 位置/法线 X 取反、三角形顶点顺序反向；顶点写成**厘米**（×100），`UnitScaleFactor=1`：MCP 的 FBX 导入不做单位换算。
-  - UV 原样写（FBX 与 Unity 都是左下原点），UE 导入自己翻 V，材质里再翻回。
-  - 校验：导入后 `StaticMeshTools.get_bounds` 与 Unity AABB×100 一致（FXMD_DAO_001 = ±150cm）。
-- 贴图：`TextureTools.import_file` 导 PNG，再 `ObjectTools.set_properties` 设并回读：
-  - `SRGB ← m_ColorSpace`，源提供独立 `m_WrapU/V` 时分别设置 `AddressX/Y`；只出现一个轴明确失败。两轴均不存在才使用源共用 `m_WrapMode`，MirrorOnce 报错。FX109 消费旧源共用模式；FX110 四张源活跃贴图已实际按独立轴导入并回读，Mask556 Clamp、其余 Wrap，均 sRGB/TC_Default/Bilinear、UE 生成 mip。
-  - `m_MipCount` 必须为 ≥1 的整数；等于 1 用 `TMGS_NoMipmaps`，大于 1 用 `TMGS_FromTextureGroup`。旧 `m_MipMap` 读取值不参与判定；源原始 mip 字节未进入 UE。
-  - `CompressionSettings = TC_Default`：UE 会把扭曲图猜成法线贴图（BC5，解码到 -1..1），与 Unity 不符。
-- 名称结合类型、PathID、源字节哈希、设置和修订生成版本名。同 PathID 不同跨文件来源/设置明确失败；写前核对所有源哈希。只保存本批创建的资产，不 SaveAll。
-
-## 10. MCP 使用要点（ue_mcp.py）
-
-- IDE 侧 MCP 会话在编辑器重启后失效（`Unknown session id`），且无法从会话内重连；`ue_mcp.py` 直接以 Streamable HTTP 连 `http://127.0.0.1:8000/mcp`，自己 initialize。
-  - `Mcp().tool("<toolset>.<tool>", **args)`、`Mcp().describe(toolset)`、`Mcp().script(py)`（ProgrammaticToolset）
-- PIE 期间 `EditorAssetSubsystem` 的存在/保存检查不可靠。旧 MCP 客户端会等待；本批 `AssetSession` 在创建/保存前明确拒绝 PIE，不停止别人的 PIE、不把等待当成功。
-- 长时间材质编译可能断连；保留真实结果与日志。后台进程不能超出窗口继续写入，归还前须确认没有在途请求。
-- 有用工具：`MaterialTools.{create_material, add_expression, connect_expressions, connect_to_output, recompile}`（recompile 失败会抛出 HLSL 报错原文）、`MaterialInstanceTools.set_*_parameter`（LinearColor 键是小写 r/g/b/a，可为负）、`NiagaraToolset_System.*`、`EditorAppToolset.{OpenEditorForAsset, CaptureEditorImage, IsPIERunning}`。
-- `CaptureAssetImage` 不支持 Niagara 系统；`CaptureEditorImage` 返回 JSON 里的 base64，需自己解码存盘。
-
-## 11. Niagara MCP 的行为（实测）
-
-- `CreateNiagaraSystem` 必须给模板；用 `/Niagara/DefaultAssets/DefaultSystem`，再 `RemoveEmitter(emitterToRemove=...)` 删掉自带的 Fountain。
-- `AddEmitter` 用 `/Niagara/DefaultAssets/Templates/CascadeConversion/CompletelyEmpty`（无模块、无渲染器）。
-- 参数名必须与 schema 完全一致：`RemoveEmitter(emitterToRemove)`、`GetEmitterTopology(emitterRef)`、`RemoveModule(moduleToRemove)`、`GetModuleInputValues(moduleRef)`、`SetStackInputData(stackInputRef, inputData)`。
-- `SetStackInputData` 用 `NiagaraExt_StackInputData_HlslExpression` 写表达式（可引用 `Particles.* / Emitter.* / System.Age / Engine.DeltaTime / Engine.Owner.*`、`rand(x)`）。有依赖的每条赋值创建独立且有序的 `AddSetParametersModule`，不能假定同一个模块内多个条目顺序可读。
-- 枚举输入用 `NiagaraExt_StackInputData_Enum`，`enumName` 是 `NewEnumeratorN` 这种内部名，用 `NiagaraToolset_Info.UEnum_Info` 查。Emitter State：Life Cycle Mode `NewEnumerator1`=Self；Loop Behavior `NewEnumerator0`=Infinite / `1`=Once。
-- **编译状态陷阱**：只改堆栈时可能返回未实际编译的 UpToDate。先 `OpenEditorForAsset` 触发编译，有限等待并核对整体状态与 `scripts[].compileEvents`；Unknown、失败、超时均不保存成成功。编译完成仍不代替实际原材质预览。
-- 删模块后旧 SetVariables 可能残留在堆栈里，探针改完要 `GetEmitterTopology` 核对。
-- `CascadeToNiagaraConverter` 的 `FXConverterUtilitiesLibrary.Finalize` 在无头进程里因 Slate 断言崩溃，已弃用；该插件已从 `.uproject` 移除。
-
-## 12. 踩过的坑与已做的处理
-
-| 现象 | 原因 | 处理 |
-| --- | --- | --- |
-| 打开编辑器弹窗要求导入，导入失败 | JSON 放进了 `Content/` | 移到 `AAADocs/Assets/Pyrios/Rendering/UnityMaterials/`，规则写进 steering |
-| AnimeStudio 导出 Shader 进程 0xC0000005 | 反汇编传了错误指针 | `fixed` 取真实地址 |
-| 网格导入后小 100 倍 | FBX `UnitScaleFactor=100` 没被 MCP 导入换算 | 顶点写厘米、因子 1 |
-| VectorParameter 读 `.w` 报越界 | 默认引脚只有 RGB | 连 `RGBA` 引脚（Scalar 仍用默认引脚） |
-| DXIL "read uninitialized value" | `uint4 a, b = 0` 只初始化最后一个 | 每个寄存器单独 `= (uint4)0` |
-| 编译材质时编辑器 D3D12 显存分配失败崩溃 | 开了 Sprite 等多种用途，排列翻倍 | 只开 `bUsedWithNiagaraMeshParticles` |
-| 保存时报 Asset does not exist | PIE 中资产接口不可用 | 本批明确拒绝 PIE，交统筹排窗 |
-| 扭曲贴图被当成法线图 | UE 导入按内容猜测 | 压缩固定 `TC_Default` |
-| 解析树 15 层后表达式爆长 | 四元数乘法嵌套展开 | 中间结果写成粒子属性 `UChain*` |
-| `_DisableCameraDistanceClip` 等材质里没有 | shader 后加的属性 | 取 Properties 默认值 |
-
-## 13. 已知边界（完整预制体预检阻塞或独立未验收项）
-
-- **屏幕扭曲**：已完成原 field 与 `DistortionBlit` 消费者的离线指令/输出契约取证；消费者按 `q=.1*D.xy`、`p=q*D.z` 对 RGB 分别偏移采样。完整 RGB 合成与简化 UE 原生折射有可见差异，仍待用户选择；无渲染插件实现租约，当前不写渲染 C++、不把 field 当颜色。
-- **非粒子网格节点**（MeshRenderer + Legacy Animation，如 `Eff_Others_XL_171` 武器特效、ExQTE 的 BG/Mod 节点）：未实现，需要做成 Niagara 单粒子或 StaticMesh+时间轴。
-- **粒子模块**：Shape、Velocity、Force、Noise、Collision、Sub、Trail、Lights、InheritVelocity、ClampVelocity、SizeBySpeed 等任一启用即报错；`gravityModifier≠0`、`randomizeRotationDirection≠0`、`prewarm`、`rateOverDistance`、Burst 无限循环/概率<1 报错。
-- **渲染模式**：只做了 Mesh（mode 4）+ 对齐 Local/World；Billboard、Stretch、Horizontal/Vertical 报错；多材质网格粒子报错。
-- **TrailRenderer / XWeaponTrailCustom**（武器刀光拖尾，`XWeaponTrail.dll`）：未解析。
-- **MonoEffect 系列脚本**（Follow / Fade / Destroy / SelfAttachPoint / Dither / ScreenEffect / HitWallScratch）：无类型树，只有 `payload_hex`；跟随骨骼、淡出、销毁时机都在这里，未还原。
-- **触发时机与挂点**：当前目标已包含普攻 1/2/3 和闪避表现；源技能时间轴、socket/跟随/销毁执行语义仍缺真实证据。不能猜 Notify 时间、拿 HitWindow 代替、手定挂点或新建攻击/移动能力。接入由 FX、Animation、Combat/GA 各自承担所属职责，取消/结束/切步/切角色/PIE 退出清理须整链验收。
-- **全局后处理**：游戏的特效亮度压缩、Bloom、去色未移植，HDR 交给 UE Bloom/Tonemapper。
-- **世界空间发射器的出生朝向**：按出生时组件变换计算，未经实测对照。
-- 胸口白色光核疑为 `MAT_Pyrois_Body_FX03` + `Eff_Flare_005` 的独立 flare 特效，宿主对象未找到。
-
-## 14. 身体 FX（历史生成检查通过，斗篷缺口仍开放）
-
-```
-骨骼网格槽 MAT_Pyrois_Body_FX01 → MI_Pyrois_Body_FX → M_FX_DissolveMaskLayers
-  三层 [FX04, FX01, FX02] 预乘 over 合成（Unity 多材质画同一 submesh 的顺序）
-  层逻辑 fx_dissolve_mask_layer.hlsl = Particles_Dissolve_CustomColor_Mask_Cap 在 _UsingNonPSR=1 下的 PS
-历史生成入口: build_pyrios_body_fx.py；换算 pyrios_fx_plan.py
-```
-
-- 这条线是手写移植（早于反汇编直译管线），只实现三层材质启用的分支，其余报错。
-- 如果要统一，可改用 §7 的直译管线重做，但需要先解决"一个槽三遍绘制"在 UE 里的合成。
-- 用户指出站立时斗篷上沿、背部护甲下方固定缺一块。已有只读核对未发现四片源 FX 对象、材质绑定或 Section/LOD 的明确漏项；不能由此证明接缝/蒙皮正确。渲染组复核的 `FXObjects/Pyrois_Body_FX_01..04.json` 是组件引用证明，不包含逐顶点 bone weight/bindpose。
-- 三层源材质均启用 SoftParticles，Near=0、RcpDistance=20。`fx_dissolve_mask_layer.hlsl:139` 的 `saturate(20*((SceneZ-PixelZ)*.01))` 在 UE 厘米深度约 5cm 内淡出，再经 PowerAlpha/AlphaFade；护甲与布料接缝被深度淡出吃掉是候选原因，不是已证根因。源/UE 屏幕 UV 与眼深等价、上沿逐顶点蒙皮等价及严格复现仍未验。
-- 2026-10-04 记录仅确认材质编译、冷读回与槽位保存，未验收缺口。2026-10-08 统筹另派原 Character Rendering 会话牵头斗篷只读诊断；其在原导入 FBX 找到四片 FX Geometry、逐顶点 Skin/Cluster 与 bind 矩阵，源四片共 440 顶点 / 672 三角，源拓扑与权重未发现明显异常。该源离线结论不证明当前 UE 上沿权重/待机姿态、布片覆盖或材质深度等价；后继须核同姿态线框与缺口区域。用户原临时截图文件已不存在，不能用烟雾或其它视角图片替代同一缺口证据。原 FBX：`F:\AnimeStudio\Exports\ZZZ\Avatar_Male_Size03_Pyrois_Model\Avatar_Male_Size03_Pyrois_Model.fbx`。
-- FX111/FX112 没有修改身体 FX/Toon/骨骼网格，手写身体 FX 不走此次共享 DXBC 翻译修正。斗篷和 Back03 仍分别验收；当前无 bodyFX 写权，后续 UE 核对需统筹独立排窗。
-
-## 15. 后续工作与交接
-
-1. Back03 已排除该观察时刻没有粒子/核心绑定缺失，并修正共享下标依赖；FX112 原材质仍近乎空白。下一步只读追踪可见性相关计算与真实输入，收敛最短必要观察，不重复创建八份资产试未知原因。源 runtime Pass/global/全局值仍缺证据；需要独立诊断材质、观察工具或管线改动时，先交精确目的/范围与保护原效果的方法由统筹协调，不自行改亮度、源 Shader 或关闭 soft-fade。
-2. 继续普通源分支支持与完整预检。下一资产批次先交精确清单与未验边界，FX109/FX110/FX112 均不覆盖重建；地图/Actor/PIE 接入不能沿用纯资产预览窗口。
-3. 原游戏同帧视觉对照仍缺，实际烟雾输出很淡不能单独判断亮度、朝向、尺寸、时序等价。
-4. RGB 扭曲实现等待真实用户选择；未知 Mono 脚本、动作时间轴/挂点和世界空间出生朝向继续取证，各模块负责自己的权威状态与清理。
-5. 本批文档完成后冻结交回统筹；Git 仅提供可运行脚本及必要依赖的精确交付方案，不自行提交、强制添加资产或提交 AnimeStudio 既有工作。
-
-## 16. 规范提醒（来自项目规则）
-
-- 汇报与文档用中文，解释带伪代码；代码注释中文、只描述现状。
-- 按完整需求开发与约定测试完成后集中同步架构笔记；本次按统筹明确范围只更新此文件，不重画 Obsidian、不重复过程 JSON。
-- 无子代理；长期模块会话直接承担分析、实现、自审和交接。源码、资产、UE/Git 窗口均遵守单一写入者和统筹排程。
-- 本轮脚本位于 `AAADocs/Scripts`，未改 C++。FX109 执行前专项 16/16，后续 v2 离线适配 22/22；FX110 冻结前新增 native 候选专项后实际 30/30 通过（启用 ResourceWarning 错误门禁），没有在执行窗口修改脚本或重跑全模块矩阵。覆盖整批/保存/编译失败、竞态保护、继承 inactive、跨源身份、真实 mip/独立轴、加权曲线/四元数、v2 不回落、native 字节/关键字/身份/状态拒绝契约；这些离线专项不代替 §1 的实际 UE/视觉边界或完整动作恢复验收。
-- 后继共享依赖/循环语义修正由 Character Rendering 独立完成，相关 47/47 专项及统筹复核通过。FX112 只执行冻结管线与真实原材质验证，没有重开测试矩阵；当前仅本交接说明一次集中同步写权，保存自审后整文件冻结交回统筹，由统筹精确 Git。
+当前可独立继续的是已授元数据与离线原因定位。新正文读取按具体来源和范围决定；真实 cue／默认 Mesh／材质来源先交最小缺口，资源存在或消息送达不算还原完成。历史 CLI／MCP 命令及库存仅在[历史页](ZZZ_FX_Handoff_History_20261013.md)保留，当前不据其新开窗口或重建旧包。
