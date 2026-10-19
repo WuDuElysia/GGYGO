@@ -16,13 +16,13 @@
 
 最小联机契约保持两Editor／三PIE World，每进程一Mesh，按实际World/Role/PlayerState/GetPawn及发布键配对；不能猜跨端同帧或缺D0首区间。真人已确认晚加入／重获相关性也须显示仍有效的剩余普攻FX及正确时间进度，已结束窗口不补播；远端协议与最小写集由FX／AS／Combat收敛，已进入当前Source批，Root按既有规范审查。Movement N3 provider已核收，Rendering网络N3入口已冻结，真实双进程run pin/连接/视口/FX仍未执行，不作为单人Slot前置。
 
-当前执行窗：Root按真人要求作本地阶段Git检查点，范围仅已过R8的三件源码、子仓指针和本批协调归档文档；当前无UE／Build／资源进程在途。各作者保持源码／资产／旧证据及既有入口冻结，Git后依真实差集更新准入，不沿用旧父快照冒称新基线。Rendering新Cold控制器五件DFCBFFAF…680020已离线冻结交回，Root尚未核收／授权执行；AS Producer三件2AA0FBF6…B2230C保持冻结，R13最终inputs/pin待固定实际控制器。未验Cold／生产／视觉／联机保留，阶段提交不等于整需求交付。
+当前执行窗：当前无UE／构建进程。Core R2已正常exit0并完整107根归还，Root实核after及45条产物／回执身份，详见[本阶段归还](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-core隔离构建r2正常归还)。Root按真人要求收取父工程两份协调文档及Git元数据写窗，其他Source／资产冻结；本次提交后，后继Native须按实际Git差集重新承接保护，不直接消费旧父。AS R3实现7124及输入A0D0已静态核收冻结；Rendering R2唯一纯成功消费入口两件已交回516FFF83…C4719C，待Root核收，host／launch不变，首次小admission仍未消费且须绑定实际新父。R13／prepared R10／旧运行继续冻结，无其他Native授权。
 
-R10宿主审查：FX采样失败挡住释放的问题已由原作者修复，四件pin911C9E520933FF5C4E593B878A73781E03261B112C535E76042113A3D7511FD1已Root静态核收冻结。原16故障场景检查及Root独立真函数三tick回放通过：Sample仅1次，provider／fixture／EndPIE各1次，保失败，ending后才撤callback；原公共归还槽、四枚举和预编码保持。当前仍prepared_waiting_bindings，真实软件／新Cold／3DA／相机类绑定及UE运行未验，禁止直接执行；旧失效路径与准确原图见本阶段历史。
+R10宿主审查：三件继任已以prepared_waiting_bindings交回冻结，Root实核runtime41896B／A57F3417…BE3BB90、host36155B／A3799F2F…28D2EA6、pin301396B／537CFBB3…AA5147；launcher不改。1323静态依赖、已删六个重复helper，原16场景／21非boot方法及公有归还／四枚举预编码合同由原作者复核，Root尚未最终核收运行绑定。失败Cold未绑定；runtime／父／run／camera仍None且拒绝执行。后继只待真实成功Cold及明确相机类，不授权运行。
 
-AS新Cold／数值继任：AS原组长已独占获准Saved/Codex/PyriosSavedProductionCold_20261019_Entry_R1三件（cold_assets.py、inputs.json、entry_pin.json）及PyriosProductionDamageProvider_20261019_R13三件（damage_verify.py、inputs.json、entry_pin.json），对实际R8 Build完整父／85根交集0。新producer明确验证已保存八包在当前软件的真实加载／配置兼容，旧作者／旧软件／保存字节作为原始来源，当前Cold与Numeric仍须同一真实reader/software；仅继任consume对应段升级，旧R12／Author／Source／资产不改。无UE／Build／SDK／Git或新控制器写权；R10旧三DA同版门及Cold控制器由Root/Rendering另列，不能冒称六件已能运行。模块直聊被拒时由Root转交，不等逐条真人通信批准。
+AS新Cold／数值继任：D0新reader本轮真实UE环境、三份加载DLL／出生及与before软件一致已Root实核；八包入场确实未加载。Producer R2在GA未知Step／CDO／graph比较处失败，CDO导出与原Author逐字一致、八包磁盘字节不变；当前RawStep／graph因先assert后保存而缺失，不能称两Remote是唯一差异或当前值为0。七包及诊断四件未执行。R1原八回执／退出／完整父均核收，详见[失败归还](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-当前软件cold-r1失败及完整归还)。新R3／控制器R2先补观察，Step0同一NS及Normal01窗的真实fixed／Ready／端点／两Remote尚待核；不猜参数或放行未知字段。R13最终pin29E2DBC6…DFD5E8已Root实际check_entry／128依赖核收冻结，仅静态、未运行；后继契约定型再另授适配。
 
-Git阶段检查点：本轮源码子仓3e827859dc246541311727abd441e2c5c874a13c；父工程由包含本条的提交承载；笔记无新增，保持4da4f4c。本地阶段提交及前序检查点见[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r8后续阶段提交与restore归还)，整需求最终验收及精确Git交付仍待。
+Git阶段检查点：源码子仓3e827859dc246541311727abd441e2c5c874a13c；笔记4da4f4c，二仓当前均无新增改动。父工程前次288d806，本次仅提交本活动入口及既有历史两件；13项无关／未验资产及配置保持原样，不stage。此次为本地阶段检查点，整需求最终验收及精确Git交付仍待；前序检查点见[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r8后续阶段提交与restore归还)。
 
 ### 当前Source批：CR R3／R4／R6及R7集成
 
@@ -32,7 +32,7 @@ Git阶段检查点：本轮源码子仓3e827859dc246541311727abd441e2c5c874a13c�
 
 Slot-AB已验收归档：保留ActionPoseSlot及生产A，不移Mesh。普通B同Idle身体骨链抬高约63cm，当前节点仍承担必要基准修正；[完整结论与证据](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-slot对照结论保留a身体基准修正)按需查，不再作为其余需求前置。
 
-缓存贴图：Resource本地Restore已正常exit0、完整保护归还，未授权差集0，原五回执及准确93根边界见[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-r8后续阶段提交与restore归还)。已停止，无Build／Decode后继窗；完整实际读闭包／Native ABI／写入封闭证明仍false，四texturedata未读。V/W补丁未编译、旧worker仍输出V/W=null；实际图像及材质采样未验。
+缓存贴图：worker及真实Core R2已构建并正常归还；R2原177源＋本次2生成项，旧bin/obj为0，产出隔离AnimeStudio.dll。首轮重复属性失败及后继成功过程均已迁[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-19-core隔离构建r2正常归还)，旧失败目录保留。当前无资源后继写窗，不Restore、不改源码／旧二进制，不复制CLI／原blk、不导出metadata／Decode／runtime.freeze；V/W实际解析、Native ABI、图像及材质采样仍待。
 
 伤害配置与运行事实只见[CR-R5](Module_Audit_Repair_Ledger.md)：实际10／20／30及Buff20／40／60已有证据，新源码受影响生产验证尚未完成。
 
