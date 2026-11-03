@@ -66,7 +66,7 @@
   - 在 Kiro 自己的 Editor 实例中查找 Legacy BeginTraceWindow／EndTraceWindow 的蓝图与 AnimNotify 消费者；无消费者则删除，有消费者则写明并保留
   - Editor 核查：`GGYGO.Combat.MeleeTrace.LegacyConsumerAudit`（Test_R16a，NullRHI）加载 /Game 下全部 42 个蓝图（含 AnimBP、AnimNotify、Widget），92 张图 680 个节点，按函数／委托引用与属性名核对，0 个消费者；C++ 只有安全测试使用
   - 已删除 `BeginTraceWindow`／`EndTraceWindow`、Legacy 窗口来源，以及只由 Legacy 窗口广播的 `OnMeleeHit` 与反射接收器 `GGYGOMeleeTraceTestReceiver.h`；`SafetyAndCoverage` 改用 Owned 窗口，原断言保留，Test_R16a 通过
-  - 仓内另一作者的 Editor 观察脚本 `AAADocs/Scripts/observe_bh3_kevin_combat.py` 用 `get_editor_property('OnMeleeHit')` 绑定该事件（脚本自注只是 Legacy 观察，Kevin 走 Owned 窗口后本就收不到）；删除后该脚本绑定时会抛错，需原作者移除这一项
+  - 仓内另一作者的 Editor 观察脚本 `AAADocs/Scripts/observe_bh3_kevin_combat.py` 用 `get_editor_property('OnMeleeHit')` 绑定该事件（脚本自注只是 Legacy 观察，Kevin 走 Owned 窗口后本就收不到）；删除后该脚本绑定时会抛错。收尾续修已从原前像最小更新该脚本：删去 `on_hit` 与 `OnMeleeHit` 绑定，保留 `is_tracing` 与 Health 绑定（新 SHA256 0B599750…，P3 的 `standby_sha` 须用新值；只做语法检查，未在 Editor 运行）
   - _Requirements: 8.2_
 
 - [x] 7. 测试适配（批次 1）

@@ -165,8 +165,10 @@ class UGGYGOSquadTransitionAbility : public UGGYGOGameplayAbility
 - **控制丢失通知在解除附身前。** 顺序为：取得决定 → 登记续放、取消其余 → 补发释放（ReleaseHeldInputForControlLoss）→ OnOwnerControlLost（此时 Controller 仍可读）→ Hero ReleasePlayerInput → UnPossess → Possess 新队员 → 新队员进场或切回处理 → 旧队员 OffField 并留场或退场 → 广播。
 - **退场能力的识别。** `SendGameplayEvent` 只返回激活数，Squad 在发事件期间临时订阅 ASC 的 `AbilityActivatedCallbacks`，记录这次事件同步激活且仍在执行的 Spec，等待它们结束。
 - **进退场能力默认 ServerInitiated。** Squad 在服务器发事件，换下的队员不是本地控制，LocalPredicted 能力会被 GAS 以网络原因拒绝。
-- **切换来源。** `SwitchToSlot(SlotIndex, Source = Script)`；`ServerRequestSwitchToSlot` 以 PlayerRequest 调用。目前没有死亡自动切换，DeathAutoSwitch 只是枚举值。注册首位时的自动 SwitchToSlot(0) 也会向首位发 SwitchIn。
+- **切换来源。** `SwitchToSlot(SlotIndex, Source = Script)`；`ServerRequestSwitchToSlot` 以 PlayerRequest 调用；`ServerRequestSwitchToAdjacentSlot(±1)` 由服务器从出战序号循环找相邻可出战位置，同样以 PlayerRequest 调用。玩家键位归 `AGGYGOPlayerController`（`IMC_Squad`，默认 Z 上一个、C 下一个，Started 触发），不放在 Hero 输入会话里：换人会同步退役旧 Pawn 的会话，而 Controller 跨 Pawn 存在。目前没有死亡自动切换，DeathAutoSwitch 只是枚举值。注册首位时的自动 SwitchToSlot(0) 也会向首位发 SwitchIn。
 - **队员状态不复制。** `GetMemberState` 只在服务器有意义。
 - **碰撞随角色复制（收尾修正）。** 引擎的 `bActorEnableCollision` 不复制；只在服务器关闭时，客户端仍有待命队员的胶囊，本地预测移动会撞上看不见的队员。Squad 改用 `AGGYGOCharacterBase::SetReplicatedActorEnableCollision`：服务器设置复制属性并立即应用，客户端在 OnRep 应用同一值。隐藏走引擎复制的 `bHidden`。
+- **待命停骨架更新（收尾修正）。** 服务器上从未附身的队员没有 Controller，PawnExtension 停在 Spawned，CMC 没有 MovementSet；ACharacter 的 Mesh 隐藏时仍 AlwaysTickPoseAndRefreshBones，动画读到未初始化的移动配置并报 Error。`DeactivateSlot` 置 Mesh `bNoSkeletonUpdate=true`，`ActivateSlot`（在 Possess 之后）恢复。不关组件 Tick，因为开局登记早于 BeginPlay 时，注册会按 `bStartWithTickEnabled` 重新打开 Tick。只在服务器设置，客户端动画不受影响。
+- **换人相机准入（Camera 侧收尾修正）。** 新 Pawn 被附身后 Hero 再次调 `ActivateCameraEvaluation`；管理器 Running 时允许准入 Controller 当前附身的 Pawn 替换准入来源，按首次准入同一流程校验并求值。
 - **待命队员的相关性。** 按引擎 `APawn::IsNetRelevantFor`（当前未启用 Iris），隐藏、无碰撞且不属于观察者的 Pawn 不复制。初始待命队员 Owner 是原 Controller，对其客户端相关（隐藏、无碰撞）；换下后 UnPossess 清空 Owner，变为待命后按该规则不再相关，客户端副本会被销毁、切回时重新复制，客户端 Slot 随之释放并重新绑定。联机测试按"不存在或隐藏且无碰撞"判定客户端上的待命队员，没有单独断言副本被销毁。
 - **测试夹具限制。** 未开局私有世界中 CMC 不订阅本地 ASC（只在 BeginPlay 订阅），locomotion 阻止只能在 PIE 验证；该世界没有消息路由，留场"技能照常结算"用不破韧的 PoiseDamage 核对。

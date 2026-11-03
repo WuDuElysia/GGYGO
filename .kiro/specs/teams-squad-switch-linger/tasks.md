@@ -4,7 +4,7 @@
 
 整改第 6 步，新行为。执行规则与命令同第 1 步，输出目录为 `Saved/Kiro/teams-squad-switch-linger/`。开工前确认第 5 步已验收。资产制作需要启动 Kiro 自己的 Editor 实例，只保存本 spec 新建的资产，不 SaveAll。
 
-状态（2026-11-03 收尾）：源码与 NullRHI 测试完成；监听服务器＋1 客户端的 NullRHI PIE（测试编队）行为断言全部通过，Automation 结果因其他模块的 3 条生产 Error 记为 Fail（见任务 8）。三项玩法取舍待用户确认。与 design.md 的差异见其「实现差异」。
+状态（2026-11-03 收尾）：源码与 NullRHI 测试完成；监听服务器＋1 客户端的 NullRHI PIE（测试编队）全部通过，Test_R19 的 3 条生产 Error 已在收尾续修中消除（Test_R22，见任务 6、8）。三项玩法取舍待用户确认；换人键已按用户决定接好。与 design.md 的差异见其「实现差异」。
 
 ## Tasks
 
@@ -51,8 +51,10 @@
 
 - [x] 6. 网络
   - 新增 ServerRequestSwitchToSlot；开发期控制台入口 `GGYGOSwitchToSlot N`（PlayerController Exec，走同一 RPC）
+  - 正式换人键（用户 11-03）：Controller 级上一个／下一个，默认 Z／C，键位在 `IMC_Squad`，两个 IA 带 PlayerMappable 名；经 `ServerRequestSwitchToAdjacentSlot(±1)` 由服务器选目标。Test_R23 联机测试中客户端真实按 Z／C 切换通过
   - 收尾发现并修复：引擎的整体碰撞开关不复制，待命队员在客户端保留胶囊；改为 `AGGYGOCharacterBase::SetReplicatedActorEnableCollision` 由服务器设置并复制
   - 联机验证 `GGYGO.Teams.SquadSwitch.ListenServerClientRequest`（Test_R19）：客户端 RPC 切人、留场可见与碰撞、OffField 复制且免疫不复制、ReturnPending 复制与解除、待命隐藏无碰撞、切回待命队员后控制与 ViewTarget 跟随
+  - 收尾续修：待命队员在服务器停骨架更新（`bNoSkeletonUpdate`），消除从未附身队员的 WalkRunLean Error；Camera 管理器允许同一 Controller 新附身的 Pawn 重新准入。Test_R22 的 SquadSwitch 7 例全部通过，无生产 Error
   - _Requirements: 5.1-5.4_
 
 - [x] 7. 测试
@@ -63,7 +65,7 @@
   - 编译 GGYGOEditor：Build_R13 通过；收尾 Build_R16～R19 通过
   - Test_R13（114 例）109 通过，3 例既有失败，2 例夹具问题已修并在 Test_R14 通过；收尾 Test_R16a 受影响 54 例全部通过，Test_R17 SquadSwitch 私有 6 例通过
   - PIE 与最小联机：L_Movement_Test 上的同进程监听服务器＋1 客户端 NullRHI PIE，测试编队为 Experience 首位角色 Pyrios 的两份实例（PostLogin 写 Roster，走生产“已设 Roster”来源），续放能力用夹具 GA，无进退场 GA 时按规则立即进场／待命。行为断言全部通过（Test_R19）
-  - Automation 结果为 Fail：其他模块记录了 3 条生产 Error，未过滤——服务器上从未被附身的待命队员 PawnExtension 停在 Spawned（权威端等 Controller），MovementSet 未应用，ABP_Pyrios 的 WalkRunLean 报错 2 次；客户端切到新队员时相机管理器拒绝第二个激活源（already-activated-for-another-original-source）1 次。NullRHI 下角色渲染的 R32f 格式错误属运行环境，测试中声明为预期
+  - Test_R19 的 Automation 结果为 Fail：3 条生产 Error，未过滤——服务器上从未被附身的待命队员 PawnExtension 停在 Spawned（权威端等 Controller），MovementSet 未应用，ABP_Pyrios 的 WalkRunLean 报错 2 次；客户端切到新队员时相机管理器拒绝第二个激活源（already-activated-for-another-original-source）1 次。收尾续修后 Test_R22 通过，无生产 Error。NullRHI 下角色渲染的 R32f 格式错误属运行环境，测试中声明为预期
   - 未验：画面、Montage／FX 表现、真实设备输入、真实 RHI
   - _Requirements: 7.1, 7.3, 7.4_
 
