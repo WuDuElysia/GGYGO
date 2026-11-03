@@ -1,0 +1,22 @@
+// 从实际编译的custom-output合同生成互斥角色证书；不作为场景渲染输出或field替代。
+#include "/Engine/Private/Common.ush"
+#include "/Engine/Private/SceneTexturesCommon.ush"
+#include "/Engine/Generated/Material.ush"
+
+#if GGYGO_COMPILED_FIELD_ROLE
+#if NUM_MATERIAL_OUTPUTS_GETSIGNEDDISTORTIONFIELD != 2
+#error Field role requires exactly two custom outputs.
+#endif
+#if (DYNAMIC_PARAMETERS_MASK & GGYGO_REQUIRED_DP_SLOTS) != GGYGO_REQUIRED_DP_SLOTS
+#error Field role requires actual compiled dynamic-parameter slot dependencies.
+#endif
+#else
+#if NUM_MATERIAL_OUTPUTS_GETSIGNEDDISTORTIONFIELD != 0
+#error No-field role cannot certify a material declaring field outputs.
+#endif
+#endif
+
+void MainPS(out float4 Value : SV_Target0)
+{
+	Value = GGYGO_COMPILED_FIELD_ROLE;
+}

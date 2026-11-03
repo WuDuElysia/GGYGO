@@ -1,4 +1,4 @@
-/** @file GGYGOLinearMontageAuthorLibrary.h @brief 完整源线性 Montage 的编辑器制作、只读验证及原生时间轴事实读取入口。 */
+/** @file GGYGOLinearMontageAuthorLibrary.h @brief Montage 编辑器制作、Notify 原位迁时及原生时间轴事实读取入口。 */
 #pragma once
 
 #include "CoreMinimal.h"
@@ -6,6 +6,8 @@
 #include "GGYGOLinearMontageAuthorLibrary.generated.h"
 
 class UAnimMontage;
+class UAnimNotify;
+class UAnimNotifyState;
 class UAnimSequence;
 
 /** 本次调用的实际原生读回；失败不签发可用长度或区段坐标。 */
@@ -135,7 +137,26 @@ struct GGYGOEDITOR_API FGGYGOMontageTimelineFacts
 	TArray<FGGYGOMontageTimelineNotifyFact> Notifies;
 };
 
-/** 不保存包，不编辑源、Skeleton 或运行时；调用者拥有新对象和失败产物的清理决定。 */
+/** 单次点／State Notify 迁时结果；Before／After 只在对应原对象实际读回时填写。 */
+USTRUCT(BlueprintType)
+struct GGYGOEDITOR_API FGGYGOMontageNotifyRetimeResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "GGYGO|Editor|Animation")
+	bool bSucceeded = false;
+	/** 已执行原位写入；之后外调核验失败时仍为 true，不代表已保存或允许保存。 */
+	UPROPERTY(BlueprintReadOnly, Category = "GGYGO|Editor|Animation")
+	bool bWriteApplied = false;
+	UPROPERTY(BlueprintReadOnly, Category = "GGYGO|Editor|Animation")
+	FString Error;
+	UPROPERTY(BlueprintReadOnly, Category = "GGYGO|Editor|Animation")
+	FGGYGOMontageTimelineNotifyFact Before;
+	UPROPERTY(BlueprintReadOnly, Category = "GGYGO|Editor|Animation")
+	FGGYGOMontageTimelineNotifyFact After;
+};
+
+/** 不保存包，不编辑源、Skeleton 或运行时；调用者负责事务、保存及失败现场的处理。 */
 UCLASS()
 class GGYGOEDITOR_API UGGYGOLinearMontageAuthorLibrary : public UBlueprintFunctionLibrary
 {
@@ -167,4 +188,35 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Animation")
 	static FGGYGOMontageTimelineFacts ReadMontageTimelineFacts(const UAnimMontage* Montage);
+
+	/**
+	 * 在非 PIE 的 Editor GameThread 按唯一 Guid、原对象和准确原时间迁移一个点 Notify。
+	 * 原生 Link／SetTime、RefreshTriggerOffset 和 RefreshCacheData 更新链接、边界偏移及缓存；
+	 * 保留原 Guid、Notify 对象与其它作者字段，不删除／新建 Notify，不保存或自动回滚。
+	 * 拒绝有父／已加载子资产的 Montage，以及缓存刷新会重排作者轨道的无效配置。
+	 * @param NotifyGuid ReadMontageTimelineFacts 返回的 32 位 Digits Guid。
+	 * @param ExpectedNotify 原点 Notify 对象，必须仍由该 Montage 直接持有。
+	 * @param ExpectedAbsoluteTime 当前 GetTime 的准确 float 值；不做秒数宽容或幂等猜测。
+	 * @param NewAbsoluteTime Montage 范围内、有实际 Slot segment 覆盖的目标绝对秒。
+	 * @return 失败可能发生在写入后的外调中；调用者须拒绝保存、保留现场并核验完整资产，不能据失败自动恢复旧快照。
+	 */
+	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Animation", meta = (ScriptName = "retime_montage_point_notify_by_guid"))
+	static FGGYGOMontageNotifyRetimeResult RetimeMontagePointNotifyByGuid(UAnimMontage* Montage,
+		const FString& NotifyGuid, UAnimNotify* ExpectedNotify, float ExpectedAbsoluteTime, float NewAbsoluteTime);
+
+	/**
+	 * 按唯一 Guid、原 State 对象及准确旧 GetTime/GetDuration 原位迁移 Queued State 的两端。
+	 * 使用原生 Link、SetTime、SetDuration、RefreshTriggerOffset／RefreshEndTriggerOffset 与 RefreshCacheData；
+	 * 保留原 Guid、State 对象及非时间声明，不新建／删除窗口，不保存或自动回滚。
+	 * @param ExpectedState 必须仍由原 Montage 直接持有；不接受点 Notify 或 BranchingPoint。
+	 * @param ExpectedAbsoluteTime ReadMontageTimelineFacts 返回的原生 time。
+	 * @param ExpectedDuration 同一原生事实的 duration，不能用显示文本或 double 端点差代替。
+	 * @param NewAbsoluteTime 明确的新起点；两端均须有实际 Slot segment 覆盖。
+	 * @param NewEndAbsoluteTime 明确的新终点，严格晚于起点且不越出 Montage。
+	 * @return 失败可能已写入或产生 dirty；须消费 bWriteApplied 并保留现场、拒绝保存。
+	 */
+	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Animation", meta = (ScriptName = "retime_montage_notify_state_by_guid"))
+	static FGGYGOMontageNotifyRetimeResult RetimeMontageNotifyStateByGuid(UAnimMontage* Montage,
+		const FString& NotifyGuid, UAnimNotifyState* ExpectedState, float ExpectedAbsoluteTime,
+		float ExpectedDuration, float NewAbsoluteTime, float NewEndAbsoluteTime);
 };

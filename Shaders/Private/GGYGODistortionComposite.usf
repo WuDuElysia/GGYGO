@@ -1,0 +1,23 @@
+// 原 signed RGBA 先按 One/One 累加，再进行一次 RGB 合成。
+// 源：Hidden/Universal Render Pipeline/DistortionBlit；本通路不改曝光或振幅。
+#include "/Engine/Public/Platform.ush"
+
+Texture2D SceneTexture;
+Texture2D FieldTexture;
+SamplerState SceneSampler;
+SamplerState FieldSampler;
+float2 OutputViewMin;
+float2 OutputViewInvSize;
+float3 RGBShift;
+
+void MainPS(float4 SvPosition : SV_POSITION, out float4 OutColor : SV_Target0)
+{
+	float2 ViewportUV = (SvPosition.xy - OutputViewMin) * OutputViewInvSize;
+	float4 D = FieldTexture.SampleLevel(FieldSampler, ViewportUV, 0);
+	float2 Q = 0.1 * D.xy;
+	float2 Chromatic = Q * D.z;
+	float R = SceneTexture.SampleLevel(SceneSampler, ViewportUV + Q + Chromatic * RGBShift.x, 0).r;
+	float G = SceneTexture.SampleLevel(SceneSampler, ViewportUV + Q + Chromatic * RGBShift.y, 0).g;
+	float B = SceneTexture.SampleLevel(SceneSampler, ViewportUV + Q + Chromatic * RGBShift.z, 0).b;
+	OutColor = float4(R, G, B, 1);
+}

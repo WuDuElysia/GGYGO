@@ -5,6 +5,11 @@
 	"Description": "",
 	"Modules": [
 		{
+			"Name": "GGYGORendering",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit"
+		},
+		{
 			"Name": "GGYGO",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",

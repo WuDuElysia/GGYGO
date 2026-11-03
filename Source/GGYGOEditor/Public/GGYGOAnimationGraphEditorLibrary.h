@@ -11,6 +11,16 @@ class UBlueprint;
 class UEdGraph;
 class UEdGraphNode;
 
+/** 原 Blueprint 节点注释的实际读回；空注释是合法值，由 bSucceeded 区分读取失败。 */
+USTRUCT(BlueprintType)
+struct FGGYGOBlueprintNodeCommentResult
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadOnly, Category = "Blueprint|Graph") bool bSucceeded = false;
+	UPROPERTY(BlueprintReadOnly, Category = "Blueprint|Graph") FString Comment;
+	UPROPERTY(BlueprintReadOnly, Category = "Blueprint|Graph") FString Error;
+};
+
 /** 当前一次读取的作者图关联；对象引用不代表播放来源或运行帧已经验证。 */
 USTRUCT(BlueprintType)
 struct FGGYGOAnimationGetterAssociation
@@ -161,6 +171,23 @@ class GGYGOEDITOR_API UGGYGOAnimationGraphEditorLibrary : public UBlueprintFunct
 	GENERATED_BODY()
 
 public:
+	/** 只读 Owner 登记作者图内实际节点的注释，拒绝 CDO 和游离节点，不修改或编译 Blueprint。 */
+	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Blueprint")
+	static FGGYGOBlueprintNodeCommentResult ReadBlueprintNodeComment(UBlueprint* Owner, UEdGraphNode* Node);
+
+	/** 非 PIE 时通过节点公开注释入口修改并通知原图，返回实际读回；同值不改，不重建、编译或保存。 */
+	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Blueprint")
+	static FGGYGOBlueprintNodeCommentResult WriteBlueprintNodeComment(UBlueprint* Owner, UEdGraphNode* Node, const FString& Comment);
+
+	/**
+	 * 在同一原作者图内，把明确输出连接到真实函数 WorldContext 元数据指定的输入；允许隐藏 Pin。
+	 * 不改变 Pin 标志，不覆盖异源链接或插入转换节点；经原 K2 Schema 连接并核实际双向链接。
+	 * @return bSucceeded 仅表示原连接实际读回，已有正确链接幂等；不创建节点、编译或保存。
+	 */
+	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Blueprint")
+	static FGGYGOAnimationGraphEditResult ConnectBlueprintCallWorldContext(UBlueprint* Owner, UEdGraphNode* CallNode,
+		FName ParameterName, UEdGraphNode* SourceNode, FName SourcePinName);
+
 	/** 在明确 Owner 的非 PIE 动画作者图中，通过原生 creator 创建指定动画节点。
 	 * @param NodeClass 原 UAnimGraphNode_Base 的可构造派生类，不使用本地化菜单名。
 	 * @param Position 作者图位置，不影响运行时姿态。

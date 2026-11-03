@@ -13,7 +13,15 @@ class UAbilitySystemComponent;
 class UGGYGOAbilitySystemComponent;
 class UGGYGOPlayerComboAbility;
 class FGGYGOAbilityTerminationCompletedNotice;
+class FJsonObject;
 struct FGGYGOMontageFXObservationFact;
+struct FGGYGOActionMotionNativeSourceObservation;
+
+namespace GGYGOPlayerActionObservation
+{
+	/** 把 CMC 公开的逐源值投影为共享 JSON；可用性由各观察入口核验，LocalId 只定位本机源。 */
+	GGYGOEDITOR_API TSharedPtr<FJsonObject> NativeActionSource(const FGGYGOActionMotionNativeSourceObservation& Source);
+}
 
 /** 一对象一观察窗；既有宿主调用 Sample，不注册 Tick、不驱动输入／动画／结束。
  * Combo 历史由原 GA 写入，完整退出由 ASC 签发；FX 事实由原 publisher/组件写入。

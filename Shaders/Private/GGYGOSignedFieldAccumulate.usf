@@ -1,0 +1,56 @@
+// 同原View/VF计算WPO，只输出两路完整signed RGBA，不执行原生二维refraction或普通颜色。
+#include "/Engine/Private/Common.ush"
+#define SceneTexturesStruct GGYGOSignedFieldPass.SceneTextures
+#include "/Engine/Private/SceneTexturesCommon.ush"
+#include "/Engine/Generated/Material.ush"
+#if NUM_MATERIAL_OUTPUTS_GETSIGNEDDISTORTIONFIELD != 2
+#error Field material requires exactly two connected float4 custom outputs.
+#endif
+#if (DYNAMIC_PARAMETERS_MASK & GGYGO_REQUIRED_DP_SLOTS) != GGYGO_REQUIRED_DP_SLOTS
+#error Field material lost a required dynamic-parameter slot during actual translation.
+#endif
+#include "/Engine/Generated/VertexFactory.ush"
+
+struct FGGYGOSignedFieldVSToPS
+{
+	FVertexFactoryInterpolantsVSToPS FactoryInterpolants;
+	float4 Position : SV_POSITION;
+	FStereoVSOutput StereoOutput;
+};
+
+#if VERTEXSHADER
+void MainVS(FVertexFactoryInput Input, out FGGYGOSignedFieldVSToPS Output
+#if USE_GLOBAL_CLIP_PLANE
+	, out float ClipDistance : SV_ClipDistance
+#endif
+)
+{
+	StereoSetupVF(Input, Output.StereoOutput);
+	FVertexFactoryIntermediates Intermediates = GetVertexFactoryIntermediates(Input);
+	float4 WorldPosition = VertexFactoryGetWorldPosition(Input, Intermediates);
+	float3x3 TangentToLocal = VertexFactoryGetTangentToLocal(Input, Intermediates);
+	FMaterialVertexParameters Parameters = GetMaterialVertexParameters(
+		Input, Intermediates, WorldPosition.xyz, TangentToLocal);
+	WorldPosition.xyz += GetMaterialWorldPositionOffset(Parameters);
+	ApplyMaterialFirstPersonTransform(Parameters, WorldPosition.xyz);
+	Output.Position = mul(WorldPosition, ResolvedView.TranslatedWorldToClip);
+	Output.FactoryInterpolants = VertexFactoryGetInterpolantsVSToPS(Input, Intermediates, Parameters);
+#if USE_GLOBAL_CLIP_PLANE
+	ClipDistance = dot(ResolvedView.GlobalClippingPlane, float4(WorldPosition.xyz, 1));
+#endif
+}
+#endif
+
+#if PIXELSHADER
+void MainPS(FVertexFactoryInterpolantsVSToPS Interpolants,
+	float4 SvPosition : SV_Position, FStereoPSInput StereoInput OPTIONAL_IsFrontFace,
+	out float4 DefaultField : SV_Target0, out float4 OverlayField : SV_Target1)
+{
+	StereoSetupPS(StereoInput);
+	FMaterialPixelParameters Parameters = GetMaterialPixelParameters(Interpolants, SvPosition);
+	FPixelMaterialInputs Inputs;
+	CalcMaterialParameters(Parameters, Inputs, SvPosition, bIsFrontFace);
+	DefaultField = GetSignedDistortionField0(Parameters);
+	OverlayField = GetSignedDistortionField1(Parameters);
+}
+#endif

@@ -1,4 +1,4 @@
-/** @file GGYGOLinearMontageAuthorLibrary.cpp @brief 通过原生帧域、区段和动作来源验证制作新线性 Montage，并只读复制 Montage 时间轴事实。 */
+/** @file GGYGOLinearMontageAuthorLibrary.cpp @brief 原生线性 Montage 制作、Notify 原位迁时及时间轴事实读取。 */
 #include "GGYGOLinearMontageAuthorLibrary.h"
 
 #include "Animation/Data/GGYGOActionMotionSourceBinding.h"
@@ -8,11 +8,13 @@
 #include "Animation/AnimData/IAnimationDataController.h"
 #include "Animation/AnimData/IAnimationDataModel.h"
 #include "Animation/AnimCompositeBase.h"
+#include "Animation/AnimLinkableElement.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/Skeleton.h"
+#include "Editor.h"
 #include "Misc/PackageName.h"
 #include "UObject/Package.h"
 
@@ -173,6 +175,37 @@ namespace GGYGOMontageTimelineFactsPrivate
 		}
 		return NAME_None;
 	}
+
+	FGGYGOMontageTimelineNotifyFact ReadNotifyFact(const UAnimMontage* Montage, const FAnimNotifyEvent& Event)
+	{
+		FGGYGOMontageTimelineNotifyFact Out;
+#if WITH_EDITORONLY_DATA
+		if (Event.Guid.IsValid()) { Out.Guid = Event.Guid.ToString(EGuidFormats::Digits); }
+#endif
+		Out.TrackIndex = Event.TrackIndex;
+		if (const UAnimNotify* Notify = Event.Notify.Get())
+		{
+			Out.NotifyClass = Notify->GetClass()->GetPathName();
+			Out.NotifyObject = Notify->GetPathName();
+		}
+		if (const UAnimNotifyState* State = Event.NotifyStateClass.Get())
+		{
+			Out.StateClass = State->GetClass()->GetPathName();
+			if (Out.NotifyObject.IsEmpty()) { Out.NotifyObject = State->GetPathName(); }
+		}
+		Out.StockNotifyName = ReadStockNotifyName(Event);
+		Out.Time = Event.GetTime();
+		Out.TriggerTimeOffset = Event.TriggerTimeOffset;
+		Out.TriggerTime = Event.GetTriggerTime();
+		Out.Duration = Event.GetDuration();
+		Out.EndTriggerTime = Event.GetEndTriggerTime();
+		Out.SlotIndex = Event.GetSlotIndex();
+		Out.SegmentIndex = Event.GetSegmentIndex();
+		Out.LinkMethod = DescribeLinkMethod(Event.GetLinkMethod());
+		Out.bIsBranchingPoint = Event.IsBranchingPoint();
+		Out.bLinkedToSelf = Event.GetLinkedMontage() == Montage;
+		return Out;
+	}
 }
 
 FGGYGOMontageTimelineFacts UGGYGOLinearMontageAuthorLibrary::ReadMontageTimelineFacts(const UAnimMontage* Montage)
@@ -214,33 +247,407 @@ FGGYGOMontageTimelineFacts UGGYGOLinearMontageAuthorLibrary::ReadMontageTimeline
 	}
 	for (const FAnimNotifyEvent& Event : Montage->Notifies)
 	{
-		FGGYGOMontageTimelineNotifyFact& Out = Facts.Notifies.AddDefaulted_GetRef();
-#if WITH_EDITORONLY_DATA
-		if (Event.Guid.IsValid()) { Out.Guid = Event.Guid.ToString(EGuidFormats::Digits); }
-#endif
-		Out.TrackIndex = Event.TrackIndex;
-		if (const UAnimNotify* Notify = Event.Notify.Get())
-		{
-			Out.NotifyClass = Notify->GetClass()->GetPathName();
-			Out.NotifyObject = Notify->GetPathName();
-		}
-		if (const UAnimNotifyState* State = Event.NotifyStateClass.Get())
-		{
-			Out.StateClass = State->GetClass()->GetPathName();
-			if (Out.NotifyObject.IsEmpty()) { Out.NotifyObject = State->GetPathName(); }
-		}
-		Out.StockNotifyName = ReadStockNotifyName(Event);
-		Out.Time = Event.GetTime();
-		Out.TriggerTimeOffset = Event.TriggerTimeOffset;
-		Out.TriggerTime = Event.GetTriggerTime();
-		Out.Duration = Event.GetDuration();
-		Out.EndTriggerTime = Event.GetEndTriggerTime();
-		Out.SlotIndex = Event.GetSlotIndex();
-		Out.SegmentIndex = Event.GetSegmentIndex();
-		Out.LinkMethod = DescribeLinkMethod(Event.GetLinkMethod());
-		Out.bIsBranchingPoint = Event.IsBranchingPoint();
-		Out.bLinkedToSelf = Event.GetLinkedMontage() == Montage;
+		Facts.Notifies.Add(ReadNotifyFact(Montage, Event));
 	}
 	Facts.bSucceeded = true;
 	return Facts;
+}
+
+namespace GGYGOMontageNotifyRetimePrivate
+{
+	int32 FindUniqueNotify(const UAnimMontage* Montage, const FGuid& Guid)
+	{
+		int32 Found = INDEX_NONE;
+		for (int32 Index = 0; Index < Montage->Notifies.Num(); ++Index)
+		{
+			if (Montage->Notifies[Index].Guid == Guid)
+			{
+				if (Found != INDEX_NONE) { return INDEX_NONE; }
+				Found = Index;
+			}
+		}
+		return Found;
+	}
+
+	/** Modify／缓存刷新可同步广播；只比较本次栈上原生快照，不覆盖外调产生的后继工作。 */
+	bool MatchesNotifySnapshot(const UAnimMontage* Montage, const TArray<FAnimNotifyEvent>& Expected)
+	{
+		if (Montage->Notifies.Num() != Expected.Num()) { return false; }
+		for (int32 Index = 0; Index < Expected.Num(); ++Index)
+		{
+			if (!FAnimNotifyEvent::StaticStruct()->CompareScriptStruct(&Montage->Notifies[Index], &Expected[Index], PPF_None))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool ValidateRetime(UAnimMontage* Montage, const FGuid& Guid, UAnimNotify* ExpectedNotify,
+		float ExpectedTime, float NewTime, int32& NotifyIndex, FString& Error)
+	{
+		if (!GEditor || GEditor->PlayWorld || !IsValid(Montage) || !IsValid(ExpectedNotify)
+			|| ExpectedNotify->GetOuter() != Montage)
+		{
+			Error = TEXT("需要非 PIE Editor 中仍由原 Montage 直接持有的有效 Notify 对象。");
+			return false;
+		}
+		// RefreshCacheData 会向已加载子 Montage 传播；父资产的派生数据也不是本入口的写入范围。
+		if (Montage->HasParentAsset() || !Montage->ChildrenAssets.IsEmpty())
+		{
+			Error = TEXT("拒绝父／子资产关联的 Montage，避免刷新跨资产传播或覆盖派生数据。");
+			return false;
+		}
+		const float Length = Montage->GetPlayLength();
+		if (!FMath::IsFinite(Length) || Length <= 0.0f || !FMath::IsFinite(ExpectedTime)
+			|| !FMath::IsFinite(NewTime) || ExpectedTime < 0.0f || ExpectedTime > Length || NewTime < 0.0f || NewTime > Length)
+		{
+			Error = TEXT("原时间／目标时间必须是 Montage 有效长度范围内的有限绝对秒。");
+			return false;
+		}
+		NotifyIndex = FindUniqueNotify(Montage, Guid);
+		if (NotifyIndex == INDEX_NONE)
+		{
+			Error = TEXT("Guid 未匹配到唯一现有 Notify。");
+			return false;
+		}
+		const FAnimNotifyEvent& Event = Montage->Notifies[NotifyIndex];
+		if (Event.Notify != ExpectedNotify || Event.NotifyStateClass || Event.Duration != 0.0f
+			|| Event.GetTime() != ExpectedTime || Event.GetLinkedMontage() != Montage)
+		{
+			Error = TEXT("Guid 对应的原对象、点 Notify 类型、零 Duration、准确原时间或原 Montage 链接已不匹配。");
+			return false;
+		}
+		if (!Montage->SlotAnimTracks.IsValidIndex(Event.GetSlotIndex())
+			|| (Event.GetLinkMethod() != EAnimLinkMethod::Absolute && Event.GetLinkMethod() != EAnimLinkMethod::Relative
+				&& Event.GetLinkMethod() != EAnimLinkMethod::Proportional))
+		{
+			Error = TEXT("原 Notify 的 Slot 或 LinkMethod 无效。");
+			return false;
+		}
+		const FAnimTrack& Track = Montage->SlotAnimTracks[Event.GetSlotIndex()].AnimTrack;
+		const int32 SegmentIndex = Track.GetSegmentIndexAtTime(NewTime);
+		if (!Track.AnimSegments.IsValidIndex(SegmentIndex)
+			|| !IsValid(Track.AnimSegments[SegmentIndex].GetAnimReference().Get())
+			|| !FMath::IsFinite(Track.AnimSegments[SegmentIndex].GetLength()) || Track.AnimSegments[SegmentIndex].GetLength() <= 0.0f)
+		{
+			Error = TEXT("目标没有有效正长度源 segment 覆盖；拒绝 Link 自动退回 Absolute 链接。");
+			return false;
+		}
+		// 原生 RefreshCacheData 会修复无效轨道及同轨近同刻事件；准入沿其同一比较规则拒绝改动其它声明。
+		for (int32 Index = 0; Index < Montage->Notifies.Num(); ++Index)
+		{
+			const FAnimNotifyEvent& Current = Montage->Notifies[Index];
+			const float Time = Index == NotifyIndex ? NewTime : Current.GetTime();
+			if (!Montage->AnimNotifyTracks.IsValidIndex(Current.TrackIndex) || !FMath::IsFinite(Time)
+				|| !FMath::IsFinite(Current.GetTriggerTime()) || !FMath::IsFinite(Current.GetEndTriggerTime()))
+			{
+				Error = FString::Printf(TEXT("Notify[%d] 轨道／时间无效；拒绝缓存刷新隐式修复。"), Index);
+				return false;
+			}
+			for (int32 OtherIndex = 0; OtherIndex < Index; ++OtherIndex)
+			{
+				const FAnimNotifyEvent& Other = Montage->Notifies[OtherIndex];
+				const float OtherTime = OtherIndex == NotifyIndex ? NewTime : Other.GetTime();
+				if (Current.TrackIndex == Other.TrackIndex && FMath::IsNearlyEqual(Time, OtherTime))
+				{
+					Error = FString::Printf(TEXT("Notify[%d]/[%d] 同轨近同刻；缓存刷新会改写轨道，拒绝迁时。"), Index, OtherIndex);
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+}
+
+FGGYGOMontageNotifyRetimeResult UGGYGOLinearMontageAuthorLibrary::RetimeMontagePointNotifyByGuid(
+	UAnimMontage* Montage, const FString& NotifyGuid, UAnimNotify* ExpectedNotify, float ExpectedAbsoluteTime, float NewAbsoluteTime)
+{
+	using namespace GGYGOMontageNotifyRetimePrivate;
+	using namespace GGYGOMontageTimelineFactsPrivate;
+	FGGYGOMontageNotifyRetimeResult Result;
+	// 先检查线程，避免错误路径访问 UObject；诊断路径在合法线程内一次捕获。
+	if (!IsInGameThread())
+	{
+		Result.Error = TEXT("[Animation.MontageNotifyRetime] 只允许在 GameThread 调用。");
+		return Result;
+	}
+	const FString MontagePath = GetPathNameSafe(Montage);
+	auto FailRetime = [&Result, &MontagePath, &NotifyGuid](const FString& Reason)
+	{
+		Result.Error = FString::Printf(TEXT("[Animation.MontageNotifyRetime] Montage='%s' Guid='%s': %s"),
+			*MontagePath, *NotifyGuid, *Reason);
+		return Result;
+	};
+	FGuid Guid;
+	if (!FGuid::ParseExact(NotifyGuid, EGuidFormats::Digits, Guid) || !Guid.IsValid())
+	{
+		return FailRetime(TEXT("需要有效的 32 位 Digits Guid。"));
+	}
+	FString Error;
+	int32 NotifyIndex = INDEX_NONE;
+	if (!ValidateRetime(Montage, Guid, ExpectedNotify, ExpectedAbsoluteTime, NewAbsoluteTime, NotifyIndex, Error))
+	{
+		return FailRetime(Error);
+	}
+	Result.Before = ReadNotifyFact(Montage, Montage->Notifies[NotifyIndex]);
+	if (NewAbsoluteTime == ExpectedAbsoluteTime)
+	{
+		Result.After = Result.Before;
+		Result.bSucceeded = true;
+		return Result;
+	}
+
+	const TWeakObjectPtr<UAnimMontage> OriginalMontage = Montage;
+	const TWeakObjectPtr<UAnimNotify> OriginalNotify = ExpectedNotify;
+	TArray<FAnimNotifyEvent> ExpectedNotifies = Montage->Notifies;
+	Montage->Modify();
+	Montage = OriginalMontage.Get();
+	ExpectedNotify = OriginalNotify.Get();
+	if (!ValidateRetime(Montage, Guid, ExpectedNotify, ExpectedAbsoluteTime, NewAbsoluteTime, NotifyIndex, Error))
+	{
+		return FailRetime(Error);
+	}
+	if (!MatchesNotifySnapshot(Montage, ExpectedNotifies))
+	{
+		return FailRetime(TEXT("Modify 外调改变了原 Notify 声明；拒绝继续写入。"));
+	}
+
+	// CalculateOffsetForNotify 是未单独导出的虚接口，须保留原生分派；返回后重取原对象与声明。
+	const EAnimEventTriggerOffsets::Type Offset = Montage->CalculateOffsetForNotify(NewAbsoluteTime);
+	Montage = OriginalMontage.Get();
+	ExpectedNotify = OriginalNotify.Get();
+	if (!ValidateRetime(Montage, Guid, ExpectedNotify, ExpectedAbsoluteTime, NewAbsoluteTime, NotifyIndex, Error))
+	{
+		return FailRetime(Error);
+	}
+	if (!MatchesNotifySnapshot(Montage, ExpectedNotifies))
+	{
+		return FailRetime(TEXT("offset 计算外调改变了原 Notify 声明；拒绝继续写入。"));
+	}
+	{
+		FAnimNotifyEvent& Event = Montage->Notifies[NotifyIndex];
+		Result.bWriteApplied = true;
+		Event.Link(Montage, NewAbsoluteTime, Event.GetSlotIndex());
+		Event.SetTime(NewAbsoluteTime);
+		// 沿 Persona 的原生政策保留已有作者偏移，必要时形成目标边界 offset。
+		Event.RefreshTriggerOffset(Offset);
+	}
+	ExpectedNotifies = Montage->Notifies;
+	ExpectedNotifies.Sort();
+	// 会排序、重建轨道／BranchingPoint 缓存并广播；此处之后不保留任何数组元素地址。
+	Montage->RefreshCacheData();
+	Montage = OriginalMontage.Get();
+	ExpectedNotify = OriginalNotify.Get();
+	if (!ValidateRetime(Montage, Guid, ExpectedNotify, NewAbsoluteTime, NewAbsoluteTime, NotifyIndex, Error))
+	{
+		return FailRetime(Error);
+	}
+	Result.After = ReadNotifyFact(Montage, Montage->Notifies[NotifyIndex]);
+	if (!MatchesNotifySnapshot(Montage, ExpectedNotifies))
+	{
+		return FailRetime(TEXT("缓存刷新外调改变了原 Notify 声明；保留未保存现场，拒绝报告成功。"));
+	}
+	Result.bSucceeded = true;
+	return Result;
+}
+
+namespace GGYGOMontageNotifyStateRetimePrivate
+{
+	bool ValidateEndpoint(const UAnimMontage* Montage, const FAnimLinkableElement& Link,
+		float TargetTime, FString& Error)
+	{
+		if (Link.GetLinkedMontage() != Montage || !Montage->SlotAnimTracks.IsValidIndex(Link.GetSlotIndex())
+			|| (Link.GetLinkMethod() != EAnimLinkMethod::Absolute && Link.GetLinkMethod() != EAnimLinkMethod::Relative
+				&& Link.GetLinkMethod() != EAnimLinkMethod::Proportional))
+		{
+			Error = TEXT("State 原端点的 Montage、Slot 或 LinkMethod 无效。");
+			return false;
+		}
+		const FAnimTrack& Track = Montage->SlotAnimTracks[Link.GetSlotIndex()].AnimTrack;
+		const int32 CurrentSegment = Link.GetSegmentIndex();
+		const int32 TargetSegment = Track.GetSegmentIndexAtTime(TargetTime);
+		if (!Track.AnimSegments.IsValidIndex(CurrentSegment) || !Track.AnimSegments.IsValidIndex(TargetSegment)
+			|| !IsValid(Link.GetLinkedSequence())
+			|| Link.GetLinkedSequence() != Track.AnimSegments[CurrentSegment].GetAnimReference().Get()
+			|| !FMath::IsFinite(Track.AnimSegments[CurrentSegment].GetLength())
+			|| Track.AnimSegments[CurrentSegment].GetLength() <= 0.0f
+			|| !IsValid(Track.AnimSegments[TargetSegment].GetAnimReference().Get())
+			|| !FMath::IsFinite(Track.AnimSegments[TargetSegment].GetLength())
+			|| Track.AnimSegments[TargetSegment].GetLength() <= 0.0f)
+		{
+			Error = TEXT("State 原链接或目标 segment/source 无效；拒绝 Link 自动退回 Absolute。");
+			return false;
+		}
+		return true;
+	}
+
+	bool ValidateRetime(UAnimMontage* Montage, const FGuid& Guid, UAnimNotifyState* ExpectedState,
+		float ExpectedTime, float ExpectedDuration, float NewTime, float NewEnd, int32& NotifyIndex, FString& Error)
+	{
+		using namespace GGYGOMontageNotifyRetimePrivate;
+		if (!GEditor || GEditor->PlayWorld || !IsValid(Montage) || !IsValid(ExpectedState)
+			|| ExpectedState->GetOuter() != Montage)
+		{
+			Error = TEXT("需要非 PIE Editor 中仍由原 Montage 直接持有的有效 State 对象。");
+			return false;
+		}
+		if (Montage->HasParentAsset() || !Montage->ChildrenAssets.IsEmpty())
+		{
+			Error = TEXT("拒绝父／子资产关联的 Montage，避免缓存刷新跨资产传播。");
+			return false;
+		}
+		const float Length = Montage->GetPlayLength();
+		if (!FMath::IsFinite(Length) || Length <= 0.0f || !FMath::IsFinite(ExpectedTime)
+			|| !FMath::IsFinite(ExpectedDuration) || ExpectedTime < 0.0f || ExpectedDuration <= 0.0f
+			|| !FMath::IsFinite(NewTime) || !FMath::IsFinite(NewEnd) || NewTime < 0.0f
+			|| NewTime >= NewEnd || NewEnd > Length || !FMath::IsFinite(NewEnd - NewTime))
+		{
+			Error = TEXT("原时间／时长及目标两端必须为 Montage 域内的有限正区间。");
+			return false;
+		}
+		NotifyIndex = FindUniqueNotify(Montage, Guid);
+		if (NotifyIndex == INDEX_NONE)
+		{
+			Error = TEXT("Guid 未匹配到唯一现有 State。");
+			return false;
+		}
+		const FAnimNotifyEvent& Event = Montage->Notifies[NotifyIndex];
+		if (Event.Notify || Event.NotifyStateClass != ExpectedState || Event.GetTime() != ExpectedTime
+			|| Event.GetDuration() != ExpectedDuration || !FMath::IsFinite(Event.Duration) || Event.Duration <= 0.0f
+			|| !FMath::IsFinite(Event.EndLink.GetTime()) || Event.EndLink.GetTime() > Length
+			|| Event.MontageTickType != EMontageNotifyTickType::Queued || Event.IsBranchingPoint())
+		{
+			Error = TEXT("原 State 对象、精确 time/duration、Queued 或原结束链接已不匹配。");
+			return false;
+		}
+		if (!ValidateEndpoint(Montage, Event, NewTime, Error)
+			|| !ValidateEndpoint(Montage, Event.EndLink, NewEnd, Error))
+		{
+			return false;
+		}
+		// 沿 RefreshCacheData 的轨道修复条件准入，避免迁时顺带改写其它 Notify。
+		for (int32 Index = 0; Index < Montage->Notifies.Num(); ++Index)
+		{
+			const FAnimNotifyEvent& Current = Montage->Notifies[Index];
+			const float Time = Index == NotifyIndex ? NewTime : Current.GetTime();
+			if (!Montage->AnimNotifyTracks.IsValidIndex(Current.TrackIndex) || !FMath::IsFinite(Time)
+				|| !FMath::IsFinite(Current.GetTriggerTime()) || !FMath::IsFinite(Current.GetEndTriggerTime()))
+			{
+				Error = TEXT("原 Notify 轨道／触发时间无效；拒绝缓存隐式修复。");
+				return false;
+			}
+			for (int32 OtherIndex = 0; OtherIndex < Index; ++OtherIndex)
+			{
+				const FAnimNotifyEvent& Other = Montage->Notifies[OtherIndex];
+				const float OtherTime = OtherIndex == NotifyIndex ? NewTime : Other.GetTime();
+				if (Current.TrackIndex == Other.TrackIndex && FMath::IsNearlyEqual(Time, OtherTime))
+				{
+					Error = TEXT("目标产生同轨近同刻 Notify；拒绝缓存重排作者轨道。");
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+}
+
+FGGYGOMontageNotifyRetimeResult UGGYGOLinearMontageAuthorLibrary::RetimeMontageNotifyStateByGuid(
+	UAnimMontage* Montage, const FString& NotifyGuid, UAnimNotifyState* ExpectedState, float ExpectedAbsoluteTime,
+	float ExpectedDuration, float NewAbsoluteTime, float NewEndAbsoluteTime)
+{
+	using namespace GGYGOMontageNotifyRetimePrivate;
+	using namespace GGYGOMontageTimelineFactsPrivate;
+	FGGYGOMontageNotifyRetimeResult Result;
+	if (!IsInGameThread())
+	{
+		Result.Error = TEXT("[Animation.MontageStateRetime] 只允许在 GameThread 调用。");
+		return Result;
+	}
+	const FString MontagePath = GetPathNameSafe(Montage);
+	auto FailRetime = [&Result, &MontagePath, &NotifyGuid](const FString& Reason)
+	{
+		Result.Error = FString::Printf(TEXT("[Animation.MontageStateRetime] Montage='%s' Guid='%s': %s"),
+			*MontagePath, *NotifyGuid, *Reason);
+		return Result;
+	};
+	FGuid Guid;
+	if (!FGuid::ParseExact(NotifyGuid, EGuidFormats::Digits, Guid) || !Guid.IsValid())
+	{
+		return FailRetime(TEXT("需要有效的 32 位 Digits Guid。"));
+	}
+	FString Error;
+	int32 NotifyIndex = INDEX_NONE;
+	if (!GGYGOMontageNotifyStateRetimePrivate::ValidateRetime(Montage, Guid, ExpectedState,
+		ExpectedAbsoluteTime, ExpectedDuration, NewAbsoluteTime, NewEndAbsoluteTime, NotifyIndex, Error))
+	{
+		return FailRetime(Error);
+	}
+	Result.Before = ReadNotifyFact(Montage, Montage->Notifies[NotifyIndex]);
+	if (NewAbsoluteTime == ExpectedAbsoluteTime && NewEndAbsoluteTime == Montage->Notifies[NotifyIndex].EndLink.GetTime())
+	{
+		Result.After = Result.Before;
+		Result.bSucceeded = true;
+		return Result;
+	}
+	const TWeakObjectPtr<UAnimMontage> OriginalMontage = Montage;
+	const TWeakObjectPtr<UAnimNotifyState> OriginalState = ExpectedState;
+	TArray<FAnimNotifyEvent> ExpectedNotifies = Montage->Notifies;
+	Montage->Modify();
+	Montage = OriginalMontage.Get();
+	ExpectedState = OriginalState.Get();
+	if (!GGYGOMontageNotifyStateRetimePrivate::ValidateRetime(Montage, Guid, ExpectedState,
+		ExpectedAbsoluteTime, ExpectedDuration, NewAbsoluteTime, NewEndAbsoluteTime, NotifyIndex, Error)
+		|| !MatchesNotifySnapshot(Montage, ExpectedNotifies))
+	{
+		return FailRetime(Error.IsEmpty() ? FString(TEXT("Modify 外调改变了原 Notify 声明。")) : Error);
+	}
+	EAnimEventTriggerOffsets::Type Offsets[2];
+	const float Endpoints[2] = {NewAbsoluteTime, NewEndAbsoluteTime};
+	for (int32 Endpoint = 0; Endpoint < 2; ++Endpoint)
+	{
+		// 虚调用可同步外调；每端返回后重取原对象、Guid 和完整声明，不留数组元素地址。
+		Offsets[Endpoint] = Montage->CalculateOffsetForNotify(Endpoints[Endpoint]);
+		Montage = OriginalMontage.Get();
+		ExpectedState = OriginalState.Get();
+		if (!GGYGOMontageNotifyStateRetimePrivate::ValidateRetime(Montage, Guid, ExpectedState,
+			ExpectedAbsoluteTime, ExpectedDuration, NewAbsoluteTime, NewEndAbsoluteTime, NotifyIndex, Error)
+			|| !MatchesNotifySnapshot(Montage, ExpectedNotifies))
+		{
+			return FailRetime(Error.IsEmpty() ? FString(TEXT("端点 offset 外调改变了原 Notify 声明。")) : Error);
+		}
+	}
+	{
+		FAnimNotifyEvent& Event = Montage->Notifies[NotifyIndex];
+		const int32 StartSlot = Event.GetSlotIndex();
+		const int32 EndSlot = Event.EndLink.GetSlotIndex();
+		Result.bWriteApplied = true;
+		Event.Link(Montage, NewAbsoluteTime, StartSlot);
+		Event.SetTime(NewAbsoluteTime);
+		Event.SetDuration(NewEndAbsoluteTime - NewAbsoluteTime);
+		Event.EndLink.Link(Montage, NewEndAbsoluteTime, EndSlot);
+		Event.RefreshTriggerOffset(Offsets[0]);
+		Event.RefreshEndTriggerOffset(Offsets[1]);
+	}
+	ExpectedNotifies = Montage->Notifies;
+	ExpectedNotifies.Sort();
+	Montage->RefreshCacheData();
+	Montage = OriginalMontage.Get();
+	ExpectedState = OriginalState.Get();
+	if (!GGYGOMontageNotifyStateRetimePrivate::ValidateRetime(Montage, Guid, ExpectedState,
+		NewAbsoluteTime, NewEndAbsoluteTime - NewAbsoluteTime, NewAbsoluteTime, NewEndAbsoluteTime, NotifyIndex, Error))
+	{
+		return FailRetime(Error);
+	}
+	Result.After = ReadNotifyFact(Montage, Montage->Notifies[NotifyIndex]);
+	if (Montage->Notifies[NotifyIndex].EndLink.GetTime() != NewEndAbsoluteTime)
+	{
+		return FailRetime(TEXT("原生结束链接未精确落到目标终点；保留未保存现场。"));
+	}
+	if (!MatchesNotifySnapshot(Montage, ExpectedNotifies))
+	{
+		return FailRetime(TEXT("缓存刷新外调改变了原 Notify 声明；保留未保存现场。"));
+	}
+	Result.bSucceeded = true;
+	return Result;
 }

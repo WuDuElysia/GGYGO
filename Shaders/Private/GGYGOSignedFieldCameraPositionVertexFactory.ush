@@ -1,0 +1,44 @@
+// 复用Niagara的完整粒子、UV、颜色、DP及Primitive协议，只修正明确选择的Facing基底。
+#define GetVertexFactoryIntermediates GGYGOGetNativeSpriteIntermediates
+#include "/Plugin/FX/Niagara/Private/NiagaraSpriteVertexFactory.ush"
+#undef GetVertexFactoryIntermediates
+
+FVertexFactoryIntermediates GetVertexFactoryIntermediates(FVertexFactoryInput Input)
+{
+	FVertexFactoryIntermediates Result = GGYGOGetNativeSpriteIntermediates(Input);
+	uint ParticleID = GetInstanceId(GetInstanceIdFromVF(Input));
+	if (NiagaraSpriteVFLooseParameters.SortedIndicesOffset != 0xFFFFFFFF)
+	{
+		ParticleID = NiagaraSpriteVFLooseParameters.SortedIndices[
+			NiagaraSpriteVFLooseParameters.SortedIndicesOffset + ParticleID];
+	}
+
+	// 相机与粒子同位时朝向不唯一，沿当前View方向；退化轴始终来自该View，不借world-Z。
+	float3 Facing = SafeNormalizeWithFallback(ResolvedView.TranslatedWorldCameraOrigin
+		- Result.TranslatedWorldPosition, -ResolvedView.ViewForward);
+	float3 Right = cross(Facing, ResolvedView.ViewUp);
+	if (dot(Right, Right) < 1.e-10f)
+	{
+		Right = ResolvedView.ViewRight - Facing * dot(ResolvedView.ViewRight, Facing);
+	}
+	Right = normalize(Right);
+	float3 Up = cross(Facing, Right);
+	float SinRotation, CosRotation;
+	sincos(GetNiagaraParticleRotation(ParticleID), SinRotation, CosRotation);
+	float3 RotatedRight = Up * SinRotation + Right * CosRotation;
+	float3 RotatedUp = Up * CosRotation - Right * SinRotation;
+
+	float2 PositionUV, TextureUV, UnflippedUV;
+	ComputeBillboardUVs(Input, GetNiagaraParticleSize(ParticleID),
+		GetNiagaraParticleSubimage(ParticleID), Result.UVScale,
+		PositionUV, TextureUV, UnflippedUV);
+	float2 Corner = abs(Result.Size) * (PositionUV - GetNiagaraPivotOffset(ParticleID));
+	float3 Delta = Corner.x * (RotatedRight - Result.TangentRight)
+		+ Corner.y * (RotatedUp - Result.TangentUp);
+	Result.VertexWorldPosition = LWCAdd(Result.VertexWorldPosition, Delta);
+	Result.TangentRight = RotatedRight;
+	Result.TangentUp = RotatedUp;
+	Result.TangentToLocal = CalcTangentBasis(Result);
+	// Source affine/pivot/viewport及signed size仍由原WPO/DP3处理，本VF不再修正。
+	return Result;
+}

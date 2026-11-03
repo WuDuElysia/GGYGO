@@ -1,8 +1,12 @@
 /** @file GGYGOAnimationPoseObservationSubsystem.cpp @brief 记录自然 finalize、物理结果与原生源姿态，不驱动被观察对象。 */
 #include "GGYGOAnimationPoseObservationSubsystem.h"
+#include "GGYGOPlayerActionObservation.h"
 
 #include "Animation/Runtime/GGYGOAnimInstanceBase.h"
 #include "Character/Components/GGYGOCharacterMovementComponent.h"
+#include "Abilities/GameplayAbility.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "Animation/AnimationPoseData.h"
 #include "Animation/AnimNode_AssetPlayerBase.h"
 #include "Animation/AnimSequence.h"
@@ -12,9 +16,17 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Dom/JsonObject.h"
 #include "Editor.h"
+#include "Engine/Engine.h"
 #include "Engine/EngineTypes.h"
+#include "Engine/NetDriver.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
+#include "GameplayAbilitySpec.h"
+#include "GameplayTagContainer.h"
+#include "GameplayTask.h"
+#include "GameplayTaskOwnerInterface.h"
+#include "GameplayTasksComponent.h"
+#include "HAL/PlatformTime.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Serialization/JsonSerializer.h"
 #include "UObject/UnrealType.h"
@@ -37,6 +49,233 @@ namespace GGYGOAnimationObservation
 	{
 		// JSON number 的常见 double 消费器不能准确承载全部 uint64。
 		Object->SetStringField(Name, FString::Printf(TEXT("%llu"), Serial));
+	}
+
+	TSharedPtr<FJsonObject> NativeActionMotion(const FGGYGOActionMotionNativeObservation& Observation)
+	{
+		TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+		Result->SetNumberField(TEXT("status"), static_cast<uint8>(Observation.Status));
+		Result->SetStringField(TEXT("diagnostic"), Observation.Diagnostic);
+		const bool bAvailable = Observation.Status == EGGYGOActionMotionNativeObservationStatus::Available
+			|| Observation.Status == EGGYGOActionMotionNativeObservationStatus::NoActionSource;
+		Result->SetBoolField(TEXT("available"), bAvailable);
+		// 不可用时不把默认时间、Identity 或空列表写成一次有效观察。
+		if (!bAvailable) { return Result; }
+		SetSerial(Result, TEXT("frame"), Observation.Frame);
+		Result->SetNumberField(TEXT("world_time_seconds"), Observation.WorldTimeSeconds);
+		Result->SetStringField(TEXT("world"), Observation.WorldPath);
+		Result->SetStringField(TEXT("character"), Observation.CharacterPath);
+		Result->SetStringField(TEXT("movement"), Observation.MovementPath);
+		Result->SetNumberField(TEXT("local_role"), Observation.LocalRole);
+		TArray<TSharedPtr<FJsonValue>> ActiveSources;
+		TArray<TSharedPtr<FJsonValue>> PendingSources;
+		for (const FGGYGOActionMotionNativeSourceObservation& Source : Observation.Sources)
+		{
+			TArray<TSharedPtr<FJsonValue>>& Sources = Source.Container == EGGYGOActionMotionNativeSourceContainer::Active
+				? ActiveSources : PendingSources;
+			Sources.Add(MakeShared<FJsonValueObject>(GGYGOPlayerActionObservation::NativeActionSource(Source)));
+		}
+		Result->SetArrayField(TEXT("active_sources"), ActiveSources);
+		Result->SetArrayField(TEXT("pending_sources"), PendingSources);
+		return Result;
+	}
+
+	TSharedPtr<FJsonObject> NetworkDriverLive(const UWorld& World)
+	{
+		TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+		SetSerial(Result, TEXT("live_frame"), GFrameCounter);
+		Result->SetNumberField(TEXT("live_platform_seconds"), FPlatformTime::Seconds());
+		Result->SetBoolField(TEXT("available"), false);
+		Result->SetBoolField(TEXT("net_test_enabled"), DO_ENABLE_NET_TEST != 0);
+		Result->SetStringField(TEXT("world"), World.GetPathName());
+		Result->SetNumberField(TEXT("world_object_id"), World.GetUniqueID());
+		const UNetDriver* Driver = World.GetNetDriver();
+		if (!World.IsGameWorld() || !IsValid(Driver) || Driver->HasAnyFlags(RF_BeginDestroyed | RF_FinishDestroyed))
+		{
+			Result->SetStringField(TEXT("diagnostic"), TEXT("Original game World has no live primary NetDriver; incoming simulation settings are unavailable"));
+			return Result;
+		}
+		Result->SetStringField(TEXT("driver"), Driver->GetPathName());
+		Result->SetNumberField(TEXT("driver_object_id"), Driver->GetUniqueID());
+		Result->SetStringField(TEXT("driver_name"), Driver->NetDriverName.ToString());
+		Result->SetStringField(TEXT("driver_world"), GetPathNameSafe(Driver->GetWorld()));
+		if (Driver->GetWorld() != &World)
+		{
+			Result->SetStringField(TEXT("diagnostic"), TEXT("Primary NetDriver does not belong to the original World"));
+			return Result;
+		}
+		const bool bNamedDriverMatches = GEngine && !Driver->NetDriverName.IsNone()
+			&& GEngine->FindNamedNetDriver(&World, Driver->NetDriverName) == Driver;
+		Result->SetBoolField(TEXT("named_driver_matches"), bNamedDriverMatches);
+		if (!bNamedDriverMatches)
+		{
+			Result->SetStringField(TEXT("diagnostic"), TEXT("Original World/NetDriverName does not resolve to this primary NetDriver; named command scope is unavailable"));
+			return Result;
+		}
+#if DO_ENABLE_NET_TEST
+		const FPacketSimulationSettings& Settings = Driver->PacketSimulationSettings;
+		if (Settings.PktIncomingLagMin < 0 || Settings.PktIncomingLagMax < Settings.PktIncomingLagMin
+			|| Settings.PktIncomingLoss < 0 || Settings.PktIncomingLoss > 100
+			|| Settings.PktIncomingFrameDelay < 0 || Settings.PktIncomingBufferBloatInMS < 0)
+		{
+			Result->SetStringField(TEXT("diagnostic"), FString::Printf(TEXT("Invalid incoming simulation settings: Min=%d Max=%d Loss=%d FrameDelay=%d BufferBloatInMS=%d"),
+				Settings.PktIncomingLagMin, Settings.PktIncomingLagMax, Settings.PktIncomingLoss,
+				Settings.PktIncomingFrameDelay, Settings.PktIncomingBufferBloatInMS));
+			return Result;
+		}
+		Result->SetBoolField(TEXT("available"), true);
+		Result->SetStringField(TEXT("diagnostic"), TEXT(""));
+		// 只读当前主 Driver 的公开配置，不检查或操作 connection 的延迟队列。
+		Result->SetStringField(TEXT("scope"), TEXT("World primary NetDriver public incoming packet simulation settings at live_frame; not connection or delayed-packet queue state"));
+		Result->SetNumberField(TEXT("incoming_lag_min_ms"), Settings.PktIncomingLagMin);
+		Result->SetNumberField(TEXT("incoming_lag_max_ms"), Settings.PktIncomingLagMax);
+		Result->SetNumberField(TEXT("incoming_loss_percent"), Settings.PktIncomingLoss);
+		Result->SetNumberField(TEXT("incoming_frame_delay"), Settings.PktIncomingFrameDelay);
+		Result->SetNumberField(TEXT("incoming_buffer_bloat_ms"), Settings.PktIncomingBufferBloatInMS);
+#else
+		Result->SetStringField(TEXT("diagnostic"), TEXT("DO_ENABLE_NET_TEST is disabled; incoming simulation settings are unavailable"));
+#endif
+		return Result;
+	}
+
+	TSharedPtr<FJsonObject> AbilitySystemLive(const ACharacter& Character)
+	{
+		TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+		SetSerial(Result, TEXT("live_frame"), GFrameCounter);
+		Result->SetBoolField(TEXT("available"), false);
+		Result->SetStringField(TEXT("pawn"), Character.GetPathName());
+		Result->SetNumberField(TEXT("pawn_object_id"), Character.GetUniqueID());
+		const ENetRole LocalRole = Character.GetLocalRole();
+		const bool bLocallyControlled = Character.IsLocallyControlled();
+		Result->SetNumberField(TEXT("local_role"), static_cast<uint8>(LocalRole));
+		Result->SetBoolField(TEXT("locally_controlled"), bLocallyControlled);
+		const UWorld* World = Character.GetWorld();
+		Result->SetStringField(TEXT("world"), GetPathNameSafe(World));
+		// 仅使用原 Pawn 的 ASC 接口，不搜索组件或猜测外部宿主。
+		const UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(&Character, false);
+		if (!IsValid(ASC) || ASC->IsBeingDestroyed())
+		{
+			Result->SetStringField(TEXT("diagnostic"), TEXT("Original Pawn interface has no live ASC; task counts are unavailable"));
+			return Result;
+		}
+		Result->SetStringField(TEXT("ability_system"), ASC->GetPathName());
+		Result->SetNumberField(TEXT("ability_system_object_id"), ASC->GetUniqueID());
+		Result->SetStringField(TEXT("owner_actor"), GetPathNameSafe(ASC->GetOwnerActor()));
+		Result->SetStringField(TEXT("avatar_actor"), GetPathNameSafe(ASC->GetAvatarActor()));
+		Result->SetStringField(TEXT("ability_system_world"), GetPathNameSafe(ASC->GetWorld()));
+		if (!IsValid(World) || !World->IsGameWorld() || Character.IsActorBeingDestroyed()
+			|| ASC->GetWorld() != World || ASC->GetAvatarActor() != &Character)
+		{
+			Result->SetStringField(TEXT("diagnostic"), TEXT("Original ASC World/Avatar does not match the observed Pawn scope; task counts are unavailable"));
+			return Result;
+		}
+		// ActivatableAbilities 只对 Authority/Owner 可见；Sim 的空列表不是零资源证明。
+		if (LocalRole != ROLE_Authority && (LocalRole != ROLE_AutonomousProxy || !bLocallyControlled))
+		{
+			Result->SetStringField(TEXT("diagnostic"), TEXT("ASC public spec/task observation requires Authority or the locally controlled AutonomousProxy; this role cannot certify empty lists"));
+			return Result;
+		}
+		Result->SetBoolField(TEXT("available"), true);
+		Result->SetStringField(TEXT("diagnostic"), TEXT(""));
+		Result->SetStringField(TEXT("scope"), TEXT("Owner/Authority ASC public KnownTasks and activatable spec instances at live_frame; excludes private Ability.ActiveTasks and tasks not registered with this ASC"));
+		TArray<TSharedPtr<FJsonValue>> Specs;
+		TMap<const IGameplayTaskOwnerInterface*, TArray<TSharedPtr<FJsonValue>>> InstanceOwners;
+		int32 UnreadInstances = 0;
+		for (const FGameplayAbilitySpec& Spec : ASC->GetActivatableAbilities())
+		{
+			TSharedPtr<FJsonObject> SpecRow = MakeShared<FJsonObject>();
+			const FString Handle = Spec.Handle.ToString();
+			SpecRow->SetStringField(TEXT("spec_handle"), Handle);
+			SpecRow->SetStringField(TEXT("ability"), GetPathNameSafe(Spec.Ability.Get()));
+			SpecRow->SetBoolField(TEXT("active"), Spec.IsActive());
+			TArray<TSharedPtr<FJsonValue>> Instances;
+			for (const UGameplayAbility* Instance : Spec.GetAbilityInstances())
+			{
+				if (!IsValid(Instance)) { ++UnreadInstances; continue; }
+				TSharedPtr<FJsonObject> InstanceRow = MakeShared<FJsonObject>();
+				InstanceRow->SetStringField(TEXT("spec_handle"), Handle);
+				InstanceRow->SetStringField(TEXT("instance"), Instance->GetPathName());
+				InstanceRow->SetNumberField(TEXT("instance_object_id"), Instance->GetUniqueID());
+				InstanceRow->SetStringField(TEXT("instance_class"), Instance->GetClass()->GetPathName());
+				InstanceRow->SetBoolField(TEXT("active"), Instance->IsActive());
+				TSharedPtr<FJsonValue> Value = MakeShared<FJsonValueObject>(InstanceRow);
+				Instances.Add(Value);
+				InstanceOwners.FindOrAdd(static_cast<const IGameplayTaskOwnerInterface*>(Instance)).Add(Value);
+			}
+			SpecRow->SetArrayField(TEXT("instances"), Instances);
+			Specs.Add(MakeShared<FJsonValueObject>(SpecRow));
+		}
+		Result->SetArrayField(TEXT("specs"), Specs);
+		Result->SetNumberField(TEXT("unread_ability_instance_count"), UnreadInstances);
+		TSet<const UGameplayTask*> SeenTasks;
+		TArray<TSharedPtr<FJsonValue>> Tasks;
+		int32 UnreadTasks = 0;
+		for (auto TaskIt = ASC->GetKnownTaskIterator(); TaskIt; ++TaskIt)
+		{
+			const UGameplayTask* Task = (*TaskIt).Get();
+			if (!IsValid(Task)) { ++UnreadTasks; continue; }
+			if (SeenTasks.Contains(Task)) { continue; }
+			SeenTasks.Add(Task);
+			TSharedPtr<FJsonObject> TaskRow = MakeShared<FJsonObject>();
+			TaskRow->SetStringField(TEXT("task"), Task->GetPathName());
+			TaskRow->SetNumberField(TEXT("task_object_id"), Task->GetUniqueID());
+			TaskRow->SetStringField(TEXT("task_class"), Task->GetClass()->GetPathName());
+			TaskRow->SetNumberField(TEXT("state"), static_cast<uint8>(Task->GetState()));
+			TaskRow->SetBoolField(TEXT("finished"), Task->IsFinished());
+			const IGameplayTaskOwnerInterface* Owner = Task->GetTaskOwner();
+			TaskRow->SetBoolField(TEXT("has_task_owner"), Owner != nullptr);
+			// 按真实接口指针匹配实例；Transient Outer 不承担能力归属证明。
+			TArray<TSharedPtr<FJsonValue>> OwnerMatches;
+			if (const auto* Matches = InstanceOwners.Find(Owner)) { OwnerMatches = *Matches; }
+			TaskRow->SetArrayField(TEXT("owner_matches"), OwnerMatches);
+			Tasks.Add(MakeShared<FJsonValueObject>(TaskRow));
+		}
+		Result->SetNumberField(TEXT("known_task_count"), SeenTasks.Num());
+		Result->SetNumberField(TEXT("unread_known_task_count"), UnreadTasks);
+		Result->SetArrayField(TEXT("known_tasks"), Tasks);
+		TSharedPtr<FJsonObject> TagCounts = MakeShared<FJsonObject>();
+		const FGameplayTagContainer Tags = ASC->GetOwnedGameplayTags().GetGameplayTagParents();
+		for (const FGameplayTag Tag : Tags)
+		{
+			TagCounts->SetNumberField(Tag.ToString(), ASC->GetTagCount(Tag));
+		}
+		Result->SetObjectField(TEXT("tag_counts"), TagCounts);
+		return Result;
+	}
+
+	TSharedPtr<FJsonObject> CameraTurn(const FGGYGOLocomotionSteeringSnapshot& Captured)
+	{
+		TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+		Result->SetNumberField(TEXT("status"), static_cast<uint8>(Captured.CameraTurnStatus));
+		Result->SetStringField(TEXT("diagnostic"), Captured.CameraTurnDiagnostic);
+		Result->SetBoolField(TEXT("remote"), Captured.bCameraTurnRemote);
+		const bool bAvailable = Captured.CameraTurnStatus == EGGYGOLocomotionSteeringStatus::Valid;
+		Result->SetBoolField(TEXT("available"), bAvailable);
+		// Initial/NA/Invalid 只导出资格；不把默认余角或步态对写成真实零观测。
+		if (!bAvailable) { return Result; }
+		Result->SetNumberField(TEXT("demand_degrees"), Captured.CameraTurnDemandDegrees);
+		Result->SetNumberField(TEXT("control_yaw_delta_degrees"), Captured.CameraControlYawDeltaDegrees);
+		Result->SetNumberField(TEXT("gait"), static_cast<uint8>(Captured.CameraTurnGait));
+		Result->SetNumberField(TEXT("walk_run_blend_alpha"), Captured.CameraTurnWalkRunBlendAlpha);
+		Result->SetStringField(TEXT("original_movement"), GetPathNameSafe(Captured.OriginalMovement.Get()));
+		Result->SetStringField(TEXT("original_character"), GetPathNameSafe(Captured.OriginalCharacter.Get()));
+		Result->SetStringField(TEXT("original_updated_component"), GetPathNameSafe(Captured.OriginalUpdatedComponent.Get()));
+		if (Captured.bCameraTurnRemote)
+		{
+			Result->SetNumberField(TEXT("publisher_epoch"), Captured.CameraTurnPublisherEpoch);
+			Result->SetNumberField(TEXT("publication_serial"), Captured.CameraTurnPublicationSerial);
+			// 样本键与本端接受帧都允许真实零；后者不是本机完成区间的证明。
+			Result->SetNumberField(TEXT("native_sample_key"), Captured.CameraTurnNativeSampleKey);
+			SetSerial(Result, TEXT("accepted_local_frame"), Captured.CameraTurnAcceptedLocalFrame);
+		}
+		else
+		{
+			SetSerial(Result, TEXT("source_epoch"), Captured.SourceEpoch);
+			SetSerial(Result, TEXT("completed_interval_serial"), Captured.CompletedIntervalSerial);
+			SetSerial(Result, TEXT("completed_frame"), Captured.CompletedFrame);
+			Result->SetNumberField(TEXT("native_delta_seconds"), Captured.NativeDeltaSeconds);
+		}
+		return Result;
 	}
 
 	TSharedPtr<FJsonObject> Motion(const FGGYGOMotionExecutionSnapshot& Snapshot)
@@ -256,6 +495,8 @@ void UGGYGOAnimationPoseObservationSubsystem::OnBoneTransformsFinalized()
 	Record->SetStringField(TEXT("anim_instance"), Anim->GetPathName());
 	Record->SetStringField(TEXT("character"), Character->GetPathName());
 	Record->SetStringField(TEXT("movement"), Movement->GetPathName());
+	Record->SetObjectField(TEXT("ability_system_live"), GGYGOAnimationObservation::AbilitySystemLive(*Character));
+	Record->SetObjectField(TEXT("network_driver_live"), GGYGOAnimationObservation::NetworkDriverLive(*Mesh->GetWorld()));
 	Record->SetNumberField(TEXT("root_motion_mode"), static_cast<uint8>(Anim->RootMotionMode));
 	Record->SetBoolField(TEXT("mesh_is_playing_root_motion"), Mesh->IsPlayingRootMotion());
 	Record->SetBoolField(TEXT("root_motion_from_everything"), Mesh->IsPlayingRootMotionFromEverything());
@@ -276,15 +517,19 @@ void UGGYGOAnimationPoseObservationSubsystem::OnBoneTransformsFinalized()
 	Record->SetNumberField(TEXT("native_update_counter"), UpdateCounter);
 	Record->SetNumberField(TEXT("native_evaluation_counter"), EvaluationCounter);
 	Record->SetBoolField(TEXT("native_extract_root_motion"), bExtractRootMotion);
+	const FGGYGOAnimationStateFrame& CapturedFrame = Anim->GetAnimationStateFrame();
 	FString StateText;
-	FGGYGOAnimationStateFrame::StaticStruct()->ExportText(StateText, &Anim->GetAnimationStateFrame(), nullptr, Anim, PPF_IncludeTransient, nullptr);
+	FGGYGOAnimationStateFrame::StaticStruct()->ExportText(StateText, &CapturedFrame, nullptr, Anim, PPF_IncludeTransient, nullptr);
 	Record->SetStringField(TEXT("animation_captured_frame"), StateText);
+	Record->SetObjectField(TEXT("movement_camera_turn"), GGYGOAnimationObservation::CameraTurn(CapturedFrame.LocomotionSteering));
 	// 图本帧实际消费的远端姿态视图（与 animation_captured_frame 同次 GT 抓取）；server 键与本机帧分列。
 	FString RemoteText;
 	FGGYGOAnimationRemotePoseFrame::StaticStruct()->ExportText(RemoteText, &Anim->GetRemoteMotionPoseFrame(), nullptr, Anim, PPF_IncludeTransient, nullptr);
 	Record->SetStringField(TEXT("animation_remote_pose"), RemoteText);
 	// 只在此调用栈借用 CMC 已验证的事实，绝不把 binding/RMS 资源存进 observer。
 	Record->SetObjectField(TEXT("movement_completed_interval"), GGYGOAnimationObservation::Motion(Movement->GetMotionExecutionSnapshot()));
+	// 当前原 RMS 与完成区间分别记录；Finalize 帧不证明 owner 输入评价或源已实际贡献。
+	Record->SetObjectField(TEXT("movement_action_native"), GGYGOAnimationObservation::NativeActionMotion(Movement->GetActionMotionNativeObservation()));
 	TSharedPtr<FJsonObject> FinalBones = MakeShared<FJsonObject>();
 	const TArray<FTransform>& ComponentTransforms = Mesh->GetComponentSpaceTransforms();
 	for (FName Name : ObservedBoneNames)

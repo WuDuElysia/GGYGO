@@ -1,6 +1,7 @@
 /** @file GGYGOViewportReadbackLibrary.cpp @brief 沿原 viewport/SetupView 采集表面或投影值并归还当前任务资源。 */
 #include "GGYGOViewportReadbackLibrary.h"
 
+#include "Async/TaskGraphInterfaces.h"
 #include "Camera/GGYGOCameraComponent.h"
 #include "Camera/GGYGOCameraMode.h"
 #include "Camera/GGYGOPlayerCameraManager.h"
@@ -13,7 +14,14 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "ImageUtils.h"
+#include "IImageWrapperModule.h"
+#include "Misc/Paths.h"
+#include "Misc/ScopeLock.h"
+#include "Modules/ModuleManager.h"
+#include "RenderingThread.h"
+#include "RHIGPUReadback.h"
 #include "RHIResources.h"
+#include "RHISurfaceDataConversion.h"
 #include "SceneInterface.h"
 #include "SceneView.h"
 #include "SceneViewExtension.h"
@@ -24,12 +32,323 @@
 #include "UObject/StrongObjectPtr.h"
 #include "UObject/UObjectGlobals.h"
 #include "Widgets/SViewport.h"
+#if PLATFORM_WINDOWS && PLATFORM_64BITS
+#include "Windows/WindowsHWrapper.h"
+#endif
 
 namespace GGYGOViewportReadback
 {
 	FString NativeFrame()
 	{
 		return FString::Printf(TEXT("%llu"), GFrameCounter);
+	}
+}
+
+/** 每个像素任务独占；RT只管staging，后台只管自有CPU数据，均不解引用UObject或原viewport。 */
+struct FGGYGOViewportPixelReadbackState
+{
+	FCriticalSection Mutex;
+	TAtomic<bool> bCancelled{false};
+	TAtomic<bool> bRenderPending{false};
+	TAtomic<bool> bRenderReleased{true};
+	TAtomic<bool> bCleanupPending{false};
+	TUniquePtr<FRHIGPUTextureReadback> Readback; // 仅RT创建、映射和销毁。
+	FGraphEventRef Worker;
+	bool bWorkerQueued = false;
+	bool bCopyQueued = false;
+	bool bCpuReady = false;
+	bool bEncoded = false;
+	bool bFileWritten = false;
+	bool bFileVerified = false;
+	bool bFileHandleReleased = true;
+	bool bCloseMeasured = false;
+	bool bConvertedMeasured = false;
+	bool bEncodedMeasured = false;
+	bool bWriteMeasured = false;
+	bool bVerifyMeasured = false;
+	FIntPoint Size = FIntPoint::ZeroValue;
+	EPixelFormat Format = PF_Unknown;
+	FString OutputPath;
+	FString Error;
+	int64 FileSize = 0;
+	TArray<uint8> EncodedBytes; // 仅兼容bytes模式；ToFile不向GT传PNG数组。
+	double CopySubmitSeconds = 0;
+	double ReadyObservedDelaySeconds = 0;
+	double MapCopySeconds = 0;
+	double ConvertSeconds = 0;
+	double EncodeSeconds = 0;
+	double WriteSeconds = 0;
+	double VerifySeconds = 0;
+	double CloseSeconds = 0;
+
+	void SetError(const FString& Value)
+	{
+		FScopeLock Lock(&Mutex);
+		if (Error.IsEmpty()) { Error = Value; }
+	}
+};
+
+namespace GGYGOViewportReadback
+{
+	using FPixelState = TSharedPtr<FGGYGOViewportPixelReadbackState, ESPMode::ThreadSafe>;
+	// 诊断资源预算，拒绝巨幅表面；不改变游戏分辨率，也不偷换其它表面。
+	constexpr int64 MaxRawReadbackBytes = 256LL * 1024 * 1024;
+
+	void WritePngExclusive(const FPixelState& State, const TArray64<uint8>& Png)
+	{
+#if PLATFORM_WINDOWS && PLATFORM_64BITS
+		if (State->bCancelled.Load()) { return; }
+		const double WriteStart = FPlatformTime::Seconds();
+		HANDLE Handle = ::CreateFileW(*State->OutputPath, GENERIC_READ | GENERIC_WRITE, 0, nullptr,
+			CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
+		if (Handle == INVALID_HANDLE_VALUE)
+		{
+			const DWORD Error = ::GetLastError();
+			{
+				FScopeLock Lock(&State->Mutex);
+				State->WriteSeconds = FPlatformTime::Seconds() - WriteStart;
+				State->bWriteMeasured = true;
+			}
+			State->SetError(FString::Printf(TEXT("Win64 CREATE_NEW失败，错误%u；不覆盖文件或创建目录。"), Error));
+			return;
+		}
+		{
+			FScopeLock Lock(&State->Mutex);
+			State->bFileHandleReleased = false;
+		}
+		// 独占原句柄一经创建，所有路径都走下面唯一Close；取消不删除本次实际部分文件。
+		int64 Offset = 0;
+		DWORD IoError = ERROR_SUCCESS;
+		FString IoStage;
+		bool bWriteOK = true;
+		while (Offset < Png.Num() && !State->bCancelled.Load())
+		{
+			const DWORD Want = static_cast<DWORD>(FMath::Min<int64>(Png.Num() - Offset, 64 * 1024));
+			DWORD Done = 0;
+			const bool bWritten = ::WriteFile(Handle, Png.GetData() + Offset, Want, &Done, nullptr) != 0;
+			if (!bWritten || Done == 0)
+			{
+				IoError = bWritten ? ERROR_WRITE_FAULT : ::GetLastError();
+				IoStage = TEXT("WriteFile");
+				bWriteOK = false;
+				break;
+			}
+			Offset += Done;
+		}
+		bWriteOK = bWriteOK && Offset == Png.Num();
+		{
+			FScopeLock Lock(&State->Mutex);
+			State->WriteSeconds = FPlatformTime::Seconds() - WriteStart;
+			State->bWriteMeasured = true;
+		}
+
+		const double VerifyStart = FPlatformTime::Seconds();
+		LARGE_INTEGER ActualSize{}, Begin{};
+		const bool bSizeKnown = ::GetFileSizeEx(Handle, &ActualSize) != 0;
+		if (!bSizeKnown) { IoError = ::GetLastError(); IoStage = TEXT("GetFileSizeEx"); }
+		bool bVerified = false;
+		if (bWriteOK && !State->bCancelled.Load() && bSizeKnown && ActualSize.QuadPart == Png.Num()
+			&& ::SetFilePointerEx(Handle, Begin, nullptr, FILE_BEGIN))
+		{
+			TArray<uint8> Chunk;
+			Chunk.SetNumUninitialized(64 * 1024);
+			Offset = 0;
+			bVerified = true;
+			while (Offset < Png.Num() && !State->bCancelled.Load())
+			{
+				const DWORD Want = static_cast<DWORD>(FMath::Min<int64>(Png.Num() - Offset, Chunk.Num()));
+				DWORD Done = 0;
+				const bool bRead = ::ReadFile(Handle, Chunk.GetData(), Want, &Done, nullptr) != 0;
+				if (!bRead || Done == 0)
+				{
+					IoError = bRead ? ERROR_HANDLE_EOF : ::GetLastError();
+					IoStage = TEXT("ReadFile");
+					bVerified = false;
+					break;
+				}
+				if (FMemory::Memcmp(Chunk.GetData(), Png.GetData() + Offset, Done) != 0)
+				{
+					IoError = ERROR_CRC;
+					IoStage = TEXT("CompareBeforeClose");
+					bVerified = false;
+					break;
+				}
+				Offset += Done;
+			}
+			bVerified = bVerified && Offset == Png.Num();
+		}
+		else if (bWriteOK && !State->bCancelled.Load() && bSizeKnown)
+		{
+			IoStage = ActualSize.QuadPart == Png.Num() ? TEXT("SetFilePointerEx") : TEXT("SizeBeforeClose");
+			IoError = ActualSize.QuadPart == Png.Num() ? ::GetLastError() : ERROR_INVALID_DATA;
+		}
+		const double VerifySeconds = FPlatformTime::Seconds() - VerifyStart;
+		const double CloseStart = FPlatformTime::Seconds();
+		const bool bClosed = ::CloseHandle(Handle) != 0;
+		const DWORD CloseError = bClosed ? ERROR_SUCCESS : ::GetLastError();
+		{
+			FScopeLock Lock(&State->Mutex);
+			State->CloseSeconds = FPlatformTime::Seconds() - CloseStart;
+			State->bCloseMeasured = true;
+			State->bFileHandleReleased = bClosed;
+			State->bFileWritten = bWriteOK && bClosed;
+			State->bFileVerified = bVerified; // 明确是同一独占句柄内、关闭前的字节验证。
+			State->VerifySeconds = VerifySeconds;
+			State->bVerifyMeasured = true;
+			State->FileSize = bSizeKnown ? ActualSize.QuadPart : 0;
+			State->bEncoded = true;
+		}
+		if (!bClosed) { State->SetError(FString::Printf(TEXT("原PNG句柄关闭失败，错误%u；不能签资源归还。"), CloseError)); }
+		else if (!bWriteOK || !bVerified)
+		{
+			State->SetError(State->bCancelled.Load() ? TEXT("PNG任务被取消，原句柄已关闭；保留本次实际文件。")
+				: FString::Printf(TEXT("PNG写入或关闭前验证未完成，阶段%s，错误%u；保留本次实际文件。"), *IoStage, IoError));
+		}
+#else
+		State->SetError(TEXT("新ToFile排他创建仅支持Win64；其它平台不退回非排他写入。"));
+#endif
+	}
+
+	void EncodeAndWrite(const FPixelState& State, TArray64<uint8>& Raw)
+	{
+		if (IsInGameThread()) { State->SetError(TEXT("任务执行器未提供后台线程，拒绝在GT编码/写盘。")); return; }
+		if (State->bCancelled.Load()) { return; }
+		TArray64<FColor> Colors;
+		Colors.SetNumUninitialized(static_cast<int64>(State->Size.X) * State->Size.Y);
+		const double ConvertStart = FPlatformTime::Seconds();
+		const uint32 Pitch = static_cast<uint32>(State->Size.X) * sizeof(FColor);
+		switch (State->Format)
+		{
+		case PF_B8G8R8A8:
+			ConvertRawB8G8R8A8DataToFColor(State->Size.X, State->Size.Y, Raw.GetData(), Pitch, Colors.GetData());
+			break;
+		case PF_R8G8B8A8:
+			ConvertRawR8G8B8A8DataToFColor(State->Size.X, State->Size.Y, Raw.GetData(), Pitch, Colors.GetData());
+			break;
+		case PF_A2B10G10R10:
+			ConvertRawR10G10B10A2DataToFColor(State->Size.X, State->Size.Y, Raw.GetData(), Pitch, Colors.GetData());
+			break;
+		default:
+			State->SetError(TEXT("后台收到未获准的SDR像素格式。"));
+			return;
+		}
+		for (FColor& Color : Colors) { Color.A = 255; }
+		{
+			FScopeLock Lock(&State->Mutex);
+			State->ConvertSeconds = FPlatformTime::Seconds() - ConvertStart;
+			State->bConvertedMeasured = true;
+		}
+		Raw.Empty();
+		if (State->bCancelled.Load()) { return; }
+		TArray64<uint8> Png;
+		const double EncodeStart = FPlatformTime::Seconds();
+		FImageUtils::PNGCompressImageArray(State->Size.X, State->Size.Y,
+			TArrayView64<const FColor>(Colors.GetData(), Colors.Num()), Png);
+		{
+			FScopeLock Lock(&State->Mutex);
+			State->EncodeSeconds = FPlatformTime::Seconds() - EncodeStart;
+			State->bEncodedMeasured = true;
+		}
+		Colors.Empty();
+		if (Png.IsEmpty() || Png.Num() > MAX_int32)
+		{
+			State->SetError(TEXT("后台PNG编码为空或超出原bytes接口容量。"));
+			return;
+		}
+		if (State->bCancelled.Load()) { return; }
+		if (State->OutputPath.IsEmpty())
+		{
+			TArray<uint8> Encoded;
+			Encoded.Append(Png.GetData(), static_cast<int32>(Png.Num()));
+			FScopeLock Lock(&State->Mutex);
+			State->EncodedBytes = MoveTemp(Encoded);
+			State->bEncoded = true;
+			return;
+		}
+
+		WritePngExclusive(State, Png);
+	}
+
+	void QueuePixelCleanup(const FPixelState& State)
+	{
+		if ((State->bRenderReleased.Load() && !State->bRenderPending.Load()) || State->bCleanupPending.Exchange(true)) { return; }
+		ENQUEUE_RENDER_COMMAND(GGYGOViewportReleaseStaging)([State](FRHICommandListImmediate&)
+		{
+			State->Readback.Reset();
+			State->bRenderReleased.Store(true);
+			State->bCleanupPending.Store(false);
+		});
+	}
+
+	void QueuePixelPoll(const FPixelState& State)
+	{
+		if (State->bCancelled.Load()) { QueuePixelCleanup(State); return; }
+		if (State->bRenderReleased.Load() || State->bRenderPending.Exchange(true)) { return; }
+		ENQUEUE_RENDER_COMMAND(GGYGOViewportPollStaging)([State](FRHICommandListImmediate&)
+		{
+			if (IsInGameThread())
+			{
+				State->SetError(TEXT("渲染线程已停止，拒绝在GT映射像素。"));
+				State->Readback.Reset();
+				State->bRenderReleased.Store(true);
+				State->bRenderPending.Store(false);
+				return;
+			}
+			if (State->bCancelled.Load())
+			{
+				State->Readback.Reset();
+				State->bRenderReleased.Store(true);
+				State->bRenderPending.Store(false);
+				return;
+			}
+			if (!State->Readback)
+			{
+				State->SetError(TEXT("原GPU staging对象丢失。"));
+				State->bRenderReleased.Store(true);
+				State->bRenderPending.Store(false);
+				return;
+			}
+			if (!State->Readback->IsReady()) { State->bRenderPending.Store(false); return; }
+			const double MapStart = FPlatformTime::Seconds();
+			int32 RowPitch = 0, BufferHeight = 0;
+			void* Mapped = State->Readback->Lock(RowPitch, &BufferHeight);
+			if (!Mapped || RowPitch < State->Size.X || BufferHeight < State->Size.Y)
+			{
+				if (Mapped) { State->Readback->Unlock(); }
+				State->SetError(TEXT("就绪staging映射为空或row pitch/高度不足。"));
+				State->Readback.Reset();
+				State->bRenderReleased.Store(true);
+				State->bRenderPending.Store(false);
+				return;
+			}
+			TArray64<uint8> Raw;
+			const int64 RowBytes = static_cast<int64>(State->Size.X) * sizeof(FColor);
+			Raw.SetNumUninitialized(RowBytes * State->Size.Y);
+			for (int32 Y = 0; Y < State->Size.Y; ++Y)
+			{
+				FMemory::Memcpy(Raw.GetData() + Y * RowBytes,
+					static_cast<uint8*>(Mapped) + static_cast<int64>(Y) * RowPitch * sizeof(FColor), RowBytes);
+			}
+			State->Readback->Unlock();
+			State->Readback.Reset();
+			State->bRenderReleased.Store(true);
+			{
+				FScopeLock Lock(&State->Mutex);
+				State->MapCopySeconds = FPlatformTime::Seconds() - MapStart;
+				State->ReadyObservedDelaySeconds = MapStart - State->CopySubmitSeconds;
+				State->bCpuReady = true;
+				State->bWorkerQueued = true;
+			}
+			// 调度到现有引擎后台任务执行器；GT只轮询图事件完成，不Wait，不创建帧调度器。
+			FGraphEventRef Worker = FFunctionGraphTask::CreateAndDispatchWhenReady(
+				[State, Raw = MoveTemp(Raw)]() mutable { EncodeAndWrite(State, Raw); },
+				TStatId(), nullptr, ENamedThreads::AnyBackgroundThreadNormalTask);
+			{
+				FScopeLock Lock(&State->Mutex);
+				State->Worker = Worker;
+			}
+			State->bRenderPending.Store(false);
+		});
 	}
 }
 
@@ -96,6 +415,21 @@ UGGYGOViewportReadbackTask* UGGYGOViewportReadbackLibrary::BeginGameViewportRead
 	return Task;
 }
 
+UGGYGOViewportReadbackTask* UGGYGOViewportReadbackLibrary::BeginGameViewportReadbackToFile(
+	UWorld* ExpectedWorld, const FString& AbsolutePngPath)
+{
+	check(IsInGameThread());
+	UGGYGOViewportReadbackTask* Task = NewObject<UGGYGOViewportReadbackTask>(GetTransientPackage(), NAME_None, RF_Transient);
+	if (AbsolutePngPath.IsEmpty())
+	{
+		Task->Result.Status = EGGYGOViewportReadbackStatus::Pending;
+		Task->Fail(TEXT("ToFile必须明确绝对PNG输出路径。"));
+		return Task;
+	}
+	Task->Initialize(ExpectedWorld, true, AbsolutePngPath);
+	return Task;
+}
+
 UGGYGOViewportReadbackTask* UGGYGOViewportReadbackLibrary::BeginPlayerViewObservation(UWorld* ExpectedWorld,
 	ULocalPlayer* ExpectedPlayer, TSubclassOf<UGGYGOCameraMode> ExpectedMode, int32 MaxDraws)
 {
@@ -118,13 +452,40 @@ UGGYGOViewportReadbackTask* UGGYGOViewportReadbackLibrary::BeginNextPIEPlayerVie
 	return Task;
 }
 
-void UGGYGOViewportReadbackTask::Initialize(UWorld* ExpectedWorld, bool bReadPixels)
+void UGGYGOViewportReadbackTask::Initialize(UWorld* ExpectedWorld, bool bReadPixels, const FString& AbsolutePngPath)
 {
 	Result.bPlayerViewOnly = !bReadPixels;
 	Result.Status = EGGYGOViewportReadbackStatus::Pending;
 	Result.Error.Reset();
 	Result.RequestFrame = GGYGOViewportReadback::NativeFrame();
 	Result.WorldPath = GetPathNameSafe(ExpectedWorld);
+	if (bReadPixels)
+	{
+		// 标准Editor应已预载；不在动作切点LoadModule，也绝不让后台线程触发模块加载。
+		if (!FModuleManager::GetModulePtr<IImageWrapperModule>(TEXT("ImageWrapper")))
+		{
+			Fail(TEXT("ImageWrapper尚未在GT预载；须在启动阶段准备，不在捕获切点同步加载。"));
+			return;
+		}
+		PixelReadback = MakeShared<FGGYGOViewportPixelReadbackState, ESPMode::ThreadSafe>();
+		if (!AbsolutePngPath.IsEmpty())
+		{
+#if !(PLATFORM_WINDOWS && PLATFORM_64BITS)
+			Fail(TEXT("新ToFile排他创建仅支持Win64；旧bytes入口不受此限制。"));
+			return;
+#endif
+			FString Output = AbsolutePngPath;
+			FPaths::NormalizeFilename(Output);
+			if (FPaths::IsRelative(Output) || !FPaths::CollapseRelativeDirectories(Output)
+				|| !FPaths::GetExtension(Output).Equals(TEXT("png"), ESearchCase::IgnoreCase))
+			{
+				Fail(FString::Printf(TEXT("ToFile目标无效：%s；须明确绝对PNG路径。"), *Output));
+				return;
+			}
+			Result.OutputFilePath = Output;
+			PixelReadback->OutputPath = Output;
+		}
+	}
 	if (!IsValid(ExpectedWorld) || !ExpectedWorld->IsGameWorld() || !GEngine)
 	{
 		Fail(TEXT("需要明确且存活的游戏 World。"));
@@ -608,104 +969,153 @@ bool UGGYGOViewportReadbackTask::PinOriginalViewport(TSharedPtr<ISlateViewport>&
 void UGGYGOViewportReadbackTask::OnViewportRendered(FViewport* Viewport)
 {
 	check(IsInGameThread());
-	if (Result.Status != EGGYGOViewportReadbackStatus::Pending)
-	{
-		return;
-	}
+	if (Result.Status != EGGYGOViewportReadbackStatus::Pending) { return; }
 	TSharedPtr<ISlateViewport> Interface;
 	FString Error;
-	if (!PinOriginalViewport(Interface, Error))
-	{
-		Fail(Error);
-		return;
-	}
-	if (Viewport != static_cast<FViewport*>(OriginalViewport))
-	{
-		return;
-	}
-	// Remove 仅摘除自身条目；原生广播锁内会延后 compact。读回可能 Flush 并返入，先禁止重复消费。
-	const TStrongObjectPtr<UGGYGOViewportReadbackTask> TaskScope(this);
-	Result.Status = EGGYGOViewportReadbackStatus::Reading;
-	Result.RenderCallbackFrame = GGYGOViewportReadback::NativeFrame();
-	UGameViewportClient::OnViewportRendered().Remove(RenderedHandle);
-	RenderedHandle.Reset();
+	if (!PinOriginalViewport(Interface, Error)) { Fail(Error); return; }
+	if (Viewport != static_cast<FViewport*>(OriginalViewport)) { return; }
+	if (!GIsThreadedRendering) { Fail(TEXT("异步像素读回需要活动渲染线程，不同步退回GT。")); return; }
 	const FIntPoint Size = Viewport->GetRenderTargetTextureSizeXY();
+	const FTextureRHIRef Surface = Viewport->GetShaderResourceTexture();
 	Result.RenderTargetSize = Size;
 	Result.bHDR = Viewport->GetSceneHDREnabled();
-	const auto& Surface = Viewport->GetShaderResourceTexture();
-	if (!Surface.IsValid() || Size.X <= 0 || Size.Y <= 0 || static_cast<int64>(Size.X) * Size.Y > MAX_int32)
+	if (!Surface.IsValid() || Size.X <= 0 || Size.Y <= 0
+		|| static_cast<int64>(Size.X) * Size.Y * sizeof(FColor) > GGYGOViewportReadback::MaxRawReadbackBytes)
 	{
-		Fail(TEXT("原生读回表面无效，或 RT 尺寸不能由 FColor 数组表示。"));
+		Fail(TEXT("原表面为空或超过256MiB单任务像素预算。"));
 		return;
 	}
-	// 取值块内借用描述符；跨 ReadPixels/Flush 只保留普通字段值，避免构造描述符的 GPU mask。
-	EPixelFormat SurfaceFormat;
-	ETextureDimension SurfaceDimension;
-	uint16 SurfaceArraySize;
-	uint8 SurfaceNumSamples;
-	FIntPoint SurfaceExtent;
+	EPixelFormat Format;
 	{
-		const FRHITextureDesc& Description = Surface->GetDesc();
-		SurfaceFormat = Description.Format;
-		SurfaceDimension = Description.Dimension;
-		SurfaceArraySize = Description.ArraySize;
-		SurfaceNumSamples = Description.NumSamples;
-		SurfaceExtent = Description.Extent;
+		const FRHITextureDesc& Desc = Surface->GetDesc();
+		Format = Desc.Format;
+		if (Result.bHDR || Desc.Dimension != ETextureDimension::Texture2D || Desc.ArraySize != 1
+			|| Desc.NumSamples != 1 || Desc.Extent != Size
+			|| (Format != PF_B8G8R8A8 && Format != PF_R8G8B8A8 && Format != PF_A2B10G10R10))
+		{
+			Fail(TEXT("仅支持明确的单层单采样SDR BGRA8/RGBA8/R10G10B10A2原表面。"));
+			return;
+		}
 	}
-	Result.RenderTargetFormat = static_cast<int32>(SurfaceFormat);
-	if (Result.bHDR || SurfaceDimension != ETextureDimension::Texture2D || SurfaceArraySize != 1
-		|| SurfaceNumSamples != 1 || SurfaceExtent != Size)
+	check(PixelReadback.IsValid());
+	Result.RenderTargetFormat = static_cast<int32>(Format);
+	Result.RenderCallbackFrame = GGYGOViewportReadback::NativeFrame();
+	Result.Status = EGGYGOViewportReadbackStatus::Reading;
+	UGameViewportClient::OnViewportRendered().Remove(RenderedHandle);
+	RenderedHandle.Reset();
+	const auto State = PixelReadback;
+	State->Size = Size;
+	State->Format = Format;
+	State->bRenderReleased.Store(false);
+	State->bRenderPending.Store(true);
+	ENQUEUE_RENDER_COMMAND(GGYGOViewportCopyToStaging)([State, Surface](FRHICommandListImmediate& RHICmdList)
 	{
-		Fail(TEXT("仅支持尺寸明确的单层、单采样 2D SDR 表面；HDR、数组、MSAA 或尺寸不一致不能作为本次 PNG。"));
-		return;
-	}
-	TArray<FColor> Pixels;
-	const bool bRead = GetViewportScreenShot(Viewport, Pixels, FIntRect(FIntPoint::ZeroValue, Size));
-	// ReadPixels 会排入原生 ReadSurfaceData 并 FlushRenderingCommands；期间可处理生命周期回调。
-	if (Result.Status != EGGYGOViewportReadbackStatus::Reading)
+		if (IsInGameThread())
+		{
+			State->SetError(TEXT("捕获命令未进入RT，拒绝同步读回。"));
+			State->bRenderReleased.Store(true);
+			State->bRenderPending.Store(false);
+			return;
+		}
+		if (State->bCancelled.Load())
+		{
+			State->bRenderReleased.Store(true);
+			State->bRenderPending.Store(false);
+			return;
+		}
+		State->Readback = MakeUnique<FRHIGPUTextureReadback>(FName(TEXT("GGYGOViewportReadback")));
+		State->Readback->EnqueueCopy(RHICmdList, Surface.GetReference());
+		{
+			FScopeLock Lock(&State->Mutex);
+			State->CopySubmitSeconds = FPlatformTime::Seconds();
+			State->bCopyQueued = true;
+		}
+		State->bRenderPending.Store(false);
+	});
+}
+
+void UGGYGOViewportReadbackTask::UpdateResourceReleaseState()
+{
+	bool bPixelReleased = true;
+	if (PixelReadback.IsValid())
 	{
-		return;
+		FScopeLock Lock(&PixelReadback->Mutex);
+		bPixelReleased = PixelReadback->bRenderReleased.Load() && !PixelReadback->bRenderPending.Load()
+			&& !PixelReadback->bCleanupPending.Load()
+			&& PixelReadback->bFileHandleReleased
+			&& (!PixelReadback->bWorkerQueued || (PixelReadback->Worker.IsValid() && PixelReadback->Worker->IsComplete()));
 	}
-	TSharedPtr<ISlateViewport> CurrentInterface;
-	if (!PinOriginalViewport(CurrentInterface, Error))
+	Result.bResourcesReleased = bPixelReleased && !RenderedHandle.IsValid() && !CloseHandle.IsValid()
+		&& !WorldCleanupHandle.IsValid() && !EndPIEHandle.IsValid()
+		&& (!PlayerView.IsValid() || PlayerView->bReleased);
+}
+
+void UGGYGOViewportReadbackTask::CancelPixelReadback()
+{
+	if (!PixelReadback.IsValid()) { return; }
+	PixelReadback->bCancelled.Store(true);
+	GGYGOViewportReadback::QueuePixelCleanup(PixelReadback);
+}
+
+void UGGYGOViewportReadbackTask::AdvancePixelReadback()
+{
+	if (!PixelReadback.IsValid()) { UpdateResourceReleaseState(); return; }
+	const auto State = PixelReadback;
+	if (State->bCancelled.Load()) { GGYGOViewportReadback::QueuePixelCleanup(State); }
+	else if (Result.Status == EGGYGOViewportReadbackStatus::Reading) { GGYGOViewportReadback::QueuePixelPoll(State); }
+	FString Error;
+	bool bDone = false;
+	TSharedRef<FJsonObject> Timings = MakeShared<FJsonObject>();
+	Timings->SetStringField(TEXT("schema"), TEXT("GGYGO.ViewportPixelStages/v1"));
+	Timings->SetStringField(TEXT("scope"), TEXT("RT/worker CPU段及ready观察延迟；不是GPU硬件计时；帧号只在GT观察并发布。"));
 	{
-		Fail(Error);
-		return;
+		FScopeLock Lock(&State->Mutex);
+		const bool bWorkerComplete = State->bWorkerQueued && State->Worker.IsValid() && State->Worker->IsComplete();
+		Timings->SetBoolField(TEXT("copy_queued"), State->bCopyQueued);
+		Timings->SetBoolField(TEXT("cpu_pixels_ready"), State->bCpuReady);
+		Timings->SetBoolField(TEXT("worker_complete"), bWorkerComplete);
+		Timings->SetBoolField(TEXT("file_handle_released"), State->bFileHandleReleased);
+		if (!State->OutputPath.IsEmpty())
+		{
+			Timings->SetStringField(TEXT("file_verify_scope"), TEXT("same_exclusive_handle_before_close"));
+		}
+		if (State->bCopyQueued) { Timings->SetNumberField(TEXT("copy_submit_seconds"), State->CopySubmitSeconds); }
+		if (State->bCpuReady)
+		{
+			Timings->SetNumberField(TEXT("ready_observed_delay_seconds"), State->ReadyObservedDelaySeconds);
+			Timings->SetNumberField(TEXT("map_copy_seconds"), State->MapCopySeconds);
+			if (Result.ReadbackCompleteFrame.IsEmpty()) { Result.ReadbackCompleteFrame = GGYGOViewportReadback::NativeFrame(); }
+		}
+		if (State->bConvertedMeasured) { Timings->SetNumberField(TEXT("pixel_conversion_seconds"), State->ConvertSeconds); }
+		if (State->bEncodedMeasured) { Timings->SetNumberField(TEXT("png_encode_seconds"), State->EncodeSeconds); }
+		if (State->bWriteMeasured) { Timings->SetNumberField(TEXT("file_write_seconds"), State->WriteSeconds); }
+		if (State->bVerifyMeasured) { Timings->SetNumberField(TEXT("file_verify_seconds"), State->VerifySeconds); }
+		if (State->bCloseMeasured) { Timings->SetNumberField(TEXT("file_close_seconds"), State->CloseSeconds); }
+		Result.OutputFileSizeBytes = State->FileSize;
+		Result.bFileWriteComplete = State->bFileWritten;
+		Result.bFileReadbackVerified = State->bFileVerified;
+		if (State->bFileWritten && Result.FileWriteCompleteObservedFrame.IsEmpty())
+		{
+			Result.FileWriteCompleteObservedFrame = GGYGOViewportReadback::NativeFrame();
+		}
+		Error = State->Error;
+		bDone = bWorkerComplete && State->bEncoded && State->bRenderReleased.Load()
+			&& !State->bRenderPending.Load() && !State->bCleanupPending.Load()
+			&& State->bFileHandleReleased
+			&& (State->OutputPath.IsEmpty() || (State->bFileWritten && State->bFileVerified));
+		if (bDone && !State->bCancelled.Load() && Result.Status == EGGYGOViewportReadbackStatus::Reading && Error.IsEmpty())
+		{
+			Result.PngBytes = MoveTemp(State->EncodedBytes);
+		}
 	}
-	const auto& CurrentSurface = Viewport->GetShaderResourceTexture();
-	if (!bRead || Pixels.Num() != static_cast<int64>(Size.X) * Size.Y || !CurrentSurface.IsValid()
-		|| Viewport->GetRenderTargetTextureSizeXY() != Size || Viewport->GetSceneHDREnabled() != Result.bHDR
-		|| CurrentSurface->GetDesc().Extent != SurfaceExtent || CurrentSurface->GetDesc().Format != SurfaceFormat
-		|| CurrentSurface->GetDesc().Dimension != SurfaceDimension || CurrentSurface->GetDesc().ArraySize != SurfaceArraySize
-		|| CurrentSurface->GetDesc().NumSamples != SurfaceNumSamples)
+	FJsonSerializer::Serialize(Timings, TJsonWriterFactory<>::Create(&Result.StageTimingsJson));
+	if (!Error.IsEmpty()) { Fail(Error); }
+	if (bDone && !State->bCancelled.Load() && Result.Status == EGGYGOViewportReadbackStatus::Reading && Error.IsEmpty())
 	{
-		Fail(TEXT("原生像素读回失败，或返栈后读回表面的尺寸/格式/HDR 已改变。"));
-		return;
+		Result.Status = EGGYGOViewportReadbackStatus::Complete;
+		DetachCallbacks();
 	}
-	for (FColor& Color : Pixels)
-	{
-		Color.A = 255;
-	}
-	TArray64<uint8> Png;
-	FImageUtils::PNGCompressImageArray(Size.X, Size.Y, TArrayView64<const FColor>(Pixels.GetData(), Pixels.Num()), Png);
-	if (Result.Status != EGGYGOViewportReadbackStatus::Reading)
-	{
-		return;
-	}
-	if (!PinOriginalViewport(CurrentInterface, Error))
-	{
-		Fail(Error);
-		return;
-	}
-	if (Png.IsEmpty() || Png.Num() > MAX_int32)
-	{
-		Fail(TEXT("原生 PNG 编码为空或超出反射字节数组容量。"));
-		return;
-	}
-	Result.PngBytes.Append(Png.GetData(), static_cast<int32>(Png.Num()));
-	Result.ReadbackCompleteFrame = GGYGOViewportReadback::NativeFrame();
-	Result.Status = EGGYGOViewportReadbackStatus::Complete;
-	DetachCallbacks();
+	UpdateResourceReleaseState();
 }
 
 FGGYGOViewportReadbackResult UGGYGOViewportReadbackTask::ReadResult()
@@ -740,6 +1150,7 @@ FGGYGOViewportReadbackResult UGGYGOViewportReadbackTask::ReadResult()
 			Fail(Error);
 		}
 	}
+	AdvancePixelReadback();
 	UpdatePlayerViewJson();
 	return Result;
 }
@@ -752,7 +1163,9 @@ void UGGYGOViewportReadbackTask::Release()
 		Result.Status = EGGYGOViewportReadbackStatus::Cancelled;
 		Result.Error = TEXT("[Editor.ViewportReadback] 调用方释放了尚未完成的原请求。");
 	}
+	if (Result.Status != EGGYGOViewportReadbackStatus::Complete) { CancelPixelReadback(); }
 	DetachCallbacks();
+	UpdateResourceReleaseState();
 }
 
 void UGGYGOViewportReadbackTask::OnViewportCloseRequested(FViewport* Viewport)
@@ -789,7 +1202,9 @@ void UGGYGOViewportReadbackTask::Fail(const FString& Reason)
 	Result.Status = EGGYGOViewportReadbackStatus::Failed;
 	Result.Error = FString::Printf(TEXT("[Editor.ViewportReadback] World=%s Client=%s Viewport=%s %s"),
 		*Result.WorldPath, *Result.GameViewportClientPath, *Result.ViewportIdentity, *Reason);
+	CancelPixelReadback();
 	DetachCallbacks();
+	UpdateResourceReleaseState();
 }
 
 void UGGYGOViewportReadbackTask::DetachCallbacks()

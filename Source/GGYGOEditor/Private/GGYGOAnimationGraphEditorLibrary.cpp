@@ -12,6 +12,9 @@
 #include "Editor.h"
 #include "Animation/AnimBlueprint.h"
 #include "EdGraph/EdGraph.h"
+#include "EdGraph/EdGraphNode.h"
+#include "EdGraph/EdGraphPin.h"
+#include "EdGraphSchema_K2.h"
 #include "K2Node_AnimGetter.h"
 #include "K2Node_CallFunction.h"
 #include "K2Node_FunctionEntry.h"
@@ -20,6 +23,166 @@
 #include "UObject/Package.h"
 #include "UObject/UObjectGlobals.h"
 #include "UObject/UnrealType.h"
+
+FGGYGOBlueprintNodeCommentResult UGGYGOAnimationGraphEditorLibrary::ReadBlueprintNodeComment(
+	UBlueprint* Owner, UEdGraphNode* Node)
+{
+	FGGYGOBlueprintNodeCommentResult Result;
+	if (!IsInGameThread())
+	{
+		Result.Error = TEXT("[Blueprint.Graph] 节点注释读取需要 GameThread。");
+		return Result;
+	}
+	// 先取 Outer，避免对游离对象调用 GetGraph 触发引擎 ensure。
+	UEdGraph* Graph = IsValid(Node) ? Cast<UEdGraph>(Node->GetOuter()) : nullptr;
+	if (!IsValid(Owner) || Owner->IsTemplate() || !IsValid(Node) || Node->IsTemplate()
+		|| !IsValid(Graph) || Graph->GetTypedOuter<UBlueprint>() != Owner || !Graph->Nodes.Contains(Node))
+	{
+		Result.Error = FString::Printf(TEXT("[Blueprint.Graph] Owner=%s Graph=%s Node=%s 需要同一原 Blueprint 作者图的实际节点成员，拒绝 CDO 和游离对象。"),
+			*GetPathNameSafe(Owner), *GetPathNameSafe(Graph), *GetPathNameSafe(Node));
+		return Result;
+	}
+	TArray<UEdGraph*> AuthoringGraphs;
+	Owner->GetAllGraphs(AuthoringGraphs);
+	if (!AuthoringGraphs.Contains(Graph))
+	{
+		Result.Error = FString::Printf(TEXT("[Blueprint.Graph] Owner=%s Graph=%s Node=%s 作者图未登记在 Owner 的完整图集合中。"),
+			*Owner->GetPathName(), *Graph->GetPathName(), *Node->GetPathName());
+		return Result;
+	}
+	Result.Comment = Node->NodeComment;
+	Result.bSucceeded = true;
+	return Result;
+}
+
+FGGYGOBlueprintNodeCommentResult UGGYGOAnimationGraphEditorLibrary::WriteBlueprintNodeComment(
+	UBlueprint* Owner, UEdGraphNode* Node, const FString& Comment)
+{
+	FGGYGOBlueprintNodeCommentResult Result = ReadBlueprintNodeComment(Owner, Node);
+	if (!Result.bSucceeded) { return Result; }
+	if (!GEditor || GEditor->PlayWorld)
+	{
+		Result.bSucceeded = false;
+		Result.Error = TEXT("[Blueprint.Graph] 节点注释写入需要非 PIE Editor。");
+		return Result;
+	}
+	if (Result.Comment == Comment) { return Result; }
+	UEdGraph* Graph = Cast<UEdGraph>(Node->GetOuter());
+	// OnUpdateCommentText 自行处理节点 Modify 与事务；沿原 Blueprint／图通知发布此次注释变更。
+	Node->OnUpdateCommentText(Comment);
+	FBlueprintEditorUtils::MarkBlueprintAsModified(Owner);
+	Graph->NotifyGraphChanged();
+	Result = ReadBlueprintNodeComment(Owner, Node);
+	if (Result.bSucceeded && Result.Comment != Comment)
+	{
+		Result.bSucceeded = false;
+		Result.Error = FString::Printf(TEXT("[Blueprint.Graph] Owner=%s Node=%s 注释写后实际读回与请求不符。"),
+			*Owner->GetPathName(), *Node->GetPathName());
+	}
+	return Result;
+}
+
+FGGYGOAnimationGraphEditResult UGGYGOAnimationGraphEditorLibrary::ConnectBlueprintCallWorldContext(
+	UBlueprint* Owner, UEdGraphNode* CallNode, FName ParameterName, UEdGraphNode* SourceNode, FName SourcePinName)
+{
+	FGGYGOAnimationGraphEditResult Result;
+	if (!IsInGameThread() || !GEditor || GEditor->PlayWorld)
+	{
+		Result.Error = TEXT("[Blueprint.Graph] WorldContext 连接需要非 PIE Editor GameThread。");
+		return Result;
+	}
+	UK2Node_CallFunction* Call = Cast<UK2Node_CallFunction>(CallNode);
+	UEdGraph* Graph = IsValid(Call) ? Cast<UEdGraph>(Call->GetOuter()) : nullptr;
+	if (!IsValid(Owner) || Owner->IsTemplate() || !IsValid(Call) || Call->IsTemplate()
+		|| !IsValid(SourceNode) || SourceNode->IsTemplate() || !IsValid(Graph)
+		|| Graph->GetTypedOuter<UBlueprint>() != Owner || SourceNode->GetOuter() != Graph
+		|| !Graph->Nodes.Contains(Call) || !Graph->Nodes.Contains(SourceNode))
+	{
+		Result.Error = FString::Printf(TEXT("[Blueprint.Graph] Owner=%s Call=%s Source=%s 需要同一原 Blueprint 作者图内的实际函数调用与来源节点。"),
+			*GetPathNameSafe(Owner), *GetPathNameSafe(CallNode), *GetPathNameSafe(SourceNode));
+		return Result;
+	}
+	TArray<UEdGraph*> AuthoringGraphs;
+	Owner->GetAllGraphs(AuthoringGraphs);
+	if (!AuthoringGraphs.Contains(Graph))
+	{
+		Result.Error = FString::Printf(TEXT("[Blueprint.Graph] Owner=%s Graph=%s 作者图未登记。"), *Owner->GetPathName(), *Graph->GetPathName());
+		return Result;
+	}
+	const UEdGraphSchema_K2* Schema = Cast<UEdGraphSchema_K2>(Graph->GetSchema());
+	const UFunction* Function = Call->GetTargetFunction();
+	const FProperty* Parameter = Function ? Function->FindPropertyByName(ParameterName) : nullptr;
+	if (!Schema || ParameterName.IsNone() || SourcePinName.IsNone() || !Parameter
+		|| !Parameter->HasAnyPropertyFlags(CPF_Parm) || Parameter->HasAnyPropertyFlags(CPF_ReturnParm)
+		|| !Function->HasMetaData(FBlueprintMetadata::MD_WorldContext)
+		|| FName(*Function->GetMetaData(FBlueprintMetadata::MD_WorldContext)) != ParameterName)
+	{
+		Result.Error = FString::Printf(TEXT("[Blueprint.Graph] Call=%s Function=%s Parameter=%s SourcePin=%s 缺有效 K2 Schema 或准确 WorldContext 参数元数据。"),
+			*Call->GetPathName(), *GetPathNameSafe(Function), *ParameterName.ToString(), *SourcePinName.ToString());
+		return Result;
+	}
+	const auto FindUniquePin = [Graph](UEdGraphNode* Node, FName Name, EEdGraphPinDirection Direction) -> UEdGraphPin*
+	{
+		if (!IsValid(Graph) || !IsValid(Node) || Node->GetOuter() != Graph || !Graph->Nodes.Contains(Node)) { return nullptr; }
+		UEdGraphPin* Found = nullptr;
+		for (UEdGraphPin* Pin : Node->Pins)
+		{
+			// bHidden 只是呈现策略；不可连接、orphan 或已退役的 Pin 不能充当真实来源。
+			if (Pin && !Pin->IsPendingKill() && Pin->GetOwningNodeUnchecked() == Node && Pin->PinName == Name
+				&& Pin->Direction == Direction && !Pin->bOrphanedPin && !Pin->bNotConnectable)
+			{
+				if (Found) { return nullptr; }
+				Found = Pin;
+			}
+		}
+		return Found;
+	};
+	UEdGraphPin* Input = FindUniquePin(Call, ParameterName, EGPD_Input);
+	UEdGraphPin* Output = FindUniquePin(SourceNode, SourcePinName, EGPD_Output);
+	if (!Input || !Output)
+	{
+		Result.Error = FString::Printf(TEXT("[Blueprint.Graph] Call=%s Input=%s Source=%s Output=%s 缺唯一同名同方向、非 orphan 且可连接的实际 Pin。"),
+			*Call->GetPathName(), *ParameterName.ToString(), *SourceNode->GetPathName(), *SourcePinName.ToString());
+		return Result;
+	}
+	if (!Input->LinkedTo.IsEmpty() || Output->LinkedTo.Contains(Input))
+	{
+		Result.bSucceeded = Input->LinkedTo.Num() == 1 && Input->LinkedTo[0] == Output && Output->LinkedTo.Contains(Input);
+		if (!Result.bSucceeded)
+		{
+			Result.Error = FString::Printf(TEXT("[Blueprint.Graph] Call=%s Parameter=%s 已有异源或不完整链接，拒绝覆盖。"),
+				*Call->GetPathName(), *ParameterName.ToString());
+		}
+		return Result;
+	}
+	const FPinConnectionResponse Response = Schema->CanCreateConnection(Output, Input);
+	if (Response.Response != CONNECT_RESPONSE_MAKE)
+	{
+		Result.Error = FString::Printf(TEXT("[Blueprint.Graph] Call=%s Parameter=%s 原 K2 Schema 未允许直接连接：%s"),
+			*Call->GetPathName(), *ParameterName.ToString(), *Response.Message.ToString());
+		return Result;
+	}
+	if (!Schema->TryCreateConnection(Output, Input))
+	{
+		Result.Error = FString::Printf(TEXT("[Blueprint.Graph] Call=%s Parameter=%s 原 K2 Schema 连接失败。"),
+			*Call->GetPathName(), *ParameterName.ToString());
+		return Result;
+	}
+	// Schema 会通知节点并标记原 Blueprint；回调可能重分配 Pin，按原对象及名字重新定位。
+	Input = FindUniquePin(Call, ParameterName, EGPD_Input);
+	Output = FindUniquePin(SourceNode, SourcePinName, EGPD_Output);
+	AuthoringGraphs.Reset();
+	if (IsValid(Owner)) { Owner->GetAllGraphs(AuthoringGraphs); }
+	if (!AuthoringGraphs.Contains(Graph) || !Input || !Output || Graph->GetTypedOuter<UBlueprint>() != Owner
+		|| Input->LinkedTo.Num() != 1 || Input->LinkedTo[0] != Output || !Output->LinkedTo.Contains(Input))
+	{
+		Result.Error = FString::Printf(TEXT("[Blueprint.Graph] Call=%s Parameter=%s Source=%s Output=%s 连接后原作者图或实际双向链接读回不符。"),
+			*GetPathNameSafe(CallNode), *ParameterName.ToString(), *GetPathNameSafe(SourceNode), *SourcePinName.ToString());
+		return Result;
+	}
+	Result.bSucceeded = true;
+	return Result;
+}
 
 FGGYGOAnimationGraphEditResult UGGYGOAnimationGraphEditorLibrary::CreateAnimationNode(UBlueprint* Owner,
 	UEdGraph* Graph, UClass* NodeClass, FVector2D Position)

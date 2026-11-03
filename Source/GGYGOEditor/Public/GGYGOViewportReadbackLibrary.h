@@ -18,6 +18,7 @@ class FSceneView;
 class FSceneViewFamily;
 struct FGGYGOPlayerViewObservationState;
 struct FGGYGOPlayerViewExtension;
+struct FGGYGOViewportPixelReadbackState;
 
 /** 状态只属于当前读回资源，不表示玩法、文件写入或视觉验收完成。 */
 UENUM(BlueprintType)
@@ -59,7 +60,7 @@ struct FGGYGOViewportReadbackResult
 	uint8 WorldType = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
 	uint8 NetMode = 0;
-	/** 三个原生 GFrameCounter 分列；值观察的 RenderCallbackFrame 为 SetupView，不表示 GPU 完成。 */
+	/** GT 请求/自然 Draw/首次观察到完整 CPU 像素的帧分列；均不表示 GPU 物理完成时钟。 */
 	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
 	FString RequestFrame;
 	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
@@ -79,9 +80,26 @@ struct FGGYGOViewportReadbackResult
 	/** 当前有限玩家投影观察的纯值 JSON；不代表确认位精确写入时刻或 GPU 完成。 */
 	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
 	FString PlayerViewJson;
-	/** 像素模式仅 Complete 有 PNG。RGB 沿原生 SDR ReadPixels，Alpha 置 255。 */
+	/** 仅原 bytes 模式 Complete 有 PNG；ToFile 始终为空。RGB 沿 RHI SDR 格式转换，Alpha 置255。 */
 	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
 	TArray<uint8> PngBytes;
+	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
+	FString OutputFilePath;
+	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
+	int64 OutputFileSizeBytes = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
+	bool bFileWriteComplete = false;
+	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
+	bool bFileReadbackVerified = false;
+	/** 自有委托已摘、RT 归还命令已执行、后台任务已完成；不宣称整个 GPU 空闲。 */
+	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
+	bool bResourcesReleased = false;
+	/** GT 首次观察到后台文件关闭的帧；不是 worker 读 GFrameCounter 所造的完成帧。 */
+	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
+	FString FileWriteCompleteObservedFrame;
+	/** 有 schema 的纯值阶段耗时；ready 等待是观察延迟，不是 GPU 硬件计时。 */
+	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
+	FString StageTimingsJson;
 	UPROPERTY(BlueprintReadOnly, Category = "Editor|Viewport")
 	FString Error = TEXT("[Editor.ViewportReadback] 请求尚未初始化。");
 };
@@ -96,11 +114,11 @@ class GGYGOEDITOR_API UGGYGOViewportReadbackTask : public UObject
 	GENERATED_BODY()
 
 public:
-	/** 当前结果的值复制。等待期间发现原身份退役时，结束本任务并给出失败；不访问后继资源。 */
+	/** 读取值并消费本任务异步状态；最多排非阻塞RT查询，不推进世界。原身份退役则取消，不访问后继资源。 */
 	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Viewport")
 	FGGYGOViewportReadbackResult ReadResult();
 
-	/** 幂等归还自己的回调；未完成请求变为 Cancelled，既有终态及 PNG 值保持。 */
+	/** 幂等取消/归还；调用后仍读 ReadResult 到 bResourcesReleased，不在 GT 等 Fence 或后台任务。 */
 	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Viewport")
 	void Release();
 
@@ -109,7 +127,10 @@ public:
 private:
 	friend class UGGYGOViewportReadbackLibrary;
 	friend struct FGGYGOPlayerViewExtension;
-	void Initialize(UWorld* ExpectedWorld, bool bReadPixels = true);
+	void Initialize(UWorld* ExpectedWorld, bool bReadPixels = true, const FString& AbsolutePngPath = FString());
+	void AdvancePixelReadback();
+	void CancelPixelReadback();
+	void UpdateResourceReleaseState();
 	void InitializePlayerView(ULocalPlayer* ExpectedPlayer, TSubclassOf<UGGYGOCameraMode> ExpectedMode, int32 MaxDraws);
 	void InitializeBeforePIE(UWorld* ExpectedEditorWorld, TSubclassOf<UGGYGOCameraMode> ExpectedMode, int32 MaxDraws);
 	void OnPIEMapReady(UGameInstance* Instance);
@@ -147,22 +168,30 @@ private:
 	FDelegateHandle WorldCleanupHandle;
 	FDelegateHandle EndPIEHandle;
 	TSharedPtr<FGGYGOPlayerViewObservationState> PlayerView;
+	TSharedPtr<FGGYGOViewportPixelReadbackState, ESPMode::ThreadSafe> PixelReadback;
 };
 
-/** 通用 Editor 诊断入口；PNG 落盘及路径/hash 读回由宿主拥有。 */
+/** 通用 Editor 诊断入口；ToFile 在后台排他写入，SHA256 由外层归还后统一读取。 */
 UCLASS()
 class GGYGOEDITOR_API UGGYGOViewportReadbackLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
-	/** 等待 ExpectedWorld 的原游戏 viewport 下一次自然绘制，然后同步读回一次 SDR PNG。
+	/** 等待原游戏 viewport 自然 Draw；沿 GPU staging 异步读回和后台编码，保原 bytes 契约。
 	 * @param ExpectedWorld 明确的实际游戏 World；原 viewport/接口尚未就绪时明确失败，不选择其它目标。
 	 * @return 调用方持有并最终 Release 的任务；失败也返回带可定位诊断的原任务。
 	 * Complete 只证明该目标的原生读回及 PNG 编码完成。宿主分别记录文件完成和原 Finalize 的时机边界。
 	 */
 	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Viewport")
 	static UGGYGOViewportReadbackTask* BeginGameViewportReadback(UWorld* ExpectedWorld);
+
+	/** 同一异步核心的文件模式；明确绝对 .png 路径及已存在父目录，不覆盖或删除已有文件。
+	 * Complete 须文件关闭/读回相等及自有资源归还；失败/取消可保留本次部分文件供外层取证。
+	 * 调用方沿既有帧入口轮询 ReadResult；取消后也须 drain bResourcesReleased 才结束宿主。
+	 */
+	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Viewport")
+	static UGGYGOViewportReadbackTask* BeginGameViewportReadbackToFile(UWorld* ExpectedWorld, const FString& AbsolutePngPath);
 
 	/** 为已存在的原 viewport 布防，观察后继自然 SetupView；全局首 Draw 使用下一次 PIE 预布防入口。
 	 * @param ExpectedPlayer 明确属于原 World/viewport 的实际 LocalPlayer；PC/PCM/Pawn 就绪后只固定一次。

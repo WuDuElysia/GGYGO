@@ -5,6 +5,7 @@
 #include "AbilitySystem/GGYGOAbilitySystemComponent.h"
 #include "AbilitySystem/Tasks/GGYGOAbilityTask_PlayMontageAndWaitForEvent.h"
 #include "Character/Components/GGYGOCharacterMovementComponent.h"
+#include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Dom/JsonObject.h"
@@ -51,6 +52,119 @@ namespace GGYGOPlayerActionObservation
 			&& !Facts.bCleanupCancelled && Facts.CleanupKind == EGGYGOAbilityTerminationRequestKind::End;
 	}
 
+	/** 与原 Pose 观察投影相同的公开 native schema；不解析实例名或推导 GA handle。 */
+	TSharedPtr<FJsonObject> NativeActionSource(const FGGYGOActionMotionNativeSourceObservation& Source)
+	{
+		auto Result = MakeShared<FJsonObject>();
+		Result->SetStringField(TEXT("script_struct"), Source.ScriptStructPath);
+		Result->SetStringField(TEXT("instance_name"), Source.InstanceName.ToString());
+		Result->SetNumberField(TEXT("source_mode"), Source.SourceMode);
+		Result->SetNumberField(TEXT("local_id"), Source.LocalId);
+		Result->SetBoolField(TEXT("native_imported"), Source.bNativeImported);
+		Result->SetBoolField(TEXT("finished"), Source.bFinished);
+		Result->SetBoolField(TEXT("marked_for_removal"), Source.bMarkedForRemoval);
+		Result->SetBoolField(TEXT("explicitly_cancelled"), Source.bExplicitlyCancelled);
+		Result->SetNumberField(TEXT("montage_start_seconds"), Source.MontageStartSeconds);
+		Result->SetNumberField(TEXT("native_time_seconds"), Source.NativeTimeSeconds);
+		Result->SetNumberField(TEXT("duration_seconds"), Source.DurationSeconds);
+		Result->SetNumberField(TEXT("play_rate"), Source.PlayRate);
+		Result->SetBoolField(TEXT("has_entry_actor_rotation"), Source.bHasEntryActorRotation);
+		if (Source.bHasEntryActorRotation)
+		{
+			const FQuat& Q = Source.EntryActorRotation;
+			Result->SetArrayField(TEXT("entry_actor_rotation"), {MakeShared<FJsonValueNumber>(Q.X), MakeShared<FJsonValueNumber>(Q.Y), MakeShared<FJsonValueNumber>(Q.Z), MakeShared<FJsonValueNumber>(Q.W)});
+		}
+		Result->SetBoolField(TEXT("has_original_montage_binding"), Source.bHasOriginalMontageBinding);
+		if (Source.bHasOriginalMontageBinding)
+		{
+			Result->SetStringField(TEXT("montage"), Source.MontagePath);
+			Result->SetStringField(TEXT("slot"), Source.SlotName.ToString());
+			Result->SetStringField(TEXT("binding_initial_section_name"), Source.BindingInitialSectionName.ToString());
+			Result->SetNumberField(TEXT("track_index"), Source.TrackIndex);
+			Result->SetNumberField(TEXT("binding_initial_section_index"), Source.BindingInitialSectionIndex);
+			Result->SetNumberField(TEXT("binding_start_seconds"), Source.BindingStartSeconds);
+			Result->SetNumberField(TEXT("binding_end_seconds"), Source.BindingEndSeconds);
+			TArray<TSharedPtr<FJsonValue>> Sections;
+			for (const auto& Section : Source.Sections)
+			{
+				auto Item = MakeShared<FJsonObject>();
+				Item->SetStringField(TEXT("name"), Section.Name.ToString());
+				Item->SetNumberField(TEXT("index"), Section.Index);
+				Item->SetNumberField(TEXT("start_seconds"), Section.StartSeconds);
+				Item->SetNumberField(TEXT("end_seconds"), Section.EndSeconds);
+				Sections.Add(MakeShared<FJsonValueObject>(Item));
+			}
+			Result->SetArrayField(TEXT("sections"), Sections);
+			TArray<TSharedPtr<FJsonValue>> Segments;
+			for (const auto& Segment : Source.Segments)
+			{
+				auto Item = MakeShared<FJsonObject>();
+				Item->SetStringField(TEXT("sequence"), Segment.SequencePath);
+				Item->SetNumberField(TEXT("index"), Segment.Index);
+				Item->SetNumberField(TEXT("montage_start_seconds"), Segment.MontageStartSeconds);
+				Item->SetNumberField(TEXT("montage_end_seconds"), Segment.MontageEndSeconds);
+				Item->SetNumberField(TEXT("sequence_start_seconds"), Segment.SequenceStartSeconds);
+				Item->SetNumberField(TEXT("sequence_end_seconds"), Segment.SequenceEndSeconds);
+				Item->SetNumberField(TEXT("source_seconds_per_montage_second"), Segment.SourceSecondsPerMontageSecond);
+				Segments.Add(MakeShared<FJsonValueObject>(Item));
+			}
+			Result->SetArrayField(TEXT("segments"), Segments);
+		}
+		return Result;
+	}
+
+	TSharedPtr<FJsonObject> NativeActionMotion(const FGGYGOActionMotionNativeObservation& Observation)
+	{
+		auto Result = MakeShared<FJsonObject>();
+		Result->SetNumberField(TEXT("status"), static_cast<uint8>(Observation.Status));
+		Result->SetStringField(TEXT("diagnostic"), Observation.Diagnostic);
+		const bool bAvailable = Observation.Status == EGGYGOActionMotionNativeObservationStatus::Available
+			|| Observation.Status == EGGYGOActionMotionNativeObservationStatus::NoActionSource;
+		Result->SetBoolField(TEXT("available"), bAvailable);
+		if (!bAvailable) { return Result; }
+		Result->SetStringField(TEXT("frame"), LexToString(Observation.Frame));
+		Result->SetNumberField(TEXT("world_time_seconds"), Observation.WorldTimeSeconds);
+		Result->SetStringField(TEXT("world"), Observation.WorldPath);
+		Result->SetStringField(TEXT("character"), Observation.CharacterPath);
+		Result->SetStringField(TEXT("movement"), Observation.MovementPath);
+		Result->SetNumberField(TEXT("local_role"), Observation.LocalRole);
+		TArray<TSharedPtr<FJsonValue>> ActiveSources;
+		TArray<TSharedPtr<FJsonValue>> PendingSources;
+		for (const auto& Source : Observation.Sources)
+		{
+			auto& Sources = Source.Container == EGGYGOActionMotionNativeSourceContainer::Active ? ActiveSources : PendingSources;
+			Sources.Add(MakeShared<FJsonValueObject>(NativeActionSource(Source)));
+		}
+		Result->SetArrayField(TEXT("active_sources"), ActiveSources);
+		Result->SetArrayField(TEXT("pending_sources"), PendingSources);
+		return Result;
+	}
+
+	FGGYGOActionMotionNativeObservation ReadOriginalNativeMotion(const FGGYGOPlayerComboObservationFacts& Facts,
+		const TWeakObjectPtr<UWorld>& OriginalWorld)
+	{
+		FGGYGOActionMotionNativeObservation Result;
+		APawn* Pawn = Facts.Pawn.Get();
+		UGGYGOCharacterMovementComponent* Movement = Facts.Movement.Get();
+		UWorld* World = OriginalWorld.Get();
+		if (!World || Facts.World.Get() != World || !Pawn || Pawn->GetWorld() != World
+			|| !Movement || Movement->GetWorld() != World || Movement->GetOwner() != Pawn
+			|| Pawn->GetMovementComponent() != Movement)
+		{
+			Result.Diagnostic = TEXT("原 Pawn/World/CMC 已不可用或换源；不能用后继或空数组证明旧 RMS 已退出。");
+			return Result;
+		}
+		Result = Movement->GetActionMotionNativeObservation();
+		if (Result.Status != EGGYGOActionMotionNativeObservationStatus::Unavailable
+			&& (Result.WorldPath != World->GetPathName() || Result.CharacterPath != Pawn->GetPathName()
+				|| Result.MovementPath != Movement->GetPathName()))
+		{
+			Result.Status = EGGYGOActionMotionNativeObservationStatus::Unavailable;
+			Result.Diagnostic = TEXT("公开 native 快照与原 Pawn/World/CMC 身份不符。");
+		}
+		return Result;
+	}
+
 	FString FXKind(EGGYGOMontageFXObservationKind Kind)
 	{
 		switch (Kind)
@@ -78,6 +192,10 @@ struct UGGYGOPlayerActionObservation::FState
 	/** 仅用于精确解除／匹配本窗订阅，不用来重新解析后继。 */
 	TWeakObjectPtr<UGGYGOAbilitySystemComponent> ASC;
 	TWeakObjectPtr<UWorld> World;
+	/** 原 Montage Task 的弱对象身份；历史视图清理不能冒充该对象已销毁。 */
+	TWeakObjectPtr<UGGYGOAbilityTask_PlayMontageAndWaitForEvent> MontageTask;
+	/** 捕获时的原 AnimInstance，只读实例退役事实；不保活或重绑新 Anim。 */
+	TWeakObjectPtr<UAnimInstance> AnimInstance;
 	FDelegateHandle TerminationHandle;
 	FDelegateHandle WorldCleanupHandle;
 	FDelegateHandle EndPIEHandle;
@@ -217,6 +335,8 @@ bool UGGYGOPlayerActionObservation::BeginObservation(UGGYGOPlayerComboAbility* A
 	State->Observation = Observation;
 	State->ASC = ASC;
 	State->World = Facts.World;
+	State->MontageTask = Facts.Task;
+	State->AnimInstance = Mesh->GetAnimInstance();
 	State->TrialId = TrialId;
 	State->MaxRecords = MaxRecords;
 	State->Source = MakeShared<FJsonObject>();
@@ -226,8 +346,12 @@ bool UGGYGOPlayerActionObservation::BeginObservation(UGGYGOPlayerComboAbility* A
 	State->Source->SetStringField(TEXT("asc"), ASC->GetPathName());
 	State->Source->SetStringField(TEXT("pawn"), Pawn->GetPathName());
 	State->Source->SetStringField(TEXT("mesh"), Mesh->GetPathName());
+	State->Source->SetNumberField(TEXT("mesh_object_id"), Mesh->GetUniqueID());
 	State->Source->SetStringField(TEXT("world"), Facts.World->GetPathName());
 	State->Source->SetStringField(TEXT("task"), Facts.Task->GetPathName());
+	State->Source->SetNumberField(TEXT("task_object_id"), Facts.Task->GetUniqueID());
+	State->Source->SetStringField(TEXT("anim_instance"), GetPathNameSafe(State->AnimInstance.Get()));
+	if (State->AnimInstance.IsValid()) { State->Source->SetNumberField(TEXT("anim_instance_object_id"), State->AnimInstance->GetUniqueID()); }
 	State->Source->SetStringField(TEXT("montage"), Montage->GetPathName());
 	State->Source->SetStringField(TEXT("cmc"), Facts.Movement->GetPathName());
 	State->Source->SetStringField(TEXT("step_token"), LexToString(Facts.StepToken));
@@ -276,6 +400,70 @@ bool UGGYGOPlayerActionObservation::Sample(double ElapsedSeconds, FString& OutDi
 	Record->SetBoolField(TEXT("live_original_snapshot_available"), bLive);
 	Record->SetBoolField(TEXT("original_ga_resource_source_current"), bResourceSourceCurrent);
 	Record->SetStringField(TEXT("live_diagnostic"), LiveDiagnostic);
+	Record->SetStringField(TEXT("sample_frame"), LexToString(GFrameCounter));
+	// 原源已退役也先读取同一 CMC 的当前完整容器；自动 Stop 不是 native 退出证据。
+	Record->SetObjectField(TEXT("movement_action_native"), GGYGOPlayerActionObservation::NativeActionMotion(
+		GGYGOPlayerActionObservation::ReadOriginalNativeMotion(Facts, Original->World)));
+	const int32 OriginalMotionHandle = static_cast<int32>(Original->Source->GetNumberField(TEXT("cmc_motion_handle")));
+	const int32 OriginalMontageInstanceId = static_cast<int32>(Original->Source->GetNumberField(TEXT("montage_instance_id")));
+	auto Binding = MakeShared<FJsonObject>();
+	Binding->SetNumberField(TEXT("cmc_motion_handle"), OriginalMotionHandle);
+	Binding->SetNumberField(TEXT("montage_instance_id"), OriginalMontageInstanceId);
+	// 公共 native 投影没有 GA Handle→LocalId 映射；不能按首条 RMS 或实例名字猜关联。
+	Binding->SetBoolField(TEXT("has_native_id"), false);
+	Record->SetObjectField(TEXT("original_motion_binding"), Binding);
+	const bool bOriginalWorldAvailable = Original->World.IsValid() && Facts.World == Original->World;
+	auto TaskState = MakeShared<FJsonObject>();
+	TaskState->SetStringField(TEXT("path"), Original->Source->GetStringField(TEXT("task")));
+	TaskState->SetNumberField(TEXT("object_id"), Original->Source->GetNumberField(TEXT("task_object_id")));
+	TaskState->SetBoolField(TEXT("available"), bOriginalWorldAvailable);
+	if (bOriginalWorldAvailable)
+	{
+		UGGYGOAbilityTask_PlayMontageAndWaitForEvent* Task = Original->MontageTask.Get();
+		TaskState->SetBoolField(TEXT("exists"), Task != nullptr);
+		if (Task)
+		{
+			TaskState->SetBoolField(TEXT("active"), Task->IsActive());
+			TaskState->SetBoolField(TEXT("finished"), Task->GetState() == EGameplayTaskState::Finished);
+			TaskState->SetNumberField(TEXT("state"), static_cast<uint8>(Task->GetState()));
+		}
+	}
+	else { TaskState->SetStringField(TEXT("diagnostic"), TEXT("原 World 已不可用。")); }
+	Record->SetObjectField(TEXT("original_task_live"), TaskState);
+	auto InstanceState = MakeShared<FJsonObject>();
+	InstanceState->SetNumberField(TEXT("montage_instance_id"), OriginalMontageInstanceId);
+	InstanceState->SetStringField(TEXT("mesh"), Original->Source->GetStringField(TEXT("mesh")));
+	InstanceState->SetNumberField(TEXT("mesh_object_id"), Original->Source->GetNumberField(TEXT("mesh_object_id")));
+	InstanceState->SetStringField(TEXT("anim_instance"), Original->Source->GetStringField(TEXT("anim_instance")));
+	double AnimObjectId;
+	if (Original->Source->TryGetNumberField(TEXT("anim_instance_object_id"), AnimObjectId))
+	{
+		InstanceState->SetNumberField(TEXT("anim_instance_object_id"), AnimObjectId);
+	}
+	UAnimInstance* Anim = Original->AnimInstance.Get();
+	const bool bAnimAvailable = bOriginalWorldAvailable && Facts.Mesh.IsValid() && Anim
+		&& Facts.Mesh->GetAnimInstance() == Anim && Anim->GetWorld() == Original->World.Get();
+	InstanceState->SetBoolField(TEXT("available"), bAnimAvailable);
+	if (bAnimAvailable)
+	{
+		FAnimMontageInstance* Instance = Anim->GetMontageInstanceForID(OriginalMontageInstanceId);
+		if (Instance && Instance->Montage != Facts.Montage.Get())
+		{
+			InstanceState->SetBoolField(TEXT("available"), false);
+			InstanceState->SetStringField(TEXT("diagnostic"), TEXT("原实例 ID 当前对应另一 Montage，不冒充原实例状态。"));
+		}
+		else
+		{
+			InstanceState->SetBoolField(TEXT("exists"), Instance != nullptr);
+			if (Instance)
+			{
+				InstanceState->SetBoolField(TEXT("playing"), Instance->IsPlaying());
+				InstanceState->SetBoolField(TEXT("active"), Instance->IsActive());
+			}
+		}
+	}
+	else { InstanceState->SetStringField(TEXT("diagnostic"), TEXT("原 World/Mesh/AnimInstance 已不可用或换源。")); }
+	Record->SetObjectField(TEXT("original_montage_instance_live"), InstanceState);
 	if (bLive)
 	{
 		Record->SetStringField(TEXT("section"), Snapshot.SectionName.ToString());
@@ -501,6 +689,8 @@ void UGGYGOPlayerActionObservation::ReleaseObservation(const FString& Reason)
 	Original->Observation.Reset();
 	Original->ASC.Reset();
 	Original->World.Reset();
+	Original->MontageTask.Reset();
+	Original->AnimInstance.Reset();
 	if (ASC.IsValid() && TerminationHandle.IsValid()) { ASC->OnAbilityTerminationCompleted().Remove(TerminationHandle); }
 	if (WorldHandle.IsValid()) { FWorldDelegates::OnWorldCleanup.Remove(WorldHandle); }
 	if (EndPIEHandle.IsValid()) { FEditorDelegates::EndPIE.Remove(EndPIEHandle); }
