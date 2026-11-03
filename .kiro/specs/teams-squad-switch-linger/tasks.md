@@ -1,0 +1,72 @@
+# Implementation Plan: teams-squad-switch-linger
+
+## Overview
+
+整改第 6 步，新行为。执行规则与命令同第 1 步，输出目录为 `Saved/Kiro/teams-squad-switch-linger/`。开工前确认第 5 步已验收。资产制作需要启动 Kiro 自己的 Editor 实例，只保存本 spec 新建的资产，不 SaveAll。
+
+状态（2026-11-03 收尾）：源码与 NullRHI 测试完成；监听服务器＋1 客户端的 NullRHI PIE（测试编队）行为断言全部通过，Automation 结果因其他模块的 3 条生产 Error 记为 Fail（见任务 8）。三项玩法取舍待用户确认。与 design.md 的差异见其「实现差异」。
+
+## Tasks
+
+- [x] 0. 开工重核
+  - 核对 SquadComponent 所在 Actor、现有切换输入入口、OnRep_ActiveSlotIndex 的客户端逻辑
+  - 核对现有伤害 GE 的资产标签、NotifyAbilityFailed 的排队条件、相机在 Possess 后的行为
+  - 核对实际编队资产中可用队员数量
+  - 结论见 `Saved/Kiro/teams-squad-switch-linger/progress.md`
+  - _Requirements: 5.1, 2.2, 3.4, 7.3_
+
+- [x] 1. 标签与能力接口
+  - [x] 1.1 新增 State.OffField、State.SwitchReturnPending、Event.Squad.SwitchIn、Event.Squad.SwitchOut 标签（另加失败原因 Ability.ActivateFail.SwitchReturnPending）
+    - _Requirements: 2.2, 3.4, 4.1, 4.2_
+  - [x] 1.2 GA 基类新增 OnAvatarSwitchOut、OnOwnerControlLost、OnOwnerControlRegained 及 FGGYGOSwitchContext；默认实现读 AvatarExitPolicy
+    - _Requirements: 1.1, 1.4, 1.5_
+  - [x] 1.3 GA 基类激活条件追加 State.SwitchReturnPending 阻止（只拦输入缓冲发起的激活）；CMC 移动阻止追加该标签
+    - _Requirements: 3.4_
+
+- [x] 2. 输入补发释放与缓冲
+  - [x] 2.1 ASC 输入缓冲协作者提供 ReleaseHeldInputForControlLoss
+    - _Requirements: 1.3_
+  - [x] 2.2 SwitchReturnPending 阻止的激活失败可排队，标签移除后的下一次 ProcessAbilityInput 唤醒
+    - _Requirements: 3.4_
+
+- [x] 3. 留场状态
+  - [x] 3.1 MeleeTrace 跳过拥有 State.OffField 的目标
+    - _Requirements: 2.2_
+  - [x] 3.2 Off_Field 改为 Squad 施加的复制 loose tag（State.OffField＋仅服务器的 Gameplay.Damage.Immunity），不制作 GE_OffField 资产
+    - _Requirements: 2.2_
+
+- [x] 4. Squad 切换流程
+  - [x] 4.1 FSlotRuntime 与队员状态；订阅各槽位 ASC 的 OnAbilityEnded
+    - _Requirements: 3.1, 2.4_
+  - [x] 4.2 重写 SwitchToSlot 为 design.md 的流程，删除旧的换人前退出与 DeactivateSlot 立即隐藏
+    - _Requirements: 1.2, 1.3, 2.1, 2.5, 3.2, 3.3, 3.5, 3.6_
+  - [x] 4.3 退场与进场：BeginExit／FinishExit／SwitchIn 事件，退场中切回取消退场
+    - _Requirements: 4.1, 4.2, 4.5_
+  - [x] 4.4 删除 ASC 中第 4、5 步留下的换人退出旧实现
+    - _Requirements: 1.2_
+
+- [x] 5. 进场／退场能力基类
+  - 新增 UGGYGOSquadTransitionAbility；测试用进场与退场能力为 C++ 测试类，生产资产待用户提供
+  - _Requirements: 4.3, 4.4_
+
+- [x] 6. 网络
+  - 新增 ServerRequestSwitchToSlot；开发期控制台入口 `GGYGOSwitchToSlot N`（PlayerController Exec，走同一 RPC）
+  - 收尾发现并修复：引擎的整体碰撞开关不复制，待命队员在客户端保留胶囊；改为 `AGGYGOCharacterBase::SetReplicatedActorEnableCollision` 由服务器设置并复制
+  - 联机验证 `GGYGO.Teams.SquadSwitch.ListenServerClientRequest`（Test_R19）：客户端 RPC 切人、留场可见与碰撞、OffField 复制且免疫不复制、ReturnPending 复制与解除、待命隐藏无碰撞、切回待命队员后控制与 ViewTarget 跟随
+  - _Requirements: 5.1-5.4_
+
+- [x] 7. 测试
+  - SquadSwitch 6 例：CancelAndPreserveState、UncancelableRejectsBeforeEffects、ContinueLingersThenExits、ReturnToLingeringMember、ThreeMembersOneLingering、ReturnDuringExitCancelsExit
+  - _Requirements: 6.1-6.3, 7.2_
+
+- [~] 8. 检查点：编译、测试、PIE、联机
+  - 编译 GGYGOEditor：Build_R13 通过；收尾 Build_R16～R19 通过
+  - Test_R13（114 例）109 通过，3 例既有失败，2 例夹具问题已修并在 Test_R14 通过；收尾 Test_R16a 受影响 54 例全部通过，Test_R17 SquadSwitch 私有 6 例通过
+  - PIE 与最小联机：L_Movement_Test 上的同进程监听服务器＋1 客户端 NullRHI PIE，测试编队为 Experience 首位角色 Pyrios 的两份实例（PostLogin 写 Roster，走生产“已设 Roster”来源），续放能力用夹具 GA，无进退场 GA 时按规则立即进场／待命。行为断言全部通过（Test_R19）
+  - Automation 结果为 Fail：其他模块记录了 3 条生产 Error，未过滤——服务器上从未被附身的待命队员 PawnExtension 停在 Spawned（权威端等 Controller），MovementSet 未应用，ABP_Pyrios 的 WalkRunLean 报错 2 次；客户端切到新队员时相机管理器拒绝第二个激活源（already-activated-for-another-original-source）1 次。NullRHI 下角色渲染的 R32f 格式错误属运行环境，测试中声明为预期
+  - 未验：画面、Montage／FX 表现、真实设备输入、真实 RHI
+  - _Requirements: 7.1, 7.3, 7.4_
+
+- [x] 9. 更新活动记录
+  - 注明进退场动作资产与手感待用户提供或确认；提示现有 GA 默认仍为 Cancel
+  - _Requirements: 7.5, 7.6_

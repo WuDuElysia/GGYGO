@@ -12,7 +12,7 @@ class UWorld;
 class UAbilitySystemComponent;
 class UGGYGOAbilitySystemComponent;
 class UGGYGOPlayerComboAbility;
-class FGGYGOAbilityTerminationCompletedNotice;
+struct FAbilityEndedData;
 class FJsonObject;
 struct FGGYGOMontageFXObservationFact;
 struct FGGYGOActionMotionNativeSourceObservation;
@@ -46,7 +46,7 @@ public:
 		const FString& TrialId, int32 MaxRecords, FString& OutDiagnostic);
 
 	/** 触发前固定原网络 ASC/Pawn/Mesh，观察 FX 原发布与归还；支持没有本地 GA 的 SimulatedProxy。
-	 * @param Issuer 实际实现 MontageFXHost 的原 ASC；不从 CDO、其它 Avatar 或后继注册猜来源。
+	 * @param Issuer 原 ASC；FX 发布宿主取自它所在 Actor，不从 CDO、其它 Avatar 或后继注册猜来源。
 	 * @param MaxRecords 1..4096，Runtime 收件窗和 Editor 值记录均有界，溢出明确报证据不完整。
 	 * @return 安装原 owner 的精确只读 view；没有发布记录也不推断结束或资源已归还。
 	 */
@@ -70,7 +70,7 @@ public:
 private:
 	struct FState;
 	TSharedPtr<FState> State;
-	void OnOriginalTerminationCompleted(const FGGYGOAbilityTerminationCompletedNotice& Notice);
+	void OnOriginalAbilityEnded(const FAbilityEndedData& Data);
 	void OnWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources);
 	void OnEndPIE(bool bSimulating);
 	void ReleaseObservation(const FString& Reason);

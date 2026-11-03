@@ -11,6 +11,7 @@
 #include "Dom/JsonObject.h"
 #include "Editor.h"
 #include "Engine/World.h"
+#include "FX/Components/GGYGOMontageFXReplicationComponent.h"
 #include "FX/GGYGOMontageFXPublication.h"
 #include "GameFramework/Pawn.h"
 #include "NiagaraComponent.h"
@@ -19,16 +20,6 @@
 
 namespace GGYGOPlayerActionObservation
 {
-	FString RequestKind(EGGYGOAbilityTerminationRequestKind Kind)
-	{
-		switch (Kind)
-		{
-		case EGGYGOAbilityTerminationRequestKind::End: return TEXT("End");
-		case EGGYGOAbilityTerminationRequestKind::Cancel: return TEXT("Cancel");
-		default: return TEXT("None");
-		}
-	}
-
 	TSharedPtr<FJsonObject> History(const FGGYGOPlayerComboObservationFacts& Facts)
 	{
 		auto Result = MakeShared<FJsonObject>();
@@ -40,7 +31,6 @@ namespace GGYGOPlayerActionObservation
 		Result->SetBoolField(TEXT("cmc_drain_completed"), Facts.bMotionCompleted);
 		Result->SetBoolField(TEXT("original_cleanup_observed"), Facts.bCleanupObserved);
 		Result->SetBoolField(TEXT("original_cleanup_cancelled"), Facts.bCleanupCancelled);
-		Result->SetStringField(TEXT("original_cleanup_kind"), RequestKind(Facts.CleanupKind));
 		Result->SetStringField(TEXT("cmc_drain_diagnostic"), Facts.DrainDiagnostic);
 		return Result;
 	}
@@ -49,7 +39,7 @@ namespace GGYGOPlayerActionObservation
 	{
 		return Facts.bTaskNaturalEnded && Facts.bConsumerAccepted && Facts.bDrainRequestReturned
 			&& Facts.bDrainAccepted && Facts.bMotionCompleted && Facts.bCleanupObserved
-			&& !Facts.bCleanupCancelled && Facts.CleanupKind == EGGYGOAbilityTerminationRequestKind::End;
+			&& !Facts.bCleanupCancelled;
 	}
 
 	/** 与原 Pose 观察投影相同的公开 native schema；不解析实例名或推导 GA handle。 */
@@ -196,7 +186,10 @@ struct UGGYGOPlayerActionObservation::FState
 	TWeakObjectPtr<UGGYGOAbilityTask_PlayMontageAndWaitForEvent> MontageTask;
 	/** 捕获时的原 AnimInstance，只读实例退役事实；不保活或重绑新 Anim。 */
 	TWeakObjectPtr<UAnimInstance> AnimInstance;
-	FDelegateHandle TerminationHandle;
+	/** 被观察的能力实例与 Spec；只用于匹配它这次激活的原生结束通知。 */
+	TWeakObjectPtr<UGameplayAbility> Ability;
+	FGameplayAbilitySpecHandle SpecHandle;
+	FDelegateHandle EndedHandle;
 	FDelegateHandle WorldCleanupHandle;
 	FDelegateHandle EndPIEHandle;
 	TSharedPtr<FJsonObject> Source;
@@ -209,17 +202,18 @@ struct UGGYGOPlayerActionObservation::FState
 	bool bActive = false;
 	bool bOriginalExitCompleted = false;
 	bool bExitCancelled = false;
-	EGGYGOAbilityTerminationRequestKind ExitKind = EGGYGOAbilityTerminationRequestKind::None;
 	bool bNaturalConsumerHistory = false;
 	/** 精确原 FX view 是唯一收件资源；Runtime 只向它写值，不回调本观察对象。 */
 	TSharedPtr<FGGYGOMontageFXObservation> FXWindow;
 	TWeakObjectPtr<UAbilitySystemComponent> FXIssuer;
+	/** 原 ASC 所在 Actor 上的 FX 发布宿主；收件事实的 Issuer 必须是它。 */
+	TWeakObjectPtr<UActorComponent> FXHost;
 	TWeakObjectPtr<UGGYGOMontageFXPublicationOwner> FXPublisher;
 	TWeakObjectPtr<AActor> FXAvatar;
 	TWeakObjectPtr<USkeletalMeshComponent> FXMesh;
 	TSet<TTuple<uint64, uint64>> FXKeys;
 	uint64 FXRegistration = 0;
-	uint32 FXIssuerId = 0;
+	uint32 FXHostId = 0;
 	uint32 FXWorldId = 0;
 	uint32 FXAvatarId = 0;
 	uint32 FXMeshId = 0;
@@ -252,13 +246,13 @@ bool UGGYGOPlayerActionObservation::BeginFXObservation(UAbilitySystemComponent* 
 	const TWeakObjectPtr<UAbilitySystemComponent> OriginalIssuer(Issuer);
 	const TWeakObjectPtr<APawn> OriginalPawn(Pawn);
 	const TWeakObjectPtr<USkeletalMeshComponent> OriginalMesh(Mesh);
-	IGGYGOMontageFXHost* Host = Cast<IGGYGOMontageFXHost>(Issuer);
-	UGGYGOMontageFXPublicationOwner* Publisher = Host ? Host->GetMontageFXPublicationOwner() : nullptr;
+	UGGYGOMontageFXReplicationComponent* Host = UGGYGOMontageFXReplicationComponent::FindForASC(Issuer);
+	UGGYGOMontageFXPublicationOwner* Publisher = Host ? Host->GetPublicationOwner() : nullptr;
 	if (OriginalIssuer.Get() != Issuer || OriginalPawn.Get() != Pawn || OriginalMesh.Get() != Mesh
 		|| !IsValid(Publisher) || Publisher->GetRegistrationSerial() == 0
 		|| Issuer->GetAvatarActor() != Pawn || Mesh->GetOwner() != Pawn || Mesh->GetWorld() != Pawn->GetWorld())
 	{
-		OutDiagnostic = TEXT("[FX.Observation] 原 ASC 没有实际注册的 FX publisher。");
+		OutDiagnostic = TEXT("[FX.Observation] 原 ASC 的 Owner 上没有实际注册的 FX 发布宿主/publisher。");
 		return false;
 	}
 	const auto Window = Publisher->BeginObservation(MaxRecords, OutDiagnostic);
@@ -268,9 +262,10 @@ bool UGGYGOPlayerActionObservation::BeginFXObservation(UAbilitySystemComponent* 
 	State->bActive = true;
 	State->FXWindow = Window;
 	State->FXIssuer = Issuer;
+	State->FXHost = Host;
+	State->FXHostId = Host->GetUniqueID();
 	State->FXPublisher = Publisher;
 	State->FXRegistration = Publisher->GetRegistrationSerial();
-	State->FXIssuerId = Issuer->GetUniqueID();
 	State->FXWorldId = Pawn->GetWorld()->GetUniqueID();
 	State->FXAvatarId = Pawn->GetUniqueID();
 	State->FXMeshId = Mesh->GetUniqueID();
@@ -281,7 +276,7 @@ bool UGGYGOPlayerActionObservation::BeginFXObservation(UAbilitySystemComponent* 
 	State->MaxRecords = MaxRecords;
 	State->Source = MakeShared<FJsonObject>();
 	for (const auto& Item : {TPair<const TCHAR*, UObject*>(TEXT("issuer"), Issuer),
-		{TEXT("publisher"), Publisher}, {TEXT("world"), Pawn->GetWorld()}, {TEXT("pawn"), Pawn}, {TEXT("mesh"), Mesh}})
+		{TEXT("fx_host"), Host}, {TEXT("publisher"), Publisher}, {TEXT("world"), Pawn->GetWorld()}, {TEXT("pawn"), Pawn}, {TEXT("mesh"), Mesh}})
 	{
 		State->Source->SetStringField(Item.Key, Item.Value->GetPathName());
 		State->Source->SetStringField(FString(Item.Key) + TEXT("_id"), LexToString(Item.Value->GetUniqueID()));
@@ -337,6 +332,8 @@ bool UGGYGOPlayerActionObservation::BeginObservation(UGGYGOPlayerComboAbility* A
 	State->World = Facts.World;
 	State->MontageTask = Facts.Task;
 	State->AnimInstance = Mesh->GetAnimInstance();
+	State->Ability = Ability;
+	State->SpecHandle = SpecHandle;
 	State->TrialId = TrialId;
 	State->MaxRecords = MaxRecords;
 	State->Source = MakeShared<FJsonObject>();
@@ -362,8 +359,7 @@ bool UGGYGOPlayerActionObservation::BeginObservation(UGGYGOPlayerComboAbility* A
 	State->LastHistory = GGYGOPlayerActionObservation::History(Facts);
 	State->bNaturalConsumerHistory = GGYGOPlayerActionObservation::NaturalConsumerHistory(Facts);
 	State->bActive = true;
-	State->TerminationHandle = ASC->OnAbilityTerminationCompleted().AddUObject(this,
-		&ThisClass::OnOriginalTerminationCompleted);
+	State->EndedHandle = ASC->OnAbilityEnded.AddUObject(this, &ThisClass::OnOriginalAbilityEnded);
 	State->WorldCleanupHandle = FWorldDelegates::OnWorldCleanup.AddUObject(this, &ThisClass::OnWorldCleanup);
 	State->EndPIEHandle = FEditorDelegates::EndPIE.AddUObject(this, &ThisClass::OnEndPIE);
 	return true;
@@ -487,8 +483,8 @@ bool UGGYGOPlayerActionObservation::AppendFXFacts(const TArray<FGGYGOMontageFXOb
 	const auto Original = State;
 	for (const FGGYGOMontageFXObservationFact& Fact : Facts)
 	{
-		if (Fact.Publisher != Original->FXPublisher || Fact.Issuer != Original->FXIssuer || Fact.World != Original->World
-			|| Fact.IssuerObjectId != Original->FXIssuerId
+		if (Fact.Publisher != Original->FXPublisher || Fact.Issuer != Original->FXHost || Fact.World != Original->World
+			|| Fact.IssuerObjectId != Original->FXHostId
 			|| Fact.WorldObjectId != Original->FXWorldId || Fact.OwnerRegistration != Original->FXRegistration)
 		{
 			OutDiagnostic = TEXT("[FX.Observation] 收件事实不属于原 issuer/publisher/World/registration。");
@@ -634,17 +630,17 @@ bool UGGYGOPlayerActionObservation::SampleFX(double ElapsedSeconds, FString& Out
 	return true;
 }
 
-void UGGYGOPlayerActionObservation::OnOriginalTerminationCompleted(const FGGYGOAbilityTerminationCompletedNotice& Notice)
+void UGGYGOPlayerActionObservation::OnOriginalAbilityEnded(const FAbilityEndedData& Data)
 {
 	const auto Original = State;
 	FGGYGOPlayerComboObservationFacts Facts;
-	if (!Original.IsValid() || !Original->bActive || !Notice.HasCompletion()
-		|| !Original->Observation.ReadHistory(Facts)
-		|| !Notice.GetOriginal().GetOriginalActivation().HasSameActivation(Facts.Activation)) { return; }
+	// 能力 InstancedPerActor 且禁止重触发：观察开始后该 Spec 的第一次结束就是被观察的那次激活。
+	if (!Original.IsValid() || !Original->bActive || Original->bOriginalExitCompleted
+		|| Data.AbilitySpecHandle != Original->SpecHandle || Data.AbilityThatEnded.Get() != Original->Ability.Get()
+		|| !Original->Observation.ReadHistory(Facts)) { return; }
 	Original->bOriginalExitCompleted = true;
-	Original->ExitKind = Notice.GetOriginal().GetRequestKind();
-	Original->bExitCancelled = Notice.GetOriginal().WasCancelled();
-	// 完整退出可早于原 CMC 外调返栈；保留订阅与视图，后继 Sample／Stop 读取真实返回事实。
+	Original->bExitCancelled = Data.bWasCancelled;
+	// 原生结束可早于原 CMC 外调返栈；保留订阅与视图，后继 Sample／Stop 读取真实返回事实。
 }
 
 void UGGYGOPlayerActionObservation::ReleaseObservation(const FString& Reason)
@@ -677,13 +673,13 @@ void UGGYGOPlayerActionObservation::ReleaseObservation(const FString& Reason)
 		Original->bNaturalConsumerHistory = GGYGOPlayerActionObservation::NaturalConsumerHistory(Facts);
 	}
 	const auto ASC = Original->ASC;
-	const auto TerminationHandle = Original->TerminationHandle;
+	const auto EndedHandle = Original->EndedHandle;
 	const auto WorldHandle = Original->WorldCleanupHandle;
 	const auto EndPIEHandle = Original->EndPIEHandle;
 	// 先摘除本窗状态，再解除精确自有句柄；返栈不重绑另一对象或新窗口。
 	Original->bActive = false;
 	Original->StopReason = Reason;
-	Original->TerminationHandle.Reset();
+	Original->EndedHandle.Reset();
 	Original->WorldCleanupHandle.Reset();
 	Original->EndPIEHandle.Reset();
 	Original->Observation.Reset();
@@ -691,7 +687,8 @@ void UGGYGOPlayerActionObservation::ReleaseObservation(const FString& Reason)
 	Original->World.Reset();
 	Original->MontageTask.Reset();
 	Original->AnimInstance.Reset();
-	if (ASC.IsValid() && TerminationHandle.IsValid()) { ASC->OnAbilityTerminationCompleted().Remove(TerminationHandle); }
+	Original->Ability.Reset();
+	if (ASC.IsValid() && EndedHandle.IsValid()) { ASC->OnAbilityEnded.Remove(EndedHandle); }
 	if (WorldHandle.IsValid()) { FWorldDelegates::OnWorldCleanup.Remove(WorldHandle); }
 	if (EndPIEHandle.IsValid()) { FEditorDelegates::EndPIE.Remove(EndPIEHandle); }
 }
@@ -748,12 +745,10 @@ FString UGGYGOPlayerActionObservation::GetObservationJson() const
 			Result->SetObjectField(TEXT("original_history"), State->LastHistory);
 			Result->SetBoolField(TEXT("original_ga_full_exit_completed"), State->bOriginalExitCompleted);
 			Result->SetBoolField(TEXT("original_exit_cancelled"), State->bExitCancelled);
-			Result->SetStringField(TEXT("original_exit_kind"), GGYGOPlayerActionObservation::RequestKind(State->ExitKind));
 			Result->SetBoolField(TEXT("natural_completion_history_complete"), State->bNaturalConsumerHistory
-				&& State->bOriginalExitCompleted && !State->bExitCancelled
-				&& State->ExitKind == EGGYGOAbilityTerminationRequestKind::End);
+				&& State->bOriginalExitCompleted && !State->bExitCancelled);
 		}
-		Result->SetBoolField(TEXT("subscriptions_released"), !State->TerminationHandle.IsValid()
+		Result->SetBoolField(TEXT("subscriptions_released"), !State->EndedHandle.IsValid()
 			&& !State->WorldCleanupHandle.IsValid() && !State->EndPIEHandle.IsValid() && !State->FXWindow.IsValid());
 		Result->SetArrayField(TEXT("records"), State->Records);
 	}
