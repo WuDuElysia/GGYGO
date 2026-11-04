@@ -1,11 +1,11 @@
 # 代码整改（CR-R7 扩展）与换人续放：活动记录
 
-更新：2026-11-03。本页是这一批的唯一活动记录，保存用户决定、目标、未完成项和验收标准，执行者为 Kiro（Claude Opus 5.5）。共享窗口、写入者和构建排期仍以[当前排程](../Coordination/Module_Repair_Parallel_Schedule.md)为准，本页不分配窗口；请统筹在[修复清单 CR-R7](../Coordination/Module_Audit_Repair_Ledger.md#cr-20261014-r7)原条目中索引本页，不另复制正文。续接时以本页为准，不依赖旧聊天。
+更新：2026-11-04。本页是这一批的唯一活动记录，保存用户决定、目标、未完成项和验收标准，执行者为 Kiro（Claude Opus 5.5）。共享窗口、写入者和构建排期仍以[当前排程](../Coordination/Module_Repair_Parallel_Schedule.md)为准，本页不分配窗口；请统筹在[修复清单 CR-R7](../Coordination/Module_Audit_Repair_Ledger.md#cr-20261014-r7)原条目中索引本页，不另复制正文。续接时以本页为准，不依赖旧聊天。
 
 ## 现状
 
 - 第 1 步 abilitysystem-redundancy-cleanup、第 2 步 abilitysystem-input-request、首击 B：源码完成，批次 1 已集中编译并跑 NullRHI 测试（结果见下）。
-- 未验：PlayerCombo 生产冒烟 7 例与 Kevin 冒烟（需真实 RHI＋L_Movement_Test，不在已批额度内）、人工 PIE、FX 联机。首击 B 的端到端效果需要这些冒烟或人工 PIE 确认。第 1 步任务 6（Legacy 消费者）已在收尾完成。
+- 真实 RHI 已跑（结果与统筹待修问题清单见「收尾续二」）：Kevin 冒烟、NativeBirth 通过；PlayerCombo 生产冒烟 7 例因 FX 材质 shader map 未就绪失败；联机换人断言无错但结束 PIE 时崩溃。人工 PIE、FX 联机未验。首击 B 的端到端效果需要这些冒烟或人工 PIE 确认。第 1 步任务 6（Legacy 消费者）已在收尾完成。
 - 第 3 步 fx-montage-publication-ownership：源码完成并过 NullRHI 测试（见下节）；Editor 蓝图子类核对已在收尾完成（没有蓝图子类）；FX 的 PIE 单机与最小联机未验（要看画面）。
 - 第 4 步 abilitysystem-activation-lifecycle：源码完成并过 NullRHI 测试（见下节）；PIE 单机、最小联机与 N3 纠正重放未验。
 - 第 5 步 combatants-avatar-binding：源码完成并过 NullRHI 测试（见下节）；PIE 单机与最小联机未验。
@@ -171,8 +171,26 @@
 2. Movement 测试：`Locomotion.InputConsumer.*` 结束后测试世界被 `GGYGOLocomotionSourceBinding` 的强引用（BlendSpace1D／测试序列）留住，同一会话之后启动 PIE 会报“Previously active world not cleaned up”；本轮把 Movement 用例与 PIE 用例分开跑。
 3. PIE 结束时 Enhanced Input 报 IMC_Squad／IMC_Default／IMC_MouseLook“仍在应用、可能泄漏”的 Warning：LocalPlayer 子系统先于 Controller／Pawn 的 EndPlay 反初始化；IMC_Default、IMC_MouseLook 的同类 Warning 先前就有。
 
-剩余验收（未运行，不签通过）：
-- 真实 RHI（已批准，额度不足未跑）：PlayerCombo 生产冒烟 7 例、Kevin 冒烟、`NativeBirthFirstDigitalPress`、FX 画面（`capture_pyrios_fx.py`）、换人／倒下／相机画面（联机测试在真实 RHI 下给 `-GGYGOCaptureDir=` 时存 6 张客户端画面）。本批新增源文件使 Build_R24 重编多个 unity 文件，7 根内增长约 27MB，余量约 22MB，低于预计的约 40MB。
+真实 RHI（2026-11-04，用户追加 64MiB 后跑；Build_R34 DLL，L_Movement_Test，证据 `Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/RHI_R35c_FX`、`RHI_R35d`）：
+- 通过：`GGYGO.BossAI.Melee.KevinIce01ProductionSmoke`、`GGYGO.Input.MovementOrigin.NativeBirthFirstDigitalPress`。
+- 失败：PlayerCombo 生产冒烟 6 例（EndMovement×3、Interruption、PoseFailure×2）均因攻击 FX 被拒导致 GA 提前结束（“original activation/spec was unavailable at native ability end”等）；FX 叶 `FX.ProductionNativeNormal01` 在 FXReady 等 Niagara `IsReadyToRun` 30 秒超时，观察脚本未出图。根因见下问题 4。
+- `Teams.SquadSwitch.ListenServerClientRequest`：断言阶段无错误，6 张客户端画面已存（`RHI_R35d/Captures`），但 EndPlayMap 时 PIE 世界泄漏断言使编辑器崩溃，测试无结果记录。根因见下问题 5。
+- 画面（只看了 01、05、06）：01 就绪时两名 Pyrios（主机与客户端各自出场者）正常可见；05 倒下中画面里没有角色，只见地面上零散的角色阴影块；06 倒下后自动换上的队员正常可见，脚下阴影呈放射条纹。倒下镜头取景与阴影形态需人工判断（问题 7）。
+- 跑法：`-ExecutePythonScript` 执行完脚本即 QUIT_EDITOR（EditorPythonExecuter.cpp:125），会杀掉 tick 观察脚本；改用 `-ExecCmds=py <脚本>,Automation RunTests …;SoftQuit`。`-UserDir` 下观察脚本的 Saved 是 `<UserDir>/Saved`。生成器 `Verify_R2/make_rhi_runner.py`。
+
+统筹待修问题清单（按模块，Kiro 未改）：
+1. Movement：再次附身后客户端不能移动（见上问题 1）。
+2. Movement 测试：`Locomotion.InputConsumer.*` 泄漏测试世界（见上问题 2）。
+3. Input／Character：PIE 结束时 IMC 泄漏 Warning（见上问题 3）。
+4. FX／Rendering：冷会话里 DualSignedField 材质 `MI_Eff_Others_LKJ_GUID52624181…` 当前平台 shader map 未完整，`GGYGOSignedFieldMeshPass` 判 Unavailable，FX Task 明确失败，攻击 GA 随之结束；同一会话 17 秒内每次攻击都失败，Niagara 也一直未 Ready。需 FX／Rendering 决定按“等待真实异步就绪”处理还是预热着色器；用户首次进游戏的第一刀同样会失败。测试会话的公共 DDC 写入被拒（`LogDerivedDataCache: Failed to write`），每次会话都是冷着色器状态。
+5. Rendering：`FGGYGOCharacterShadowCapture` 析构后经 RT→GT 异步任务才释放 SceneCapture／RT 强引用，EndPlayMap 的 GC 先于该任务，`SceneCaptureComponent2D` 留住 PIE 世界，触发 PlayLevel.cpp:553 断言（自动化下致命）。RT 的 Outer 是拥有组件，同样会留住世界。
+6. 引擎：R35c 退出时 `FVirtualTextureBuiltData::GetTileOffset` 越界断言（Renderer 模块关闭阶段），测试已结束，仅记录。
+7. 画面：倒下过程镜头未取到倒下的队员（05），角色阴影呈块状／放射条纹（05、06），需 Camera 与 Rendering 人工看图判断。
+8. Pyrios 资产脚本：`wire_pyrios_skill_inputs.py` 的 IMC_Default 哈希基线因本批给 IMC_Default 加了可改键名而失效，该脚本会拒绝运行，需原作者更新基线。
+9. 业务缺口：公共 GA_Death 仍是空图（Pyrios 用 GA_Pyrios_Death）；全员倒下后无失败／复活流程；进退场 GA／Montage 缺省跳过。
+10. 未验：预测连段纠正重放、FX 晚加入、改键界面画面；提交 4fc37dc／57ebdd1、54fa94d／38be612 未单独编译过（只验证过合并后的状态）。
+
+其余未覆盖：
 - 联机未覆盖：预测连段的纠正重放、复活（项目尚无复活流程）、FX 晚加入、再次附身后的客户端移动（见上问题 1）。
 - 改键界面只在代码与改键管线上验证（联机测试经用户设置改键生效），界面本身未看画面。
 - 业务缺口：进退场 GA 与 Montage（缺省跳过）；需要留场的技能把 AvatarExitPolicy 改为 ContinueInBackground（用户以后自行配置）；全员倒下后的失败／复活流程。
@@ -186,6 +204,7 @@
 - 收尾续（Test_R22 后）：7 根内 2150935216B（峰值 2150957029B）＋域外累计 52766412B＋R1 预留 42987054B；余 68567126B（约 65.4MiB）。Build_R20～R22 与 Test_R20～R22 共用约 9.8MB。
 - 换人键（Test_R23c 后）：7 根内 2156766739B（峰值 2156789664B）＋域外累计约 52.9MB＋R1 预留 42987054B；余约 62.6MB（约 59.7MiB）。
 - 收尾续二（Test_R34r 后）：7 根内 2195357288B＋域外累计约 54.8MB＋R1 预留 42987054B；余约 22.1MB（约 21.1MiB）。Build_R24 新增源文件触发 unity 重编约 27MB；其余 10 次构建、15 次测试与 5 次资产会话共约 11MB。
+- 真实 RHI（2026-11-04）：用户再追加 64MiB，总额度 2382364672B。RHI_R35a～R35d 后 7 根内 2219289673B＋域外累计 56227080B＋R1 预留 42987054B；余 63860865B（约 60.9MiB）。四次真实 RHI 会话 7 根内共增约 23.9MB（含 R35a 前的证据整理），域外约 1.4MB。
 - 历史（Test_R12 后）：7 根内 2128963922B（峰值 2128975634B）＋域外累计 51253859B＋R1 预留 42987054B；按新额度余 92050973B（约 87.8MiB）。
   - 第 5 步 Build_R11 新增文件触发 10 个 unity 文件重编，7 根内增加约 27.4MB；之后增量构建约 0.2MB、每次 NullRHI 测试约 1.3MB。追加的 64MiB 用于第 6、7 步的构建、测试与第 6 步 Editor（NullRHI）资产制作。
   - 域外累计＝Verify_R1 Test_R4 后的 50645591B＋源码／文档正增上界（`Verify_R2/outside_since_r4_after_t12.json`）＋Verify_R2 第 1～3 步各窗 240000B＋第 4、5 步各窗实测正增。
