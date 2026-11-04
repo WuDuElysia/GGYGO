@@ -4,7 +4,7 @@
 
 整改第 6 步，新行为。执行规则与命令同第 1 步，输出目录为 `Saved/Kiro/teams-squad-switch-linger/`。开工前确认第 5 步已验收。资产制作需要启动 Kiro 自己的 Editor 实例，只保存本 spec 新建的资产，不 SaveAll。
 
-状态（2026-11-03 收尾）：源码与 NullRHI 测试完成；监听服务器＋1 客户端的 NullRHI PIE（测试编队）全部通过，Test_R19 的 3 条生产 Error 已在收尾续修中消除（Test_R22，见任务 6、8）。三项玩法取舍待用户确认；换人键已按用户决定接好。与 design.md 的差异见其「实现差异」。
+状态（2026-11-03 收尾）：源码与 NullRHI 测试完成；监听服务器＋1 客户端的 NullRHI PIE（测试编队）全部通过，Test_R19 的 3 条生产 Error 已在收尾续修中消除（Test_R22，见任务 6、8）。玩法取舍由用户 11-04 决定并已落实（见任务 9）；换人键已接好。与 design.md 的差异见其「实现差异」。
 
 ## Tasks
 
@@ -72,3 +72,11 @@
 - [x] 9. 更新活动记录
   - 注明进退场动作资产与手感待用户提供或确认；提示现有 GA 默认仍为 Cancel
   - _Requirements: 7.5, 7.6_
+
+- [x] 9. 用户 11-04 决定的落实（活动记录「收尾续二」）
+  - 不可取消的 Cancel 决定改为留场放完；开局第一名不发 SwitchIn；玩家换人冷却 `SwitchCooldownSeconds`（DefaultGame.ini，0.5 秒，只限 PlayerRequest）；出战队员倒下期间玩家不能换人，死亡演出结束后以 DeathAutoSwitch 自动切到下一个存活队员
+  - 死亡能力 `UGGYGODeathAbility` 与 Pyrios 资产（AM_Pyrios_Death、GA_Pyrios_Death，替换 DA_AbilitySet_Pyrios 中的 GA_Death）
+  - 键盘改键界面 `SGGYGOKeyBindingMenu`（控制台 `GGYGOOpenKeySettings`），IMC_Default 主键位可改键
+  - 测试：`UncancelableContinuesOnField`（替换 `UncancelableRejectsBeforeEffects`）、`PlayerCooldownAndDeathAutoSwitch`；联机测试补冷却、改键、客户端移动与普攻、主机按键、死亡自动换人。Test_R34 全部通过
+  - 未验：真实 RHI 画面；客户端再次附身先前控制过的队员后不能移动（Movement owner-sync，已交原模块）
+  - _Requirements: 用户决定_

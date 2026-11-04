@@ -172,3 +172,11 @@ class UGGYGOSquadTransitionAbility : public UGGYGOGameplayAbility
 - **换人相机准入（Camera 侧收尾修正）。** 新 Pawn 被附身后 Hero 再次调 `ActivateCameraEvaluation`；管理器 Running 时允许准入 Controller 当前附身的 Pawn 替换准入来源，按首次准入同一流程校验并求值。
 - **待命队员的相关性。** 按引擎 `APawn::IsNetRelevantFor`（当前未启用 Iris），隐藏、无碰撞且不属于观察者的 Pawn 不复制。初始待命队员 Owner 是原 Controller，对其客户端相关（隐藏、无碰撞）；换下后 UnPossess 清空 Owner，变为待命后按该规则不再相关，客户端副本会被销毁、切回时重新复制，客户端 Slot 随之释放并重新绑定。联机测试按"不存在或隐藏且无碰撞"判定客户端上的待命队员，没有单独断言副本被销毁。
 - **测试夹具限制。** 未开局私有世界中 CMC 不订阅本地 ASC（只在 BeginPlay 订阅），locomotion 阻止只能在 PIE 验证；该世界没有消息路由，留场"技能照常结算"用不破韧的 PoiseDamage 核对。
+
+## 用户 11-04 的玩法决定（实现）
+
+- **不可取消的能力留场。** 换出决定为 Cancel 而能力不可取消时，按 ContinueOnField 处理：登记续放、通知失去控制、旧队员 Lingering，放完后退场。原“整次拒绝”取消。
+- **SwitchIn 只发给替换在场队员的入场者。** 开局第一名（没有被替换的出战队员）不发。
+- **玩家换人冷却。** `SwitchCooldownSeconds`（Config＝Game）从上次替换在场队员的换人成功起算，只限制 PlayerRequest；Script 与 DeathAutoSwitch 不受限。冷却与倒下期间的玩家请求以 Verbose 记录，不报 Warning。
+- **死亡自动换人。** Squad 在登记时订阅队员 HealthComponent 的 `OnDeathFinished`。服务器上出战队员的死亡演出结束时，在同一广播内以 DeathAutoSwitch 调 `SwitchToAdjacentSlot(1)`：此时角色下一帧才销毁，附身与槽位绑定仍完整；死亡能力已在结束清理中，换出决定会跳过它。没有存活队员时保持现状并记录。倒下（Dying）期间玩家请求不执行。
+- **死亡能力。** `UGGYGODeathAbility` 由 `Event.Death` 触发（ServerInitiated），服务器上取消其余能力（SurvivesDeath 除外）、`StartDeath`、播放 DeathMontage，淡出开始即结束，结束清理里 `FinishDeath`。DeathMontage 由角色蓝图配置；缺失时报错并立即结束死亡。

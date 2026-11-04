@@ -9,7 +9,7 @@
 - 第 3 步 fx-montage-publication-ownership：源码完成并过 NullRHI 测试（见下节）；Editor 蓝图子类核对已在收尾完成（没有蓝图子类）；FX 的 PIE 单机与最小联机未验（要看画面）。
 - 第 4 步 abilitysystem-activation-lifecycle：源码完成并过 NullRHI 测试（见下节）；PIE 单机、最小联机与 N3 纠正重放未验。
 - 第 5 步 combatants-avatar-binding：源码完成并过 NullRHI 测试（见下节）；PIE 单机与最小联机未验。
-- 第 6 步 teams-squad-switch-linger：源码完成并过 NullRHI 测试（见下节）；收尾修正待命碰撞复制、待命骨架更新与换人相机准入，测试编队的 NullRHI 监听服务器 PIE 全部通过（Test_R22，无生产 Error）；换人键按用户 11-03 决定做成可配置的上一个／下一个，默认 Z／C（Test_R23 通过）；三项玩法取舍待用户；进退场动作资产缺省时跳过。
+- 第 6 步 teams-squad-switch-linger：源码完成并过 NullRHI 测试；收尾修正待命碰撞复制、骨架更新、换人相机准入与换人键；用户 11-04 的玩法决定（不可取消能力留场、开局不发 SwitchIn、0.5 秒玩家换人冷却、倒下后自动换人、改键界面）已落实并过 NullRHI 联机测试（Test_R34），见「收尾续二」；进退场动作资产缺省时跳过。
 - 第 7 步 abilitysystem-healthset-repnotify：复现完成，保留分类帧（技术决定，已定案）；反算已迁出 ASC；NullRHI 测试通过；联机数值与广播一致性在收尾的监听服务器 PIE 中核对（见「收尾」）。
 - 收尾（Root 续派，2026-11-03；之后用户授权 Kiro 直接完成剩余整改与 Git）：Legacy 消费者 Editor 核查与删除、宿主蓝图子类核查、待命碰撞复制修正、开发期切人入口、监听服务器＋1 客户端 NullRHI PIE、两处跨模块生产 Error 修正、Kevin 观察脚本消费者更新已完成；终态、问题处理与剩余验收见「收尾」节。
 - Obsidian：受影响模块的结构笔记、Canvas 与 `模块参考.md` 已按当前源码改写（AbilitySystem、Animation、BossAI、Camera、Character、Combat、Combatants、GameFeature、Input、Messages、Movement、Teams）；`计划_*.md` 作为历史未改。Canvas 均通过 JSON／ID／边引用核验，改动笔记的 wikilink 锚点均存在，格式与换行按前像保持；未在 Obsidian 中目视检查。前像与脚本在 `Saved/Kiro/abilitysystem-healthset-repnotify/ObsidianBefore/`（manifest.tsv）及同目录 `obsidian_*.py`。Obsidian 仓未提交。
@@ -96,7 +96,7 @@
 - 新增 `UGGYGOSquadTransitionAbility`（配置 Montage，由对应 GameplayEvent 触发，播完结束；蓝图实现 ActivateAbility 时由蓝图接管；默认 ServerInitiated）。删除 ASC 的换人退出旧实现（TryExit／CheckExited／退出 scope 等）。
 - 测试：SquadSwitch 改为 6 例（Cancel 取消与状态保留、不可取消拒绝、续放留场后退场且留场免伤而结算照常、切回留场队员与缓冲按下、三人场景、退场中切回取消退场）。
 - 验证（`Verify_R2/`）：Build_R13 一次通过；Test_R13（114 例）109 通过，3 例为既有失败（同第 5 步），2 例是夹具环境问题（未开局世界中 CMC 不订阅 ASC；无消息路由时 Damage 结算报投递失败），改测试后 Test_R14 通过。
-- 待用户（Root 已转问）：ReturnPending 不拦已在运行的续放能力的按键；不可取消的 Cancel 决定整次拒绝换人；首位入场也发 SwitchIn。正式切换按键已定（见「收尾」）。PIE 与最小联机已在收尾用测试编队完成（NullRHI）；进退场 GA 资产缺省时按既定规则跳过。
+- 用户 11-04 已定：切回时续放能力照常收键；不可取消的能力改为留场放完；开局第一名不发 SwitchIn。落实与验证见「收尾续二」。进退场 GA 资产缺省时按既定规则跳过。
 - 证据：`Saved/Kiro/teams-squad-switch-linger/`（`Before/`、`before_manifest.tsv`、`Patches/`、`after_summary.tsv`、`progress.md`）。
 
 ## 第 7 步（已编译、已测 NullRHI）
@@ -146,11 +146,36 @@
   - Obsidian 两段（第一阶段、收尾续修）；3 个开工前已有他人改动的文件只提交本批差异。
 - 源码已冻结，各 spec 的 `after_summary.tsv` 已按 Build_R23 时的文件刷新。
 
+## 收尾续二（用户 11-04 决定，Kiro 恢复写权后落实）
+
+用户决定：切回时续放能力照常收键；不可取消的能力改为留场放完、不再拒绝换人；开局第一名不发 SwitchIn；玩家换人冷却 0.5 秒（配置）；出战队员倒下动作播完后自动切到下一个存活队员，倒下期间不能手动切；7 个 GA 维持换下即取消；进退场资产以后做；换人不配手柄键；现在做键盘改键界面；批准真实 RHI 画面验证与联机补测；Kevin 观察脚本连同原作者版本一起提交；补提交更正 `e374112` 的说明；三个既有失败测试由 Kiro 修；只读复审结果见聊天。细节由 Kiro 判断：冷却整队共用、只限玩家请求、从替换在场队员的换人成功起算；全员倒下时保持现状；改键界面第一版只做键盘，覆盖 `IMC_Default` 主键位与 `IMC_Squad`，经控制台 `GGYGOOpenKeySettings` 打开。
+
+改动（前像与 diff：`Saved/Kiro/closeout-20261103/`）：
+- Teams `UGGYGOSquadComponent`：Cancel 决定的能力不可取消时改走留场；只有替换在场队员时发 SwitchIn；`SwitchCooldownSeconds`（Config＝Game，`DefaultGame.ini` 中 0.5）只限制 PlayerRequest，`GetSwitchCooldownRemaining()` 只读；PlayerRequest 在出战队员倒下（Dying）期间不执行；登记时订阅队员 HealthComponent 的 `OnDeathFinished`，服务器上出战队员死亡结束时以 DeathAutoSwitch 同步切到下一个存活队员；`SwitchToAdjacentSlot` 在没有出战位置时覆盖全部位置（复审问题 1）。
+- 死亡：新增 C++ `UGGYGODeathAbility`（Event.Death 触发、ServerInitiated；服务器上取消其余能力、`StartDeath`、播放 DeathMontage，淡出开始或被打断时结束，结束清理里 `FinishDeath`）。原共用 `GA_Death` 只有空事件图，玩家从未进入死亡流程。资产（`AAADocs/Scripts/wire_pyrios_death.py`，Asset_R24e）：`AM_Pyrios_Death`（FullBody 槽、单段，5.02 秒）、`GA_Pyrios_Death`（父类 GGYGODeathAbility），`DA_AbilitySet_Pyrios` 中 GA_Death 换成它；共用 GA_Death 本身与 Common 能力集未改。
+- 改键：`DefaultInput.ini` 打开 Enhanced Input 用户设置；PlayerController 新增 `PlayerMappableInputMappings`（登记到用户设置）与 `OpenKeySettings`／`CloseKeySettings`／`GGYGOOpenKeySettings`；新增 Slate 界面 `SGGYGOKeyBindingMenu`（`Input/GGYGOKeyBindingMenu.*`，按档案行列出、改第一槽位、占用键拒绝、恢复默认、改动立即应用并异步存档）。资产（`AAADocs/Scripts/wire_player_key_settings.py`，Asset_R24d）：`IMC_Default` 的 WASD、Shift、Ctrl、空格、鼠标左键改为逐行可改键（固定名 MoveForward／MoveBackward／MoveLeft／MoveRight／Sprint／ForceWalk／Jump／Attack），方向键与手柄行不参与；`BP_PlayerController` 登记 IMC_Default 与 IMC_Squad。键、动作、修饰器不变。`wire_pyrios_skill_inputs.py` 的 IMC_Default 哈希基线因此失效，该脚本会拒绝运行（E/R/F 输入线本就暂停）。
+- 复审问题：PlayerController 重绑时核对子系统，LocalPlayer 变了就在新子系统重新注册换人 IMC（问题 4）；删去无使用者的 `InputTag.SwitchCharacter.Next／Prev`（问题 5）；注释不再写死键位（问题 7）；相机管理器在原生 ViewTarget 换到尚未准入的 GG 相机时暂停发布、等它的 Ready，不输出未准入的来源（问题 3，改为等待而非停止发布：客户端的 Ready 可能晚一帧）。
+- 联机补测中发现并修复：主机（单机即主机）按键换人时，新 Pawn 在原生 `PossessedBy`（先于 `SetPawn`）里推进到 DataInitialized，Hero 把这一刻 Controller 尚未指向 Pawn 报成相机关联错误；现在该入口在此窗口直接等待随后的 InitializePlayerInput。客户端解除附身只经复制到达，本地不调用 UnPossessed，旧 Pawn 的 Hero 输入会话与输入组件一直留着，再次附身时不会重建；`AGGYGOCharacterBase::OnRep_Controller` 现在在失去本地控制时退役 Hero 输入并销毁玩家输入组件，与服务器 UnPossessed 一致。
+- 三个既有失败：`Camera.ModeOwnershipAndAvatarReceiver` 是测试世界不开局、Hero 的 BeginPlay 仲裁绑定没有发生，测试按生产绑定显式完成；`Movement.Locomotion.InputConsumer.FailedRequestRecovery` 的 3 条 Error 是测试故意制造的生产拒绝，按原诊断恰好声明；`Input.MovementOrigin.NativeBirthFirstDigitalPress` 需要真实系统窗口，放在真实 RHI 会话中跑（未跑，见下）。
+- Kevin 观察脚本：原作者未提交的整份版本连同修正一起提交（12B）；补一个提交更正 `e374112` 说明中关于该脚本的那句（13B）。
+
+验证（`Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/`，NullRHI）：
+- Build_R24～R34 均成功（R24 因测试误用受保护接口编译失败，R24b 修正；R24 失败使 UBT 删除旧 pdb，R24b 的域外 214MB 正增按与 R24 前尺寸比较的净增 1.48MB 计）。
+- 资产：Asset_R24d、R24e 成功；R24a～c 是脚本问题（runner 守卫、结构体字段只读）的失败重试，未保存任何包。
+- Test_R34（L_Movement_Test）：SquadSwitch 8 例全部通过，含新增 `UncancelableContinuesOnField`、`PlayerCooldownAndDeathAutoSwitch`；联机测试覆盖客户端 RPC 与 Z／C 按键换人、冷却等待、改键（客户端把“上一个角色”改到 X 后按 X 生效）、客户端首次附身队员上按住 W 移动（服务器侧位移约 6 m、客户端与服务器位置一致）、客户端在再次附身的队员上普攻被服务器激活、主机自己按 C 换人无 Error、服务器致死伤害后倒下动作播完自动换人（客户端控制并看向新队员）、生命／上限／破韧复制与 PIE 收尾。NullRHI 下普攻必需 FX 按约定报“Rendering is unavailable”并结束能力，测试中声明为预期。
+- Test_R34r（74 例：Test_R16a 清单、SquadSwitch 私有用例、Camera 7、Movement 11、Input 夹具）全部通过；`Camera.ModeOwnershipAndAvatarReceiver` 与 `FailedRequestRecovery` 现已通过。
+- UnrealEditor-GGYGO.dll SHA256 7ABE62D1…（Build_R34）。
+
+发现、未修（交原模块）：
+1. Movement：客户端再次附身先前控制过的队员后不能移动。日志（Test_R31d、Test_R32）显示新输入会话已装配，但 CMC 的 owner-sync 收到 `StaleNativeResponse` 后丢弃了服务器响应，会话一直等不到“观察到中立再真实按下”的前提，按住 W 报 `HeldWithoutProvenPress`。首次附身的队员移动正常，技能输入在再次附身后正常。曾试过在 CMC 中忽略同一 Pawn／Controller 的重复 Controller 通知，未解决，已还原。
+2. Movement 测试：`Locomotion.InputConsumer.*` 结束后测试世界被 `GGYGOLocomotionSourceBinding` 的强引用（BlendSpace1D／测试序列）留住，同一会话之后启动 PIE 会报“Previously active world not cleaned up”；本轮把 Movement 用例与 PIE 用例分开跑。
+3. PIE 结束时 Enhanced Input 报 IMC_Squad／IMC_Default／IMC_MouseLook“仍在应用、可能泄漏”的 Warning：LocalPlayer 子系统先于 Controller／Pawn 的 EndPlay 反初始化；IMC_Default、IMC_MouseLook 的同类 Warning 先前就有。
+
 剩余验收（未运行，不签通过）：
-- 真实 RHI 与画面：PlayerCombo 生产冒烟 7 例与 Kevin 冒烟、FX 单机与晚加入、TurnBack、Boss 出场与 BT 连续出招、留场的 Montage／位移／FX 表现、相机画面。建议最小范围：一次真实 RHI Editor 会话跑现有 PlayerCombo 生产冒烟 7 例，再由用户人工 PIE 看 FX 与换人画面；预计新增约 32MiB 驱动缓存、约 5MB 着色器缓存与约 2MB 测试输出，共约 40MB，当前余量可容纳，用途需用户批准。
-- 联机未覆盖：客户端移动与攻击（需真实输入）、预测连段的纠正重放、死亡与重生、LocalPredicted 续放能力在 UnPossess 后的预测键行为、FX 晚加入。
-- 业务缺口：玩家改键界面（换人键已有 PlayerMappable 名，见「收尾」）；进退场 GA 与 Montage（缺省跳过）；需要留场的技能把 AvatarExitPolicy 改为 ContinueInBackground（现有 7 个 GA 都是 Cancel）。
-- 既有失败（与本批无关，未修）：`Camera.ModeOwnershipAndAvatarReceiver`、`Input.MovementOrigin.NativeBirthFirstDigitalPress`、`Movement.Locomotion.InputConsumer.FailedRequestRecovery`。
+- 真实 RHI（已批准，额度不足未跑）：PlayerCombo 生产冒烟 7 例、Kevin 冒烟、`NativeBirthFirstDigitalPress`、FX 画面（`capture_pyrios_fx.py`）、换人／倒下／相机画面（联机测试在真实 RHI 下给 `-GGYGOCaptureDir=` 时存 6 张客户端画面）。本批新增源文件使 Build_R24 重编多个 unity 文件，7 根内增长约 27MB，余量约 22MB，低于预计的约 40MB。
+- 联机未覆盖：预测连段的纠正重放、复活（项目尚无复活流程）、FX 晚加入、再次附身后的客户端移动（见上问题 1）。
+- 改键界面只在代码与改键管线上验证（联机测试经用户设置改键生效），界面本身未看画面。
+- 业务缺口：进退场 GA 与 Montage（缺省跳过）；需要留场的技能把 AvatarExitPolicy 改为 ContinueInBackground（用户以后自行配置）；全员倒下后的失败／复活流程。
 
 ## 额度
 
@@ -160,6 +185,7 @@
 - 收尾（Test_R19 后）：7 根内 2141176586B（峰值 2141199534B）＋域外累计 52702280B＋R1 预留 42987054B；余 78389888B（约 74.8MiB）。收尾 4 次构建、5 次测试与证据共用约 6.1MB。
 - 收尾续（Test_R22 后）：7 根内 2150935216B（峰值 2150957029B）＋域外累计 52766412B＋R1 预留 42987054B；余 68567126B（约 65.4MiB）。Build_R20～R22 与 Test_R20～R22 共用约 9.8MB。
 - 换人键（Test_R23c 后）：7 根内 2156766739B（峰值 2156789664B）＋域外累计约 52.9MB＋R1 预留 42987054B；余约 62.6MB（约 59.7MiB）。
+- 收尾续二（Test_R34r 后）：7 根内 2195357288B＋域外累计约 54.8MB＋R1 预留 42987054B；余约 22.1MB（约 21.1MiB）。Build_R24 新增源文件触发 unity 重编约 27MB；其余 10 次构建、15 次测试与 5 次资产会话共约 11MB。
 - 历史（Test_R12 后）：7 根内 2128963922B（峰值 2128975634B）＋域外累计 51253859B＋R1 预留 42987054B；按新额度余 92050973B（约 87.8MiB）。
   - 第 5 步 Build_R11 新增文件触发 10 个 unity 文件重编，7 根内增加约 27.4MB；之后增量构建约 0.2MB、每次 NullRHI 测试约 1.3MB。追加的 64MiB 用于第 6、7 步的构建、测试与第 6 步 Editor（NullRHI）资产制作。
   - 域外累计＝Verify_R1 Test_R4 后的 50645591B＋源码／文档正增上界（`Verify_R2/outside_since_r4_after_t12.json`）＋Verify_R2 第 1～3 步各窗 240000B＋第 4、5 步各窗实测正增。
@@ -219,7 +245,7 @@
 | 3 | [fx-montage-publication-ownership](../../.kiro/specs/fx-montage-publication-ownership/tasks.md) | 2 | 源码完成，NullRHI 已测（见现状）；Editor 蓝图核对已完成（见收尾）；FX 的 PIE、联机未验 |
 | 4 | [abilitysystem-activation-lifecycle](../../.kiro/specs/abilitysystem-activation-lifecycle/tasks.md) | 1；8；5 的段寿命部分；10 的 GA 与 ASC 部分；9；11 的 CMC 部分（后三项自第 1 步移入） | 源码完成，NullRHI 已测（见第 4 步）；PIE、联机、N3 纠正重放未验 |
 | 5 | [combatants-avatar-binding](../../.kiro/specs/combatants-avatar-binding/tasks.md) | 3；4 | 源码完成，NullRHI 已测（见第 5 步）；NullRHI 监听服务器 PIE 覆盖出生与换人（见收尾）；移动、攻击、死亡与重生未验 |
-| 6 | [teams-squad-switch-linger](../../.kiro/specs/teams-squad-switch-linger/tasks.md) | 换人续放（新行为） | 源码完成，NullRHI 已测；监听服务器 PIE 全部通过（Test_R22／R23）；换人键默认 Z／C 已接；三项玩法取舍待用户；进退场资产缺省跳过 |
+| 6 | [teams-squad-switch-linger](../../.kiro/specs/teams-squad-switch-linger/tasks.md) | 换人续放（新行为） | 源码完成，NullRHI 已测；玩法决定已落实（见收尾续二）；进退场资产缺省跳过；真实 RHI 画面未看 |
 | 7 | [abilitysystem-healthset-repnotify](../../.kiro/specs/abilitysystem-healthset-repnotify/tasks.md) | 12；3 的属性反算部分 | 复现完成，保留分类帧（已定案）；反算已迁出；NullRHI 已测；联机伤害／上限／破韧一致（见收尾）；死亡联机未验 |
 
 顺序说明：FX 关闭（第 3 步）排在激活/终止状态机（第 4 步）之前。这样第 4 步重写激活与终止时，不需要再维护 FX 关闭义务。
