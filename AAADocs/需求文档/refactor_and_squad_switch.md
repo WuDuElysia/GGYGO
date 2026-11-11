@@ -114,11 +114,18 @@
 - 证据为 [增量构建](../../Saved/Codex/I22_20261111/build.log)、[消息回归及首轮夹具失败](../../Saved/Codex/I22_20261111/editor.log)、[SyncMarker 修正夹具后的两项通过及 Python 读回](../../Saved/Codex/I22_20261111/Rerun/editor.log)。首轮误用了 `RF_Transient` 动画和绕过 CoreRedirects 的裸类加载／文本成员导入；修正夹具后只复验失败两项，未改断言所保护的标脏和函数可用行为。
 - 未验证 Cook／打包及历史蓝图包的重新加载（未发现实际引用包）。启动日志中的 13 条 `LogAutomationTest: Error: Condition failed` 发生在专项测试开始前，原样保留，来源未在本需求排查；三个专项叶自身均为 Success、无 error／warning。Marker 排序、缓存刷新、完整 JSON 校验与 `AnimSyncMarkerTools` 归位仍属于 [CR-1014-T1](../Coordination/Module_Audit_Repair_Ledger.md)，本次模块迁移不关闭这些候选。
 
+## 剩余候选盘点与嵌套输入来源
+
+- I23 盘点完成，逐项结论见[修复清单](../Coordination/Module_Audit_Repair_Ledger.md#剩余候选核对)。Boss／玩家共享 Montage 资源、重复 getter 检查及 ASC 测试日志已完成，关闭对应旧候选。Hero 职责拆分、GE 校验统一保持优化建议；Marker 工具整理、旧预输入和 ZZZ 兼容层沿既有决定处理。
+- CR-1111-D1 已修复：CheckCost 内同 Spec 的 raw Try 失败曾先认领外层输入来源。InputBuffer 现在记录同步 Can 层级，并将原生结果与输入 Try 的进入层级对应；内层原生失败及 GA 反馈照常，外层原请求仍获得一次合法重试通知和原截止。没有改变原生 Try、调度或玩法策略。
+- 改动仅为 `GGYGOAbilityInputBuffer.h/.cpp` 与 `GGYGOGameplayAbility.cpp` 的 Can 范围；保留 GA 文件中最小联机的既有诊断改动。原两条失败断言和原日志保留，诊断测试源未改。
+- `GGYGOEditor Win64 Development` 增量编译通过；独立 NullRHI Editor 的六项自动化全部通过、每项无 error／warning：原嵌套来源诊断、失败回调释放占用者、同一时刻重入物理请求、组准入、按来源退休请求、切回留场成员。证据：[构建日志](../../Saved/Codex/I23_20261111/build.log)、[运行日志](../../Saved/Codex/I23_20261111/editor.log)、[自动化报告](../../Saved/Codex/I23_20261111/Automation/index.json)。
+- 未做本修复的生产实机输入、联机和 Cook 验证；不改变最小联机及其它需求的未完成状态。退出时 MCP 服务有 socket 收尾错误，Editor 进程正常退出 0，专项自动化结果未受影响。
+
 ## 未完成项
 
 交给 Codex，顺序和第一步见 [Codex 交接](../Coordination/Handover_Codex.md)。
 
-3. CR-R7 剩余候选逐项核对，按[修复清单](../Coordination/Module_Audit_Repair_Ledger.md)出状态表；含新登记的 CR-1111-D1（显式开关诊断 `ProjectDiagnostics.Input.ActivationOrigin.NestedSameSpecRawTry` 失败）。小缺陷直接修，优化交用户。
 5. 各 spec 勾选状态回写（依赖最小联机完成），同时更新上面的状态表。
 6. 原统筹待修问题里还开着的：
    - PIE 结束时 Enhanced Input 报 `IMC_Squad`／`IMC_Default`／`IMC_MouseLook` "仍在应用、可能泄漏"的 Warning（LocalPlayer 子系统先于 Controller／Pawn 的 EndPlay 反初始化），本批没有复查。
