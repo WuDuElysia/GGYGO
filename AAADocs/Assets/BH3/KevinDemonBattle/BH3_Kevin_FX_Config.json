@@ -1,0 +1,3053 @@
+{
+  "schema": "GGYGO.KevinFX/v1",
+  "task": "KVB-20261105-01",
+  "authorship": "project_authored",
+  "asset_root": "/Game/Characters/Boss/Kevin/DemonBattle/FX",
+  "revision": "R1",
+  "status": "assets_saved_independent_readback_passed_runtime_visual_pending",
+  "references": [
+    {
+      "path": "F:/AnimeStudio/Exports/BH3/Animator/Kevin/05_BOSS_411_DemonBattle/Monster_Boss_411_Texture_Weapon_Color.png",
+      "observed": "原武器贴图：青蓝/青白冰刃，橙黄火刃；仅作为配色和锐利轮廓参考",
+      "not_established": "原粒子、预警几何、触发时点和生命周期"
+    },
+    {
+      "path": "F:/AnimeStudio/Exports/BH3/Animator/Kevin/05_BOSS_411_DemonBattle/Monster_Boss_411_Texture_Body_Wings_Blue_Color.png",
+      "observed": "原翼膜贴图：青白破碎、细长的尖角轮廓",
+      "not_established": "原战斗FX画面、翼防御强度或爆发顺序"
+    }
+  ],
+  "design": {
+    "language": "冰为锐利青白碎片和细线，火为橙黄长条和短爆发；共用克制的破环/裂纹轮廓",
+    "hierarchy": "低亮危险提示、局部蓄力、单一主爆发、短尾；持续领域保持边缘清楚、中心低遮挡",
+    "budget": "单技能通常同时1至3层；无全屏遮罩、无额外灯、无扭曲场；短粒子尾不决定伤害",
+    "timing": "使用Animation认证Montage窗口和Combat实际命中几何；未得到窗口的条目不接生产",
+    "warning_geometry": "Circle/Sector/Line必须由Combat真实危险几何提供尺寸，不能从特效外圈反推伤害",
+    "creation": "全部形状由新Kevin材质和原生Niagara制作，不导入或重写Pyrios包，不声称还原原游戏粒子"
+  },
+  "palettes": {
+    "Ice": {
+      "color_linear": [
+        0.1,
+        0.72,
+        1.0
+      ],
+      "core_linear": [
+        0.78,
+        0.97,
+        1.0
+      ]
+    },
+    "Fire": {
+      "color_linear": [
+        1.0,
+        0.16,
+        0.015
+      ],
+      "core_linear": [
+        1.0,
+        0.78,
+        0.16
+      ]
+    },
+    "Neutral": {
+      "color_linear": [
+        0.32,
+        0.54,
+        0.64
+      ],
+      "core_linear": [
+        0.83,
+        0.95,
+        1.0
+      ]
+    }
+  },
+  "playback": {
+    "mode": "MontageWindow",
+    "begin_event_tag": "each_phase_consumes_animation_declared_begin_event_tag",
+    "end_event_tag": "each_phase_consumes_animation_declared_end_event_tag",
+    "remote_seek_delta_seconds": 0.03333333333333333,
+    "remote_max_sim_time_seconds": 0.033,
+    "abort_stop_mode": "DestroyImmediately",
+    "field_settings": "NoCustomField",
+    "ground_basis": "原Mesh本体+Y为Actor+X；根空间项目朝向修正yaw=90度，地面高度以实际Mesh根读回为准",
+    "socket_policy": "原根为空名；武器使用Animation验证的KevinWeaponTraceEnd，不回落到根",
+    "normal_tail": "仅短粒子可DeactivateDetachKeepWorld转交AutoDestroy，预警/领域/守卫立即销毁",
+    "acceptance": "原GA取消/死亡/失败、换段及PIE退出核自有Task与组件；来源/编译/保存不代画面与联机",
+    "warning_follow": "当Combat查询使用当前Avatar相对中心，预警/领域Attached原Mesh根跟随同一Avatar；固定落点必须另给已冻结World目标，不能在开始时偷换"
+  },
+  "effects": {
+    "IceWeaponTrail": {
+      "anchor": "weapon",
+      "normal_stop": "DeactivateDetachKeepWorld",
+      "layers": [
+        {
+          "kind": "ribbon",
+          "shape": "ribbon",
+          "palette": "Ice",
+          "life": 0.16,
+          "rate": 90,
+          "width": 38,
+          "gain": 2.0
+        }
+      ]
+    },
+    "FireWeaponTrail": {
+      "anchor": "weapon",
+      "normal_stop": "DeactivateDetachKeepWorld",
+      "layers": [
+        {
+          "kind": "ribbon",
+          "shape": "ribbon",
+          "palette": "Fire",
+          "life": 0.2,
+          "rate": 90,
+          "width": 45,
+          "gain": 2.4
+        },
+        {
+          "kind": "sprite",
+          "shape": "streak",
+          "palette": "Fire",
+          "life": 0.26,
+          "rate": 20,
+          "size": [
+            5,
+            24
+          ],
+          "speed": 75,
+          "spread": 9,
+          "gain": 1.1
+        }
+      ]
+    },
+    "IceCharge": {
+      "anchor": "weapon",
+      "normal_stop": "DestroyImmediately",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "facet",
+          "palette": "Ice",
+          "life": 0.45,
+          "rate": 20,
+          "size": [
+            7,
+            24
+          ],
+          "speed": -28,
+          "spread": 36,
+          "gain": 1.2
+        },
+        {
+          "kind": "sprite",
+          "shape": "halo",
+          "palette": "Ice",
+          "life": 0.18,
+          "rate": 8,
+          "size": [
+            30,
+            30
+          ],
+          "speed": 0,
+          "spread": 0,
+          "gain": 0.6
+        }
+      ]
+    },
+    "FireCharge": {
+      "anchor": "weapon",
+      "normal_stop": "DestroyImmediately",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "streak",
+          "palette": "Fire",
+          "life": 0.5,
+          "rate": 24,
+          "size": [
+            5,
+            32
+          ],
+          "speed": -40,
+          "spread": 45,
+          "gain": 1.4
+        },
+        {
+          "kind": "sprite",
+          "shape": "halo",
+          "palette": "Fire",
+          "life": 0.2,
+          "rate": 8,
+          "size": [
+            34,
+            34
+          ],
+          "speed": 0,
+          "spread": 0,
+          "gain": 0.8
+        }
+      ]
+    },
+    "IceStrike": {
+      "anchor": "root",
+      "normal_stop": "DeactivateDetachKeepWorld",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "facet",
+          "palette": "Ice",
+          "life": 0.32,
+          "burst": 16,
+          "size": [
+            6,
+            32
+          ],
+          "speed": 220,
+          "spread": 18,
+          "gain": 1.8
+        },
+        {
+          "kind": "sprite",
+          "shape": "halo",
+          "palette": "Ice",
+          "life": 0.12,
+          "burst": 1,
+          "size": [
+            84,
+            84
+          ],
+          "speed": 0,
+          "spread": 0,
+          "gain": 2.2
+        }
+      ]
+    },
+    "FireStrike": {
+      "anchor": "root",
+      "normal_stop": "DeactivateDetachKeepWorld",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "streak",
+          "palette": "Fire",
+          "life": 0.32,
+          "burst": 18,
+          "size": [
+            5,
+            36
+          ],
+          "speed": 260,
+          "spread": 12,
+          "gain": 2.0
+        },
+        {
+          "kind": "sprite",
+          "shape": "halo",
+          "palette": "Fire",
+          "life": 0.1,
+          "burst": 1,
+          "size": [
+            100,
+            100
+          ],
+          "speed": 0,
+          "spread": 0,
+          "gain": 2.2
+        }
+      ]
+    },
+    "IceWarning": {
+      "anchor": "ground",
+      "normal_stop": "DestroyImmediately",
+      "geometry_required": true,
+      "layers": [
+        {
+          "kind": "ground",
+          "shape": "warning",
+          "palette": "Ice",
+          "life": 1.0,
+          "loop": true,
+          "burst": 1,
+          "size": [
+            100,
+            100
+          ],
+          "gain": 0.35
+        }
+      ]
+    },
+    "FireWarning": {
+      "anchor": "ground",
+      "normal_stop": "DestroyImmediately",
+      "geometry_required": true,
+      "layers": [
+        {
+          "kind": "ground",
+          "shape": "warning",
+          "palette": "Fire",
+          "life": 1.0,
+          "loop": true,
+          "burst": 1,
+          "size": [
+            100,
+            100
+          ],
+          "gain": 0.35
+        }
+      ]
+    },
+    "IceGroundBreak": {
+      "anchor": "ground",
+      "normal_stop": "DeactivateDetachKeepWorld",
+      "layers": [
+        {
+          "kind": "ground",
+          "shape": "broken_ring",
+          "palette": "Ice",
+          "life": 0.4,
+          "burst": 1,
+          "size": [
+            110,
+            110
+          ],
+          "grow": 3.2,
+          "gain": 1.4
+        },
+        {
+          "kind": "sprite",
+          "shape": "facet",
+          "palette": "Ice",
+          "life": 0.55,
+          "burst": 22,
+          "size": [
+            10,
+            48
+          ],
+          "speed": 240,
+          "spread": 45,
+          "gain": 1.6
+        }
+      ]
+    },
+    "FireGroundBreak": {
+      "anchor": "ground",
+      "normal_stop": "DeactivateDetachKeepWorld",
+      "layers": [
+        {
+          "kind": "ground",
+          "shape": "broken_ring",
+          "palette": "Fire",
+          "life": 0.36,
+          "burst": 1,
+          "size": [
+            120,
+            120
+          ],
+          "grow": 3.8,
+          "gain": 1.6
+        },
+        {
+          "kind": "sprite",
+          "shape": "streak",
+          "palette": "Fire",
+          "life": 0.55,
+          "burst": 24,
+          "size": [
+            9,
+            56
+          ],
+          "speed": 270,
+          "spread": 45,
+          "gain": 1.8
+        }
+      ]
+    },
+    "IceDomain": {
+      "anchor": "ground",
+      "normal_stop": "DestroyImmediately",
+      "geometry_required": true,
+      "layers": [
+        {
+          "kind": "ground",
+          "shape": "broken_ring",
+          "palette": "Ice",
+          "life": 1.0,
+          "loop": true,
+          "burst": 1,
+          "size": [
+            100,
+            100
+          ],
+          "gain": 0.5
+        }
+      ]
+    },
+    "FireDomain": {
+      "anchor": "ground",
+      "normal_stop": "DestroyImmediately",
+      "geometry_required": true,
+      "layers": [
+        {
+          "kind": "ground",
+          "shape": "broken_ring",
+          "palette": "Fire",
+          "life": 1.0,
+          "loop": true,
+          "burst": 1,
+          "size": [
+            100,
+            100
+          ],
+          "gain": 0.55
+        }
+      ]
+    },
+    "WingGuard": {
+      "anchor": "root",
+      "normal_stop": "DestroyImmediately",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "facet",
+          "palette": "Ice",
+          "life": 0.7,
+          "rate": 16,
+          "size": [
+            12,
+            64
+          ],
+          "speed": 14,
+          "spread": 110,
+          "gain": 0.7
+        }
+      ]
+    },
+    "GuardBreak": {
+      "anchor": "root",
+      "normal_stop": "DeactivateDetachKeepWorld",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "facet",
+          "palette": "Ice",
+          "life": 0.48,
+          "burst": 28,
+          "size": [
+            12,
+            62
+          ],
+          "speed": 290,
+          "spread": 95,
+          "gain": 1.5
+        }
+      ]
+    },
+    "IceDashWake": {
+      "anchor": "root",
+      "normal_stop": "DeactivateDetachKeepWorld",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "facet",
+          "palette": "Ice",
+          "life": 0.24,
+          "rate": 35,
+          "size": [
+            9,
+            34
+          ],
+          "speed": 30,
+          "spread": 35,
+          "gain": 0.7
+        }
+      ]
+    },
+    "FireDashWake": {
+      "anchor": "root",
+      "normal_stop": "DeactivateDetachKeepWorld",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "streak",
+          "palette": "Fire",
+          "life": 0.24,
+          "rate": 35,
+          "size": [
+            8,
+            38
+          ],
+          "speed": 40,
+          "spread": 35,
+          "gain": 0.8
+        }
+      ]
+    },
+    "AerialGather": {
+      "anchor": "root",
+      "normal_stop": "DestroyImmediately",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "facet",
+          "palette": "Ice",
+          "life": 0.6,
+          "rate": 26,
+          "size": [
+            9,
+            44
+          ],
+          "speed": -85,
+          "spread": 130,
+          "gain": 1.2
+        }
+      ]
+    },
+    "IceHitImpact": {
+      "anchor": "impact",
+      "normal_stop": "DeactivateDetachKeepWorld",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "facet",
+          "palette": "Ice",
+          "life": 0.2,
+          "burst": 9,
+          "size": [
+            4,
+            19
+          ],
+          "speed": 190,
+          "spread": 0,
+          "gain": 1.8
+        }
+      ]
+    },
+    "FireHitImpact": {
+      "anchor": "impact",
+      "normal_stop": "DeactivateDetachKeepWorld",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "streak",
+          "palette": "Fire",
+          "life": 0.22,
+          "burst": 11,
+          "size": [
+            4,
+            24
+          ],
+          "speed": 210,
+          "spread": 0,
+          "gain": 2.0
+        }
+      ]
+    },
+    "IceProjectile": {
+      "anchor": "projectile",
+      "normal_stop": "DestroyImmediately",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "facet",
+          "palette": "Ice",
+          "local_space": true,
+          "life": 1.0,
+          "loop": true,
+          "burst": 1,
+          "size": [
+            24,
+            64
+          ],
+          "speed": 0,
+          "spread": 0,
+          "gain": 1.8
+        },
+        {
+          "kind": "ribbon",
+          "shape": "ribbon",
+          "palette": "Ice",
+          "life": 0.13,
+          "rate": 90,
+          "width": 18,
+          "gain": 1.1
+        }
+      ]
+    },
+    "FireWingGuard": {
+      "anchor": "root",
+      "normal_stop": "DestroyImmediately",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "facet",
+          "palette": "Fire",
+          "life": 0.7,
+          "rate": 16,
+          "size": [
+            12,
+            64
+          ],
+          "speed": 14,
+          "spread": 110,
+          "gain": 0.75
+        }
+      ]
+    },
+    "DeathDissipate": {
+      "anchor": "root",
+      "normal_stop": "DestroyImmediately",
+      "layers": [
+        {
+          "kind": "sprite",
+          "shape": "facet",
+          "palette": "Neutral",
+          "life": 0.9,
+          "burst": 28,
+          "size": [
+            8,
+            38
+          ],
+          "speed": 65,
+          "spread": 75,
+          "gain": 0.7
+        }
+      ]
+    }
+  },
+  "hit_cues": {
+    "Ice01": {
+      "effect": "IceHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Ice01",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "location_mode": "HitResult",
+      "audio_hit_event_id": 549475289,
+      "audio_binding_basis": "same_boss_ice_candidate",
+      "original_action_mapping_verified": false
+    },
+    "Ice02": {
+      "effect": "IceHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Ice02",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "location_mode": "HitResult",
+      "audio_hit_event_id": 549475289,
+      "audio_binding_basis": "same_boss_ice_candidate",
+      "original_action_mapping_verified": false
+    },
+    "Ice03": {
+      "effect": "IceHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Ice03",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "location_mode": "ParametersLocation",
+      "audio_hit_event_id": 549475289,
+      "audio_binding_basis": "same_boss_ice_candidate",
+      "original_action_mapping_verified": false
+    },
+    "Ice04": {
+      "effect": "IceHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Ice04",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "location_mode": "HitResult",
+      "audio_hit_event_id": 549475289,
+      "audio_binding_basis": "same_boss_ice_candidate",
+      "original_action_mapping_verified": false
+    },
+    "Ice05": {
+      "effect": "IceHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Ice05",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "location_mode": "HitResult",
+      "audio_hit_event_id": 549475289,
+      "audio_binding_basis": "same_boss_ice_candidate",
+      "original_action_mapping_verified": false
+    },
+    "Fire01": {
+      "effect": "FireHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire01",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3810557962_1",
+      "location_mode": "HitResult",
+      "audio_hit_event_id": 3810557962,
+      "audio_binding_basis": "same_action_candidate",
+      "original_action_mapping_verified": false
+    },
+    "Fire02": {
+      "effect": "FireHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire02",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1624690421_1",
+      "location_mode": "HitResult",
+      "audio_hit_event_id": 1624690421,
+      "audio_binding_basis": "same_action_candidate",
+      "original_action_mapping_verified": false
+    },
+    "Fire03": {
+      "effect": "FireHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire03",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3980448763_1",
+      "location_mode": "HitResult",
+      "audio_hit_event_id": 3980448763,
+      "audio_binding_basis": "other_fire_action_project_candidate",
+      "original_action_mapping_verified": false
+    },
+    "Fire04": {
+      "effect": "FireHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire04",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2564483858_1",
+      "location_mode": "ParametersLocation",
+      "audio_hit_event_id": 2564483858,
+      "audio_binding_basis": "same_action_candidate",
+      "original_action_mapping_verified": false
+    },
+    "Fly01": {
+      "effect": "IceHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly01",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3618384701_1",
+      "location_mode": "HitResult",
+      "audio_hit_event_id": 3618384701,
+      "audio_binding_basis": "same_action_candidate",
+      "original_action_mapping_verified": false
+    },
+    "Fly02": {
+      "effect": "IceHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly02",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858524_1",
+      "location_mode": "HitResult",
+      "audio_hit_event_id": 93858524,
+      "audio_binding_basis": "same_action_candidate",
+      "original_action_mapping_verified": false
+    },
+    "Fly03": {
+      "effect": "IceHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly03",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858524_1",
+      "location_mode": "HitResult",
+      "audio_hit_event_id": 93858524,
+      "audio_binding_basis": "other_fly_action_project_candidate",
+      "original_action_mapping_verified": false
+    },
+    "Counter": {
+      "effect": "IceHitImpact",
+      "tag": "GameplayCue.Hit.Kevin.DemonBattle.Counter",
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E4188079933_1",
+      "location_mode": "HitResult",
+      "audio_hit_event_id": 4188079933,
+      "audio_binding_basis": "same_action_candidate",
+      "original_action_mapping_verified": false
+    }
+  },
+  "projectile_visuals": {
+    "Fly03": {
+      "effect": "IceProjectile",
+      "owner": "original_projectile_actor",
+      "field_mode": "NoCustomField",
+      "local_transform": {
+        "translation": [
+          0,
+          0,
+          0
+        ],
+        "rotation_degrees": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "collision_radius_cm": 32,
+      "visual_core_diameter_cm": 64,
+      "stop": "original_projectile_destroy",
+      "lifetime_source": "Combat原ProjectileMovement Actor的真实命中/超时/GA取消；Niagara不执行移动或判定"
+    },
+    "AirChain01": {
+      "effect": "IceProjectile",
+      "owner": "original_projectile_actor",
+      "field_mode": "NoCustomField",
+      "local_transform": {
+        "translation": [
+          0,
+          0,
+          0
+        ],
+        "rotation_degrees": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "collision_radius_cm": 32,
+      "visual_core_diameter_cm": 64,
+      "stop": "original_projectile_destroy",
+      "lifetime_source": "Combat原ProjectileMovement Actor的真实命中/超时/GA取消；Niagara不执行移动或判定",
+      "source_visual_key": "Fly03"
+    },
+    "AirChain02": {
+      "effect": "IceProjectile",
+      "owner": "original_projectile_actor",
+      "field_mode": "NoCustomField",
+      "local_transform": {
+        "translation": [
+          0,
+          0,
+          0
+        ],
+        "rotation_degrees": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "collision_radius_cm": 32,
+      "visual_core_diameter_cm": 64,
+      "stop": "original_projectile_destroy",
+      "lifetime_source": "Combat原ProjectileMovement Actor的真实命中/超时/GA取消；Niagara不执行移动或判定",
+      "source_visual_key": "Fly03"
+    }
+  },
+  "actions": [
+    {
+      "action_id": "Ice01",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice01_KVB",
+      "enable_gate": "",
+      "damage_mode": "melee",
+      "based_on_hit_windows": [
+        [
+          0.75,
+          0.9166666666666666
+        ]
+      ],
+      "based_on_duration_seconds": 2.0,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.75
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice01.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice01.FX.Warning.End",
+          "effect": "IceCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.75,
+            0.9166666666666666
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice01.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice01.FX.Active01.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "Ice02",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice02_KVB",
+      "enable_gate": "",
+      "damage_mode": "melee",
+      "based_on_hit_windows": [
+        [
+          0.13333333333333333,
+          0.4
+        ]
+      ],
+      "based_on_duration_seconds": 1.850000023841858,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.13333333333333333
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice02.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice02.FX.Warning.End",
+          "effect": "IceCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.13333333333333333,
+            0.4
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice02.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice02.FX.Active01.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "Ice03",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice03_KVB",
+      "enable_gate": "",
+      "damage_mode": "area",
+      "based_on_hit_windows": [
+        [
+          0.98,
+          1.12
+        ]
+      ],
+      "based_on_duration_seconds": 2.0500001907348633,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.98
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice03.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice03.FX.Warning.End",
+          "effect": "IceWarning",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "",
+          "local_transform": {
+            "translation": [
+              0,
+              150,
+              2
+            ],
+            "rotation_degrees": [
+              0,
+              90,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          "geometry": {
+            "shape": "circle",
+            "radius_cm": 450,
+            "basis": "combat_configuration",
+            "center_lifecycle": "current_avatar_relative_center"
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.98,
+            1.12
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice03.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice03.FX.Active01.End",
+          "effect": "IceGroundBreak",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "",
+          "local_transform": {
+            "translation": [
+              0,
+              150,
+              2
+            ],
+            "rotation_degrees": [
+              0,
+              90,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "Ice04",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice04_KVB",
+      "enable_gate": "",
+      "damage_mode": "melee",
+      "based_on_hit_windows": [
+        [
+          0.75,
+          1.02
+        ]
+      ],
+      "based_on_duration_seconds": 2.183333396911621,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.75
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice04.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice04.FX.Warning.End",
+          "effect": "IceCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.75,
+            1.02
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice04.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice04.FX.Active01.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "Ice05",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice05_KVB",
+      "enable_gate": "",
+      "damage_mode": "melee",
+      "based_on_hit_windows": [
+        [
+          0.2,
+          0.48
+        ]
+      ],
+      "based_on_duration_seconds": 2.0,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.2
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice05.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice05.FX.Warning.End",
+          "effect": "IceCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.2,
+            0.48
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice05.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice05.FX.Active01.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "Fire01",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire01_KVB",
+      "enable_gate": "",
+      "damage_mode": "melee",
+      "based_on_hit_windows": [
+        [
+          0.45,
+          0.95
+        ],
+        [
+          1.05,
+          1.4
+        ]
+      ],
+      "based_on_duration_seconds": 2.8333332538604736,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.45
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire01.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire01.FX.Warning.End",
+          "effect": "FireCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.45,
+            0.95
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire01.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire01.FX.Active01.End",
+          "effect": "FireWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            1.05,
+            1.4
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire01.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire01.FX.Active02.End",
+          "effect": "FireWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "Fire02",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire02_KVB",
+      "enable_gate": "",
+      "damage_mode": "melee",
+      "based_on_hit_windows": [
+        [
+          0.55,
+          1.1
+        ],
+        [
+          2.1,
+          2.8
+        ]
+      ],
+      "based_on_duration_seconds": 4.2166666984558105,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.55
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire02.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire02.FX.Warning.End",
+          "effect": "FireCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.55,
+            1.1
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire02.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire02.FX.Active01.End",
+          "effect": "FireWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            2.1,
+            2.8
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire02.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire02.FX.Active02.End",
+          "effect": "FireWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "Fire03",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire03_KVB",
+      "enable_gate": "",
+      "damage_mode": "melee",
+      "based_on_hit_windows": [
+        [
+          0.1,
+          0.48
+        ],
+        [
+          0.62,
+          1.1
+        ]
+      ],
+      "based_on_duration_seconds": 3.2333333492279053,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.1
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire03.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire03.FX.Warning.End",
+          "effect": "FireCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.1,
+            0.48
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire03.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire03.FX.Active01.End",
+          "effect": "FireWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            0.62,
+            1.1
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire03.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire03.FX.Active02.End",
+          "effect": "FireWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "Fire04",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire04_KVB",
+      "enable_gate": "",
+      "damage_mode": "area",
+      "based_on_hit_windows": [
+        [
+          2.12,
+          2.35
+        ]
+      ],
+      "based_on_duration_seconds": 5.183333396911621,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            2.12
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire04.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire04.FX.Warning.End",
+          "effect": "FireCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            2.12,
+            2.35
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire04.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire04.FX.Active01.End",
+          "effect": "FireStrike",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          "placement_basis": "Combat已证该Area窗可在空中发生；使用原武器局部火爆发，真实Landed表现独立"
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "Fly01",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly01_KVB",
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "damage_mode": "melee",
+      "based_on_hit_windows": [
+        [
+          0.55,
+          1.0
+        ],
+        [
+          2.0,
+          2.55
+        ]
+      ],
+      "based_on_duration_seconds": 3.933333396911621,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.55
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly01.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly01.FX.Warning.End",
+          "effect": "IceCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.55,
+            1.0
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly01.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly01.FX.Active01.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            2.0,
+            2.55
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly01.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly01.FX.Active02.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "Fly02",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly02_KVB",
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "damage_mode": "melee",
+      "based_on_hit_windows": [
+        [
+          0.55,
+          1.1
+        ],
+        [
+          1.65,
+          2.2
+        ]
+      ],
+      "based_on_duration_seconds": 3.433333396911621,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.55
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly02.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly02.FX.Warning.End",
+          "effect": "IceCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.55,
+            1.1
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly02.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly02.FX.Active01.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            1.65,
+            2.2
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly02.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly02.FX.Active02.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "Fly03",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly03_KVB",
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "damage_mode": "projectile",
+      "based_on_hit_windows": [
+        [
+          3.1,
+          3.25
+        ],
+        [
+          3.6,
+          3.75
+        ]
+      ],
+      "based_on_duration_seconds": 4.833333492279053,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            3.1
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly03.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly03.FX.Warning.End",
+          "effect": "AerialGather",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              90
+            ],
+            "rotation_degrees": [
+              0,
+              90,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            3.1,
+            3.25
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly03.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly03.FX.Active01.End",
+          "effect": "IceStrike",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            3.6,
+            3.75
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly03.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly03.FX.Active02.End",
+          "effect": "IceStrike",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "Counter",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Counter_KVB",
+      "enable_gate": "",
+      "damage_mode": "melee",
+      "based_on_hit_windows": [
+        [
+          0.18,
+          0.43
+        ]
+      ],
+      "based_on_duration_seconds": 1.1666666269302368,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.18
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Counter.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Counter.FX.Warning.End",
+          "effect": "IceCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.18,
+            0.43
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Counter.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Counter.FX.Active01.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "DashF",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_DashF_KVB",
+      "enable_gate": "",
+      "damage_mode": "none",
+      "based_on_hit_windows": [],
+      "based_on_duration_seconds": 1.0666667222976685,
+      "phases": [
+        {
+          "phase_id": "Active",
+          "role": "active",
+          "window_seconds": [
+            0.0,
+            1.0666667222976685
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.DashF.FX.Active.Begin",
+          "end_event_tag": "Event.Montage.Kevin.DashF.FX.Active.End",
+          "effect": "IceDashWake",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              45
+            ],
+            "rotation_degrees": [
+              0,
+              90,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": []
+    },
+    {
+      "action_id": "DashB",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_DashB_KVB",
+      "enable_gate": "",
+      "damage_mode": "none",
+      "based_on_hit_windows": [],
+      "based_on_duration_seconds": 1.25,
+      "phases": [
+        {
+          "phase_id": "Active",
+          "role": "active",
+          "window_seconds": [
+            0.0,
+            1.25
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.DashB.FX.Active.Begin",
+          "end_event_tag": "Event.Montage.Kevin.DashB.FX.Active.End",
+          "effect": "IceDashWake",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              45
+            ],
+            "rotation_degrees": [
+              0,
+              90,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": []
+    },
+    {
+      "action_id": "FlyEvade",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_FlyEvade_KVB",
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "damage_mode": "none",
+      "based_on_hit_windows": [],
+      "based_on_duration_seconds": 1.25,
+      "phases": [
+        {
+          "phase_id": "Active",
+          "role": "active",
+          "window_seconds": [
+            0.0,
+            1.25
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.FlyEvade.FX.Active.Begin",
+          "end_event_tag": "Event.Montage.Kevin.FlyEvade.FX.Active.End",
+          "effect": "IceDashWake",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              45
+            ],
+            "rotation_degrees": [
+              0,
+              90,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": []
+    },
+    {
+      "action_id": "FireWingGuard",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_FireWingGuard_KVB",
+      "enable_gate": "",
+      "damage_mode": "none",
+      "based_on_hit_windows": [],
+      "based_on_duration_seconds": 4.5,
+      "phases": [
+        {
+          "phase_id": "Charge",
+          "role": "charge",
+          "window_seconds": [
+            0.0,
+            0.5
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.FireWingGuard.FX.Charge.Begin",
+          "end_event_tag": "Event.Montage.Kevin.FireWingGuard.FX.Charge.End",
+          "effect": "FireCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Guard",
+          "role": "guard",
+          "window_seconds": [
+            0.5,
+            2.5
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.FireWingGuard.FX.Guard.Begin",
+          "end_event_tag": "Event.Montage.Kevin.FireWingGuard.FX.Guard.End",
+          "effect": "FireWingGuard",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              100
+            ],
+            "rotation_degrees": [
+              0,
+              90,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不叠加新发射器；原短尾按Niagara寿命退役，持续效果随原窗口立即停止"
+        }
+      ]
+    },
+    {
+      "action_id": "AirChain01",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_AirChain01_KVB",
+      "enable_gate": "",
+      "damage_mode": "per_window",
+      "based_on_hit_windows": [
+        [
+          0.550000011920929,
+          1.0
+        ],
+        [
+          2.0,
+          2.549999952316284
+        ],
+        [
+          7.0333333015441895,
+          7.183333396911621
+        ],
+        [
+          7.5333333015441895,
+          7.683333396911621
+        ],
+        [
+          10.886666297912598,
+          11.116666793823242
+        ]
+      ],
+      "based_on_duration_seconds": 13.949999809265137,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.550000011920929
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Warning.End",
+          "effect": "IceCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "CastWarning",
+          "role": "charge",
+          "window_seconds": [
+            3.933333396911621,
+            7.0333333015441895
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.CastWarning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.CastWarning.End",
+          "effect": "AerialGather",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              90
+            ],
+            "rotation_degrees": [
+              0,
+              90,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "SlamWarning",
+          "role": "warning",
+          "window_seconds": [
+            8.766666412353516,
+            10.886666297912598
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.SlamWarning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.SlamWarning.End",
+          "effect": "FireCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.550000011920929,
+            1.0
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active01.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            2.0,
+            2.549999952316284
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active02.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active03",
+          "role": "active",
+          "window_seconds": [
+            7.0333333015441895,
+            7.183333396911621
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active03.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active03.End",
+          "effect": "IceStrike",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active04",
+          "role": "active",
+          "window_seconds": [
+            7.5333333015441895,
+            7.683333396911621
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active04.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active04.End",
+          "effect": "IceStrike",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active05",
+          "role": "active",
+          "window_seconds": [
+            10.886666297912598,
+            11.116666793823242
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active05.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active05.End",
+          "effect": "FireStrike",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不另造落地效果或第二计时；原短尾按Niagara寿命退役，曲线外Gravity/Landed由GA实际边界清理，LandingRecovery另行表现"
+        }
+      ],
+      "airborne_boundary": "Active05为曲线内Area释放，使用局部火爆发；不把此时点或曲线末端当作真实Landed。曲线外Gravity/Landed与LandingRecovery由原GA/CMC处理。",
+      "hit_cue_source": "沿Animation真实HitWindow.source_action_id/hit_cue_tag复用Fly01/02、Fly03、Fire04原Cue，不以整链单Cue覆盖不同命中模式"
+    },
+    {
+      "action_id": "AirChain02",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_AirChain02_KVB",
+      "enable_gate": "",
+      "damage_mode": "per_window",
+      "based_on_hit_windows": [
+        [
+          0.550000011920929,
+          1.100000023841858
+        ],
+        [
+          1.649999976158142,
+          2.200000047683716
+        ],
+        [
+          6.5333333015441895,
+          6.683333396911621
+        ],
+        [
+          7.0333333015441895,
+          7.183333396911621
+        ],
+        [
+          10.386666297912598,
+          10.616666793823242
+        ]
+      ],
+      "based_on_duration_seconds": 13.449999809265137,
+      "phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.550000011920929
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Warning.End",
+          "effect": "IceCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "CastWarning",
+          "role": "charge",
+          "window_seconds": [
+            3.433333396911621,
+            6.5333333015441895
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.CastWarning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.CastWarning.End",
+          "effect": "AerialGather",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              90
+            ],
+            "rotation_degrees": [
+              0,
+              90,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "SlamWarning",
+          "role": "warning",
+          "window_seconds": [
+            8.266666412353516,
+            10.386666297912598
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.SlamWarning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.SlamWarning.End",
+          "effect": "FireCharge",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.550000011920929,
+            1.100000023841858
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active01.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            1.649999976158142,
+            2.200000047683716
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active02.End",
+          "effect": "IceWeaponTrail",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active03",
+          "role": "active",
+          "window_seconds": [
+            6.5333333015441895,
+            6.683333396911621
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active03.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active03.End",
+          "effect": "IceStrike",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active04",
+          "role": "active",
+          "window_seconds": [
+            7.0333333015441895,
+            7.183333396911621
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active04.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active04.End",
+          "effect": "IceStrike",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        {
+          "phase_id": "Active05",
+          "role": "active",
+          "window_seconds": [
+            10.386666297912598,
+            10.616666793823242
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active05.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active05.End",
+          "effect": "FireStrike",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "Attached",
+          "socket_name": "KevinWeaponTraceEnd",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation_degrees": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "unused_animation_phases": [
+        {
+          "phase_id": "Recovery",
+          "reason": "不另造落地效果或第二计时；原短尾按Niagara寿命退役，曲线外Gravity/Landed由GA实际边界清理，LandingRecovery另行表现"
+        }
+      ],
+      "airborne_boundary": "Active05为曲线内Area释放，使用局部火爆发；不把此时点或曲线末端当作真实Landed。曲线外Gravity/Landed与LandingRecovery由原GA/CMC处理。",
+      "hit_cue_source": "沿Animation真实HitWindow.source_action_id/hit_cue_tag复用Fly01/02、Fly03、Fire04原Cue，不以整链单Cue覆盖不同命中模式"
+    },
+    {
+      "action_id": "LandingRecovery",
+      "contract_kind": "presentation",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_LandingRecovery_KVB",
+      "section": "Main",
+      "trigger": "real_landed_only",
+      "movement_mode": "presentation_only_no_CMC_curve_execution",
+      "enable_gate": "",
+      "damage_mode": "none",
+      "based_on_hit_windows": [],
+      "based_on_duration_seconds": 2.450000047683716,
+      "phases": [
+        {
+          "phase_id": "Impact",
+          "role": "impact",
+          "window_seconds": [
+            0.0,
+            0.35
+          ],
+          "begin_event_tag": "Event.Montage.Kevin.LandingRecovery.FX.Impact.Begin",
+          "end_event_tag": "Event.Montage.Kevin.LandingRecovery.FX.Impact.End",
+          "timing_basis": "project_real_landed_recovery_not_original_event",
+          "effect": "FireGroundBreak",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "space": "World",
+          "socket_name": "",
+          "local_transform": {
+            "translation": [
+              0,
+              0,
+              2
+            ],
+            "rotation_degrees": [
+              0,
+              90,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      ],
+      "placement_basis": "原GA/CMC真实Landed后才播放独立Montage；Impact开始时组合原Mesh根地面World变换，取消立即归还，正常短尾交Niagara。声音由Audio在同实际表现契约提供。"
+    }
+  ],
+  "integration_status": "已消费19主动组和真实Landed独立LandingRecovery，共20组/54个FX窗口；落地Impact复用FireGroundBreak，不改空中Fire04或既有19组，不增包/新机制。UE资产及可见结果未验",
+  "animation_configuration": "BH3_Kevin_Combat_Montage_Config.json",
+  "audio_configuration": "BH3_Kevin_Audio_Config.json"
+}

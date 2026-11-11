@@ -1,48 +1,46 @@
-# Kevin Ice01 / Ice02 隔离动态验证
+# Kevin DemonBattle 运行验证
 
-状态：统一完整 `GGYGOEditor Win64 Development` 构建由根会话报告成功，UHT 与两个 DLL 链接通过；本方案与观察脚本尚未在 UE 执行。统一 UE 操作由根会话负责。
+当前需求与未完成项以 [Kevin Boss 完整组装](../../../需求文档/kevin_boss_assembly.md) 为准。本文记录实际验证入口和证据边界，替代早期仅 Ice01／Ice02 直接请求 GA 的隔离方案。
 
-## 1. 前置门槛
+## 正式入口
 
-1. 顺序执行 Movement 派生原地动画/Profile builder → Animation Socket/Montage/ABP builder → Combat Wiring 只读预检 → `--apply` → 再次只读预检。保留各工具报告及已有资产差异。
-2. 原生自动化：`GGYGO.Combat.MeleeTrace.SafetyAndCoverage`、`GGYGO.BossAI.Melee.EndReentry`，回归 `GGYGO.Combat.Combo.WindowAndBuffer`。Movement 测试由其模块提供。报告实际通过/失败，构建成功不代替测试成功。
-3. 只在独立临时关卡/PIE 做验证，不改主关卡或旧 `/Game/AI/Boss/Test`。地面应可行走，保证 CMC 已落地，避免 `BeginActionMotion` 因 Falling 拒绝。每个用例可重启 PIE 得到干净状态。
-4. 在该关卡放置一个 `GGYGOBossEncounter`，BossDefinition 指向新 Kevin Definition；检查生成的 State、Controller 与 Avatar 指向一致，Owner ASC/Avatar 完成初始化。Definition 的 BT 保持空；本轮以 ASC 直接请求已授予的具体 GA 类。
-5. 目标必须有绑定成功的 ASC 与 HealthComponent，健康值足够、无无敌/GodMode/自动回血，碰撞响应兼容 `ECC_Pawn`。可用第二个新 Kevin Encounter 作为被动目标，BT 为空且不触发其能力；不必修改旧 Test 目标。
-6. 空旷位置先播放一次，只观察 Socket 轨迹确定目标固定位置。目标放在实际剑轨迹覆盖范围，验收期间保持静止，不每帧跟随武器。Ice02 是 Prop1 驱动离手剑，不是独立弹体。
+- 地图：`/Game/Map/BH3/L_KevinBoss_P3`，D3D12、单玩家 PIE。
+- Encounter 使用正式 Definition、State、Controller、PawnData、AbilitySet 和两阶段行为树；Boss 由 BT 选招，经 GAS、Montage 作者窗、CMC 和 Combat 执行。
+- 玩家通过原 LocalPlayer／Controller／Pawn 输入装配提交 W／S／D／LeftMouseButton。观察脚本不直接激活 Boss，不写生命，不开 GodMode，不移动或强制落地 Boss。
+- 脚本：本机 `Saved/Codex/KevinBossAssembly_20261111/battle_host.py`。输出为同目录各次运行的 `editor.log`、实际 game viewport PNG 和 Master WAV。日志中的活动特效／声音实例只证明运行事实，画面和听感分别核验。
 
-## 2. 只读观察入口
+## 已取得证据
 
-导入 `AAADocs/Scripts/observe_bh3_kevin_combat.py`，导入本身不执行 UE 操作。先从当前服务器 PIE 获得 `source_avatar` 与 `target_avatar` 对象，再调用：
+以下路径均相对 `Saved/Codex/KevinBossAssembly_20261111/`。
 
-```python
-observer = module.start(source_avatar, target_avatar, label='Ice01_contact', seconds=8.0)
-# source_state 为该 Encounter.get_boss_state()；ability_class 为新 GA BP.generated_class()
-asc = source_state.get_ggygo_ability_system_component()
-activated = asc.try_activate_ability_by_class(ability_class, False)
-```
+| 范围 | 结果与证据 |
+| --- | --- |
+| BossAI／Combat／CMC | `Battle_R1/editor.log` 的 15 项 BossAI 自动化通过；`Battle_R2/editor.log` 的范围／弹体命中查询和 ActionMotion TimingAndOwnership 通过。 |
+| 动画与作者图 | `Animation_Read/editor.log` 的原生轨迹、姿态、Montage 窗口及声音引用读回通过，KevinMotionOutputGuard／KevinPreserveAuthoredGraph 两项通过。 |
+| Focus 与转向 | Controller 恢复原生 AAIController Tick，使用 BT Focus→ControlRotation→CMC 原生转向。`Build_FocusStandalone/build.log` 编译通过；`Focus_Standalone/editor.log` 跨引擎帧两次换向的 NativeFocusRotation 回归通过。 |
+| P3 场景 | `Scene_Read/editor.log` 独立读回通过；实际导航投影、双方完整路径和 9 个空中净空采样通过，初始双方间距 18 m。 |
+| 完整交战 | `Battle_R6/editor.log` 覆盖 Counter、Ice01～05、Fire01～03、AirChain01／02 共 11 个选招入口。Boss 从 1200 HP 经 50% 阶段切换至死亡；玩家以真实普攻完成战斗，结束剩余 2 HP。 |
+| 空中收尾 | 两条 AirChain 均完成 Flying 释放、CMC 原生重力、真实 Landed 及 LandingRecovery 后返回地面选招。`Battle_R5/081_falling_hold.png`、`107_falling_hold.png` 可见 Fly_Loop 末帧全身等待姿态；没有补写 Z 或合成下降。 |
+| 死亡清理 | R6 DeathFinished 后 Avatar 销毁，再观察 5 秒，Boss 弹体、持续声音及活动 Kevin Niagara 均无残留。 |
+| 声音与画面采集 | R6 录得 15 种实际播放的 Kevin SoundCue 实例、237 秒 Master WAV，以及 145 张完整 viewport 读回；部分主要特效受玩家特效及运动模糊遮挡，不能据实例计数判定全部可见。 |
 
-上述 Python 方法名按当前 UFUNCTION 推导，首次执行需确认反射可用性；如果失败，记录实际错误并修脚本，不绕过 GAS 发伤害。观察器通过真实 `OnMeleeHit`、`OnHealthChanged` 委托记录事件，用 Slate 回调记录时序快照；回调仅观察，不拥有攻击时序。8 秒到期自动解绑，也可显式 `observer.stop()`。
+## 受影响复验
 
-输出：`Saved/Codex/kevin_combat_observe_<label>_<UTC>.json`。记录 Montage 路径/位置、Trace 开关、CMC 动作状态、双方位置、目标生命、Mesh Tick/URO，以及伤害变化时的即时 Trace 状态。Slate 采样可能漏掉短窗口，精确边界应依据同步命中/生命委托及原生日志；观察器不会自动将样本判为整套验收通过。
+- **Dash_F 追击已通过**：R6 发现原 MoveTo 因缺少普通移动曲线执行请求被 CMC 拒绝，用户选择完整 Dash_F 分段接近。无伤害 GA、冷却 GE、两阶段动作池及不含 MoveTo 的 BT 已制作，`Build_DashF/build.log` 编译、`DashF_Create/editor.log` 保存、`DashF_Read/editor.log` 独立读回 47 包通过。`Battle_R7_DashF/editor.log` 前两段对静止玩家各水平移动约 711.145 cm，与原片段 711.144 cm 对应，距离 18 m→10.89 m→3.78 m，双方生命不变；随后正常攻击，共记录 11 次 Dash_F，无旧 CMC 拒绝。玩家约 65 秒阵亡，Boss 走真实目标死亡取消，未签本轮胜利。
+- **地面旋转修复**：R8 实图复现 IceWarning 竖起。UE Python 原生构造读回证明位置参数顺序造成 Pitch／Yaw 错位，改具名 `pitch/yaw/roll`；保存 9 个子蓝图，`Rotation_Read/editor.log` 独立验证 37 包。R9 的 `027_NS_Kevin_IceWarning_14030df00bfc_030.png` 和 `030_NS_Kevin_IceGroundBreak_c6025809cf08.png` 已确认水平预警圆和破环。R9 玩家阵亡，未签完整胜利。
+- **火系与空中复拍**：`Visual_Fire_Air/editor.log` 在同一正式场景暂停 BT，通过已有 GAS 授予依次请求 Fire01～03、AirChain01／02；五项均完成且等到真实落地，52 张 PNG 读回、13 种实际 SoundCue、63.637 秒 Master WAV。已核对 `019_NS_Kevin_FireGroundBreak_697aabbd5128_030.png` 的水平火环、`005_NS_Kevin_FireWeaponTrail_8504586aacf1.png` 的刀光、`004_NS_Kevin_FireCharge_cd10c72ba158_030.png` 的蓄力、`036_NS_Kevin_AerialGather_8eb7275a5a2e_030.png` 的聚集碎片、`038_NS_Kevin_IceStrike_23f0e5ab6080.png`／`042_NS_Kevin_FireStrike_d5999ef92921.png` 的冰火爆发及 `039_NS_Kevin_IceProjectile_e1d0bb948cd1_030.png` 的弹体尾迹。
+- 专项取景使用临时诊断 CameraActor 并关闭运动模糊，不保存生产相机／渲染配置，不写生命、不开 GodMode、不移动角色或强制落地。专项 GAS 请求只证明相应执行和表现，不作为自动选招或完整战斗证据。
 
-## 3. 最小动态用例
+## 未覆盖边界
 
-| 用例 | 执行 | 必需证据 |
-| --- | --- | --- |
-| Ice01 正常完成 | 固定接触目标；只激活 Ice01 一次，等待 Montage 完成再多等至少 0.5 秒 | 激活成功；播放正确 Montage；候选窗口 45→55/60 秒；命中/血量事件在真实窗口内，同目标同窗口仅一次；最终 Trace 关闭、动作位移结束、Mesh Tick/URO 恢复 |
-| Ice02 正常完成 | 固定接触目标；激活 Ice02 一次 | 同上，候选窗口 8→24/60 秒；击中来自 Prop1 动画轨迹，不宣称弹体生命周期 |
-| 窗口外零伤害 | 目标位于剑轨迹范围，观察起手、收招与结束后静置 | HealthChanged 不得在 Trace 关闭时产生该动作伤害；无延迟命中。未覆盖短窗口的 Slate 样本不能单独证明零伤害 |
-| 下一次动作可再命中 | 相同目标、完整结束后再次激活同一 GA | 新实例周期/窗口可再伤一次；区分“第二次攻击”与“单次重复命中” |
-| 起手中断 | 在窗口开始前标记 `observer.mark('cancel_requested')`，停止该活动 Montage，令共享任务走真实中断回调 | 零伤害；Trace 与动作句柄清理；Mesh 设置恢复；可以再次激活。停止 Montage 是中断路径证据，不代替所有 GAS 取消路径 |
-| 窗口内中断 | 在已经看到开窗/首个命中后停止该活动 Montage，至少再观察 0.5 秒 | 中断后不再命中、无额外血量下降，动作位移不继续；下一次 GA 可以正常激活 |
-| 不可见仍更新 | 摄像机移开 Boss，让服务端 Mesh 不被渲染，再激活同一 GA | 动作期 AlwaysTickPoseAndRefreshBones/URO=false；有骨骼驱动真实命中与伤害，结束恢复最初值；不等于已完成独立 Dedicated Server 验收 |
+- 本文证据不覆盖 Kevin 独立进程联机、Dedicated Server、Cook、性能验收或真实音频设备试听。
+- 旧隔离方案里的逐动作窗口外零伤害、逐时点中断及不可见服务端骨骼更新矩阵，没有因完整战斗通过而自动获得覆盖。
+- 声音配置中的同 Boss 动作候选仍是项目映射；原版事件归属与时点未知的项保留原标签。
 
-Montage 中断可通过当前 Mesh AnimInstance 的 `montage_stop(0.0, exact_montage)`；必须传实际活动的精确 Montage，不停止其他角色动画。记录请求时刻，核对后续 Task Interrupted → GA EndAbility。独立 GAS 直接取消与死亡取消如本轮工具无法驱动，明确列为未验证，不伪称覆盖。
+## 核心评审后的定向验证
 
-## 4. 位移与伤害解释
+`Build_ReviewFix/build.log` 增量编译成功；`Review_Query/editor.log` 的 AreaAndProjectile 与 TouchThenBlock 两项通过，后者经生产弹体入口验证同段／跨段同 Actor 先 Touch 后 Block：仅一次命中，阻挡仍销毁弹体。物理阻挡独立输出，伤害去重不变。
 
-- 使用派生原地动画及 CMC MotionProfile；移动由 CMC/RMS 执行。GA 开始后记录位移起终点和有效速率，平地无阻挡时与 Profile 的累计位移经过 Mesh 朝向/缩放后的结果对比；碰墙另属 Movement 用例。不得通过 Actor 每帧 SetLocation 制造位移证据。
-- 伤害期望先读实际 GA BP 配置。当前暂定 Damage=20、PoiseDamage=10；GE SetByCaller 仍经过 Execution/HealthSet。若有衰减、免疫或残血钳制，记录原因，不仅按“出现命中日志”宣称结算成功。
-- 每轮用例记录地图、PIE 实例/权限、GA 类、Montage/Profile 路径、目标初始/最终血量、命中计数、最终 Trace/Motion 状态和观察报告。用例未实际执行保持待验收。
-- 结束观察先解绑，再停止 PIE；不保存被测运行时变化。自动选招、Target 服务、联机、群战过滤、其他动作执行器及原游戏 HitBox 还原均不由此轮手动近战用例证明。
+本批 GE 制作／验证库及材质实例资源读回库连同结果结构迁入 GGYGOEditor。`Review_Editor_Read/editor.log` 验证四个 Editor 反射类型、GA／AI 47 包与 FX 43 包独立只读回，未保存资产。原 Content 包未检出旧类型序列化引用，未新增运行时兼容。没有重复跑未受影响的全战斗。
+
+构建／运行针对当前完整工作树，包含其它工作线未提交改动；不代表选择性提交后的干净 HEAD 已单独构建。Editor 启动原有 `LogAutomationTest: Condition failed` 诊断仍在完整日志中，不冒称全日志零错误；上述专项各有独立成功结论。

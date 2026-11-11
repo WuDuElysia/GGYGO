@@ -142,10 +142,12 @@ namespace GGYGOKevinMotion
 		FString Name, Path, SourceHash;
 		FName Bone;
 		FBasis Basis;
-		TStrongObjectPtr<UAnimSequence> Source, Existing;
+		FAxisMap ImportMapping;
+		TStrongObjectPtr<UAnimSequence> Source, Existing, PoseAnchor;
 		TArray<FVector> Positions, Scales, ActorDisplacements;
 		TArray<FQuat> Rotations;
 		TArray<float> Times;
+		bool bHoldLastFrame = false;
 		FJson Report;
 	};
 
@@ -196,8 +198,11 @@ namespace GGYGOKevinMotion
 			|| !FMath::IsNearlyEqual(Derived->GetPlayLength(), Plan.Source->GetPlayLength(), .001f)
 			|| Model->GetNumBoneTracks() != SourceModel->GetNumBoneTracks()
 			|| Metadata.GetValue(Derived, TEXT("GGYGO.MotionCurveSpace")) != CurveSpace
+			|| Metadata.GetValue(Derived, TEXT("GGYGO.MotionPoseAnchor")) != Plan.PoseAnchor->GetPathName()
 			|| Metadata.GetValue(Derived, TEXT("GGYGO.MotionSourceFBXSHA256")) != Plan.SourceHash)
 			return Fail(Plan.Path, TEXT("derived pose/grid/source/basis contract differs; existing asset preserved"));
+		if (Plan.bHoldLastFrame && Metadata.GetValue(Derived, TEXT("GGYGO.PoseSample")) != TEXT("last_frame"))
+			return Fail(Plan.Path, TEXT("末帧表现资产缺少明确采样来源"));
 		TArray<FName> Names;
 		SourceModel->GetBoneTrackNames(Names);
 		for (FName Name : Names)
@@ -217,7 +222,7 @@ namespace GGYGOKevinMotion
 				SourceModel->GetBoneTrackTransforms(Name, Expected);
 				if (Actual.Num() != Expected.Num()) return Fail(Plan.Path, TEXT("non-motion bone grid changed"));
 				for (int32 Frame = 0; Frame < Actual.Num(); ++Frame)
-					if (!Actual[Frame].Equals(Expected[Frame], .001))
+					if (!Actual[Frame].Equals(Plan.bHoldLastFrame ? Expected.Last() : Expected[Frame], .001))
 						return Fail(Plan.Path, TEXT("non-motion bone changed"));
 			}
 		}
@@ -246,15 +251,20 @@ namespace GGYGOKevinMotion
 		return true;
 	}
 
-	bool Prepare(const FJson& Clip, const FBasis& Basis, FPreparedMotion& Plan)
+	bool Prepare(const FJson& Clip, const FBasis& Basis, const FAxisMap* ExpectedImportMapping, FPreparedMotion& Plan)
 	{
-		FString SourcePath, BoneName;
+		FString SourcePath, BoneName, AnchorPath, ReferenceMode, Usage;
 		const TArray<TSharedPtr<FJsonValue>>* Samples = nullptr;
 		double AuditedDuration = 0, ClipRange[2];
 		if (!Clip || !Clip->TryGetStringField(TEXT("source_clip"), Plan.Name)
 			|| !Clip->TryGetStringField(TEXT("source_sequence"), SourcePath)
 			|| !Clip->TryGetStringField(TEXT("derived_sequence"), Plan.Path)
 			|| !Clip->TryGetStringField(TEXT("motion_bone"), BoneName) || BoneName.IsEmpty()
+			|| !Clip->TryGetStringField(TEXT("pose_anchor_sequence"), AnchorPath)
+			|| !Clip->TryGetStringField(TEXT("motion_curve_reference"), ReferenceMode)
+			|| ReferenceMode != TEXT("original_ue_model_with_fbx_full_grid")
+			|| !Clip->TryGetStringField(TEXT("motion_usage"), Usage)
+			|| (Usage != TEXT("action_xyz") && Usage != TEXT("presentation_static") && Usage != TEXT("presentation_last_frame"))
 			|| !Clip->TryGetStringField(TEXT("fbx_sha256"), Plan.SourceHash) || Plan.SourceHash.Len() != 64
 			|| !Clip->TryGetNumberField(TEXT("duration"), AuditedDuration) || !FMath::IsFinite(AuditedDuration)
 			|| !ReadNumbers(Clip, TEXT("clip_range_seconds"), 2, ClipRange)
@@ -330,14 +340,9 @@ namespace GGYGOKevinMotion
 		FAxisMap Mapping;
 		double TranslationError = 0, RotationError = 0;
 		int32 MatchingMaps = 0;
-		const int32 Permutations[6][3] = {{0,1,2},{0,2,1},{1,0,2},{1,2,0},{2,0,1},{2,1,0}};
-		for (const auto& Permutation : Permutations)
-			for (int32 Bits = 0; Bits < 8; ++Bits)
-			{
-				FAxisMap Candidate;
-				for (int32 Axis = 0; Axis < 3; ++Axis) Candidate.Axis[Axis] = Permutation[Axis];
-				Candidate.Sign = FVector(Bits & 1 ? -1 : 1, Bits & 2 ? -1 : 1, Bits & 4 ? -1 : 1);
-				double PositionError = 0, AngleError = 0;
+		const auto CompareMap = [&](const FAxisMap& Candidate, double& PositionError, double& AngleError)
+		{
+			PositionError = AngleError = 0;
 				for (int32 Frame = 0; Frame < Count; ++Frame)
 				{
 					PositionError = FMath::Max(PositionError, FVector::Distance(Original[Frame].GetTranslation() - Original[0].GetTranslation(),
@@ -346,18 +351,82 @@ namespace GGYGOKevinMotion
 					const FQuat FBX = Candidate.MapRotation(FbxRotations[Frame] * FbxRotations[0].Inverse());
 					AngleError = FMath::Max(AngleError, FMath::RadiansToDegrees(UE.AngularDistance(FBX)));
 				}
-				if (PositionError <= .25 && AngleError <= .25 && Candidate.Axis[2] == 1)
+			return PositionError <= .25 && AngleError <= .25 && Candidate.Axis[2] == 1;
+		};
+		if (ExpectedImportMapping)
+		{
+			Mapping = *ExpectedImportMapping;
+			if (!CompareMap(Mapping, TranslationError, RotationError))
+				return Fail(Plan.Name, TEXT("full FBX/native grid differs from the explicitly calibrated import mapping"));
+			MatchingMaps = 1;
+		}
+		else
+		{
+			const int32 Permutations[6][3] = {{0,1,2},{0,2,1},{1,0,2},{1,2,0},{2,0,1},{2,1,0}};
+			for (const auto& Permutation : Permutations)
+				for (int32 Bits = 0; Bits < 8; ++Bits)
 				{
-					++MatchingMaps; Mapping = Candidate; TranslationError = PositionError; RotationError = AngleError;
+					FAxisMap Candidate;
+					for (int32 Axis = 0; Axis < 3; ++Axis) Candidate.Axis[Axis] = Permutation[Axis];
+					Candidate.Sign = FVector(Bits & 1 ? -1 : 1, Bits & 2 ? -1 : 1, Bits & 4 ? -1 : 1);
+					double PositionError = 0, AngleError = 0;
+					if (CompareMap(Candidate, PositionError, AngleError))
+					{
+						++MatchingMaps; Mapping = Candidate; TranslationError = PositionError; RotationError = AngleError;
+					}
 				}
-			}
-		if (MatchingMaps != 1)
+		}
+		if (Usage == TEXT("presentation_static"))
+		{
+			// 明确的静态表现模式：原生与 FBX 根轨道必须逐帧确实静止，不猜不可辨识的坐标映射。
+			for (int32 Frame = 0; Frame < Count; ++Frame)
+				if (Original[Frame].GetTranslation() != Original[0].GetTranslation()
+					|| Original[Frame].GetRotation() != Original[0].GetRotation()
+					|| FbxPositions[Frame] != FbxPositions[0] || FbxRotations[Frame] != FbxRotations[0])
+					return Fail(Plan.Name, TEXT("presentation_static requires genuinely constant native/FBX root tracks"));
+			Plan.Report->SetStringField(TEXT("axis_evidence"), TEXT("not_applicable_to_verified_static_presentation"));
+		}
+		else if (MatchingMaps != 1)
 			return Fail(Plan.Name, FString::Printf(TEXT("FBX/UE full-pose axis evidence is missing or ambiguous (%d matching maps); no inferred basis"), MatchingMaps));
+		Plan.ImportMapping = Mapping;
+		Plan.bHoldLastFrame = Usage == TEXT("presentation_last_frame");
+		Plan.Report->SetStringField(TEXT("motion_usage"), Usage);
 		Plan.Report->SetArrayField(TEXT("axis_permutation"), {MakeShared<FJsonValueNumber>(Mapping.Axis[0]), MakeShared<FJsonValueNumber>(Mapping.Axis[1]), MakeShared<FJsonValueNumber>(Mapping.Axis[2])});
 		Plan.Report->SetArrayField(TEXT("axis_sign"), VectorJson(Mapping.Sign));
 		Plan.Report->SetNumberField(TEXT("fbx_to_ue_translation_error_cm"), TranslationError);
 		Plan.Report->SetNumberField(TEXT("fbx_to_ue_relative_rotation_error_deg"), RotationError);
 		const int32 Parent = Ref.GetParentIndex(Bone);
+		// 多段共用明确的姿态锚，避免每片首帧平移在 CMC 累计位移上再次跳变。
+		// 曲线仍从各片首帧零位移开始；锚只归一表现，不新增胶囊位移来源。
+		if (!FPackageName::IsValidLongPackageName(AnchorPath) || !AnchorPath.StartsWith(Base)
+			|| AnchorPath.Contains(TEXT("/Derived/")))
+			return Fail(Plan.Name, TEXT("explicit original pose anchor required inside the configured animation source root"));
+		Plan.PoseAnchor.Reset(LoadObject<UAnimSequence>(nullptr,
+			*(AnchorPath + TEXT(".") + FPackageName::GetLongPackageAssetName(AnchorPath))));
+		if (!Plan.PoseAnchor || Plan.PoseAnchor->GetSkeleton() != Plan.Source->GetSkeleton()
+			|| Plan.PoseAnchor->GetPackage()->IsDirty() || !FPackageName::DoesPackageExist(AnchorPath)
+			|| !Plan.PoseAnchor->GetDataModel() || Plan.PoseAnchor->GetDataModel()->GetNumberOfKeys() <= 0)
+			return Fail(Plan.Name, TEXT("shared pose anchor is missing, unsaved or has an incompatible source model"));
+		FTransform AnchorTransform = FTransform::Identity;
+		const IAnimationDataModel* AnchorModel = Plan.PoseAnchor->GetDataModel();
+		for (int32 Index = Bone; Index != INDEX_NONE; Index = Ref.GetParentIndex(Index))
+		{
+			FTrack Track;
+			Track.Reference = Ref.GetRefBonePose()[Index];
+			if (AnchorModel->IsValidBoneTrackName(Ref.GetBoneName(Index)))
+			{
+				AnchorModel->GetBoneTrackTransforms(Ref.GetBoneName(Index), Track.Keys);
+				if (Track.Keys.IsEmpty()) return Fail(AnchorPath, TEXT("declared anchor bone track has no keys"));
+			}
+			const FTransform Local = Track.At(0);
+			if (Local.ContainsNaN() || !Local.GetRotation().IsNormalized())
+				return Fail(AnchorPath, TEXT("invalid anchor first-frame transform"));
+			AnchorTransform = AnchorTransform * Local;
+		}
+		const FVector AnchorPosition = AnchorTransform.GetTranslation();
+		const FVector InitialOffset = Original[0].GetTranslation() - AnchorPosition;
+		Plan.Report->SetStringField(TEXT("pose_anchor_sequence"), Plan.PoseAnchor->GetPathName());
+		Plan.Report->SetArrayField(TEXT("pose_anchor_component_cm"), VectorJson(AnchorPosition));
 		double Residual = 0, ReconstructionError = 0;
 		for (int32 Frame = 0; Frame < Count; ++Frame)
 		{
@@ -366,21 +435,34 @@ namespace GGYGOKevinMotion
 			// Preserve original local rotation/scale exactly; only the translation track is rebased.
 			FTransform Local;
 			FVector ActorDelta;
-			if (!DecomposeXYZ(Original[Frame], OriginalLocal, ParentPose, Original[0].GetTranslation(), Basis.Rotation, Local, ActorDelta))
+			if (!DecomposeXYZ(Original[Frame], OriginalLocal, ParentPose, AnchorPosition, Basis.Rotation, Local, ActorDelta))
 				return Fail(Plan.Name, TEXT("paired pose has noninvertible parent or nonfinite motion"));
 			Plan.Positions.Add(Local.GetTranslation());
 			Plan.Rotations.Add(OriginalLocal.GetRotation());
 			Plan.Scales.Add(OriginalLocal.GetScale3D());
 			// UE imports are already cm. Uniform mesh scale is applied once by CMC, never baked here.
-			Plan.ActorDisplacements.Add(ActorDelta);
+			Plan.ActorDisplacements.Add(ActorDelta - Basis.Rotation.RotateVector(InitialOffset));
 			const FTransform Rebuilt = Local * ParentPose;
-			Residual = FMath::Max(Residual, FVector::Distance(Rebuilt.GetTranslation(), Original[0].GetTranslation()));
-			ReconstructionError = FMath::Max(ReconstructionError, FVector::Distance(Rebuilt.GetTranslation() + Basis.Rotation.UnrotateVector(Plan.ActorDisplacements.Last()), Original[Frame].GetTranslation()));
+			Residual = FMath::Max(Residual, FVector::Distance(Rebuilt.GetTranslation(), AnchorPosition));
+			ReconstructionError = FMath::Max(ReconstructionError, FVector::Distance(Rebuilt.GetTranslation()
+				+ Basis.Rotation.UnrotateVector(Plan.ActorDisplacements.Last()), Original[Frame].GetTranslation() - InitialOffset));
 			if (!Rebuilt.GetRotation().Equals(Original[Frame].GetRotation(), .001)
 				|| !Rebuilt.GetScale3D().Equals(Original[Frame].GetScale3D(), .001))
 				return Fail(Plan.Name, TEXT("paired decomposition changed source rotation/scale"));
 		}
 		if (Residual > .001 || ReconstructionError > .001) return Fail(Plan.Name, TEXT("full XYZ paired decomposition exceeds tolerance"));
+		if (Plan.bHoldLastFrame)
+		{
+			// 显式末帧采样只制作静止表现；源轨迹仍先逐帧核验，不把原移动伪称为静止。
+			Plan.Report->SetArrayField(TEXT("source_last_actor_displacement_cm"), VectorJson(Plan.ActorDisplacements.Last()));
+			Plan.Report->SetNumberField(TEXT("presentation_sample_frame"), Count - 1);
+			const FVector Position = Plan.Positions.Last(), Scale = Plan.Scales.Last();
+			const FQuat Rotation = Plan.Rotations.Last();
+			Plan.Positions.Init(Position, Count);
+			Plan.Rotations.Init(Rotation, Count);
+			Plan.Scales.Init(Scale, Count);
+			Plan.ActorDisplacements.Init(FVector::ZeroVector, Count);
+		}
 		Plan.Report->SetNumberField(TEXT("in_place_residual_xyz_cm"), Residual);
 		Plan.Report->SetNumberField(TEXT("reconstruction_error_xyz_cm"), ReconstructionError);
 		Plan.Report->SetArrayField(TEXT("ue_first_position_cm"), VectorJson(Original[0].GetTranslation()));
@@ -406,6 +488,23 @@ namespace GGYGOKevinMotion
 		IAnimationDataController& Controller = Derived->GetController();
 		Controller.OpenBracket(FText::FromString(TEXT("Pair full XYZ in-place pose and actor-local curves")), false);
 		bool bWritten = Controller.SetBoneTrackKeys(Plan.Bone, Plan.Positions, Plan.Rotations, Plan.Scales, false);
+		if (Plan.bHoldLastFrame)
+		{
+			TArray<FName> Names;
+			Plan.Source->GetDataModel()->GetBoneTrackNames(Names);
+			for (FName Name : Names)
+			{
+				if (!bWritten || Name == Plan.Bone) continue;
+				TArray<FTransform> SourceKeys;
+				Plan.Source->GetDataModel()->GetBoneTrackTransforms(Name, SourceKeys);
+				TArray<FVector> Positions, Scales;
+				TArray<FQuat> Rotations;
+				Positions.Init(SourceKeys.Last().GetTranslation(), SourceKeys.Num());
+				Rotations.Init(SourceKeys.Last().GetRotation(), SourceKeys.Num());
+				Scales.Init(SourceKeys.Last().GetScale3D(), SourceKeys.Num());
+				bWritten = Controller.SetBoneTrackKeys(Name, Positions, Rotations, Scales, false);
+			}
+		}
 		for (int32 Axis = 0; bWritten && Axis < 3; ++Axis)
 		{
 			TArray<FRichCurveKey> Keys;
@@ -427,6 +526,8 @@ namespace GGYGOKevinMotion
 		Metadata.SetValue(Derived, TEXT("GGYGO.MotionCurveSpace"), CurveSpace);
 		Metadata.SetValue(Derived, TEXT("GGYGO.MotionAssetBasis"), *BasisStamp(Plan.Basis));
 		Metadata.SetValue(Derived, TEXT("GGYGO.MotionSourceFBXSHA256"), *Plan.SourceHash);
+		Metadata.SetValue(Derived, TEXT("GGYGO.MotionPoseAnchor"), *Plan.PoseAnchor->GetPathName());
+		if (Plan.bHoldLastFrame) Metadata.SetValue(Derived, TEXT("GGYGO.PoseSample"), TEXT("last_frame"));
 		Derived->PostEditChange();
 		if (!ValidateDerived(Plan, Derived)) return false;
 		FAssetRegistryModule::AssetCreated(Derived);
@@ -454,7 +555,12 @@ namespace GGYGOKevinMotion
 		FString BasisPath, SelectionPath;
 		const FJson *Snapshot = nullptr, *Current = nullptr;
 		const TArray<TSharedPtr<FJsonValue>> *Clips = nullptr, *Selected = nullptr, *Catalog = nullptr;
+		bool bSourceReady = false;
+		FString ReferenceName, ConfigReferenceName;
 		if (!Document->TryGetNumberField(TEXT("schema"), Schema) || Schema != 2
+			|| !Document->TryGetBoolField(TEXT("success"), bSourceReady) || !bSourceReady
+			|| !Document->TryGetStringField(TEXT("import_basis_reference_clip"), ReferenceName)
+			|| !Config->TryGetStringField(TEXT("import_basis_reference_clip"), ConfigReferenceName) || ReferenceName != ConfigReferenceName
 			|| !Document->TryGetStringField(TEXT("basis_config"), BasisPath) || BasisPath != BasisConfig
 			|| !Document->TryGetStringField(TEXT("montage_config"), SelectionPath) || SelectionPath != MontageConfig
 			|| !Document->TryGetObjectField(TEXT("motion_asset_basis"), Snapshot)
@@ -469,6 +575,7 @@ namespace GGYGOKevinMotion
 		if (!Basis.Rotation.Equals(Audited.Rotation, .00001) || !Basis.Scale.Equals(Audited.Scale, .00001))
 		{ Fail(Args[1], TEXT("basis snapshot is stale; audit the confirmed Wiring configuration again")); return; }
 		TArray<FPreparedMotion> Plans;
+		FAxisMap SharedImportMapping;
 		TSet<FString> Names, Targets;
 		TArray<FString> Missing;
 		TArray<TSharedPtr<FJsonValue>> Rows;
@@ -485,6 +592,8 @@ namespace GGYGOKevinMotion
 				|| !Clip->TryGetStringField(TEXT("motion_bone"), ClipBone))
 			{ bSuccess = Fail(Args[1], TEXT("source audit does not match the ordered unique selected_actions")); break; }
 			Names.Add(Name);
+			if (Index == 0 && Name != ReferenceName)
+			{ bSuccess = Fail(Name, TEXT("first selected clip must be the explicit import-basis reference")); break; }
 			FJson Action;
 			for (const auto& Entry : *Catalog)
 			{
@@ -495,19 +604,27 @@ namespace GGYGOKevinMotion
 					Action = Object;
 				}
 			}
-			FString ExpectedSource, ExpectedDerived, ExpectedBone;
+			FString ExpectedSource, ExpectedDerived, ExpectedBone, ExpectedAnchor, ClipAnchor;
+			FString ExpectedReference, ClipReference, ExpectedUsage, ClipUsage;
 			bool bRequired = false;
 			if (!bSuccess) break;
 			if (!Action || !Action->TryGetStringField(TEXT("source_sequence"), ExpectedSource) || ExpectedSource != ClipSource
 				|| !Action->TryGetStringField(TEXT("sequence_override"), ExpectedDerived) || ExpectedDerived != ClipDerived
 				|| !Action->TryGetStringField(TEXT("motion_bone"), ExpectedBone) || ExpectedBone != ClipBone
+				|| !Action->TryGetStringField(TEXT("pose_anchor_sequence"), ExpectedAnchor)
+				|| !Clip->TryGetStringField(TEXT("pose_anchor_sequence"), ClipAnchor) || ClipAnchor != ExpectedAnchor
+				|| !Action->TryGetStringField(TEXT("motion_curve_reference"), ExpectedReference)
+				|| !Clip->TryGetStringField(TEXT("motion_curve_reference"), ClipReference) || ClipReference != ExpectedReference
+				|| !Action->TryGetStringField(TEXT("motion_usage"), ExpectedUsage)
+				|| !Clip->TryGetStringField(TEXT("motion_usage"), ClipUsage) || ClipUsage != ExpectedUsage
 				|| !Action->TryGetBoolField(TEXT("require_sequence_override"), bRequired) || !bRequired || Targets.Contains(ClipDerived))
 			{ bSuccess = Fail(Name, TEXT("stale/duplicate derived source, bone or selection contract")); break; }
 			Targets.Add(ClipDerived);
 			FPreparedMotion Plan; Plan.Report = MakeShared<FJsonObject>();
 			Rows.Add(MakeShared<FJsonValueObject>(Plan.Report));
-			bSuccess = Prepare(Clip, Basis, Plan);
+			bSuccess = Prepare(Clip, Basis, Index == 0 ? nullptr : &SharedImportMapping, Plan);
 			if (!bSuccess) break;
+			if (Index == 0) SharedImportMapping = Plan.ImportMapping;
 			if (!Plan.Existing) Missing.Add(Plan.Path);
 			Plans.Add(MoveTemp(Plan));
 		}

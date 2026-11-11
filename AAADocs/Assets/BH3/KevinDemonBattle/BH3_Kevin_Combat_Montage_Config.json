@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "status": "manual_candidates_prepared_pending_build_and_runtime_validation",
+  "schema_version": 2,
+  "status": "KVB-20261105-01_source_FK_classified_offline; production_assets_and_windows_not_verified",
   "mesh": "/Game/Characters/Boss/Kevin/DemonBattle/Mesh/SK_Kevin_DemonBattle",
   "skeleton": "/Game/Characters/Boss/Kevin/DemonBattle/Mesh/SK_Kevin_DemonBattle_Skeleton",
   "slot": "DefaultSlot",
@@ -11,7 +11,7 @@
     "start_socket": "KevinWeaponTraceStart",
     "end_socket": "KevinWeaponTraceEnd",
     "method": "weapon_section_principal_axis_extents",
-    "status": "geometry_candidate_pending_visual_verification"
+    "status": "read_only_geometry_candidate; socket_creation_requires_separate_asset_window"
   },
   "actions": [
     {
@@ -20,16 +20,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Force_Kill_ThrowSkill_AS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "paired_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Force_Kill_ThrowSkill_BS",
@@ -37,16 +37,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Force_Kill_ThrowSkill_BS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "paired_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Be_Executed_AS",
@@ -54,16 +54,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Be_Executed_AS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "paired_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Be_Executed",
@@ -71,84 +71,108 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Be_Executed",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "paired_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Execute_Wing_Defence_BS",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Execute_Wing_Defence_BS",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Execute_Wing_Defence_BS_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Execute_Wing_Defence_BS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 0.5,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Execute_Wing_Defence_Loop",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Execute_Wing_Defence_Loop",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Execute_Wing_Defence_Loop_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Execute_Wing_Defence_Loop",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": true,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 2.0,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Execute_Wing_Defence_AS",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Execute_Wing_Defence_AS",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Execute_Wing_Defence_AS_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Execute_Wing_Defence_AS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 2.0,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOS_411_Ani_Counter",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOS_411_Ani_Counter",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Counter_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Counter",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 1.1666666269302368,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Wing_Defence_Break(80-200)",
@@ -156,41 +180,46 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Wing_Defence_Break_80_200_",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_01",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_01",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Attack_01_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_01",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 2.8333332538604736,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Ice_Attack_02",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_02",
-      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_02_InPlace",
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_02_KVB_InPlace",
       "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice_Attack_02",
-      "enabled": true,
       "damage_enabled": true,
       "window_source": "manual_candidate",
       "hit_windows": [
@@ -201,40 +230,54 @@
           "end_seconds": 0.4
         }
       ],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "derived_in_place_required",
-      "preview_note": "UE source preview frames 0/8/15/21/30/45: Prop1-driven blade moves away from hand and sweeps back. Candidate end 24 estimated between observed 21 and 30. Animated weapon motion only; no independent projectile lifecycle, homing or collision implemented."
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "preview_note": "UE source preview frames 0/8/15/21/30/45: Prop1-driven blade moves away from hand and sweeps back. Candidate end 24 estimated between observed 21 and 30. Animated weapon motion only; no independent projectile lifecycle, homing or collision implemented.",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 1.850000023841858,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_02",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_02",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Attack_02_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_02",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 4.2166666984558105,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Ice_Attack_01",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_01",
-      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_01_InPlace",
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_01_KVB_InPlace",
       "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice_Attack_01",
-      "enabled": true,
       "damage_enabled": true,
       "window_source": "manual_candidate",
+      "test_only": true,
+      "original_game_window_known": false,
       "hit_windows": [
         {
           "start_frame": 45,
@@ -243,13 +286,20 @@
           "end_seconds": 0.9166666666666666
         }
       ],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "derived_in_place_required",
-      "preview_note": "UE source preview frames 20/30/45/48/51/55/65/80: 48 blade extends sideways, 51-55 follow-through. Candidate only; runtime hit acceptance pending."
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "preview_note": "Project automation test only, not original game timing. UE source preview frames 20/30/45/48/51/55/65/80: 48 blade extends sideways, 51-55 follow-through. The adjustable project window 45-55/60 is configured within the native 2-second clip before blend-out; hit_windows_confirmed means this project test configuration is selected and its interval is valid. Original game trigger timing is unknown; native Notify playback, sockets and actual Owned hit acceptance remain pending.",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 2.0,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Wing_Defence_BS",
@@ -257,16 +307,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Wing_Defence_BS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Wing_Defence_Loop",
@@ -274,16 +324,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Wing_Defence_Loop",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": true,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Wing_Defence_ThrowSkill",
@@ -291,16 +341,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Wing_Defence_ThrowSkill",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "paired_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Wing_Defence_ThrowSkill_BS",
@@ -308,16 +358,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Wing_Defence_ThrowSkill_BS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "paired_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Wing_ThrowSkill_AS",
@@ -325,50 +375,62 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Wing_ThrowSkill_AS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "paired_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Dash_B",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Dash_B",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Dash_B_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Dash_B",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 1.25,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Dash_F",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Dash_F",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Dash_F_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Dash_F",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 1.0666667222976685,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_03_Loop",
@@ -376,33 +438,39 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_03_Loop",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_03",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_03",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Attack_03_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_03",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 3.2333333492279053,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_04_BS",
@@ -410,16 +478,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_04_BS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_04_Air_Wait",
@@ -427,16 +495,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_04_Air_Wait",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": true,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_04_Down_Loop",
@@ -444,33 +512,33 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_04_Down_Loop",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": true,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_04_Down_AS",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04_Down_AS",
       "sequence_override": "",
       "require_sequence_override": false,
-      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_04_Down_AS",
-      "enabled": true,
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_LandingRecovery_KVB",
       "damage_enabled": false,
-      "window_source": "unavailable",
+      "window_source": "presentation_only",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_04_Down_Loop_Spline",
@@ -478,50 +546,56 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_04_Down_Loop_Spline",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_StandUp",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandUp",
       "sequence_override": "",
       "require_sequence_override": false,
-      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_StandUp",
-      "enabled": true,
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_StandUp_KVB",
       "damage_enabled": false,
-      "window_source": "unavailable",
+      "window_source": "presentation_only",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_04",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Attack_04_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_04",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 5.183333396911621,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_03_Loop_End",
@@ -529,67 +603,85 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_03_Loop_End",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Ice_Attack_03_BS",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_03_BS",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_03_BS_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice_Attack_03_BS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 0.9333333373069763,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Ice_Attack_03_Loop",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_03_Loop",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_03_Loop_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice_Attack_03_Loop",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": true,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 0.2666666805744171,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Ice_Attack_03_AS",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_03_AS",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_03_AS_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice_Attack_03_AS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 0.8500000238418579,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Wing_Defence_Simple",
@@ -597,169 +689,223 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Wing_Defence_Simple",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Ice_Attack_04",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_04",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_04_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice_Attack_04",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 2.183333396911621,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Ice_Attack_05",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_05",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_05_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice_Attack_05",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 2.0,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fly_Attack_01",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_01",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_01_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly_Attack_01",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 3.933333396911621,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fly_Attack_02",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_02",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_02_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly_Attack_02",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 3.433333396911621,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fly_Attack_03_AS",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_AS",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_AS_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly_Attack_03_AS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 30.0,
+      "frame_rate": 30,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 1.0,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fly_Attack_03_Summon",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Summon",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_Summon_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly_Attack_03_Summon",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 30.0,
+      "frame_rate": 30,
       "source_loop_time": true,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 1.0,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fly_Attack_03_Between",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Between",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_Between_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly_Attack_03_Between",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 30.0,
+      "frame_rate": 30,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 1.100000023841858,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fly_Attack_03_Shoot",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Shoot",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_Shoot_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly_Attack_03_Shoot",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 30.0,
+      "frame_rate": 30,
       "source_loop_time": true,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 1.0,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fly_Attack_03_BS",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_BS",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_BS_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly_Attack_03_BS",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 30.0,
+      "frame_rate": 30,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 0.7333333492279053,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_04_Charge",
@@ -767,16 +913,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_04_Charge",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": true,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Attack_04_ChargeEnd",
@@ -784,84 +930,90 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Attack_04_ChargeEnd",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "section_family",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Fly_Evade",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Evade",
-      "sequence_override": "",
-      "require_sequence_override": false,
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Evade_KVB_InPlace",
+      "require_sequence_override": true,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly_Evade",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "montage_original_xyz_common_pose_anchor",
+      "hit_windows_confirmed": false,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 1.25,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "action_xyz"
     },
     {
       "source_clip": "BOSS_411_Ani_Hit_L",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_L",
       "sequence_override": "",
       "require_sequence_override": false,
-      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Hit_L",
-      "enabled": true,
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_HitLight_KVB",
       "damage_enabled": false,
-      "window_source": "unavailable",
+      "window_source": "presentation_only",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Hit_H_F",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_H_F",
       "sequence_override": "",
       "require_sequence_override": false,
-      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Hit_H_F",
-      "enabled": true,
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_HitHeavyFront_KVB",
       "damage_enabled": false,
-      "window_source": "unavailable",
+      "window_source": "presentation_only",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Hit_H_B",
       "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_H_B",
       "sequence_override": "",
       "require_sequence_override": false,
-      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Hit_H_B",
-      "enabled": true,
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_HitHeavyBack_KVB",
       "damage_enabled": false,
-      "window_source": "unavailable",
+      "window_source": "presentation_only",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Hit_Throw",
@@ -869,16 +1021,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Hit_Throw",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_ThrowDown",
@@ -886,16 +1038,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_ThrowDown",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_KnockDown",
@@ -903,16 +1055,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_KnockDown",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Die",
@@ -920,16 +1072,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Die",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Execute_Defence_01",
@@ -937,16 +1089,16 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Execute_Defence_01",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
     },
     {
       "source_clip": "BOSS_411_Ani_Fire_Execute_Defence_02",
@@ -954,20 +1106,2178 @@
       "sequence_override": "",
       "require_sequence_override": false,
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire_Execute_Defence_02",
-      "enabled": true,
       "damage_enabled": false,
       "window_source": "unavailable",
       "hit_windows": [],
-      "frame_rate": 60.0,
+      "frame_rate": 60,
       "source_loop_time": false,
       "use_proposal": "single_montage",
       "blend_in_seconds": 0.1,
       "blend_out_seconds": 0.15,
-      "movement_policy": "asset_preparation_only_no_gameplay_binding"
+      "movement_policy": "asset_preparation_only_no_gameplay_binding",
+      "hit_windows_confirmed": false
+    },
+    {
+      "source_clip": "BOSS_411_Ani_Fly_Loop",
+      "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Loop",
+      "sequence_override": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_AirHold_KVB_InPlace",
+      "require_sequence_override": true,
+      "motion_bone": "Bip001",
+      "pose_anchor_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+      "expected_native_duration_seconds": 0.03333333507180214,
+      "native_duration_evidence": "Saved/Codex/bh3_demonbattle_verification.json",
+      "motion_curve_reference": "original_ue_model_with_fbx_full_grid",
+      "motion_usage": "presentation_last_frame",
+      "montage": "",
+      "damage_enabled": false,
+      "hit_windows": [],
+      "hit_windows_confirmed": false,
+      "window_source": "project_chosen_source_last_frame_hold",
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15
     }
   ],
   "anim_blueprint": {
     "asset": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/ABP_Kevin_DemonBattle",
-    "idle_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy"
+    "idle_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+    "mode": "guard_standard_slot_health_death",
+    "death_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Die",
+    "death_state_source": "Health.GetDeathState != NotDead",
+    "death_loop": false,
+    "air_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_AirHold_KVB_InPlace"
+  },
+  "selected_actions": [
+    "BOSS_411_Ani_Ice_Attack_01",
+    "BOSS_411_Ani_Fire_Execute_Wing_Defence_BS",
+    "BOSS_411_Ani_Fire_Execute_Wing_Defence_Loop",
+    "BOSS_411_Ani_Fire_Execute_Wing_Defence_AS",
+    "BOS_411_Ani_Counter",
+    "BOSS_411_Ani_Fire_Attack_01",
+    "BOSS_411_Ani_Ice_Attack_02",
+    "BOSS_411_Ani_Fire_Attack_02",
+    "BOSS_411_Ani_Dash_B",
+    "BOSS_411_Ani_Dash_F",
+    "BOSS_411_Ani_Fire_Attack_03",
+    "BOSS_411_Ani_Fire_Attack_04",
+    "BOSS_411_Ani_Ice_Attack_03_BS",
+    "BOSS_411_Ani_Ice_Attack_03_Loop",
+    "BOSS_411_Ani_Ice_Attack_03_AS",
+    "BOSS_411_Ani_Ice_Attack_04",
+    "BOSS_411_Ani_Ice_Attack_05",
+    "BOSS_411_Ani_Fly_Attack_01",
+    "BOSS_411_Ani_Fly_Attack_02",
+    "BOSS_411_Ani_Fly_Attack_03_AS",
+    "BOSS_411_Ani_Fly_Attack_03_Summon",
+    "BOSS_411_Ani_Fly_Attack_03_Between",
+    "BOSS_411_Ani_Fly_Attack_03_Shoot",
+    "BOSS_411_Ani_Fly_Attack_03_BS",
+    "BOSS_411_Ani_Fly_Evade",
+    "BOSS_411_Ani_Fly_Loop"
+  ],
+  "skill_assembly_schema": "GGYGO.KevinSkillAnimation/v1",
+  "skill_assemblies": [
+    {
+      "id": "Ice01",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice01_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Ice_Attack_01",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_01",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_01_KVB_InPlace",
+          "duration_source_seconds": 2.0,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 2.0,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "melee",
+      "hit_windows": [
+        {
+          "start_seconds": 0.75,
+          "end_seconds": 0.9166666666666666,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Ice01.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice01.Hit01.End",
+          "damage_mode": "melee",
+          "source_action_id": "Ice01",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Ice01"
+        }
+      ],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "沿既有45-55帧项目窗口；原游戏事件未知，不能把旧test_only当本批验收。",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 2.0,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.75
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice01.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice01.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.75,
+            0.9166666666666666
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice01.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice01.FX.Active01.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            0.9166666666666666,
+            2.0
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice01.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice01.FX.Recovery.End"
+        }
+      ]
+    },
+    {
+      "id": "Ice02",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice02_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Ice_Attack_02",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_02",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_02_KVB_InPlace",
+          "duration_source_seconds": 1.850000023841858,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 1.850000023841858,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "melee",
+      "hit_windows": [
+        {
+          "start_seconds": 0.13333333333333333,
+          "end_seconds": 0.4,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Ice02.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice02.Hit01.End",
+          "damage_mode": "melee",
+          "source_action_id": "Ice02",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Ice02"
+        }
+      ],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 1.850000023841858,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.13333333333333333
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice02.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice02.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.13333333333333333,
+            0.4
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice02.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice02.FX.Active01.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            0.4,
+            1.850000023841858
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice02.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice02.FX.Recovery.End"
+        }
+      ]
+    },
+    {
+      "id": "Ice03",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice03_KVB",
+      "main_section": "Main",
+      "motion_end_section": "End",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Ice_Attack_03_BS",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_03_BS",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_03_BS_KVB_InPlace",
+          "duration_source_seconds": 0.9333333373069763,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 0.9333333373069763,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "Hold",
+          "source_clip": "BOSS_411_Ani_Ice_Attack_03_Loop",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_03_Loop",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_03_Loop_KVB_InPlace",
+          "duration_source_seconds": 0.2666666805744171,
+          "loop_count": 1,
+          "expected_start_seconds": 0.9333333373069763,
+          "expected_end_seconds": 1.2000000476837158,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "End",
+          "source_clip": "BOSS_411_Ani_Ice_Attack_03_AS",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_03_AS",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_03_AS_KVB_InPlace",
+          "duration_source_seconds": 0.8500000238418579,
+          "loop_count": 1,
+          "expected_start_seconds": 1.2000000476837158,
+          "expected_end_seconds": 2.0500001907348633,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "area",
+      "hit_windows": [
+        {
+          "start_seconds": 0.98,
+          "end_seconds": 1.12,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Ice03.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice03.Hit01.End",
+          "damage_mode": "area",
+          "source_action_id": "Ice03",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Ice03"
+        }
+      ],
+      "enable_gate": "",
+      "source_order_evidence": "body_relative_endpoint_FK_and_pose_review",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "BS举手进入保持，AS放下；一轮Hold为项目有界编排。",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 2.0500001907348633,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.98
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice03.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice03.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.98,
+            1.12
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice03.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice03.FX.Active01.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            1.12,
+            2.0500001907348633
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice03.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice03.FX.Recovery.End"
+        }
+      ]
+    },
+    {
+      "id": "Ice04",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice04_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Ice_Attack_04",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_04",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_04_KVB_InPlace",
+          "duration_source_seconds": 2.183333396911621,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 2.183333396911621,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "melee",
+      "hit_windows": [
+        {
+          "start_seconds": 0.75,
+          "end_seconds": 1.02,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Ice04.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice04.Hit01.End",
+          "damage_mode": "melee",
+          "source_action_id": "Ice04",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Ice04"
+        }
+      ],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 2.183333396911621,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.75
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice04.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice04.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.75,
+            1.02
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice04.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice04.FX.Active01.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            1.02,
+            2.183333396911621
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice04.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice04.FX.Recovery.End"
+        }
+      ]
+    },
+    {
+      "id": "Ice05",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice05_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Ice_Attack_05",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Ice_Attack_05",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Ice_Attack_05_KVB_InPlace",
+          "duration_source_seconds": 2.0,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 2.0,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "melee",
+      "hit_windows": [
+        {
+          "start_seconds": 0.2,
+          "end_seconds": 0.48,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Ice05.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice05.Hit01.End",
+          "damage_mode": "melee",
+          "source_action_id": "Ice05",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Ice05"
+        }
+      ],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 2.0,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.2
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice05.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice05.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.2,
+            0.48
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice05.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice05.FX.Active01.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            0.48,
+            2.0
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Ice05.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Ice05.FX.Recovery.End"
+        }
+      ]
+    },
+    {
+      "id": "Fire01",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire01_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Fire_Attack_01",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_01",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Attack_01_KVB_InPlace",
+          "duration_source_seconds": 2.8333332538604736,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 2.8333332538604736,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "melee",
+      "hit_windows": [
+        {
+          "start_seconds": 0.45,
+          "end_seconds": 0.95,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fire01.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire01.Hit01.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fire01",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire01"
+        },
+        {
+          "start_seconds": 1.05,
+          "end_seconds": 1.4,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fire01.Hit02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire01.Hit02.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fire01",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire01"
+        }
+      ],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 2.8333332538604736,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.45
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire01.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire01.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.45,
+            0.95
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire01.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire01.FX.Active01.End"
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            1.05,
+            1.4
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire01.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire01.FX.Active02.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            1.4,
+            2.8333332538604736
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire01.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire01.FX.Recovery.End"
+        }
+      ]
+    },
+    {
+      "id": "Fire02",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire02_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Fire_Attack_02",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_02",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Attack_02_KVB_InPlace",
+          "duration_source_seconds": 4.2166666984558105,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 4.2166666984558105,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "melee",
+      "hit_windows": [
+        {
+          "start_seconds": 0.55,
+          "end_seconds": 1.1,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fire02.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire02.Hit01.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fire02",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire02"
+        },
+        {
+          "start_seconds": 2.1,
+          "end_seconds": 2.8,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fire02.Hit02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire02.Hit02.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fire02",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire02"
+        }
+      ],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "原根竖直范围约307cm，完整纵横轨迹；禁止裁平或定速替代。",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 4.2166666984558105,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.55
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire02.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire02.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.55,
+            1.1
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire02.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire02.FX.Active01.End"
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            2.1,
+            2.8
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire02.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire02.FX.Active02.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            2.8,
+            4.2166666984558105
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire02.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire02.FX.Recovery.End"
+        }
+      ],
+      "completion_flow": {
+        "curve_finish": "release_owned_curve_and_flying_then_native_falling",
+        "landing_required": true,
+        "landing_montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_LandingRecovery_KVB"
+      }
+    },
+    {
+      "id": "Fire03",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire03_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Fire_Attack_03",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_03",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Attack_03_KVB_InPlace",
+          "duration_source_seconds": 3.2333333492279053,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 3.2333333492279053,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "melee",
+      "hit_windows": [
+        {
+          "start_seconds": 0.1,
+          "end_seconds": 0.48,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fire03.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire03.Hit01.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fire03",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire03"
+        },
+        {
+          "start_seconds": 0.62,
+          "end_seconds": 1.1,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fire03.Hit02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire03.Hit02.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fire03",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire03"
+        }
+      ],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "完整单片含收招；同族Loop非原循环，首尾身体RMS约63cm。",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 3.2333333492279053,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.1
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire03.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire03.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.1,
+            0.48
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire03.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire03.FX.Active01.End"
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            0.62,
+            1.1
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire03.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire03.FX.Active02.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            1.1,
+            3.2333333492279053
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire03.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire03.FX.Recovery.End"
+        }
+      ]
+    },
+    {
+      "id": "Fire04",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fire04_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Fire_Attack_04",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Attack_04_KVB_InPlace",
+          "duration_source_seconds": 5.183333396911621,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 5.183333396911621,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "area",
+      "hit_windows": [
+        {
+          "start_seconds": 2.12,
+          "end_seconds": 2.35,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fire04.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire04.Hit01.End",
+          "damage_mode": "area",
+          "source_action_id": "Fire04",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire04"
+        }
+      ],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "完整原根竖直范围约1730cm；BS/AirWait/Down/Charge等为外部轨迹/等待变体，不能从后缀另拼无限技能。",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 5.183333396911621,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            2.12
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire04.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire04.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            2.12,
+            2.35
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire04.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire04.FX.Active01.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            2.35,
+            5.183333396911621
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fire04.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fire04.FX.Recovery.End"
+        }
+      ],
+      "completion_flow": {
+        "curve_finish": "release_owned_curve_and_flying_then_native_falling",
+        "landing_required": true,
+        "landing_montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_LandingRecovery_KVB"
+      }
+    },
+    {
+      "id": "Fly01",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly01_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_01",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_01",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_01_KVB_InPlace",
+          "duration_source_seconds": 3.933333396911621,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 3.933333396911621,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "melee",
+      "hit_windows": [
+        {
+          "start_seconds": 0.55,
+          "end_seconds": 1.0,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fly01.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly01.Hit01.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fly01",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly01"
+        },
+        {
+          "start_seconds": 2.0,
+          "end_seconds": 2.55,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fly01.Hit02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly01.Hit02.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fly01",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly01"
+        }
+      ],
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "尾根较首根高约153cm；落地/保持由统筹地空玩法决定。",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 3.933333396911621,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.55
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly01.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly01.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.55,
+            1.0
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly01.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly01.FX.Active01.End"
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            2.0,
+            2.55
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly01.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly01.FX.Active02.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            2.55,
+            3.933333396911621
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly01.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly01.FX.Recovery.End"
+        }
+      ]
+    },
+    {
+      "id": "Fly02",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly02_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_02",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_02",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_02_KVB_InPlace",
+          "duration_source_seconds": 3.433333396911621,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 3.433333396911621,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "melee",
+      "hit_windows": [
+        {
+          "start_seconds": 0.55,
+          "end_seconds": 1.1,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fly02.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly02.Hit01.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fly02",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly02"
+        },
+        {
+          "start_seconds": 1.65,
+          "end_seconds": 2.2,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fly02.Hit02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly02.Hit02.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fly02",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly02"
+        }
+      ],
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "尾根较首根高约155cm；不是自动返回地面的完整飞行循环。",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 3.433333396911621,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.55
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly02.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly02.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.55,
+            1.1
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly02.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly02.FX.Active01.End"
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            1.65,
+            2.2
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly02.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly02.FX.Active02.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            2.2,
+            3.433333396911621
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly02.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly02.FX.Recovery.End"
+        }
+      ]
+    },
+    {
+      "id": "Fly03",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Fly03_KVB",
+      "main_section": "Main",
+      "motion_end_section": "End",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_BS",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_BS",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_BS_KVB_InPlace",
+          "duration_source_seconds": 0.7333333492279053,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 0.7333333492279053,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "Hold",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_Summon",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Summon",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_Summon_KVB_InPlace",
+          "duration_source_seconds": 1.0,
+          "loop_count": 1,
+          "expected_start_seconds": 0.7333333492279053,
+          "expected_end_seconds": 1.7333333492279053,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "Transition",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_Between",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Between",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_Between_KVB_InPlace",
+          "duration_source_seconds": 1.100000023841858,
+          "loop_count": 1,
+          "expected_start_seconds": 1.7333333492279053,
+          "expected_end_seconds": 2.8333334922790527,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "Release",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_Shoot",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Shoot",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_Shoot_KVB_InPlace",
+          "duration_source_seconds": 1.0,
+          "loop_count": 1,
+          "expected_start_seconds": 2.8333334922790527,
+          "expected_end_seconds": 3.8333334922790527,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "End",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_AS",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_AS",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_AS_KVB_InPlace",
+          "duration_source_seconds": 1.0,
+          "loop_count": 1,
+          "expected_start_seconds": 3.8333334922790527,
+          "expected_end_seconds": 4.833333492279053,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "projectile",
+      "hit_windows": [
+        {
+          "start_seconds": 3.1,
+          "end_seconds": 3.25,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fly03.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly03.Hit01.End",
+          "damage_mode": "projectile",
+          "source_action_id": "Fly03",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly03"
+        },
+        {
+          "start_seconds": 3.6,
+          "end_seconds": 3.75,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Fly03.Hit02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly03.Hit02.End",
+          "damage_mode": "projectile",
+          "source_action_id": "Fly03",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly03"
+        }
+      ],
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "source_order_evidence": "body_relative_endpoint_FK_and_pose_review",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "五段身体端点连续；Summon/Shoot各播放一次为项目设计，不宣称原次数/发射事件。",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 4.833333492279053,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            3.1
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly03.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly03.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            3.1,
+            3.25
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly03.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly03.FX.Active01.End"
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            3.6,
+            3.75
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly03.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly03.FX.Active02.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            3.75,
+            4.833333492279053
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Fly03.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Fly03.FX.Recovery.End"
+        }
+      ]
+    },
+    {
+      "id": "Counter",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Counter_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOS_411_Ani_Counter",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOS_411_Ani_Counter",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Counter_KVB_InPlace",
+          "duration_source_seconds": 1.1666666269302368,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 1.1666666269302368,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "melee",
+      "hit_windows": [
+        {
+          "start_seconds": 0.18,
+          "end_seconds": 0.43,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.Counter.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Counter.Hit01.End",
+          "damage_mode": "melee",
+          "source_action_id": "Counter",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Counter"
+        }
+      ],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "反击姿态；反击准入由GA/BossAI的真实防御事实决定。",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 1.1666666269302368,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.18
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Counter.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Counter.FX.Warning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.18,
+            0.43
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Counter.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Counter.FX.Active01.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            0.43,
+            1.1666666269302368
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.Counter.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.Counter.FX.Recovery.End"
+        }
+      ]
+    },
+    {
+      "id": "DashF",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_DashF_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Dash_F",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Dash_F",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Dash_F_KVB_InPlace",
+          "duration_source_seconds": 1.0666667222976685,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 1.0666667222976685,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "none",
+      "hit_windows": [],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 1.0666667222976685,
+      "animation_phases": [
+        {
+          "phase_id": "Active",
+          "role": "active",
+          "window_seconds": [
+            0.0,
+            1.0666667222976685
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.DashF.FX.Active.Begin",
+          "end_event_tag": "Event.Montage.Kevin.DashF.FX.Active.End"
+        }
+      ]
+    },
+    {
+      "id": "DashB",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_DashB_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Dash_B",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Dash_B",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Dash_B_KVB_InPlace",
+          "duration_source_seconds": 1.25,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 1.25,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "none",
+      "hit_windows": [],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 1.25,
+      "animation_phases": [
+        {
+          "phase_id": "Active",
+          "role": "active",
+          "window_seconds": [
+            0.0,
+            1.25
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.DashB.FX.Active.Begin",
+          "end_event_tag": "Event.Montage.Kevin.DashB.FX.Active.End"
+        }
+      ]
+    },
+    {
+      "id": "FlyEvade",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_FlyEvade_KVB",
+      "main_section": "Main",
+      "motion_end_section": "None",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Fly_Evade",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Evade",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Evade_KVB_InPlace",
+          "duration_source_seconds": 1.25,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 1.25,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "none",
+      "hit_windows": [],
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 1.25,
+      "animation_phases": [
+        {
+          "phase_id": "Active",
+          "role": "active",
+          "window_seconds": [
+            0.0,
+            1.25
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.FlyEvade.FX.Active.Begin",
+          "end_event_tag": "Event.Montage.Kevin.FlyEvade.FX.Active.End"
+        }
+      ]
+    },
+    {
+      "id": "FireWingGuard",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_FireWingGuard_KVB",
+      "main_section": "Main",
+      "motion_end_section": "End",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Fire_Execute_Wing_Defence_BS",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Execute_Wing_Defence_BS",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Execute_Wing_Defence_BS_KVB_InPlace",
+          "duration_source_seconds": 0.5,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 0.5,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "Hold",
+          "source_clip": "BOSS_411_Ani_Fire_Execute_Wing_Defence_Loop",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Execute_Wing_Defence_Loop",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Execute_Wing_Defence_Loop_KVB_InPlace",
+          "duration_source_seconds": 2.0,
+          "loop_count": 1,
+          "expected_start_seconds": 0.5,
+          "expected_end_seconds": 2.5,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "End",
+          "source_clip": "BOSS_411_Ani_Fire_Execute_Wing_Defence_AS",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Execute_Wing_Defence_AS",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Execute_Wing_Defence_AS_KVB_InPlace",
+          "duration_source_seconds": 2.0,
+          "loop_count": 1,
+          "expected_start_seconds": 2.5,
+          "expected_end_seconds": 4.5,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "none",
+      "hit_windows": [],
+      "enable_gate": "",
+      "source_order_evidence": "body_relative_endpoint_FK_and_pose_review",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "有限一轮防御表现；无自动无敌/反伤，权限由GA配置。",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 4.5,
+      "animation_phases": [
+        {
+          "phase_id": "Charge",
+          "role": "charge",
+          "window_seconds": [
+            0.0,
+            0.5
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.FireWingGuard.FX.Charge.Begin",
+          "end_event_tag": "Event.Montage.Kevin.FireWingGuard.FX.Charge.End"
+        },
+        {
+          "phase_id": "Guard",
+          "role": "guard",
+          "window_seconds": [
+            0.5,
+            2.5
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.FireWingGuard.FX.Guard.Begin",
+          "end_event_tag": "Event.Montage.Kevin.FireWingGuard.FX.Guard.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            2.5,
+            4.5
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.FireWingGuard.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.FireWingGuard.FX.Recovery.End"
+        }
+      ]
+    },
+    {
+      "id": "AirChain01",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_AirChain01_KVB",
+      "main_section": "Main",
+      "motion_end_section": "End",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_01",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_01",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_01_KVB_InPlace",
+          "duration_source_seconds": 3.933333396911621,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 3.933333396911621,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "CastPrepare",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_BS",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_BS",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_BS_KVB_InPlace",
+          "duration_source_seconds": 0.7333333492279053,
+          "loop_count": 1,
+          "expected_start_seconds": 3.933333396911621,
+          "expected_end_seconds": 4.6666669845581055,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "CastHold",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_Summon",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Summon",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_Summon_KVB_InPlace",
+          "duration_source_seconds": 1.0,
+          "loop_count": 1,
+          "expected_start_seconds": 4.6666669845581055,
+          "expected_end_seconds": 5.6666669845581055,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "CastTransition",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_Between",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Between",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_Between_KVB_InPlace",
+          "duration_source_seconds": 1.100000023841858,
+          "loop_count": 1,
+          "expected_start_seconds": 5.6666669845581055,
+          "expected_end_seconds": 6.766666889190674,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "CastRelease",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_Shoot",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Shoot",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_Shoot_KVB_InPlace",
+          "duration_source_seconds": 1.0,
+          "loop_count": 1,
+          "expected_start_seconds": 6.766666889190674,
+          "expected_end_seconds": 7.766666889190674,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "CastRecovery",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_AS",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_AS",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_AS_KVB_InPlace",
+          "duration_source_seconds": 1.0,
+          "loop_count": 1,
+          "expected_start_seconds": 7.766666889190674,
+          "expected_end_seconds": 8.766666412353516,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "End",
+          "source_clip": "BOSS_411_Ani_Fire_Attack_04",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Attack_04_KVB_InPlace",
+          "duration_source_seconds": 5.183333396911621,
+          "loop_count": 1,
+          "expected_start_seconds": 8.766666412353516,
+          "expected_end_seconds": 13.949999809265137,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "per_window",
+      "hit_windows": [
+        {
+          "start_seconds": 0.550000011920929,
+          "end_seconds": 1.0,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.Hit01.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fly01",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly01"
+        },
+        {
+          "start_seconds": 2.0,
+          "end_seconds": 2.549999952316284,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.Hit02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.Hit02.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fly01",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly01"
+        },
+        {
+          "start_seconds": 7.0333333015441895,
+          "end_seconds": 7.183333396911621,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.Hit03.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.Hit03.End",
+          "damage_mode": "projectile",
+          "source_action_id": "Fly03",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly03"
+        },
+        {
+          "start_seconds": 7.5333333015441895,
+          "end_seconds": 7.683333396911621,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.Hit04.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.Hit04.End",
+          "damage_mode": "projectile",
+          "source_action_id": "Fly03",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly03"
+        },
+        {
+          "start_seconds": 10.886666297912598,
+          "end_seconds": 11.116666793823242,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.Hit05.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.Hit05.End",
+          "damage_mode": "area",
+          "source_action_id": "Fire04",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire04"
+        }
+      ],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "项目有限飞行链：Fly攻击→Fly03有限发射→完整Fire04→释放曲线/飞行资源→CMC原生重力→真实Landed→落地表现；外部原下降轨迹未恢复。",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 13.949999809265137,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.550000011920929
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Warning.End"
+        },
+        {
+          "phase_id": "CastWarning",
+          "role": "charge",
+          "window_seconds": [
+            3.933333396911621,
+            7.0333333015441895
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.CastWarning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.CastWarning.End"
+        },
+        {
+          "phase_id": "SlamWarning",
+          "role": "warning",
+          "window_seconds": [
+            8.766666412353516,
+            10.886666297912598
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.SlamWarning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.SlamWarning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.550000011920929,
+            1.0
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active01.End"
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            2.0,
+            2.549999952316284
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active02.End"
+        },
+        {
+          "phase_id": "Active03",
+          "role": "active",
+          "window_seconds": [
+            7.0333333015441895,
+            7.183333396911621
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active03.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active03.End"
+        },
+        {
+          "phase_id": "Active04",
+          "role": "active",
+          "window_seconds": [
+            7.5333333015441895,
+            7.683333396911621
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active04.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active04.End"
+        },
+        {
+          "phase_id": "Active05",
+          "role": "active",
+          "window_seconds": [
+            10.886666297912598,
+            11.116666793823242
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active05.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Active05.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            11.116666793823242,
+            13.949999809265137
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain01.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain01.FX.Recovery.End"
+        }
+      ],
+      "completion_flow": {
+        "curve_finish": "release_owned_curve_and_flying_then_native_falling",
+        "landing_required": true,
+        "landing_montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_LandingRecovery_KVB",
+        "cancel": "retire_original_resources; no_forced_Z_or_synthetic_landing",
+        "death": "Health_ABP_death_priority_no_second_montage"
+      }
+    },
+    {
+      "id": "AirChain02",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_AirChain02_KVB",
+      "main_section": "Main",
+      "motion_end_section": "End",
+      "segments": [
+        {
+          "section": "Main",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_02",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_02",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_02_KVB_InPlace",
+          "duration_source_seconds": 3.433333396911621,
+          "loop_count": 1,
+          "expected_start_seconds": 0.0,
+          "expected_end_seconds": 3.433333396911621,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "CastPrepare",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_BS",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_BS",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_BS_KVB_InPlace",
+          "duration_source_seconds": 0.7333333492279053,
+          "loop_count": 1,
+          "expected_start_seconds": 3.433333396911621,
+          "expected_end_seconds": 4.1666669845581055,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "CastHold",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_Summon",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Summon",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_Summon_KVB_InPlace",
+          "duration_source_seconds": 1.0,
+          "loop_count": 1,
+          "expected_start_seconds": 4.1666669845581055,
+          "expected_end_seconds": 5.1666669845581055,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "CastTransition",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_Between",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Between",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_Between_KVB_InPlace",
+          "duration_source_seconds": 1.100000023841858,
+          "loop_count": 1,
+          "expected_start_seconds": 5.1666669845581055,
+          "expected_end_seconds": 6.266666889190674,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "CastRelease",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_Shoot",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_Shoot",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_Shoot_KVB_InPlace",
+          "duration_source_seconds": 1.0,
+          "loop_count": 1,
+          "expected_start_seconds": 6.266666889190674,
+          "expected_end_seconds": 7.266666889190674,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "CastRecovery",
+          "source_clip": "BOSS_411_Ani_Fly_Attack_03_AS",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fly_Attack_03_AS",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fly_Attack_03_AS_KVB_InPlace",
+          "duration_source_seconds": 1.0,
+          "loop_count": 1,
+          "expected_start_seconds": 7.266666889190674,
+          "expected_end_seconds": 8.266666412353516,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        },
+        {
+          "section": "End",
+          "source_clip": "BOSS_411_Ani_Fire_Attack_04",
+          "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04",
+          "derived_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Derived/AS_Kevin_Fire_Attack_04_KVB_InPlace",
+          "duration_source_seconds": 5.183333396911621,
+          "loop_count": 1,
+          "expected_start_seconds": 8.266666412353516,
+          "expected_end_seconds": 13.449999809265137,
+          "duration_scope": "prior_native_readback; verify_current_before_authoring"
+        }
+      ],
+      "damage_mode": "per_window",
+      "hit_windows": [
+        {
+          "start_seconds": 0.550000011920929,
+          "end_seconds": 1.100000023841858,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.Hit01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.Hit01.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fly02",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly02"
+        },
+        {
+          "start_seconds": 1.649999976158142,
+          "end_seconds": 2.200000047683716,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.Hit02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.Hit02.End",
+          "damage_mode": "melee",
+          "source_action_id": "Fly02",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly02"
+        },
+        {
+          "start_seconds": 6.5333333015441895,
+          "end_seconds": 6.683333396911621,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.Hit03.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.Hit03.End",
+          "damage_mode": "projectile",
+          "source_action_id": "Fly03",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly03"
+        },
+        {
+          "start_seconds": 7.0333333015441895,
+          "end_seconds": 7.183333396911621,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.Hit04.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.Hit04.End",
+          "damage_mode": "projectile",
+          "source_action_id": "Fly03",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fly03"
+        },
+        {
+          "start_seconds": 10.386666297912598,
+          "end_seconds": 10.616666793823242,
+          "provenance": "project_source_FK_candidate",
+          "original_game_timing_known": false,
+          "ue_visual_verified": false,
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.Hit05.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.Hit05.End",
+          "damage_mode": "area",
+          "source_action_id": "Fire04",
+          "hit_cue_tag": "GameplayCue.Hit.Kevin.DemonBattle.Fire04"
+        }
+      ],
+      "enable_gate": "",
+      "source_order_evidence": "complete_original_take",
+      "composition_policy": "finite_one_pass_project_design",
+      "original_game_sequence_known": false,
+      "blend_in_seconds": 0.1,
+      "blend_out_seconds": 0.15,
+      "play_rate": 1.0,
+      "notes": "项目有限飞行链：Fly攻击→Fly03有限发射→完整Fire04→释放曲线/飞行资源→CMC原生重力→真实Landed→落地表现；外部原下降轨迹未恢复。",
+      "fx_phases": [],
+      "audio_events": [],
+      "expected_duration_seconds": 13.449999809265137,
+      "animation_phases": [
+        {
+          "phase_id": "Warning",
+          "role": "warning",
+          "window_seconds": [
+            0.0,
+            0.550000011920929
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Warning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Warning.End"
+        },
+        {
+          "phase_id": "CastWarning",
+          "role": "charge",
+          "window_seconds": [
+            3.433333396911621,
+            6.5333333015441895
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.CastWarning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.CastWarning.End"
+        },
+        {
+          "phase_id": "SlamWarning",
+          "role": "warning",
+          "window_seconds": [
+            8.266666412353516,
+            10.386666297912598
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.SlamWarning.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.SlamWarning.End"
+        },
+        {
+          "phase_id": "Active01",
+          "role": "active",
+          "window_seconds": [
+            0.550000011920929,
+            1.100000023841858
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active01.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active01.End"
+        },
+        {
+          "phase_id": "Active02",
+          "role": "active",
+          "window_seconds": [
+            1.649999976158142,
+            2.200000047683716
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active02.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active02.End"
+        },
+        {
+          "phase_id": "Active03",
+          "role": "active",
+          "window_seconds": [
+            6.5333333015441895,
+            6.683333396911621
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active03.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active03.End"
+        },
+        {
+          "phase_id": "Active04",
+          "role": "active",
+          "window_seconds": [
+            7.0333333015441895,
+            7.183333396911621
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active04.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active04.End"
+        },
+        {
+          "phase_id": "Active05",
+          "role": "active",
+          "window_seconds": [
+            10.386666297912598,
+            10.616666793823242
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active05.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Active05.End"
+        },
+        {
+          "phase_id": "Recovery",
+          "role": "recovery",
+          "window_seconds": [
+            10.616666793823242,
+            13.449999809265137
+          ],
+          "timing_basis": "project_source_FK_candidate_not_original_game_event",
+          "begin_event_tag": "Event.Montage.Kevin.AirChain02.FX.Recovery.Begin",
+          "end_event_tag": "Event.Montage.Kevin.AirChain02.FX.Recovery.End"
+        }
+      ],
+      "completion_flow": {
+        "curve_finish": "release_owned_curve_and_flying_then_native_falling",
+        "landing_required": true,
+        "landing_montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_LandingRecovery_KVB",
+        "cancel": "retire_original_resources; no_forced_Z_or_synthetic_landing",
+        "death": "Health_ABP_death_priority_no_second_montage"
+      }
+    }
+  ],
+  "source_pose_catalog": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+  "pose_anchor_policy": "StandBy首帧Bip001共用姿态锚；CMC只执行每段原轨迹差分，源序列不改",
+  "presentation_sequences": {
+    "idle": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandBy",
+    "death": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Die",
+    "hit_light": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_L",
+    "hit_heavy_front": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_H_F",
+    "hit_heavy_back": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_H_B",
+    "stand_up": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandUp"
+  },
+  "import_basis_reference_clip": "BOSS_411_Ani_Ice_Attack_01",
+  "selected_presentations": [
+    "BOSS_411_Ani_Fire_Attack_04_Down_AS",
+    "BOSS_411_Ani_Hit_L",
+    "BOSS_411_Ani_Hit_H_F",
+    "BOSS_411_Ani_Hit_H_B",
+    "BOSS_411_Ani_StandUp"
+  ],
+  "landing_presentation_montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_LandingRecovery_KVB",
+  "presentation_contracts": [
+    {
+      "id": "LandingRecovery",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_LandingRecovery_KVB",
+      "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Fire_Attack_04_Down_AS",
+      "section": "Main",
+      "expected_duration_seconds": 2.450000047683716,
+      "movement_mode": "presentation_only_no_CMC_curve_execution",
+      "trigger": "real_landed_only",
+      "animation_phases": [
+        {
+          "phase_id": "Impact",
+          "role": "impact",
+          "window_seconds": [
+            0.0,
+            0.35
+          ],
+          "begin_event_tag": "Event.Montage.Kevin.LandingRecovery.FX.Impact.Begin",
+          "end_event_tag": "Event.Montage.Kevin.LandingRecovery.FX.Impact.End",
+          "timing_basis": "project_real_landed_recovery_not_original_event"
+        }
+      ]
+    },
+    {
+      "id": "HitLight",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_HitLight_KVB",
+      "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_L",
+      "section": "Main",
+      "expected_duration_seconds": 1.2833333015441895,
+      "movement_mode": "presentation_only_no_CMC_curve_execution",
+      "trigger": "owned_reaction_request",
+      "animation_phases": []
+    },
+    {
+      "id": "HitHeavyFront",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_HitHeavyFront_KVB",
+      "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_H_F",
+      "section": "Main",
+      "expected_duration_seconds": 1.4166666269302368,
+      "movement_mode": "presentation_only_no_CMC_curve_execution",
+      "trigger": "owned_reaction_request",
+      "animation_phases": []
+    },
+    {
+      "id": "HitHeavyBack",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_HitHeavyBack_KVB",
+      "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_Hit_H_B",
+      "section": "Main",
+      "expected_duration_seconds": 1.4166666269302368,
+      "movement_mode": "presentation_only_no_CMC_curve_execution",
+      "trigger": "owned_reaction_request",
+      "animation_phases": []
+    },
+    {
+      "id": "StandUp",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_StandUp_KVB",
+      "source_sequence": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/AS_BOSS_411_Ani_StandUp",
+      "section": "Main",
+      "expected_duration_seconds": 2.700000047683716,
+      "movement_mode": "presentation_only_no_CMC_curve_execution",
+      "trigger": "owned_reaction_request",
+      "animation_phases": []
+    }
+  ],
+  "authoring_entrypoints": {
+    "source_prepare": "AAADocs/Scripts/audit_kevin_action_motion.py",
+    "motion": "GGYGO.BuildKevinMotionAssets",
+    "pose_and_sockets": "GGYGO.BuildKevinCombatAssets",
+    "skill_montages": "AAADocs/Scripts/build_kevin_skill_animation.py::run",
+    "presentations": "GGYGO.BuildKevinCombatAssets build-presentations; then build_kevin_skill_animation.prepare_presentations",
+    "legacy_build_actions": "not_used_for_KVB; selected_actions_are_source_derivation_inputs"
   }
 }

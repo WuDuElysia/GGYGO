@@ -1,0 +1,4985 @@
+{
+  "schema_version": 1,
+  "task_id": "KVB-20261105-01",
+  "status": "offline_prepared_not_UE_executed",
+  "source_inputs": [
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\manifest.json",
+      "size": 1349236,
+      "sha256": "cfd02e6c73aa7c2c899a03436fb5a0ecf16c1689f71359771bc6343561384557"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\bank_event_graphs.json",
+      "size": 835200,
+      "sha256": "fc0fa3407104c248f87d9c276effb07a7aae7afdecd1c678eb0ba39ab04e6587"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\dump_ja.xml",
+      "size": 2614078,
+      "sha256": "688c0c0c020cd776329969af7130a24302e88a4cc9dff3277d2873edbe4d4c78"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P2__shared__wem_210439275.wav",
+      "size": 479832,
+      "sha256": "f037b868aaba991aef3587a67dcac7dac69603968d18879796e0672eea30e838"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P2__shared__wem_782428646.wav",
+      "size": 479832,
+      "sha256": "e9dc90d0db72a726dba656b351a26a04b4db09343ce7ff2b64d7ce2b60b5e5eb"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P2__shared__wem_778861245.wav",
+      "size": 479832,
+      "sha256": "3d9213cacc2197b70b20b48bffd95009a748e1995cc5401ebad990c28ad2deed"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P1__shared__wem_642694718.wav",
+      "size": 263232,
+      "sha256": "28314b8c814c813807fef208802e6521dd1ade27400b428bb377b16d8e492deb"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P1__shared__wem_812247040.wav",
+      "size": 247116,
+      "sha256": "4fb2cb866890c50af786dc8d2f386ebb5ff17f3b6fc52b88d931c4fb06fb857e"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P1__shared__wem_243896595.wav",
+      "size": 263232,
+      "sha256": "9d0a9b4dc78a8005acde8ce2c5d9be53ba01598b744bb738e424bfc2cd8ec652"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P1__shared__wem_728669760.wav",
+      "size": 287264,
+      "sha256": "96f1a665c0d3cefb6dc3cd0fbfeb61649aebcfd0b486b97e39c4b4306b53919d"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\ANI_FIRE_ATTACK_01__shared__wem_1036581940.wav",
+      "size": 310184,
+      "sha256": "f589b220da5027042e7d0a5f1004ea4ddce2e95d4f01a282eed8ee1a0c181d10"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\ANI_FIRE_ATTACK_01__shared__wem_908108476.wav",
+      "size": 320548,
+      "sha256": "8c31d59863c41e7cb84ea72e75b9e954e7aa5bf061f48f5c0e03c7a31be1e888"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\FX_FIRE_ATTACK_01__shared__wem_599009840.wav",
+      "size": 276612,
+      "sha256": "fd635120e62dce1ea70098032d12974b881cd17b7b6340dc7f98436c93a399df"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\FX_FIRE_ATTACK_01__shared__wem_528316068.wav",
+      "size": 269332,
+      "sha256": "f426ab112f502d8d81608ae1cd2d87120e581ba8e814abb195404126545956a9"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\FX_FIRE_ATTACK_01_SIMPLE__shared__wem_216168400.wav",
+      "size": 122444,
+      "sha256": "a0807723bee2b1b21b3f3d3d801a12f256ee6d40a6a31c54c0d3b09b51e996f5"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_NORMAL_GROUND_CRACK_01__shared__wem_945357548.wav",
+      "size": 278744,
+      "sha256": "bb972eef6c094b2285ea1655f7bc2fce961281314ef62e65c21eaeb4c2b2d702"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_01_SIMPLE__shared__wem_69696904.wav",
+      "size": 134520,
+      "sha256": "73c5bff8b94b31b5266ecc78015b8493e67ee8c28b3bfee94832de94822eb471"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_00__shared__wem_778667132.wav",
+      "size": 806648,
+      "sha256": "54d8ed3712abbda9218b013fcd7d58bb2b57ed698fe8aad1381ea457ef514ab3"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_00__shared__wem_355178717.wav",
+      "size": 111884,
+      "sha256": "e365481abadeb91e2600847e70ab37a3c8a57873fa64a9fb42110566c9d59c9c"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_00__shared__wem_319134382.wav",
+      "size": 274608,
+      "sha256": "232d55104c73541c587268aedc69f27a9f8df70d61539d008dbd09774df5cc95"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_00__shared__wem_108397275.wav",
+      "size": 201088,
+      "sha256": "411c922194c1d281319943ac00374ab190a6091d9edeb710e06b626d4b76dad1"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_01__shared__wem_604860765.wav",
+      "size": 218900,
+      "sha256": "817d86a1033ff3874b428726389bef16e82b6fd305760a4a6af8b65a5a3f1778"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_01__shared__wem_1066818597.wav",
+      "size": 205368,
+      "sha256": "10eed6b1f503caef96b7640ff73c62478611dd7e8974d32d56d04b7adb3bd197"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_01__shared__wem_982872304.wav",
+      "size": 246260,
+      "sha256": "3191577c8f84f7f2ec30633bb7a578e53a6193978eac40260cb826ba61bf3b47"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_HOLD__shared__wem_155218484.wav",
+      "size": 157560,
+      "sha256": "d3f3e78b6a652304bfc6c73d63553e807e90df709937249c952d160d47818660"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_SIMPLE__shared__wem_281274540.wav",
+      "size": 145494,
+      "sha256": "871f76f16286b322536c440e3c932f29150ee380cfac6d94c96596b93de7b6de"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_SIMPLE__shared__wem_623914037.wav",
+      "size": 199324,
+      "sha256": "16415ccb61e53b2a0893c24ee8770a0cfa8957f7d33ffc0b51a85fada3aff2cc"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_SIMPLE__shared__wem_205266320.wav",
+      "size": 203646,
+      "sha256": "949a4408343d182166de2121df438da48b919a86d58ef4dfed23052bfb61feb9"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_TREAD_AIR__shared__wem_682134181.wav",
+      "size": 158012,
+      "sha256": "c0cb570b74088de27c9a0f31a7e32efd05f1e9cc03af13c2b7088cfd2cc55030"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_TREAD_AIR__shared__wem_113223230.wav",
+      "size": 159176,
+      "sha256": "51a7943fa1ec349411a8701b958d5c91918f499470ec31eec38fe74c55aa1ca7"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_710904726.wav",
+      "size": 357008,
+      "sha256": "1889e3d6a32dda04d3884ee46b846aa0bb18585407da31cac1fe0cfb0d9caab7"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_957553787.wav",
+      "size": 371336,
+      "sha256": "93fd47613751fe1464aa45a20c6a17b86f6698cc368a0577199c05eb79df230d"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_959406443.wav",
+      "size": 325804,
+      "sha256": "4f94d47feca7c8434922b012f8da6e5d7ba781ab54e4547b7f46f71c4b5da0ce"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\FX_FIRE_ATTACK_04_GROUND_CRACK__shared__wem_545257667.wav",
+      "size": 319224,
+      "sha256": "f731a3869de4d42ba170021059f54a43fc3e0470d784725c8ddd7494434f8e43"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\FX_FIRE_ATTACK_04_GROUND_CRACK_BOOM__shared__wem_778667132.wav",
+      "size": 806648,
+      "sha256": "54d8ed3712abbda9218b013fcd7d58bb2b57ed698fe8aad1381ea457ef514ab3"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\FX_FIRE_ATTACK_04_GROUND_CRACK_BOOM__shared__wem_355178717.wav",
+      "size": 111884,
+      "sha256": "e365481abadeb91e2600847e70ab37a3c8a57873fa64a9fb42110566c9d59c9c"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_02__shared__wem_101176235.wav",
+      "size": 155392,
+      "sha256": "abc1259dd4695e7830365dd5f2439f37a0f01b7e9e1d5f054bf8e5a1b8741efd"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_02__shared__wem_210723009.wav",
+      "size": 175880,
+      "sha256": "1a57f07ec495c3a15dc387d1b56c0ba2154fe3a480e9330c9e6390f554b3ee1e"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_03__shared__wem_1066818597.wav",
+      "size": 205368,
+      "sha256": "10eed6b1f503caef96b7640ff73c62478611dd7e8974d32d56d04b7adb3bd197"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_03__shared__wem_982872304.wav",
+      "size": 246260,
+      "sha256": "3191577c8f84f7f2ec30633bb7a578e53a6193978eac40260cb826ba61bf3b47"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_01__shared__wem_696876504.wav",
+      "size": 185072,
+      "sha256": "b833ef5397ac628df844671c70600d31ec8a7cd44f9ade9853d241c085fb8780"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_01__shared__wem_576167962.wav",
+      "size": 186344,
+      "sha256": "8355c5e50fbcd3eebd2fe763fe1ab1b1ac0b40841f1089145601ccba11974281"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_FLY__shared__wem_152253059.wav",
+      "size": 254324,
+      "sha256": "aa0fc5bda653e5e84e242cdf984cdc362f680b5fc013c4fa9de69d9dde887350"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\FX_FLY_ATTACK_02_03__shared__wem_255229517.wav",
+      "size": 265508,
+      "sha256": "c48bed4dc997643583799a68c1ed8fd23527d846958a692142a19c03c5341d7d"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\FX_FLY_ATTACK_02_03__shared__wem_1050604985.wav",
+      "size": 367916,
+      "sha256": "a219c24912d680921f3d66cb17268bd546cc061b7ea5e4de71a336392969d399"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\FX_FLY_ATTACK_02_02__shared__wem_864896253.wav",
+      "size": 197788,
+      "sha256": "b13fd56680eb06baaef7405da231ecc4f7450d7cb22db1e53cf0ed6b7136bf17"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\FX_FLY_ATTACK_02_02__shared__wem_998801857.wav",
+      "size": 156380,
+      "sha256": "eb171b078b7f38ca2945f89e4a55d920f9e9f7783029f3e0b6bfb25c16ddc898"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\FX_FLY_ATTACK_02_01__shared__wem_301104583.wav",
+      "size": 205960,
+      "sha256": "d20ac499af97fe40e9842480a95524dee0a4345d482fef26f048c0efad283880"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\FX_FLY_ATTACK_02_01__shared__wem_601253471.wav",
+      "size": 147892,
+      "sha256": "1b5e86dc8a819e4ae1b6350fda32933b76a403cdc14085bc6c33010a7b620688"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\mapping.json",
+      "size": 35926,
+      "sha256": "ce70320ed3519bba1d01aeb5bffbccb28005da04db5632e44fb26ebd6e03e543"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\mapping.json",
+      "size": 29150,
+      "sha256": "98b355167305e27ce373b863cd94780eee43e30f22c6fab4ee5f348ac92be8fa"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\mapping.json",
+      "size": 85611,
+      "sha256": "e72d1c6553fda98c27845137256f4c4bd60e1a47be43d9b8186a9ff97f07ced9"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\mapping.json",
+      "size": 42936,
+      "sha256": "5212a3cc687c7e4b2efbafde2a6a733f894463cf92f6ed1b0ca4f9594739967a"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\mapping.json",
+      "size": 40366,
+      "sha256": "fc31ab24175fec6d9c5e7e3348d074617e9c8bdeae5d098a4af3513cdc606021"
+    },
+    {
+      "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\mapping.json",
+      "size": 33577,
+      "sha256": "e46658c209ea436c099a2848e9b23d2088c43ea09862bc9c83384b12576a375b"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\594dddcc147f4f302d454569acab63746784978cb7125cff50a0cf952521e03d.wav",
+      "size": 224516,
+      "sha256": "3478b16baa708a75d0ed4739d81dae115b23c08ec661cfaf79bb492339b12300"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\bd7b36911487d1f2b2718bd9f05fceb2a1902d592d69ac31493da24474d416fd.wav",
+      "size": 220420,
+      "sha256": "243fa321b3b873341a928aa4cbb02f70a1fd127e12cab12557967381bc1cfd45"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\e2bc2c0c84762b5ac139b4243b3b3d2d627885b8ccdee38095794b6271c4974e.wav",
+      "size": 224516,
+      "sha256": "d47f69f0266921dffacc6ca480a43126b3d7a6c6c331b30e6cafa7a4fc5ca42a"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\0665fc0fad744fc7c5850175a96930f9559891c592afa07dd4a570e931a99eb3.wav",
+      "size": 156700,
+      "sha256": "f18bc6e697e2feb8254136a37dda1e81474657de97426553e0243190a55876bf"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\0a050d92f017a5931be3b4d8c415e878d874ae4356b67017499da7194e3311af.wav",
+      "size": 138792,
+      "sha256": "a9dd141df1ce93418da7f7e65dac4ddd55ed5971d2d75d6b93efa9fcbf7e2fc7"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\25f57f9b9b57a5a3cc6c8393d1147668f034e01a3970371ec6e4e1f634e9ae52.wav",
+      "size": 156216,
+      "sha256": "34bc66f3db64ba74166a8b28a04edd9a8141cb34e66b081358d72233ccb097b4"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\290b0225d15b96087b693eaf177cbc9c07532835d72f9706e16fc8f2685de884.wav",
+      "size": 149628,
+      "sha256": "4af9e6b2c4fab1a197138c45da2cfb8ccbd56bafde2f2f0569363b4191a4f9b2"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\3766043728b60c646715d35dd4d8658b8ff4b223a73ab4e3e642f3d9c8db57ce.wav",
+      "size": 141320,
+      "sha256": "e561b61759f8258a73b2061c52a330c65c7d0adfc04be4665debf6745c5cf05d"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\50bd11efa8f5be9e916c4ff7070b8f530f7a4137b0a7eb9458af040df9b20ae2.wav",
+      "size": 170952,
+      "sha256": "da71c07596481b2253700523b624fa07c382819b6173ebc692410edd376ad940"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\3e41c2bc8579f52396a42b14bbecf2dcb97a7fc802ec2f660c49022c05fb3973.wav",
+      "size": 170420,
+      "sha256": "3b53d9aef9e5768520cb95da0312cf03a9910eed8c413a0500a151ba08a00a54"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\4b73f224c70b9184647cef92277d67e8f5bd8d5ac5f9707550d7c461268fc518.wav",
+      "size": 163100,
+      "sha256": "bd2234fd3993e81a752f084ea9ebf28c21c08a9bb7f56eea75a04888dc8d0d0a"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\d9a4aff6235108df5060a25998fcf89028ca9ae7429320d76cfea6811c138f6f.wav",
+      "size": 159312,
+      "sha256": "49f22e94f4f9de14e6cf9af699e6f1e8e3facb6ff591574cf8bb1166f97da86b"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\3e27ca82aa4ef63cebd7feda0db71a09b366bb7e233398620cf76a02567517f9.wav",
+      "size": 183016,
+      "sha256": "a77a296eeb46f297d1e47165cb30da1697989a85f3a3f75c16cc4703b3333d4a"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\8c771eecffe080d348be07c2f8109e0f616d519d5b02e287d5f90ff57b1d5323.wav",
+      "size": 189788,
+      "sha256": "d008e04af500ce3ce59838474d4876d76a935dcba4237bdcf3646d27ca29da8a"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\c732e429c4f507599ff159cf0b8f8b509aaa3d5b20d9284bda68948dad25c207.wav",
+      "size": 168004,
+      "sha256": "ac8aac366c1f8d5731c004a4487fb0ba4f32aff33d924ab0e54264e6b667daca"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\849180a37bd7780752fa894d514fe3d0c33eb61ed94951e20106eb8086f66e01.wav",
+      "size": 1719276,
+      "sha256": "4f8c5cc882d82746ac984e828e9c4167a897efc79bba57e71c03371b4c8d0d34"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\3d99b344b17a4c5917361036d4fc3eac5da7ac8bec7efbdfcbfebaf0d1f7b784.wav",
+      "size": 259344,
+      "sha256": "0417e2653a37a8e289f0325af41d960798232acbbf64e22cd54033dfcc464a63"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\f3d906dae06db692cd0a85fcf6a5395194b252ee3b9a756fec25e4b3c9f103dc.wav",
+      "size": 455312,
+      "sha256": "7cdd9ffcf78c4df38694f8cad2ee59c14ac1efe6c075ba30055599b59ef7d940"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\6e5272139260fd59cd9ee54f99f698749e7c2bac9769e0f92756bb9c1cefc0ec.wav",
+      "size": 312452,
+      "sha256": "8ce107ec07eefc567bce2a77867c67ba1ec76bbb2a8c2e18c46e438ca2ff3194"
+    },
+    {
+      "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\84fd81f9e5823ae8806744166627f4426bd729bdcdf6bc738bc2029318b52ecb.wav",
+      "size": 334848,
+      "sha256": "07380de38dd63ca9e0af618fcd5ea0c6e2c35bcf3a45d18da1fc869078cbfe84"
+    }
+  ],
+  "soundwaves": [
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P2__shared__wem_210439275",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P2__shared__wem_210439275.wav",
+        "size": 479832,
+        "sha256": "f037b868aaba991aef3587a67dcac7dac69603968d18879796e0672eea30e838"
+      },
+      "source_wem_sha256": "2c90248115b6d142eb3a9d70221588fb32d6dd38b7dd647652aae3113f161988",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOS_411_Ani_Counter\\SW_FX_COUNTER_WIN_P2__shared__wem_210439275.uasset",
+          "size": 318748,
+          "sha256": "9522d0880b8582cbd5e6b5e3bc73de3e9f06c52db7640434d11932289d4bf572"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 2.719886621315193,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P2__shared__wem_782428646",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P2__shared__wem_782428646.wav",
+        "size": 479832,
+        "sha256": "e9dc90d0db72a726dba656b351a26a04b4db09343ce7ff2b64d7ce2b60b5e5eb"
+      },
+      "source_wem_sha256": "2f1832d38b6d7a19042bb228440192273eb4e4258961fe80b9a1f97fc2c1bfc3",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOS_411_Ani_Counter\\SW_FX_COUNTER_WIN_P2__shared__wem_782428646.uasset",
+          "size": 324999,
+          "sha256": "1881b91d75b1d7a41585c170f21cb702786d83cd0850dd6a412906efcb23edae"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 2.719886621315193,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P2__shared__wem_778861245",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P2__shared__wem_778861245.wav",
+        "size": 479832,
+        "sha256": "3d9213cacc2197b70b20b48bffd95009a748e1995cc5401ebad990c28ad2deed"
+      },
+      "source_wem_sha256": "3a52c5334a3dcc2d2dcbc87c1b8dd5e307c0099efad5cc29a07df87ba79cd99b",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOS_411_Ani_Counter\\SW_FX_COUNTER_WIN_P2__shared__wem_778861245.uasset",
+          "size": 309331,
+          "sha256": "c8113f3d33e76820c9ef0b1af9f6d2eba2cb9669823869f674b300f6b3bdea89"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 2.719886621315193,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P1__shared__wem_642694718",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P1__shared__wem_642694718.wav",
+        "size": 263232,
+        "sha256": "28314b8c814c813807fef208802e6521dd1ade27400b428bb377b16d8e492deb"
+      },
+      "source_wem_sha256": "39d40075987f8d31169e48c48736c91996dd666748f5aec7aaa17dd708e78512",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOS_411_Ani_Counter\\SW_FX_COUNTER_WIN_P1__shared__wem_642694718.uasset",
+          "size": 190357,
+          "sha256": "85d781f676a38fffe3179ea72f139daf7fe879a5a0e25befdd9ab085e7d43017"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.4919954648526077,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P1__shared__wem_812247040",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P1__shared__wem_812247040.wav",
+        "size": 247116,
+        "sha256": "4fb2cb866890c50af786dc8d2f386ebb5ff17f3b6fc52b88d931c4fb06fb857e"
+      },
+      "source_wem_sha256": "6ab767f1c9fbdc637ece613abd8f256b2a53fe335141a275c2e78fc73b6a720b",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOS_411_Ani_Counter\\SW_FX_COUNTER_WIN_P1__shared__wem_812247040.uasset",
+          "size": 174582,
+          "sha256": "821940829932701d2a754050ab240dc04c438001df7017f3bcf6db33fe78ba76"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.4006349206349207,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P1__shared__wem_243896595",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P1__shared__wem_243896595.wav",
+        "size": 263232,
+        "sha256": "9d0a9b4dc78a8005acde8ce2c5d9be53ba01598b744bb738e424bfc2cd8ec652"
+      },
+      "source_wem_sha256": "6b97e5de596dd0e7c5c2c25a9b7626c3a60acdde47aad4b8dbfa12ce5c9caf5d",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOS_411_Ani_Counter\\SW_FX_COUNTER_WIN_P1__shared__wem_243896595.uasset",
+          "size": 184859,
+          "sha256": "f68dfa630fc45383245f67b11512a5e79f716a2da6e893ed7f05ee3371929b33"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.4919954648526077,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P1__shared__wem_728669760",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOS_411_Ani_Counter\\FX_COUNTER_WIN_P1__shared__wem_728669760.wav",
+        "size": 287264,
+        "sha256": "96f1a665c0d3cefb6dc3cd0fbfeb61649aebcfd0b486b97e39c4b4306b53919d"
+      },
+      "source_wem_sha256": "d98fb3a245434433f1e99c23f258d7d63e86b1fdddd546c154b00316ef5ddb60",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOS_411_Ani_Counter\\SW_FX_COUNTER_WIN_P1__shared__wem_728669760.uasset",
+          "size": 198062,
+          "sha256": "cac68350c47bf20b9d0edf29811ef3851efc468b778b88e8ae5d7b90e77801df"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.6282312925170068,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_01/SW_ANI_FIRE_ATTACK_01__shared__wem_1036581940",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\ANI_FIRE_ATTACK_01__shared__wem_1036581940.wav",
+        "size": 310184,
+        "sha256": "f589b220da5027042e7d0a5f1004ea4ddce2e95d4f01a282eed8ee1a0c181d10"
+      },
+      "source_wem_sha256": "48dd8f2dcc485dea79a7a94e3bed1528e886aa3b92e650811488b60a80cec3c0",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\SW_ANI_FIRE_ATTACK_01__shared__wem_1036581940.uasset",
+          "size": 217845,
+          "sha256": "8c478fac3c1399e0d46ef933e0cb61002e96e9183f3b1a14f843122bbbdc4cbe"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.7581632653061225,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_01/SW_ANI_FIRE_ATTACK_01__shared__wem_908108476",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\ANI_FIRE_ATTACK_01__shared__wem_908108476.wav",
+        "size": 320548,
+        "sha256": "8c31d59863c41e7cb84ea72e75b9e954e7aa5bf061f48f5c0e03c7a31be1e888"
+      },
+      "source_wem_sha256": "ebebf2efe3666706991d1b7850fc8c1c8ec81e062d23132034ebab31becce8d0",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\SW_ANI_FIRE_ATTACK_01__shared__wem_908108476.uasset",
+          "size": 226436,
+          "sha256": "8e201ca8cbf763cf184542e71d22fb3c0855c0a35655172284d16c19bcbd3888"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.8169160997732425,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_01/SW_FX_FIRE_ATTACK_01__shared__wem_599009840",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\FX_FIRE_ATTACK_01__shared__wem_599009840.wav",
+        "size": 276612,
+        "sha256": "fd635120e62dce1ea70098032d12974b881cd17b7b6340dc7f98436c93a399df"
+      },
+      "source_wem_sha256": "6b184c4675b2591d27ba9cad506fdaea8e3c407cca395df890ad7070ce5cab88",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\SW_FX_FIRE_ATTACK_01__shared__wem_599009840.uasset",
+          "size": 190813,
+          "sha256": "a8b53a33f9eeb30fc9521f6f385bf45cd2ebd7e74766caf857954c2354c645e5"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.567845804988662,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_01/SW_FX_FIRE_ATTACK_01__shared__wem_528316068",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\FX_FIRE_ATTACK_01__shared__wem_528316068.wav",
+        "size": 269332,
+        "sha256": "f426ab112f502d8d81608ae1cd2d87120e581ba8e814abb195404126545956a9"
+      },
+      "source_wem_sha256": "eede1ae924256f5690d03048cd5f8b4ffa7f34ee910539c7a7d95b8d5a23558a",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\SW_FX_FIRE_ATTACK_01__shared__wem_528316068.uasset",
+          "size": 186839,
+          "sha256": "6f011cc242a3e7f04173c35f14687763e12841471f6c3a944162c3e31cf16366"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.5265759637188208,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_01/SW_FX_FIRE_ATTACK_01_SIMPLE__shared__wem_216168400",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\FX_FIRE_ATTACK_01_SIMPLE__shared__wem_216168400.wav",
+        "size": 122444,
+        "sha256": "a0807723bee2b1b21b3f3d3d801a12f256ee6d40a6a31c54c0d3b09b51e996f5"
+      },
+      "source_wem_sha256": "50d9db8ebe3aa6431ef241f865048e97b5cf1c2eddafa7b52b83eff441656d1e",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_01\\SW_FX_FIRE_ATTACK_01_SIMPLE__shared__wem_216168400.uasset",
+          "size": 65847,
+          "sha256": "24438d96f858afe67c306ff2b4e16d35cf3fe68cfca4a5b59797dee9dee464f4"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 32000,
+      "channels": 2,
+      "duration_seconds": 0.95625,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_NORMAL_GROUND_CRACK_01__shared__wem_945357548",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_NORMAL_GROUND_CRACK_01__shared__wem_945357548.wav",
+        "size": 278744,
+        "sha256": "bb972eef6c094b2285ea1655f7bc2fce961281314ef62e65c21eaeb4c2b2d702"
+      },
+      "source_wem_sha256": "c7b73e9b99ec4470aaf9ab6726e30518b9f26263a57ba2efcc701eae76a4b550",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_NORMAL_GROUND_CRACK_01__shared__wem_945357548.uasset",
+          "size": 186782,
+          "sha256": "82cffb2ee8b8fa56178acb9fd5e5d47f58116a393a2d21f7465ad9f9b6d23d43"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.5799319727891157,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_01_SIMPLE__shared__wem_69696904",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_01_SIMPLE__shared__wem_69696904.wav",
+        "size": 134520,
+        "sha256": "73c5bff8b94b31b5266ecc78015b8493e67ee8c28b3bfee94832de94822eb471"
+      },
+      "source_wem_sha256": "9d506598f0c0d0a24750c1e42206ac97d58b7621ed76365d5cf2cf6a7ff41ad4",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_01_SIMPLE__shared__wem_69696904.uasset",
+          "size": 93905,
+          "sha256": "b555a9fef8e121470376b5950600e49cec498aab5c6f494ceb0471ac19c7b54c"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.7623356009070295,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_00__shared__wem_778667132",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_00__shared__wem_778667132.wav",
+        "size": 806648,
+        "sha256": "54d8ed3712abbda9218b013fcd7d58bb2b57ed698fe8aad1381ea457ef514ab3"
+      },
+      "source_wem_sha256": "06da012b0474b7d1c94d57e26cf82ad90182eb69d8028db89f8f7bb273520a71",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_00__shared__wem_778667132.uasset",
+          "size": 338107,
+          "sha256": "4dede2403a8a942c57957d7d392505dd53f1133df1dd97b8c3d3dbcecb8f29e9"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 4.572585034013605,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_00__shared__wem_355178717",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_00__shared__wem_355178717.wav",
+        "size": 111884,
+        "sha256": "e365481abadeb91e2600847e70ab37a3c8a57873fa64a9fb42110566c9d59c9c"
+      },
+      "source_wem_sha256": "d145675126bbf1c81449089f4b3d6a9985fdd1bcb8bd31b3c84b61d68640b608",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_00__shared__wem_355178717.uasset",
+          "size": 76780,
+          "sha256": "64bcba0fc2c4c236307f6f8e3fdf5962043c0b0c6a42df5344e76f0ee125a31d"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 1,
+      "duration_seconds": 1.2680272108843538,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_00__shared__wem_319134382",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_00__shared__wem_319134382.wav",
+        "size": 274608,
+        "sha256": "232d55104c73541c587268aedc69f27a9f8df70d61539d008dbd09774df5cc95"
+      },
+      "source_wem_sha256": "dee392898677e978305cf4b8407449aea1c059551c92644d788955c8ec055c4e",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_00__shared__wem_319134382.uasset",
+          "size": 84159,
+          "sha256": "7689a5766997aee034ec83cc779bdfbd292cc03cfc8667b179f5c7e9ee16711b"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 36000,
+      "channels": 2,
+      "duration_seconds": 1.9066944444444445,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_00__shared__wem_108397275",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_00__shared__wem_108397275.wav",
+        "size": 201088,
+        "sha256": "411c922194c1d281319943ac00374ab190a6091d9edeb710e06b626d4b76dad1"
+      },
+      "source_wem_sha256": "f2d36dddbd1ad79f4ef64c0b529cf1a4ffe0e6f9226c8bc5eb562520bb1699b8",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_00__shared__wem_108397275.uasset",
+          "size": 76901,
+          "sha256": "47013e7d613132a1afd7f32692f3d043ce687a7db4482deef2391b6d35fff499"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 36000,
+      "channels": 2,
+      "duration_seconds": 1.3961388888888888,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_01__shared__wem_604860765",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_01__shared__wem_604860765.wav",
+        "size": 218900,
+        "sha256": "817d86a1033ff3874b428726389bef16e82b6fd305760a4a6af8b65a5a3f1778"
+      },
+      "source_wem_sha256": "0c17df07dedb59726be6737eaebf4c011129d269b7a777b7472812c5c3042af7",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_01__shared__wem_604860765.uasset",
+          "size": 88221,
+          "sha256": "e97b57d29e3eaac90e8a9d2078c6aa227908451097d96f9db3e6c848d664d086"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 32000,
+      "channels": 2,
+      "duration_seconds": 1.7098125,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_01__shared__wem_1066818597",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_01__shared__wem_1066818597.wav",
+        "size": 205368,
+        "sha256": "10eed6b1f503caef96b7640ff73c62478611dd7e8974d32d56d04b7adb3bd197"
+      },
+      "source_wem_sha256": "6cf25d7b0415364dee4853591ba7c8b4f5e245cfe986e42ece0fc5dafac90f1f",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_01__shared__wem_1066818597.uasset",
+          "size": 93145,
+          "sha256": "e826f65f416594a32e1335be1a8ca9075c241f0939c92b317b8b2cc8f51a14c7"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 36000,
+      "channels": 2,
+      "duration_seconds": 1.425861111111111,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_01__shared__wem_982872304",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_01__shared__wem_982872304.wav",
+        "size": 246260,
+        "sha256": "3191577c8f84f7f2ec30633bb7a578e53a6193978eac40260cb826ba61bf3b47"
+      },
+      "source_wem_sha256": "b1a35a8653a630c5747616f33aa997e0572887b968b9959f2d6b31ccb3c27f18",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_01__shared__wem_982872304.uasset",
+          "size": 97220,
+          "sha256": "ee10309a06ed7c7acafc669a5d112fbe36b9759a14d69c8cffc8d4141a92b807"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 36000,
+      "channels": 2,
+      "duration_seconds": 1.7098333333333333,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_HOLD__shared__wem_155218484",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_HOLD__shared__wem_155218484.wav",
+        "size": 157560,
+        "sha256": "d3f3e78b6a652304bfc6c73d63553e807e90df709937249c952d160d47818660"
+      },
+      "source_wem_sha256": "72ca79da08f5d578769075f4c4775ed43b407b89fdb59fed29af1dfa26f3afee",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_HOLD__shared__wem_155218484.uasset",
+          "size": 120344,
+          "sha256": "6fc3e39579d67fa961ea402a9e0d2e3a54e32665ca274668ee3af0227f3d4e36"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.8929478458049886,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_SIMPLE__shared__wem_281274540",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_SIMPLE__shared__wem_281274540.wav",
+        "size": 145494,
+        "sha256": "871f76f16286b322536c440e3c932f29150ee380cfac6d94c96596b93de7b6de"
+      },
+      "source_wem_sha256": "0b487ed320f8c1b6db2b641de0d8fb83d31a2ecef0e24092fd6abe9abb35f10f",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_SIMPLE__shared__wem_281274540.uasset",
+          "size": 101366,
+          "sha256": "c4facaac1ff2d662e4bc0c434f5acb77c64fa9a49215c21382f2d428645b2d6b"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 1,
+      "duration_seconds": 1.649092970521542,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_SIMPLE__shared__wem_623914037",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_SIMPLE__shared__wem_623914037.wav",
+        "size": 199324,
+        "sha256": "16415ccb61e53b2a0893c24ee8770a0cfa8957f7d33ffc0b51a85fada3aff2cc"
+      },
+      "source_wem_sha256": "8997f1fbed462c685026485f2770ae6870246fa61f295b6de7442c71adb9969c",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_SIMPLE__shared__wem_623914037.uasset",
+          "size": 117982,
+          "sha256": "c9490ad2025d76de42ac80e011823ff60ed8a9d00b1587a972a2ff39a4f04224"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 1,
+      "duration_seconds": 2.259410430839002,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_SIMPLE__shared__wem_205266320",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_SIMPLE__shared__wem_205266320.wav",
+        "size": 203646,
+        "sha256": "949a4408343d182166de2121df438da48b919a86d58ef4dfed23052bfb61feb9"
+      },
+      "source_wem_sha256": "a635670d37cee1c406c11000a1dc25dc971e3233d18bad9b39e8766c49121a32",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_SIMPLE__shared__wem_205266320.uasset",
+          "size": 109590,
+          "sha256": "c1c11b5cf247d62477ab1c75d4c6b640a0430cf6d7e7ade561a3844b08411d61"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 1,
+      "duration_seconds": 2.3084126984126985,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_TREAD_AIR__shared__wem_682134181",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_TREAD_AIR__shared__wem_682134181.wav",
+        "size": 158012,
+        "sha256": "c0cb570b74088de27c9a0f31a7e32efd05f1e9cc03af13c2b7088cfd2cc55030"
+      },
+      "source_wem_sha256": "6c19dcf6da1bcb354d99615e9f0e283e83b0e77c4191174d95d3ebd7064f082b",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_TREAD_AIR__shared__wem_682134181.uasset",
+          "size": 101951,
+          "sha256": "50464d9b3356d14e5960f61dc660d0d61a0f599dd958f7967d2c0e1e0aa62c43"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.8955102040816326,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_TREAD_AIR__shared__wem_113223230",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\FX_FIRE_ATTACK_02_TREAD_AIR__shared__wem_113223230.wav",
+        "size": 159176,
+        "sha256": "51a7943fa1ec349411a8701b958d5c91918f499470ec31eec38fe74c55aa1ca7"
+      },
+      "source_wem_sha256": "ea5903c03bc73fcf7c6f4730286b66b7e9110f6617c9e714b9ef35452515a3ff",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_02\\SW_FX_FIRE_ATTACK_02_TREAD_AIR__shared__wem_113223230.uasset",
+          "size": 93431,
+          "sha256": "9fb3f4bc8434e75e3a8dc7c7612e920efe3b65b41ba3a205467af3846410febd"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.9021088435374149,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_04/SW_FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_710904726",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_710904726.wav",
+        "size": 357008,
+        "sha256": "1889e3d6a32dda04d3884ee46b846aa0bb18585407da31cac1fe0cfb0d9caab7"
+      },
+      "source_wem_sha256": "7532534c09da7df0ae6485fd6648d613d2fa0b2995bc0f8b081728cecf860179",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\SW_FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_710904726.uasset",
+          "size": 245985,
+          "sha256": "e5510eb14de37e858b1cb55fb978e3dc691e2d4608b4768608bda0fdd9924c04"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 2.0236054421768706,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_04/SW_FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_957553787",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_957553787.wav",
+        "size": 371336,
+        "sha256": "93fd47613751fe1464aa45a20c6a17b86f6698cc368a0577199c05eb79df230d"
+      },
+      "source_wem_sha256": "75b63937abc4b93de140d2e83abcc26e0c170b22924d130772cda03ad06a3ffe",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\SW_FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_957553787.uasset",
+          "size": 169631,
+          "sha256": "3a4170bccafb03dd526b2452a41eb7926ffd8c855008329f898666a671e19dae"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 2.1048299319727892,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_04/SW_FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_959406443",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_959406443.wav",
+        "size": 325804,
+        "sha256": "4f94d47feca7c8434922b012f8da6e5d7ba781ab54e4547b7f46f71c4b5da0ce"
+      },
+      "source_wem_sha256": "917226e3b1fe2ca16b08f4d9f774a7c2f2a35647bdfafdbaf5d379e7899ce336",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\SW_FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_959406443.uasset",
+          "size": 209617,
+          "sha256": "0ca172125555ef2672e4e40939ffed1f71769994f8ad6885295467716f1eb22f"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.8467120181405896,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_04/SW_FX_FIRE_ATTACK_04_GROUND_CRACK__shared__wem_545257667",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\FX_FIRE_ATTACK_04_GROUND_CRACK__shared__wem_545257667.wav",
+        "size": 319224,
+        "sha256": "f731a3869de4d42ba170021059f54a43fc3e0470d784725c8ddd7494434f8e43"
+      },
+      "source_wem_sha256": "3a9e7190971ef1f1b4f21595958d25b471cf4d14493588eb80ae4bfa77c6ae82",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\SW_FX_FIRE_ATTACK_04_GROUND_CRACK__shared__wem_545257667.uasset",
+          "size": 179291,
+          "sha256": "87c0478a6650124e7fa08ddd92f8fee718d36e2e57427e65a33f43b9e27bcd34"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.8094104308390022,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_04/SW_FX_FIRE_ATTACK_04_GROUND_CRACK_BOOM__shared__wem_778667132",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\FX_FIRE_ATTACK_04_GROUND_CRACK_BOOM__shared__wem_778667132.wav",
+        "size": 806648,
+        "sha256": "54d8ed3712abbda9218b013fcd7d58bb2b57ed698fe8aad1381ea457ef514ab3"
+      },
+      "source_wem_sha256": "06da012b0474b7d1c94d57e26cf82ad90182eb69d8028db89f8f7bb273520a71",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\SW_FX_FIRE_ATTACK_04_GROUND_CRACK_BOOM__shared__wem_778667132.uasset",
+          "size": 338197,
+          "sha256": "19a5775828d8aeaecea720df0ca25101cbb6b683afe02e6afebfb92a77995db6"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 4.572585034013605,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_04/SW_FX_FIRE_ATTACK_04_GROUND_CRACK_BOOM__shared__wem_355178717",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\FX_FIRE_ATTACK_04_GROUND_CRACK_BOOM__shared__wem_355178717.wav",
+        "size": 111884,
+        "sha256": "e365481abadeb91e2600847e70ab37a3c8a57873fa64a9fb42110566c9d59c9c"
+      },
+      "source_wem_sha256": "d145675126bbf1c81449089f4b3d6a9985fdd1bcb8bd31b3c84b61d68640b608",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fire_Attack_04\\SW_FX_FIRE_ATTACK_04_GROUND_CRACK_BOOM__shared__wem_355178717.uasset",
+          "size": 76870,
+          "sha256": "b11146cb386ef98cc29fd4909c26aabb2dce590cd0d96919b279fe5e27d1b003"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 1,
+      "duration_seconds": 1.2680272108843538,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_01/SW_FX_FLY_ATTACK_01_02__shared__wem_101176235",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_02__shared__wem_101176235.wav",
+        "size": 155392,
+        "sha256": "abc1259dd4695e7830365dd5f2439f37a0f01b7e9e1d5f054bf8e5a1b8741efd"
+      },
+      "source_wem_sha256": "1499dfb422cc394243ad1917f86f8bf21448b2ada49c852f67eebf7b24dd6e64",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\SW_FX_FLY_ATTACK_01_02__shared__wem_101176235.uasset",
+          "size": 130505,
+          "sha256": "6e590baa66e50774fedbe84aa848d10e9035a8026c0044b6b58a795e1aa63fb3"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.8806575963718821,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_01/SW_FX_FLY_ATTACK_01_02__shared__wem_210723009",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_02__shared__wem_210723009.wav",
+        "size": 175880,
+        "sha256": "1a57f07ec495c3a15dc387d1b56c0ba2154fe3a480e9330c9e6390f554b3ee1e"
+      },
+      "source_wem_sha256": "7e0dd944b8986e851579aa3c16c81d577d83ce291a8409ba25a00ce95c75b1d0",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\SW_FX_FLY_ATTACK_01_02__shared__wem_210723009.uasset",
+          "size": 134891,
+          "sha256": "b422b9b85e1dec5415991225df2a1a7a8dcb5eebe37475fccc37df1c2c4d3716"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.9968027210884354,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_01/SW_FX_FLY_ATTACK_01_03__shared__wem_1066818597",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_03__shared__wem_1066818597.wav",
+        "size": 205368,
+        "sha256": "10eed6b1f503caef96b7640ff73c62478611dd7e8974d32d56d04b7adb3bd197"
+      },
+      "source_wem_sha256": "6cf25d7b0415364dee4853591ba7c8b4f5e245cfe986e42ece0fc5dafac90f1f",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\SW_FX_FLY_ATTACK_01_03__shared__wem_1066818597.uasset",
+          "size": 93135,
+          "sha256": "111945cf35691b0d74f785cb78f917a71e12614266ce9afe3c6f210f1c0b9173"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 36000,
+      "channels": 2,
+      "duration_seconds": 1.425861111111111,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_01/SW_FX_FLY_ATTACK_01_03__shared__wem_982872304",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_03__shared__wem_982872304.wav",
+        "size": 246260,
+        "sha256": "3191577c8f84f7f2ec30633bb7a578e53a6193978eac40260cb826ba61bf3b47"
+      },
+      "source_wem_sha256": "b1a35a8653a630c5747616f33aa997e0572887b968b9959f2d6b31ccb3c27f18",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\SW_FX_FLY_ATTACK_01_03__shared__wem_982872304.uasset",
+          "size": 97210,
+          "sha256": "2f898bae1c400db536dbfa01864b0c52db4fa6163008e885e75e2a8d607aa306"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 36000,
+      "channels": 2,
+      "duration_seconds": 1.7098333333333333,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_01/SW_FX_FLY_ATTACK_01_01__shared__wem_696876504",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_01__shared__wem_696876504.wav",
+        "size": 185072,
+        "sha256": "b833ef5397ac628df844671c70600d31ec8a7cd44f9ade9853d241c085fb8780"
+      },
+      "source_wem_sha256": "1b5abcb1a78a622a72ed8d31f2d8da946165c07e04cdbd74012f2519455bf3d6",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\SW_FX_FLY_ATTACK_01_01__shared__wem_696876504.uasset",
+          "size": 130868,
+          "sha256": "f7f4256d79d86e0144c4e0ab070cfad99e49b63bc88ad39a1a523354f149159c"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.0489115646258504,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_01/SW_FX_FLY_ATTACK_01_01__shared__wem_576167962",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_01__shared__wem_576167962.wav",
+        "size": 186344,
+        "sha256": "8355c5e50fbcd3eebd2fe763fe1ab1b1ac0b40841f1089145601ccba11974281"
+      },
+      "source_wem_sha256": "cd3cfb3cd57a22244e6e7597da126435456946f2a1468720cad87315edac214d",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\SW_FX_FLY_ATTACK_01_01__shared__wem_576167962.uasset",
+          "size": 124806,
+          "sha256": "74482bafcd446c0b6588b0dd362643874cb1749b120ad3be24af86e189ee81ff"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.0561224489795917,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_01/SW_FX_FLY_ATTACK_01_FLY__shared__wem_152253059",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\FX_FLY_ATTACK_01_FLY__shared__wem_152253059.wav",
+        "size": 254324,
+        "sha256": "aa0fc5bda653e5e84e242cdf984cdc362f680b5fc013c4fa9de69d9dde887350"
+      },
+      "source_wem_sha256": "375c9d6b0ef6cb6c29d08b89e784c98b795354151998f13c6a2200cc72230240",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_01\\SW_FX_FLY_ATTACK_01_FLY__shared__wem_152253059.uasset",
+          "size": 190953,
+          "sha256": "23603bc02097e8d66b05be1f99be477db02a8b982898ea9c44cf2a7444743036"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.4414965986394557,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_02/SW_FX_FLY_ATTACK_02_03__shared__wem_255229517",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\FX_FLY_ATTACK_02_03__shared__wem_255229517.wav",
+        "size": 265508,
+        "sha256": "c48bed4dc997643583799a68c1ed8fd23527d846958a692142a19c03c5341d7d"
+      },
+      "source_wem_sha256": "b2b34db50b53f4953a69de6014dfdd1c5a9d1d27dd94a12737394f7ea4e85148",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\SW_FX_FLY_ATTACK_02_03__shared__wem_255229517.uasset",
+          "size": 147365,
+          "sha256": "9ae1eb6e215f87394e5102c5b1cdd3d61378ed9c42db3761af64680e2877335c"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 32000,
+      "channels": 2,
+      "duration_seconds": 2.0739375,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_02/SW_FX_FLY_ATTACK_02_03__shared__wem_1050604985",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\FX_FLY_ATTACK_02_03__shared__wem_1050604985.wav",
+        "size": 367916,
+        "sha256": "a219c24912d680921f3d66cb17268bd546cc061b7ea5e4de71a336392969d399"
+      },
+      "source_wem_sha256": "b53b87a21f21d764fbe250ac30812b626bff8b60c5449b6b30ac0f94d9890c63",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\SW_FX_FLY_ATTACK_02_03__shared__wem_1050604985.uasset",
+          "size": 182566,
+          "sha256": "46402320efc3189007e5ac537bc3000854ab1ecde4e3f2e41cf4d81e9c656419"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 2.0854421768707483,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_02/SW_FX_FLY_ATTACK_02_02__shared__wem_864896253",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\FX_FLY_ATTACK_02_02__shared__wem_864896253.wav",
+        "size": 197788,
+        "sha256": "b13fd56680eb06baaef7405da231ecc4f7450d7cb22db1e53cf0ed6b7136bf17"
+      },
+      "source_wem_sha256": "6910a56409ff43fa77bb89461fde2b2ca41b1ac837527ead0ea41ad6fa3956da",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\SW_FX_FLY_ATTACK_02_02__shared__wem_864896253.uasset",
+          "size": 130720,
+          "sha256": "83a829dd27e04b286d59a33d5d216c7185e40d510c57c1dcfa26c6f3628cf709"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.1209977324263039,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_02/SW_FX_FLY_ATTACK_02_02__shared__wem_998801857",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\FX_FLY_ATTACK_02_02__shared__wem_998801857.wav",
+        "size": 156380,
+        "sha256": "eb171b078b7f38ca2945f89e4a55d920f9e9f7783029f3e0b6bfb25c16ddc898"
+      },
+      "source_wem_sha256": "ef5f5e8fa495dd5cb9277c0db71c40c8d6fdc253bbb564a1c5c2c140b8804266",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\SW_FX_FLY_ATTACK_02_02__shared__wem_998801857.uasset",
+          "size": 96559,
+          "sha256": "a57a7b6286eaf084cb57e1cf9e66a995d8e27212621426771de05354a9ff7d6f"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 32000,
+      "channels": 2,
+      "duration_seconds": 1.221375,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_02/SW_FX_FLY_ATTACK_02_01__shared__wem_301104583",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\FX_FLY_ATTACK_02_01__shared__wem_301104583.wav",
+        "size": 205960,
+        "sha256": "d20ac499af97fe40e9842480a95524dee0a4345d482fef26f048c0efad283880"
+      },
+      "source_wem_sha256": "20a3789b5d942a186269501df0b8bae1b0fe75085d0631fd4d3d7701bdf61b81",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\SW_FX_FLY_ATTACK_02_01__shared__wem_301104583.uasset",
+          "size": 112820,
+          "sha256": "b54a3ac0cda1ef3e0f868a0f86023cb78fedadbb4f96815de885794fa1dc6d71"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.1673242630385487,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_02/SW_FX_FLY_ATTACK_02_01__shared__wem_601253471",
+      "source": {
+        "path": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\FX_FLY_ATTACK_02_01__shared__wem_601253471.wav",
+        "size": 147892,
+        "sha256": "1b5e86dc8a819e4ae1b6350fda32933b76a403cdc14085bc6c33010a7b620688"
+      },
+      "source_wem_sha256": "fe4f41fe837f0b71bf4b320ebc0379d67fe8fc6616c03877e8f293a0ebd2a917",
+      "existing": true,
+      "package_before": {
+        ".uasset": {
+          "path": "F:\\ue_project\\GGYGO\\Content\\Characters\\Boss\\Kevin\\DemonBattle\\Audio\\BOSS_411_Ani_Fly_Attack_02\\SW_FX_FLY_ATTACK_02_01__shared__wem_601253471.uasset",
+          "size": 99082,
+          "sha256": "bc46b86a25e7b4f32ac6aecec66701d91a108f4abe10614368cb99a0ac61eca6"
+        },
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.838140589569161,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_1055808575",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\594dddcc147f4f302d454569acab63746784978cb7125cff50a0cf952521e03d.wav",
+        "size": 224516,
+        "sha256": "3478b16baa708a75d0ed4739d81dae115b23c08ec661cfaf79bb492339b12300"
+      },
+      "source_wem_sha256": "594dddcc147f4f302d454569acab63746784978cb7125cff50a0cf952521e03d",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.2725170068027212,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_312234985",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\bd7b36911487d1f2b2718bd9f05fceb2a1902d592d69ac31493da24474d416fd.wav",
+        "size": 220420,
+        "sha256": "243fa321b3b873341a928aa4cbb02f70a1fd127e12cab12557967381bc1cfd45"
+      },
+      "source_wem_sha256": "bd7b36911487d1f2b2718bd9f05fceb2a1902d592d69ac31493da24474d416fd",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.249297052154195,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_33789830",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\e2bc2c0c84762b5ac139b4243b3b3d2d627885b8ccdee38095794b6271c4974e.wav",
+        "size": 224516,
+        "sha256": "d47f69f0266921dffacc6ca480a43126b3d7a6c6c331b30e6cafa7a4fc5ca42a"
+      },
+      "source_wem_sha256": "e2bc2c0c84762b5ac139b4243b3b3d2d627885b8ccdee38095794b6271c4974e",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.2725170068027212,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_779329106",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\0665fc0fad744fc7c5850175a96930f9559891c592afa07dd4a570e931a99eb3.wav",
+        "size": 156700,
+        "sha256": "f18bc6e697e2feb8254136a37dda1e81474657de97426553e0243190a55876bf"
+      },
+      "source_wem_sha256": "0665fc0fad744fc7c5850175a96930f9559891c592afa07dd4a570e931a99eb3",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.8880725623582767,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_474606388",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\0a050d92f017a5931be3b4d8c415e878d874ae4356b67017499da7194e3311af.wav",
+        "size": 138792,
+        "sha256": "a9dd141df1ce93418da7f7e65dac4ddd55ed5971d2d75d6b93efa9fcbf7e2fc7"
+      },
+      "source_wem_sha256": "0a050d92f017a5931be3b4d8c415e878d874ae4356b67017499da7194e3311af",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.7865532879818594,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_652231591",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\25f57f9b9b57a5a3cc6c8393d1147668f034e01a3970371ec6e4e1f634e9ae52.wav",
+        "size": 156216,
+        "sha256": "34bc66f3db64ba74166a8b28a04edd9a8141cb34e66b081358d72233ccb097b4"
+      },
+      "source_wem_sha256": "25f57f9b9b57a5a3cc6c8393d1147668f034e01a3970371ec6e4e1f634e9ae52",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.885328798185941,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_1031735765",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\290b0225d15b96087b693eaf177cbc9c07532835d72f9706e16fc8f2685de884.wav",
+        "size": 149628,
+        "sha256": "4af9e6b2c4fab1a197138c45da2cfb8ccbd56bafde2f2f0569363b4191a4f9b2"
+      },
+      "source_wem_sha256": "290b0225d15b96087b693eaf177cbc9c07532835d72f9706e16fc8f2685de884",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.8479818594104308,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_386186002",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\3766043728b60c646715d35dd4d8658b8ff4b223a73ab4e3e642f3d9c8db57ce.wav",
+        "size": 141320,
+        "sha256": "e561b61759f8258a73b2061c52a330c65c7d0adfc04be4665debf6745c5cf05d"
+      },
+      "source_wem_sha256": "3766043728b60c646715d35dd4d8658b8ff4b223a73ab4e3e642f3d9c8db57ce",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.8008843537414966,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_627378157",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\50bd11efa8f5be9e916c4ff7070b8f530f7a4137b0a7eb9458af040df9b20ae2.wav",
+        "size": 170952,
+        "sha256": "da71c07596481b2253700523b624fa07c382819b6173ebc692410edd376ad940"
+      },
+      "source_wem_sha256": "50bd11efa8f5be9e916c4ff7070b8f530f7a4137b0a7eb9458af040df9b20ae2",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.9688662131519274,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_755747269",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\3e41c2bc8579f52396a42b14bbecf2dcb97a7fc802ec2f660c49022c05fb3973.wav",
+        "size": 170420,
+        "sha256": "3b53d9aef9e5768520cb95da0312cf03a9910eed8c413a0500a151ba08a00a54"
+      },
+      "source_wem_sha256": "3e41c2bc8579f52396a42b14bbecf2dcb97a7fc802ec2f660c49022c05fb3973",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.9658503401360544,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_433398681",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\4b73f224c70b9184647cef92277d67e8f5bd8d5ac5f9707550d7c461268fc518.wav",
+        "size": 163100,
+        "sha256": "bd2234fd3993e81a752f084ea9ebf28c21c08a9bb7f56eea75a04888dc8d0d0a"
+      },
+      "source_wem_sha256": "4b73f224c70b9184647cef92277d67e8f5bd8d5ac5f9707550d7c461268fc518",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.9243537414965987,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_20563405",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\d9a4aff6235108df5060a25998fcf89028ca9ae7429320d76cfea6811c138f6f.wav",
+        "size": 159312,
+        "sha256": "49f22e94f4f9de14e6cf9af699e6f1e8e3facb6ff591574cf8bb1166f97da86b"
+      },
+      "source_wem_sha256": "d9a4aff6235108df5060a25998fcf89028ca9ae7429320d76cfea6811c138f6f",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.9028798185941043,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_793914873",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\3e27ca82aa4ef63cebd7feda0db71a09b366bb7e233398620cf76a02567517f9.wav",
+        "size": 183016,
+        "sha256": "a77a296eeb46f297d1e47165cb30da1697989a85f3a3f75c16cc4703b3333d4a"
+      },
+      "source_wem_sha256": "3e27ca82aa4ef63cebd7feda0db71a09b366bb7e233398620cf76a02567517f9",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.0372562358276645,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_423918195",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\8c771eecffe080d348be07c2f8109e0f616d519d5b02e287d5f90ff57b1d5323.wav",
+        "size": 189788,
+        "sha256": "d008e04af500ce3ce59838474d4876d76a935dcba4237bdcf3646d27ca29da8a"
+      },
+      "source_wem_sha256": "8c771eecffe080d348be07c2f8109e0f616d519d5b02e287d5f90ff57b1d5323",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.0756462585034015,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_777748382",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\c732e429c4f507599ff159cf0b8f8b509aaa3d5b20d9284bda68948dad25c207.wav",
+        "size": 168004,
+        "sha256": "ac8aac366c1f8d5731c004a4487fb0ba4f32aff33d924ab0e54264e6b667daca"
+      },
+      "source_wem_sha256": "c732e429c4f507599ff159cf0b8f8b509aaa3d5b20d9284bda68948dad25c207",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 0.9521541950113379,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_1008014826",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\849180a37bd7780752fa894d514fe3d0c33eb61ed94951e20106eb8086f66e01.wav",
+        "size": 1719276,
+        "sha256": "4f8c5cc882d82746ac984e828e9c4167a897efc79bba57e71c03371b4c8d0d34"
+      },
+      "source_wem_sha256": "849180a37bd7780752fa894d514fe3d0c33eb61ed94951e20106eb8086f66e01",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 9.746213151927437,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_677405599",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\3d99b344b17a4c5917361036d4fc3eac5da7ac8bec7efbdfcbfebaf0d1f7b784.wav",
+        "size": 259344,
+        "sha256": "0417e2653a37a8e289f0325af41d960798232acbbf64e22cd54033dfcc464a63"
+      },
+      "source_wem_sha256": "3d99b344b17a4c5917361036d4fc3eac5da7ac8bec7efbdfcbfebaf0d1f7b784",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 8000,
+      "channels": 2,
+      "duration_seconds": 8.103125,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_25862782",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\f3d906dae06db692cd0a85fcf6a5395194b252ee3b9a756fec25e4b3c9f103dc.wav",
+        "size": 455312,
+        "sha256": "7cdd9ffcf78c4df38694f8cad2ee59c14ac1efe6c075ba30055599b59ef7d940"
+      },
+      "source_wem_sha256": "f3d906dae06db692cd0a85fcf6a5395194b252ee3b9a756fec25e4b3c9f103dc",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 2.5808843537414967,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_858434659",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\6e5272139260fd59cd9ee54f99f698749e7c2bac9769e0f92756bb9c1cefc0ec.wav",
+        "size": 312452,
+        "sha256": "8ce107ec07eefc567bce2a77867c67ba1ec76bbb2a8c2e18c46e438ca2ff3194"
+      },
+      "source_wem_sha256": "6e5272139260fd59cd9ee54f99f698749e7c2bac9769e0f92756bb9c1cefc0ec",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.7710204081632652,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_301459183",
+      "source": {
+        "path": "F:\\AnimeStudio\\_work\\kevin_demonbattle_audio_20261008\\Decoded\\84fd81f9e5823ae8806744166627f4426bd729bdcdf6bc738bc2029318b52ecb.wav",
+        "size": 334848,
+        "sha256": "07380de38dd63ca9e0af618fcd5ea0c6e2c35bcf3a45d18da1fc869078cbfe84"
+      },
+      "source_wem_sha256": "84fd81f9e5823ae8806744166627f4426bd729bdcdf6bc738bc2029318b52ecb",
+      "existing": false,
+      "package_before": {
+        ".uasset": null,
+        ".uexp": null,
+        ".ubulk": null,
+        ".uptnl": null
+      },
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 1.8979818594104307,
+      "defaults": {
+        "looping": false,
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    }
+  ],
+  "sound_cues": [
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_02/SW_FX_FLY_ATTACK_02_03__shared__wem_255229517",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_02/SW_FX_FLY_ATTACK_02_03__shared__wem_1050604985"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        575839750,
+        401437772,
+        664662059
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "6.0",
+        "0x02 [Pitch]": "300.0",
+        "0x04 [HPF]": "20.0",
+        "0x46 [AttenuationID]": "597295199"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858524_1",
+      "event_id": 93858524,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_02/SW_FX_FLY_ATTACK_02_02__shared__wem_998801857",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_02/SW_FX_FLY_ATTACK_02_02__shared__wem_864896253"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        1035071326,
+        704099463,
+        894610550
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "6.0",
+        "0x02 [Pitch]": "700.0",
+        "0x04 [HPF]": "30.0",
+        "0x46 [AttenuationID]": "107959031"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858525_1",
+      "event_id": 93858525,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_02/SW_FX_FLY_ATTACK_02_01__shared__wem_301104583",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_02/SW_FX_FLY_ATTACK_02_01__shared__wem_601253471"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        441818741,
+        219203896,
+        669700997
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "6.0",
+        "0x02 [Pitch]": "500.0",
+        "0x04 [HPF]": "25.0",
+        "0x46 [AttenuationID]": "868363430"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858526_1",
+      "event_id": 93858526,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_01/SW_ANI_FIRE_ATTACK_01__shared__wem_1036581940",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_01/SW_ANI_FIRE_ATTACK_01__shared__wem_908108476"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        755653496,
+        427403493,
+        636247513
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x46 [AttenuationID]": "437694353"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E230747614_1",
+      "event_id": 230747614,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_312234985",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_33789830",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_1055808575"
+      ],
+      "wave_looping": [
+        false,
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        653961951,
+        158091910,
+        591261886,
+        613296528
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "8.0"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E497205119_1",
+      "event_id": 497205119,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_779329106",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_386186002",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_652231591",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_1031735765",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_627378157",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_474606388"
+      ],
+      "wave_looping": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0,
+        50000.0,
+        50000.0,
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        184834729,
+        167571323,
+        319293390,
+        443111328,
+        567255355,
+        757463316,
+        1054029013
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "5.0",
+        "0x02 [Pitch]": "-300.0",
+        "0x46 [AttenuationID]": "759325744"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "event_id": 549475289,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_NORMAL_GROUND_CRACK_01__shared__wem_945357548"
+      ],
+      "wave_looping": [
+        false
+      ],
+      "weights": [
+        1.0
+      ],
+      "source_node_ids": [
+        1042073421
+      ],
+      "source_container": "CAkSound",
+      "source_static_properties": {
+        "0x00 [Volume]": "3.0"
+      },
+      "source_avoid_repeat": 0,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E732973004_1",
+      "event_id": 732973004,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": false
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_677405599"
+      ],
+      "wave_looping": [
+        true
+      ],
+      "weights": [
+        1.0
+      ],
+      "source_node_ids": [
+        457119994
+      ],
+      "source_container": "CAkSound",
+      "source_static_properties": {
+        "0x00 [Volume]": "2.0",
+        "0x02 [Pitch]": "80.0",
+        "0x3A [Loop]": "0"
+      },
+      "source_avoid_repeat": 0,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1047260087_1",
+      "event_id": 1047260087,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": false
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_04/SW_FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_959406443"
+      ],
+      "wave_looping": [
+        false
+      ],
+      "weights": [
+        1.0
+      ],
+      "source_node_ids": [
+        540613655
+      ],
+      "source_container": "CAkSound",
+      "source_static_properties": {
+        "0x00 [Volume]": "-1.0",
+        "0x46 [AttenuationID]": "106073666"
+      },
+      "source_avoid_repeat": 0,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1107709958_1",
+      "event_id": 1107709958,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": false
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_04/SW_FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_710904726"
+      ],
+      "wave_looping": [
+        false
+      ],
+      "weights": [
+        1.0
+      ],
+      "source_node_ids": [
+        848815009
+      ],
+      "source_container": "CAkSound",
+      "source_static_properties": {},
+      "source_avoid_repeat": 0,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1107709958_2",
+      "event_id": 1107709958,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": false
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_04/SW_FX_FIRE_ATTACK_04_HIT_DOWN_GROUND__shared__wem_957553787"
+      ],
+      "wave_looping": [
+        false
+      ],
+      "weights": [
+        1.0
+      ],
+      "source_node_ids": [
+        1008638315
+      ],
+      "source_container": "CAkSound",
+      "source_static_properties": {
+        "0x3B [InitialDelay]": "0.2800000011920929"
+      },
+      "source_avoid_repeat": 0,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1107709958_3",
+      "event_id": 1107709958,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": false
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_01_SIMPLE__shared__wem_69696904"
+      ],
+      "wave_looping": [
+        false
+      ],
+      "weights": [
+        1.0
+      ],
+      "source_node_ids": [
+        942210344
+      ],
+      "source_container": "CAkSound",
+      "source_static_properties": {
+        "0x00 [Volume]": "-4.0",
+        "0x02 [Pitch]": "500.0",
+        "0x03 [LPF]": "18.0",
+        "0x46 [AttenuationID]": "799955784"
+      },
+      "source_avoid_repeat": 0,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1606537566_1",
+      "event_id": 1606537566,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": false
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_00__shared__wem_108397275",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_00__shared__wem_319134382"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        864190938,
+        24155572,
+        476734734
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "5.0",
+        "0x04 [HPF]": "26.0"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1624690420_1",
+      "event_id": 1624690420,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_00__shared__wem_778667132",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_00__shared__wem_355178717"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        303190683,
+        332251500,
+        778237385
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "2.0"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1624690420_2",
+      "event_id": 1624690420,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_01__shared__wem_604860765",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_01__shared__wem_982872304",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_01__shared__wem_1066818597"
+      ],
+      "wave_looping": [
+        false,
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        401404112,
+        40091839,
+        418407301,
+        952402593
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "8.0",
+        "0x02 [Pitch]": "400.0",
+        "0x04 [HPF]": "18.0"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1624690421_1",
+      "event_id": 1624690421,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_25862782"
+      ],
+      "wave_looping": [
+        false
+      ],
+      "weights": [
+        1.0
+      ],
+      "source_node_ids": [
+        530582634
+      ],
+      "source_container": "CAkSound",
+      "source_static_properties": {
+        "0x03 [LPF]": "20.0"
+      },
+      "source_avoid_repeat": 0,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2190265172_1",
+      "event_id": 2190265172,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": false
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_858434659",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_301459183"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        668371779,
+        521074978,
+        603998588
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {},
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2218789460_1",
+      "event_id": 2218789460,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_04/SW_FX_FIRE_ATTACK_04_GROUND_CRACK__shared__wem_545257667"
+      ],
+      "wave_looping": [
+        false
+      ],
+      "weights": [
+        50000.0
+      ],
+      "source_node_ids": [
+        124992539,
+        498309737
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "6.0",
+        "0x02 [Pitch]": "-50.0",
+        "0x04 [HPF]": "13.0"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2271838932_1",
+      "event_id": 2271838932,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_1008014826"
+      ],
+      "wave_looping": [
+        false
+      ],
+      "weights": [
+        1.0
+      ],
+      "source_node_ids": [
+        745248882
+      ],
+      "source_container": "CAkSound",
+      "source_static_properties": {
+        "0x00 [Volume]": "5.0"
+      },
+      "source_avoid_repeat": 0,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2524282819_1",
+      "event_id": 2524282819,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": false
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_00__shared__wem_778667132",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_00__shared__wem_355178717"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        303190683,
+        332251500,
+        778237385
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "2.0"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2564483858_1",
+      "event_id": 2564483858,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_793914873",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_777748382",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_423918195"
+      ],
+      "wave_looping": [
+        false,
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        130363534,
+        53271026,
+        340744066,
+        618300778
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "-5.0",
+        "0x46 [AttenuationID]": "1033631628"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2736721901_1",
+      "event_id": 2736721901,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_433398681",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_20563405",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Shared/SW_KevinDB_WEM_755747269"
+      ],
+      "wave_looping": [
+        false,
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        888249119,
+        322445616,
+        633476436,
+        965326511
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "-5.0",
+        "0x46 [AttenuationID]": "1033631628"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2736721907_1",
+      "event_id": 2736721907,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_TREAD_AIR__shared__wem_113223230",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_TREAD_AIR__shared__wem_682134181"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        675798750,
+        36113229,
+        990945991
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {},
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3188014124_1",
+      "event_id": 3188014124,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_HOLD__shared__wem_155218484"
+      ],
+      "wave_looping": [
+        false
+      ],
+      "weights": [
+        1.0
+      ],
+      "source_node_ids": [
+        102783343
+      ],
+      "source_container": "CAkSound",
+      "source_static_properties": {
+        "0x00 [Volume]": "6.0",
+        "0x03 [LPF]": "30.0"
+      },
+      "source_avoid_repeat": 0,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3286683035_1",
+      "event_id": 3286683035,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": false
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_01/SW_FX_FLY_ATTACK_01_02__shared__wem_101176235",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_01/SW_FX_FLY_ATTACK_01_02__shared__wem_210723009"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        573941234,
+        677696534,
+        870358489
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "4.0"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3618384700_1",
+      "event_id": 3618384700,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_01__shared__wem_982872304",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_01__shared__wem_1066818597"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        37558817,
+        591347222,
+        851487181
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "8.0",
+        "0x02 [Pitch]": "600.0",
+        "0x03 [LPF]": "20.0",
+        "0x04 [HPF]": "18.0"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3618384701_1",
+      "event_id": 3618384701,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_01/SW_FX_FLY_ATTACK_01_01__shared__wem_576167962",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_01/SW_FX_FLY_ATTACK_01_01__shared__wem_696876504"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        660034980,
+        169332622,
+        544695825
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "4.0"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3618384703_1",
+      "event_id": 3618384703,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fly_Attack_01/SW_FX_FLY_ATTACK_01_FLY__shared__wem_152253059"
+      ],
+      "wave_looping": [
+        false
+      ],
+      "weights": [
+        1.0
+      ],
+      "source_node_ids": [
+        424326376
+      ],
+      "source_container": "CAkSound",
+      "source_static_properties": {
+        "0x02 [Pitch]": "600.0",
+        "0x04 [HPF]": "10.0",
+        "0x46 [AttenuationID]": "57207913"
+      },
+      "source_avoid_repeat": 0,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3779481217_1",
+      "event_id": 3779481217,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": false
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_01/SW_FX_FIRE_ATTACK_01__shared__wem_528316068",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_01/SW_FX_FIRE_ATTACK_01__shared__wem_599009840"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        353475409,
+        179748771,
+        1045627739
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {},
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3810557962_1",
+      "event_id": 3810557962,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_SIMPLE__shared__wem_205266320",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_SIMPLE__shared__wem_281274540",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_SIMPLE__shared__wem_623914037"
+      ],
+      "wave_looping": [
+        false,
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        130687046,
+        157981409,
+        376447541,
+        1008044697
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "3.0"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3969531162_1",
+      "event_id": 3969531162,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_01/SW_FX_FIRE_ATTACK_01_SIMPLE__shared__wem_216168400"
+      ],
+      "wave_looping": [
+        false
+      ],
+      "weights": [
+        50000.0
+      ],
+      "source_node_ids": [
+        852231983,
+        328324683
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "6.0",
+        "0x02 [Pitch]": "600.0",
+        "0x03 [LPF]": "15.0",
+        "0x04 [HPF]": "18.0",
+        "0x46 [AttenuationID]": "759325744"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3980448763_1",
+      "event_id": 3980448763,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P2__shared__wem_210439275",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P2__shared__wem_778861245",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P2__shared__wem_782428646"
+      ],
+      "wave_looping": [
+        false,
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        1028073451,
+        102064006,
+        839702513,
+        935571515
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "3.0",
+        "0x46 [AttenuationID]": "48394049"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E4188079933_1",
+      "event_id": 4188079933,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P1__shared__wem_812247040",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P1__shared__wem_642694718",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P1__shared__wem_728669760",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOS_411_Ani_Counter/SW_FX_COUNTER_WIN_P1__shared__wem_243896595"
+      ],
+      "wave_looping": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0,
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        347378590,
+        51136501,
+        272238866,
+        585979049,
+        1014753693
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {
+        "0x00 [Volume]": "2.0"
+      },
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E4188079934_1",
+      "event_id": 4188079934,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    },
+    {
+      "wave_targets": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_TREAD_AIR__shared__wem_113223230",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/BOSS_411_Ani_Fire_Attack_02/SW_FX_FIRE_ATTACK_02_TREAD_AIR__shared__wem_682134181"
+      ],
+      "wave_looping": [
+        false,
+        false
+      ],
+      "weights": [
+        50000.0,
+        50000.0
+      ],
+      "source_node_ids": [
+        675798750,
+        36113229,
+        990945991
+      ],
+      "source_container": "CAkRanSeqCntr",
+      "source_static_properties": {},
+      "source_avoid_repeat": 1,
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E4213696849_1",
+      "event_id": 4213696849,
+      "attenuation_target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "project_volume": 0.7,
+      "project_pitch": 1.0,
+      "project_random_without_replacement": true
+    }
+  ],
+  "attenuations": [
+    {
+      "target": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/SA_KevinDB_Combat",
+      "radius_cm": 150.0,
+      "falloff_cm": 2500.0,
+      "distance_model": "LINEAR",
+      "shape": "SPHERE",
+      "spatialize": true,
+      "basis": "project_authored_tunable_not_original_Wwise_attenuation"
+    }
+  ],
+  "hit_bindings": [
+    {
+      "action_id": "Ice01",
+      "event_id": 549475289,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "binding_basis": "same_boss_ice_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Ice01"
+    },
+    {
+      "action_id": "Ice02",
+      "event_id": 549475289,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "binding_basis": "same_boss_ice_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Ice02"
+    },
+    {
+      "action_id": "Ice03",
+      "event_id": 549475289,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "binding_basis": "same_boss_ice_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Ice03"
+    },
+    {
+      "action_id": "Ice04",
+      "event_id": 549475289,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "binding_basis": "same_boss_ice_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Ice04"
+    },
+    {
+      "action_id": "Ice05",
+      "event_id": 549475289,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "binding_basis": "same_boss_ice_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Ice05"
+    },
+    {
+      "action_id": "Fire01",
+      "event_id": 3810557962,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3810557962_1",
+      "binding_basis": "same_action_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Fire01"
+    },
+    {
+      "action_id": "Fire02",
+      "event_id": 1624690421,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1624690421_1",
+      "binding_basis": "same_action_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Fire02"
+    },
+    {
+      "action_id": "Fire03",
+      "event_id": 3980448763,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3980448763_1",
+      "binding_basis": "other_fire_action_project_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Fire03"
+    },
+    {
+      "action_id": "Fire04",
+      "event_id": 2564483858,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2564483858_1",
+      "binding_basis": "same_action_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Fire04"
+    },
+    {
+      "action_id": "Fly01",
+      "event_id": 3618384701,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3618384701_1",
+      "binding_basis": "same_action_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Fly01"
+    },
+    {
+      "action_id": "Fly02",
+      "event_id": 93858524,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858524_1",
+      "binding_basis": "same_action_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Fly02"
+    },
+    {
+      "action_id": "Fly03",
+      "event_id": 93858524,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858524_1",
+      "binding_basis": "other_fly_action_project_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Fly03"
+    },
+    {
+      "action_id": "Counter",
+      "event_id": 4188079933,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E4188079933_1",
+      "binding_basis": "same_action_candidate",
+      "cue_writer": "FX",
+      "cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "cue_key": "Counter"
+    }
+  ],
+  "actions": [
+    {
+      "action_id": "Ice01",
+      "binding_basis": "same_boss_ice_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 497205119,
+      "hit_event_id": 549475289,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Ice01",
+      "hit_authority": "Combat/GAS actual hit only",
+      "enable_gate": ""
+    },
+    {
+      "action_id": "Ice02",
+      "binding_basis": "same_boss_ice_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 497205119,
+      "hit_event_id": 549475289,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Ice02",
+      "hit_authority": "Combat/GAS actual hit only",
+      "enable_gate": ""
+    },
+    {
+      "action_id": "Ice03",
+      "binding_basis": "same_boss_ice_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 497205119,
+      "hit_event_id": 549475289,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Ice03",
+      "hit_authority": "Combat/GAS actual hit only",
+      "enable_gate": ""
+    },
+    {
+      "action_id": "Ice04",
+      "binding_basis": "same_boss_ice_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 497205119,
+      "hit_event_id": 549475289,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Ice04",
+      "hit_authority": "Combat/GAS actual hit only",
+      "enable_gate": ""
+    },
+    {
+      "action_id": "Ice05",
+      "binding_basis": "same_boss_ice_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 497205119,
+      "hit_event_id": 549475289,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Ice05",
+      "hit_authority": "Combat/GAS actual hit only",
+      "enable_gate": ""
+    },
+    {
+      "action_id": "Fire01",
+      "binding_basis": "same_action_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 230747614,
+      "hit_event_id": 3810557962,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3810557962_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Fire01",
+      "hit_authority": "Combat/GAS actual hit only",
+      "enable_gate": ""
+    },
+    {
+      "action_id": "Fire02",
+      "binding_basis": "same_action_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 1624690420,
+      "hit_event_id": 1624690421,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1624690421_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Fire02",
+      "hit_authority": "Combat/GAS actual hit only",
+      "enable_gate": "",
+      "persistent_audio": {
+        "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3286683035_1",
+        "begin_tag": "Event.Montage.AudioWindowBegin",
+        "end_tag": "Event.Montage.AudioWindowEnd",
+        "socket": "None",
+        "relative_location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "relative_rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "action_id": "Fire03",
+      "binding_basis": "other_fire_action_project_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 3969531162,
+      "hit_event_id": 3980448763,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3980448763_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Fire03",
+      "hit_authority": "Combat/GAS actual hit only",
+      "enable_gate": ""
+    },
+    {
+      "action_id": "Fire04",
+      "binding_basis": "same_action_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 3779481217,
+      "hit_event_id": 2564483858,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2564483858_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Fire04",
+      "hit_authority": "Combat/GAS actual hit only",
+      "point_binding_basis": "other_fly_action_project_candidate_not_landing",
+      "enable_gate": ""
+    },
+    {
+      "action_id": "Fly01",
+      "binding_basis": "same_action_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 3618384703,
+      "hit_event_id": 3618384701,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3618384701_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Fly01",
+      "hit_authority": "Combat/GAS actual hit only",
+      "enable_gate": "auxiliary_in_owned_air_chain"
+    },
+    {
+      "action_id": "Fly02",
+      "binding_basis": "same_action_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 93858526,
+      "hit_event_id": 93858524,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858524_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Fly02",
+      "hit_authority": "Combat/GAS actual hit only",
+      "enable_gate": "auxiliary_in_owned_air_chain"
+    },
+    {
+      "action_id": "Fly03",
+      "binding_basis": "other_fly_action_project_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 93858525,
+      "hit_event_id": 93858524,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858524_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Fly03",
+      "hit_authority": "Combat/GAS actual hit only",
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "persistent_audio": {
+        "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2524282819_1",
+        "begin_tag": "Event.Montage.AudioWindowBegin",
+        "end_tag": "Event.Montage.AudioWindowEnd",
+        "socket": "None",
+        "relative_location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "relative_rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    },
+    {
+      "action_id": "Counter",
+      "binding_basis": "same_action_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 4188079934,
+      "hit_event_id": 4188079933,
+      "hit_sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E4188079933_1",
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_key": "Counter",
+      "hit_authority": "Combat/GAS actual hit only",
+      "enable_gate": ""
+    },
+    {
+      "action_id": "DashF",
+      "binding_basis": "same_boss_evade_project_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 3188014124,
+      "hit_authority": "not_a_damage_action",
+      "enable_gate": ""
+    },
+    {
+      "action_id": "DashB",
+      "binding_basis": "same_boss_evade_project_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 3188014124,
+      "hit_authority": "not_a_damage_action",
+      "enable_gate": ""
+    },
+    {
+      "action_id": "FlyEvade",
+      "binding_basis": "same_boss_evade_project_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 3188014124,
+      "hit_authority": "not_a_damage_action",
+      "enable_gate": "auxiliary_in_owned_air_chain"
+    },
+    {
+      "action_id": "FireWingGuard",
+      "binding_basis": "other_counter_action_project_candidate",
+      "original_action_mapping_verified": false,
+      "point_event_id": 4188079934,
+      "hit_authority": "not_a_damage_action",
+      "enable_gate": ""
+    },
+    {
+      "action_id": "AirChain01",
+      "source_action_ids": [
+        "Fly01",
+        "Fly03",
+        "Fire04"
+      ],
+      "binding_basis": "project_authored_owned_air_chain",
+      "original_action_mapping_verified": false,
+      "enable_gate": "",
+      "persistent_audio": {
+        "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2524282819_1",
+        "begin_tag": "Event.Montage.AudioWindowBegin",
+        "end_tag": "Event.Montage.AudioWindowEnd",
+        "socket": "None",
+        "relative_location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "relative_rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_keys": [
+        "Fly01",
+        "Fly03",
+        "Fire04"
+      ],
+      "hit_authority": "GA authenticated hit-window source_action_id"
+    },
+    {
+      "action_id": "AirChain02",
+      "source_action_ids": [
+        "Fly02",
+        "Fly03",
+        "Fire04"
+      ],
+      "binding_basis": "project_authored_owned_air_chain",
+      "original_action_mapping_verified": false,
+      "enable_gate": "",
+      "persistent_audio": {
+        "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2524282819_1",
+        "begin_tag": "Event.Montage.AudioWindowBegin",
+        "end_tag": "Event.Montage.AudioWindowEnd",
+        "socket": "None",
+        "relative_location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "relative_rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      "hit_cue_owner": "FX",
+      "hit_cue_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+      "hit_cue_keys": [
+        "Fly02",
+        "Fly03",
+        "Fire04"
+      ],
+      "hit_authority": "GA authenticated hit-window source_action_id"
+    }
+  ],
+  "owned_audio": [
+    {
+      "key": "Fire02Hold",
+      "action_id": "Fire02",
+      "event_id": 3286683035,
+      "enabled": true,
+      "persistent_audio": {
+        "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3286683035_1",
+        "begin_tag": "Event.Montage.AudioWindowBegin",
+        "end_tag": "Event.Montage.AudioWindowEnd",
+        "socket": "None",
+        "relative_location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "relative_rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      "begin_phase": "HoldBegin",
+      "end_phase": "HoldEnd",
+      "binding_basis": "project_candidate",
+      "original_trigger_seconds": null,
+      "cleanup_owner": "original GA AudioActor -> original AudioComponent; retire original identity",
+      "retire_on": [
+        "phase_end",
+        "normal_end",
+        "cancel",
+        "death",
+        "target_invalid"
+      ],
+      "finite_source_is_not_forced_to_loop": true
+    },
+    {
+      "key": "Fly03Charge",
+      "action_id": "Fly03",
+      "event_id": 2524282819,
+      "enabled": true,
+      "persistent_audio": {
+        "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2524282819_1",
+        "begin_tag": "Event.Montage.AudioWindowBegin",
+        "end_tag": "Event.Montage.AudioWindowEnd",
+        "socket": "None",
+        "relative_location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "relative_rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      "begin_phase": "ChargeBegin",
+      "end_phase": "ChargeEnd",
+      "binding_basis": "project_candidate",
+      "original_trigger_seconds": null,
+      "cleanup_owner": "original GA AudioActor -> original AudioComponent; retire original identity",
+      "retire_on": [
+        "phase_end",
+        "normal_end",
+        "cancel",
+        "death",
+        "target_invalid"
+      ],
+      "finite_source_is_not_forced_to_loop": true
+    },
+    {
+      "key": "IceEnvironment",
+      "action_id": "PhaseIce",
+      "event_id": 1047260087,
+      "enabled": false,
+      "persistent_audio": {
+        "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1047260087_1",
+        "begin_tag": "Event.Montage.AudioWindowBegin",
+        "end_tag": "Event.Montage.AudioWindowEnd",
+        "socket": "None",
+        "relative_location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "relative_rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      "begin_phase": "EnvironmentBegin",
+      "end_phase": "EnvironmentEnd",
+      "binding_basis": "project_candidate",
+      "original_trigger_seconds": null,
+      "cleanup_owner": "original GA AudioActor -> original AudioComponent; retire original identity",
+      "retire_on": [
+        "phase_end",
+        "normal_end",
+        "cancel",
+        "death",
+        "target_invalid"
+      ],
+      "finite_source_is_not_forced_to_loop": true
+    },
+    {
+      "key": "AirChain01Charge",
+      "action_id": "AirChain01",
+      "source_action_id": "Fly03",
+      "event_id": 2524282819,
+      "enabled": true,
+      "persistent_audio": {
+        "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2524282819_1",
+        "begin_tag": "Event.Montage.AudioWindowBegin",
+        "end_tag": "Event.Montage.AudioWindowEnd",
+        "socket": "None",
+        "relative_location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "relative_rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      "begin_phase": "CastWarning.Begin",
+      "end_phase": "CastWarning.End",
+      "binding_basis": "project_authored_owned_air_chain",
+      "original_trigger_seconds": null,
+      "cleanup_owner": "original GA AudioActor -> original AudioComponent; retire original identity",
+      "retire_on": [
+        "phase_end",
+        "normal_end",
+        "cancel",
+        "death",
+        "target_invalid"
+      ],
+      "finite_source_is_not_forced_to_loop": true
+    },
+    {
+      "key": "AirChain02Charge",
+      "action_id": "AirChain02",
+      "source_action_id": "Fly03",
+      "event_id": 2524282819,
+      "enabled": true,
+      "persistent_audio": {
+        "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2524282819_1",
+        "begin_tag": "Event.Montage.AudioWindowBegin",
+        "end_tag": "Event.Montage.AudioWindowEnd",
+        "socket": "None",
+        "relative_location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "relative_rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      "begin_phase": "CastWarning.Begin",
+      "end_phase": "CastWarning.End",
+      "binding_basis": "project_authored_owned_air_chain",
+      "original_trigger_seconds": null,
+      "cleanup_owner": "original GA AudioActor -> original AudioComponent; retire original identity",
+      "retire_on": [
+        "phase_end",
+        "normal_end",
+        "cancel",
+        "death",
+        "target_invalid"
+      ],
+      "finite_source_is_not_forced_to_loop": true
+    }
+  ],
+  "montage_events": [
+    {
+      "event_key": "Ice01.Active01.E497205119.1",
+      "action_id": "Ice01",
+      "phase_id": "Active01",
+      "event_id": 497205119,
+      "time_seconds": 0.75,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E497205119_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.75,
+        0.9166666666666666
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_boss_ice_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Ice02.Active01.E497205119.1",
+      "action_id": "Ice02",
+      "phase_id": "Active01",
+      "event_id": 497205119,
+      "time_seconds": 0.13333333333333333,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E497205119_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.13333333333333333,
+        0.4
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_boss_ice_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Ice03.Active01.E497205119.1",
+      "action_id": "Ice03",
+      "phase_id": "Active01",
+      "event_id": 497205119,
+      "time_seconds": 0.98,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E497205119_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.98,
+        1.12
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_boss_ice_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Ice04.Active01.E497205119.1",
+      "action_id": "Ice04",
+      "phase_id": "Active01",
+      "event_id": 497205119,
+      "time_seconds": 0.75,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E497205119_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.75,
+        1.02
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_boss_ice_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Ice05.Active01.E497205119.1",
+      "action_id": "Ice05",
+      "phase_id": "Active01",
+      "event_id": 497205119,
+      "time_seconds": 0.2,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E497205119_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.2,
+        0.48
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_boss_ice_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fire01.Active01.E230747614.1",
+      "action_id": "Fire01",
+      "phase_id": "Active01",
+      "event_id": 230747614,
+      "time_seconds": 0.45,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E230747614_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.45,
+        0.95
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fire01.Active02.E230747614.1",
+      "action_id": "Fire01",
+      "phase_id": "Active02",
+      "event_id": 230747614,
+      "time_seconds": 1.05,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E230747614_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        1.05,
+        1.4
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fire02.Active01.E1624690420.1",
+      "action_id": "Fire02",
+      "phase_id": "Active01",
+      "event_id": 1624690420,
+      "time_seconds": 0.55,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1624690420_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.55,
+        1.1
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fire02.Active01.E1624690420.2",
+      "action_id": "Fire02",
+      "phase_id": "Active01",
+      "event_id": 1624690420,
+      "time_seconds": 0.55,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1624690420_2",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.55,
+        1.1
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fire02.Active02.E1624690420.1",
+      "action_id": "Fire02",
+      "phase_id": "Active02",
+      "event_id": 1624690420,
+      "time_seconds": 2.1,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1624690420_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        2.1,
+        2.8
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fire02.Active02.E1624690420.2",
+      "action_id": "Fire02",
+      "phase_id": "Active02",
+      "event_id": 1624690420,
+      "time_seconds": 2.1,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1624690420_2",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        2.1,
+        2.8
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fire03.Active01.E3969531162.1",
+      "action_id": "Fire03",
+      "phase_id": "Active01",
+      "event_id": 3969531162,
+      "time_seconds": 0.1,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3969531162_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.1,
+        0.48
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "other_fire_action_project_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fire03.Active02.E3969531162.1",
+      "action_id": "Fire03",
+      "phase_id": "Active02",
+      "event_id": 3969531162,
+      "time_seconds": 0.62,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3969531162_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.62,
+        1.1
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "other_fire_action_project_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fire04.Active01.E3779481217.1",
+      "action_id": "Fire04",
+      "phase_id": "Active01",
+      "event_id": 3779481217,
+      "time_seconds": 2.12,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3779481217_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        2.12,
+        2.35
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "other_fly_action_project_candidate_not_landing",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fly01.Active01.E3618384703.1",
+      "action_id": "Fly01",
+      "phase_id": "Active01",
+      "event_id": 3618384703,
+      "time_seconds": 0.55,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3618384703_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.55,
+        1.0
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fly01.Active02.E3618384703.1",
+      "action_id": "Fly01",
+      "phase_id": "Active02",
+      "event_id": 3618384703,
+      "time_seconds": 2.0,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3618384703_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        2.0,
+        2.55
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fly02.Active01.E93858526.1",
+      "action_id": "Fly02",
+      "phase_id": "Active01",
+      "event_id": 93858526,
+      "time_seconds": 0.55,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858526_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.55,
+        1.1
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fly02.Active02.E93858526.1",
+      "action_id": "Fly02",
+      "phase_id": "Active02",
+      "event_id": 93858526,
+      "time_seconds": 1.65,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858526_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        1.65,
+        2.2
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fly03.Active01.E93858525.1",
+      "action_id": "Fly03",
+      "phase_id": "Active01",
+      "event_id": 93858525,
+      "time_seconds": 3.1,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858525_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        3.1,
+        3.25
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "other_fly_action_project_candidate",
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Fly03.Active02.E93858525.1",
+      "action_id": "Fly03",
+      "phase_id": "Active02",
+      "event_id": 93858525,
+      "time_seconds": 3.6,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858525_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        3.6,
+        3.75
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "other_fly_action_project_candidate",
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "Counter.Active01.E4188079934.1",
+      "action_id": "Counter",
+      "phase_id": "Active01",
+      "event_id": 4188079934,
+      "time_seconds": 0.18,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E4188079934_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.18,
+        0.43
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "DashF.Active.E3188014124.1",
+      "action_id": "DashF",
+      "phase_id": "Active",
+      "event_id": 3188014124,
+      "time_seconds": 0.0,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3188014124_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.0,
+        1.0666667222976685
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_boss_evade_project_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "DashB.Active.E3188014124.1",
+      "action_id": "DashB",
+      "phase_id": "Active",
+      "event_id": 3188014124,
+      "time_seconds": 0.0,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3188014124_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.0,
+        1.25
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_boss_evade_project_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "FlyEvade.Active.E3188014124.1",
+      "action_id": "FlyEvade",
+      "phase_id": "Active",
+      "event_id": 3188014124,
+      "time_seconds": 0.0,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3188014124_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.0,
+        1.25
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_boss_evade_project_candidate",
+      "enable_gate": "auxiliary_in_owned_air_chain",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "FireWingGuard.Charge.E4188079934.1",
+      "action_id": "FireWingGuard",
+      "phase_id": "Charge",
+      "event_id": 4188079934,
+      "time_seconds": 0.0,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E4188079934_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.0,
+        0.5
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "other_counter_action_project_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "AirChain01.Active01.E3618384703.1",
+      "action_id": "AirChain01",
+      "phase_id": "Active01",
+      "source_action_id": "Fly01",
+      "source_offset_seconds": 0.0,
+      "event_id": 3618384703,
+      "time_seconds": 0.550000011920929,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3618384703_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.550000011920929,
+        1.0
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "AirChain01.Active02.E3618384703.1",
+      "action_id": "AirChain01",
+      "phase_id": "Active02",
+      "source_action_id": "Fly01",
+      "source_offset_seconds": 0.0,
+      "event_id": 3618384703,
+      "time_seconds": 2.0,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3618384703_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        2.0,
+        2.549999952316284
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "AirChain01.Active03.E93858525.1",
+      "action_id": "AirChain01",
+      "phase_id": "Active03",
+      "source_action_id": "Fly03",
+      "source_offset_seconds": 3.933333396911621,
+      "event_id": 93858525,
+      "time_seconds": 7.0333333015441895,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858525_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        7.0333333015441895,
+        7.183333396911621
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "other_fly_action_project_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "AirChain01.Active04.E93858525.1",
+      "action_id": "AirChain01",
+      "phase_id": "Active04",
+      "source_action_id": "Fly03",
+      "source_offset_seconds": 3.933333396911621,
+      "event_id": 93858525,
+      "time_seconds": 7.5333333015441895,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858525_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        7.5333333015441895,
+        7.683333396911621
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "other_fly_action_project_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "AirChain01.Active05.E3779481217.1",
+      "action_id": "AirChain01",
+      "phase_id": "Active05",
+      "source_action_id": "Fire04",
+      "source_offset_seconds": 8.766666412353516,
+      "event_id": 3779481217,
+      "time_seconds": 10.886666297912598,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3779481217_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        10.886666297912598,
+        11.116666793823242
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "other_fly_action_project_candidate_not_landing",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "AirChain02.Active01.E93858526.1",
+      "action_id": "AirChain02",
+      "phase_id": "Active01",
+      "source_action_id": "Fly02",
+      "source_offset_seconds": 0.0,
+      "event_id": 93858526,
+      "time_seconds": 0.550000011920929,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858526_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        0.550000011920929,
+        1.100000023841858
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "AirChain02.Active02.E93858526.1",
+      "action_id": "AirChain02",
+      "phase_id": "Active02",
+      "source_action_id": "Fly02",
+      "source_offset_seconds": 0.0,
+      "event_id": 93858526,
+      "time_seconds": 1.649999976158142,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858526_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        1.649999976158142,
+        2.200000047683716
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "same_action_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "AirChain02.Active03.E93858525.1",
+      "action_id": "AirChain02",
+      "phase_id": "Active03",
+      "source_action_id": "Fly03",
+      "source_offset_seconds": 3.433333396911621,
+      "event_id": 93858525,
+      "time_seconds": 6.5333333015441895,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858525_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        6.5333333015441895,
+        6.683333396911621
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "other_fly_action_project_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "AirChain02.Active04.E93858525.1",
+      "action_id": "AirChain02",
+      "phase_id": "Active04",
+      "source_action_id": "Fly03",
+      "source_offset_seconds": 3.433333396911621,
+      "event_id": 93858525,
+      "time_seconds": 7.0333333015441895,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E93858525_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        7.0333333015441895,
+        7.183333396911621
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "other_fly_action_project_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "AirChain02.Active05.E3779481217.1",
+      "action_id": "AirChain02",
+      "phase_id": "Active05",
+      "source_action_id": "Fire04",
+      "source_offset_seconds": 8.266666412353516,
+      "event_id": 3779481217,
+      "time_seconds": 10.386666297912598,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3779481217_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "source_window_seconds": [
+        10.386666297912598,
+        10.616666793823242
+      ],
+      "timing_basis": "project_source_FK_candidate_not_original_game_event",
+      "binding_basis": "other_fly_action_project_candidate_not_landing",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "LandingRecovery.Impact.E1107709958.1",
+      "action_id": "LandingRecovery",
+      "phase_id": "Impact",
+      "source_action_id": "Fire04",
+      "event_id": 1107709958,
+      "time_seconds": 0.0,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1107709958_1",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_LandingRecovery_KVB",
+      "section": "Main",
+      "trigger_authority": "real_landed_only",
+      "movement_mode": "presentation_only_no_CMC_curve_execution",
+      "source_window_seconds": [
+        0.0,
+        0.35
+      ],
+      "timing_basis": "project_real_landed_recovery_not_original_event",
+      "binding_basis": "project_real_landed_original_SFX_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "LandingRecovery.Impact.E1107709958.2",
+      "action_id": "LandingRecovery",
+      "phase_id": "Impact",
+      "source_action_id": "Fire04",
+      "event_id": 1107709958,
+      "time_seconds": 0.0,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1107709958_2",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_LandingRecovery_KVB",
+      "section": "Main",
+      "trigger_authority": "real_landed_only",
+      "movement_mode": "presentation_only_no_CMC_curve_execution",
+      "source_window_seconds": [
+        0.0,
+        0.35
+      ],
+      "timing_basis": "project_real_landed_recovery_not_original_event",
+      "binding_basis": "project_real_landed_original_SFX_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    },
+    {
+      "event_key": "LandingRecovery.Impact.E1107709958.3",
+      "action_id": "LandingRecovery",
+      "phase_id": "Impact",
+      "source_action_id": "Fire04",
+      "event_id": 1107709958,
+      "time_seconds": 0.0,
+      "sound": "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1107709958_3",
+      "parameters": {
+        "volume": 1.0,
+        "pitch": 1.0,
+        "follow": true,
+        "attach_name": "None"
+      },
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_LandingRecovery_KVB",
+      "section": "Main",
+      "trigger_authority": "real_landed_only",
+      "movement_mode": "presentation_only_no_CMC_curve_execution",
+      "source_window_seconds": [
+        0.0,
+        0.35
+      ],
+      "timing_basis": "project_real_landed_recovery_not_original_event",
+      "binding_basis": "project_real_landed_original_SFX_candidate",
+      "enable_gate": "",
+      "original_timing_verified": false
+    }
+  ],
+  "persistent_windows": [
+    {
+      "action_id": "Fire02",
+      "phase_id": "Warning",
+      "window_seconds": [
+        0.0,
+        0.55
+      ],
+      "begin_tag": "Event.Montage.AudioWindowBegin",
+      "end_tag": "Event.Montage.AudioWindowEnd",
+      "original_timing_verified": false,
+      "timing_basis": "project_source_FK_candidate_not_original_game_event"
+    },
+    {
+      "action_id": "Fly03",
+      "phase_id": "Warning",
+      "window_seconds": [
+        0.0,
+        3.1
+      ],
+      "begin_tag": "Event.Montage.AudioWindowBegin",
+      "end_tag": "Event.Montage.AudioWindowEnd",
+      "original_timing_verified": false,
+      "timing_basis": "project_source_FK_candidate_not_original_game_event"
+    },
+    {
+      "action_id": "AirChain01",
+      "phase_id": "CastWarning",
+      "source_action_id": "Fly03",
+      "window_seconds": [
+        3.933333396911621,
+        7.0333333015441895
+      ],
+      "begin_tag": "Event.Montage.AudioWindowBegin",
+      "end_tag": "Event.Montage.AudioWindowEnd",
+      "original_timing_verified": false,
+      "timing_basis": "project_source_FK_candidate_not_original_game_event"
+    },
+    {
+      "action_id": "AirChain02",
+      "phase_id": "CastWarning",
+      "source_action_id": "Fly03",
+      "window_seconds": [
+        3.433333396911621,
+        6.5333333015441895
+      ],
+      "begin_tag": "Event.Montage.AudioWindowBegin",
+      "end_tag": "Event.Montage.AudioWindowEnd",
+      "original_timing_verified": false,
+      "timing_basis": "project_source_FK_candidate_not_original_game_event"
+    }
+  ],
+  "animation_timing_source": {
+    "path": "F:\\ue_project\\GGYGO\\AAADocs\\Assets\\BH3\\KevinDemonBattle\\BH3_Kevin_Combat_Montage_Config.json",
+    "fields": "skill_assemblies.id/animation_phases/window_seconds/enable_gate; presentation_contracts.id/montage/section/trigger/movement_mode/animation_phases",
+    "invalidate_on": "对应窗口、组装时长、启用门或表现触发契约变化；Animation 落Notify前核原窗口"
+  },
+  "required_tags": [
+    "Event.Montage.AudioWindowBegin",
+    "Event.Montage.AudioWindowEnd"
+  ],
+  "state_candidates": [
+    {
+      "state": "MoveLeft",
+      "phase_id": "foot_left",
+      "event_id": 2736721907,
+      "sound_cues": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2736721907_1"
+      ],
+      "binding_basis": "project_candidate_original_boss_event",
+      "original_timing_verified": false,
+      "time_seconds": null,
+      "time_owner": "Animation"
+    },
+    {
+      "state": "MoveRight",
+      "phase_id": "foot_right",
+      "event_id": 2736721901,
+      "sound_cues": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2736721901_1"
+      ],
+      "binding_basis": "project_candidate_original_boss_event",
+      "original_timing_verified": false,
+      "time_seconds": null,
+      "time_owner": "Animation"
+    },
+    {
+      "state": "WingDefence",
+      "phase_id": "receive_hit",
+      "event_id": 2190265172,
+      "sound_cues": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2190265172_1"
+      ],
+      "binding_basis": "project_candidate_original_boss_event",
+      "original_timing_verified": false,
+      "time_seconds": null,
+      "time_owner": "Animation"
+    },
+    {
+      "state": "WingDefence",
+      "phase_id": "ground_contact",
+      "event_id": 2218789460,
+      "sound_cues": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2218789460_1"
+      ],
+      "binding_basis": "project_candidate_original_boss_event",
+      "original_timing_verified": false,
+      "time_seconds": null,
+      "time_owner": "Animation"
+    },
+    {
+      "state": "LandingRecovery",
+      "phase_id": "Impact",
+      "event_id": 1107709958,
+      "sound_cues": [
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1107709958_1",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1107709958_2",
+        "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E1107709958_3"
+      ],
+      "binding_basis": "project_candidate_original_boss_event",
+      "original_timing_verified": false,
+      "time_seconds": 0.0,
+      "time_owner": "Animation",
+      "enabled": true,
+      "trigger_authority": "real_landed_only",
+      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_LandingRecovery_KVB",
+      "section": "Main",
+      "movement_mode": "presentation_only_no_CMC_curve_execution",
+      "source_window_seconds": [
+        0.0,
+        0.35
+      ],
+      "timing_basis": "project_real_landed_recovery_not_original_event"
+    }
+  ],
+  "source_gaps": [
+    {
+      "event_id": 39755540,
+      "event_name": "BOSS_411_FX_FIRE_ATTACK_04_FLY_DOWN_FOLLOW",
+      "status": "failed_unresolved_playback_reference",
+      "control_only": false,
+      "empty_event": false,
+      "missing_nodes": [
+        {
+          "actionId": 1026954532,
+          "targetId": 615330980,
+          "missingNodeId": 615330980,
+          "reason": "Required original playback object absent; search of all 3848 current PCK banks found no matching object"
+        },
+        {
+          "actionId": 1026954532,
+          "targetId": 615330980,
+          "missingNodeId": 615330980,
+          "reason": "Required original playback object absent; search of all 3848 current PCK banks found no matching object"
+        }
+      ],
+      "project_substitute": {
+        "event_id": 3779481217,
+        "sound_cues": [
+          "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3779481217_1"
+        ],
+        "enabled": false,
+        "basis": "Fly01 飞行流，需先确认 Fire04 下降阶段的项目适配",
+        "original_mapping_verified": false
+      }
+    },
+    {
+      "event_id": 2297010608,
+      "event_name": "BOSS_411_FX_FIRE_ATTACK_04_HOLD_ENV_STOP",
+      "status": "original_graph_resolved",
+      "control_only": true,
+      "empty_event": false,
+      "missing_nodes": []
+    },
+    {
+      "event_id": 2539632958,
+      "event_name": "BOSS_411_FX_FIRE_ATTACK_02_NORMAL_GROUND_CRACK",
+      "status": "original_graph_resolved",
+      "control_only": false,
+      "empty_event": true,
+      "missing_nodes": []
+    },
+    {
+      "event_id": 3067816605,
+      "event_name": "BOSS_411_FX_FIRE_ATTACK_04_HOLD_ENV",
+      "status": "failed_unresolved_playback_reference",
+      "control_only": false,
+      "empty_event": false,
+      "missing_nodes": [
+        {
+          "actionId": 462542570,
+          "targetId": 61986963,
+          "missingNodeId": 61986963,
+          "reason": "Required original playback object absent; search of all 3848 current PCK banks found no matching object"
+        },
+        {
+          "actionId": 462542570,
+          "targetId": 61986963,
+          "missingNodeId": 61986963,
+          "reason": "Required original playback object absent; search of all 3848 current PCK banks found no matching object"
+        }
+      ],
+      "project_substitute": {
+        "event_id": 3286683035,
+        "sound_cues": [
+          "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E3286683035_1"
+        ],
+        "enabled": false,
+        "basis": "Fire02 有限蓄力流，须由原 GA 认证窗退役",
+        "original_mapping_verified": false
+      }
+    },
+    {
+      "event_id": 3810557961,
+      "event_name": "BOSS_411_FX_FIRE_ATTACK_02",
+      "status": "original_graph_resolved",
+      "control_only": false,
+      "empty_event": true,
+      "missing_nodes": []
+    },
+    {
+      "event_id": 3965332243,
+      "event_name": "BOSS_411_FX_FIRE_ATTACK_04_FLY_DOWN_FOLLOW_STOP",
+      "status": "original_graph_resolved",
+      "control_only": false,
+      "empty_event": true,
+      "missing_nodes": []
+    },
+    {
+      "event_id": 35317695,
+      "event_name": "BOSS_411_FX_ICE_ATTACK_HINT",
+      "missing_nodes": [
+        106982489
+      ]
+    },
+    {
+      "event_id": 575525440,
+      "event_name": "BOSS_411_FX_WING_DEFENCE_HIT_ENEMY_BACK",
+      "missing_nodes": [
+        201801434
+      ]
+    },
+    {
+      "state": "Death/Enter/HitReaction",
+      "status": "no_verified_DemonBattle_action_binding",
+      "candidate_policy": "不借 FAKEKEVIN/ABYSS 语音，不自动把父动作声音继承给状态",
+      "implementable_candidates": [
+        {
+          "use": "death_ice_shatter",
+          "event_id": 549475289,
+          "sound_cues": [
+            "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E549475289_1"
+          ],
+          "enabled": false
+        },
+        {
+          "use": "death_fire_dissipation",
+          "event_id": 2564483858,
+          "sound_cues": [
+            "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2564483858_1"
+          ],
+          "enabled": false
+        },
+        {
+          "use": "physical_hit_reaction",
+          "event_id": 2190265172,
+          "sound_cues": [
+            "/Game/Characters/Boss/Kevin/DemonBattle/Audio/Cues/SC_KevinDB_E2190265172_1"
+          ],
+          "enabled": false
+        }
+      ],
+      "candidate_basis": "project_adaptation_original_SFX_not_original_state_voice"
+    }
+  ],
+  "production_contract": {
+    "montage_writer": "Animation",
+    "GA_writer": "Combat",
+    "exact_save_owner": "Root",
+    "point_lifetime": "natural_end",
+    "owned_lifetime": "GA retires original replicated AudioActor and component",
+    "persistent_audio_events": [
+      "Event.Montage.AudioWindowBegin",
+      "Event.Montage.AudioWindowEnd"
+    ],
+    "random_policy": "UE 原生不放回随机为项目配置；不声称等同 Wwise avoid-repeat 算法",
+    "mix_policy": "原单声/随机/无动态参数静态层已拆成播放组；音量0.7、音高1为可调项目混音",
+    "loop_policy": "只对原 Loop=0 的流启用 WavePlayer 循环；原循环边界与无缝性仍待试听",
+    "readiness": "制作 SoundCue 可独立推进；点声时间已投影当前 Animation 项目阶段，原声时点仍未知"
+  }
+}

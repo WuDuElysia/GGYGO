@@ -1,54 +1,266 @@
 {
-  "schema_version": 1,
-  "status": "prepared_not_executed; all gameplay tuning provisional",
-  "base": "/Game/Characters/Boss/Kevin/DemonBattle/Gameplay",
+  "schema_version": 2,
+  "status": "assembly_basis_confirmed_packages_and_runtime_not_executed",
+  "base": "/Game/Characters/Boss/Kevin/DemonBattle",
+  "demonstration_map": "/Game/Map/BH3/L_KevinBoss_P3",
+  "attack_trigger": "automation_only",
+  "initial_action": "Ice01",
+  "assets": {
+    "pawn": "/Game/Characters/Boss/Kevin/DemonBattle/Blueprints/BP_Kevin_DemonBattle",
+    "movement": "/Game/Characters/Boss/Kevin/DemonBattle/Data/DA_Movement_Kevin_DemonBattle",
+    "pawn_data": "/Game/Characters/Boss/Kevin/DemonBattle/Data/DA_Pawn_Kevin_DemonBattle",
+    "definition": "/Game/Characters/Boss/Kevin/DemonBattle/Data/DA_Boss_Kevin_DemonBattle",
+    "ability_set": "/Game/Characters/Boss/Kevin/DemonBattle/Data/DA_AbilitySet_Kevin_DemonBattle"
+  },
   "mesh": "/Game/Characters/Boss/Kevin/DemonBattle/Mesh/SK_Kevin_DemonBattle",
   "anim_blueprint": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/ABP_Kevin_DemonBattle",
-  "mesh_relative_location": [0.0, 0.0, -96.0],
-  "mesh_relative_rotation": [0.0, 0.0, 0.0],
-  "capsule_radius": 60.0,
-  "capsule_half_height": 96.0,
+  "assembly_alignment_status": "native_standby_sole_and_head_fit; mesh_plus_y_to_actor_plus_x; production_visual_pending",
+  "mesh_relative_location": [
+    0,
+    0,
+    -124.80036582052708
+  ],
+  "mesh_relative_rotation": [
+    0,
+    -90,
+    0
+  ],
+  "mesh_relative_scale": [
+    1,
+    1,
+    1
+  ],
+  "capsule_radius": 60,
+  "capsule_half_height": 125,
+  "motion_asset_basis": {
+    "confirmed": true,
+    "mesh_relative_rotation_xyzw": [
+      0,
+      0,
+      -0.7071067811865475,
+      0.7071067811865476
+    ],
+    "mesh_relative_scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "combat_tuning_status": "temporary_automation_test_initial_values_not_balance",
   "damage_effect": "/Game/GameplayEffects/Damage/GE_Damage_SetByCaller.GE_Damage_SetByCaller_C",
-  "hit_cue": "GameplayCue.Hit.Flesh",
+  "hit_cue": "",
   "trace_start_socket": "KevinWeaponTraceStart",
   "trace_end_socket": "KevinWeaponTraceEnd",
   "behavior_tree": "",
   "form_tag": "State.Boss.Form.Default",
   "phase_tag": "State.Boss.Phase.One",
+  "audio_gap": "Ice01 has no proven source sound or trigger timing; no Fire sound substituted",
   "actions": [
     {
       "id": "Ice01",
       "source_clip": "BOSS_411_Ani_Ice_Attack_01",
       "action_tag": "BossAction.Attack.Melee.Ice01",
-      "ability": "BP_GA_Kevin_Ice01",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Ice01",
       "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice_Attack_01",
-      "motion_profile": "/Game/Characters/Boss/Kevin/DemonBattle/Motion/DA_Kevin_Ice_Attack_01_Motion",
-      "play_rate": 1.0,
-      "damage": 20.0,
-      "poise_damage": 10.0,
-      "trace_radius": 25.0,
-      "min_distance": 0.0,
-      "max_distance": 500.0,
-      "max_facing_angle": 60.0,
-      "base_weight": 1.0,
-      "repeat_penalty": 0.35
-    },
-    {
-      "id": "Ice02",
-      "source_clip": "BOSS_411_Ani_Ice_Attack_02",
-      "action_tag": "BossAction.Attack.Melee.Ice02",
-      "ability": "BP_GA_Kevin_Ice02",
-      "montage": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/AM_Kevin_Ice_Attack_02",
-      "motion_profile": "/Game/Characters/Boss/Kevin/DemonBattle/Motion/DA_Kevin_Ice_Attack_02_Motion",
-      "play_rate": 1.0,
-      "damage": 20.0,
-      "poise_damage": 10.0,
-      "trace_radius": 25.0,
-      "min_distance": 0.0,
-      "max_distance": 500.0,
-      "max_facing_angle": 60.0,
-      "base_weight": 1.0,
-      "repeat_penalty": 0.35
+      "play_rate": 1,
+      "damage": 20,
+      "poise_damage": 10,
+      "trace_radius": 25
     }
-  ]
+  ],
+  "production": {
+    "schema": "GGYGO.KevinBossWiring/v1",
+    "status": "full15_author_recipe_consumed_assets_not_executed",
+    "design_basis": "project_authored_two_phases_50_percent_not_original_game",
+    "ability_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Ability_Config.json",
+    "pawn_parent_blueprint": "/Game/BP/Character/BP_BossCharacter",
+    "blackboard": "/Game/Characters/Boss/Kevin/DemonBattle/Data/BB_Kevin_DemonBattle",
+    "behavior_tree": "/Game/Characters/Boss/Kevin/DemonBattle/Data/BT_Kevin_DemonBattle",
+    "target_acquire_distance": 4000.0,
+    "target_lose_distance": 5000.0,
+    "approach_distance": 100.0,
+    "target_update_interval": 0.2,
+    "decision_interval": 0.35,
+    "target_key": "TargetActor",
+    "phases": [
+      {
+        "tag": "State.Boss.Phase.Kevin.One",
+        "health_threshold": 1.0,
+        "action_set": "/Game/Characters/Boss/Kevin/DemonBattle/Data/DA_BossActionSet_Kevin_PhaseOne",
+        "action_keys": [
+          "Ice01",
+          "Ice02",
+          "Ice03",
+          "Ice04",
+          "Ice05",
+          "Counter",
+          "DashF"
+        ]
+      },
+      {
+        "tag": "State.Boss.Phase.Kevin.Two",
+        "health_threshold": 0.5,
+        "action_set": "/Game/Characters/Boss/Kevin/DemonBattle/Data/DA_BossActionSet_Kevin_PhaseTwo",
+        "action_keys": [
+          "Ice01",
+          "Ice02",
+          "Ice03",
+          "Ice04",
+          "Ice05",
+          "Fire01",
+          "Fire02",
+          "Fire03",
+          "Counter",
+          "AirChain01",
+          "AirChain02",
+          "DashF"
+        ]
+      }
+    ],
+    "action_tuning": {
+      "Ice01": {
+        "base_weight": 1.0,
+        "min_distance": 0.0,
+        "max_distance": 650.0,
+        "max_facing_angle": 45.0,
+        "repeat_penalty": 0.25,
+        "unused_weight_gain": 0.2,
+        "max_weight": 3.0,
+        "requires_line_of_sight": true
+      },
+      "Ice02": {
+        "base_weight": 1.0,
+        "min_distance": 0.0,
+        "max_distance": 650.0,
+        "max_facing_angle": 45.0,
+        "repeat_penalty": 0.25,
+        "unused_weight_gain": 0.2,
+        "max_weight": 3.0,
+        "requires_line_of_sight": true
+      },
+      "Ice03": {
+        "base_weight": 1.0,
+        "min_distance": 0.0,
+        "max_distance": 650.0,
+        "max_facing_angle": 45.0,
+        "repeat_penalty": 0.25,
+        "unused_weight_gain": 0.2,
+        "max_weight": 3.0,
+        "requires_line_of_sight": true
+      },
+      "Ice04": {
+        "base_weight": 1.0,
+        "min_distance": 0.0,
+        "max_distance": 650.0,
+        "max_facing_angle": 45.0,
+        "repeat_penalty": 0.25,
+        "unused_weight_gain": 0.2,
+        "max_weight": 3.0,
+        "requires_line_of_sight": true
+      },
+      "Ice05": {
+        "base_weight": 1.0,
+        "min_distance": 0.0,
+        "max_distance": 650.0,
+        "max_facing_angle": 45.0,
+        "repeat_penalty": 0.25,
+        "unused_weight_gain": 0.2,
+        "max_weight": 3.0,
+        "requires_line_of_sight": true
+      },
+      "Fire01": {
+        "base_weight": 1.0,
+        "min_distance": 0.0,
+        "max_distance": 2200.0,
+        "max_facing_angle": 70.0,
+        "repeat_penalty": 0.25,
+        "unused_weight_gain": 0.2,
+        "max_weight": 3.0,
+        "requires_line_of_sight": true
+      },
+      "Fire02": {
+        "base_weight": 1.0,
+        "min_distance": 0.0,
+        "max_distance": 2200.0,
+        "max_facing_angle": 70.0,
+        "repeat_penalty": 0.25,
+        "unused_weight_gain": 0.2,
+        "max_weight": 3.0,
+        "requires_line_of_sight": true
+      },
+      "Fire03": {
+        "base_weight": 1.0,
+        "min_distance": 0.0,
+        "max_distance": 2200.0,
+        "max_facing_angle": 70.0,
+        "repeat_penalty": 0.25,
+        "unused_weight_gain": 0.2,
+        "max_weight": 3.0,
+        "requires_line_of_sight": true
+      },
+      "Counter": {
+        "base_weight": 0.5,
+        "min_distance": 0.0,
+        "max_distance": 500.0,
+        "max_facing_angle": 45.0,
+        "repeat_penalty": 0.25,
+        "unused_weight_gain": 0.2,
+        "max_weight": 3.0,
+        "requires_line_of_sight": true
+      },
+      "AirChain01": {
+        "base_weight": 0.7,
+        "min_distance": 450.0,
+        "max_distance": 2200.0,
+        "max_facing_angle": 70.0,
+        "repeat_penalty": 0.0,
+        "unused_weight_gain": 0.1,
+        "max_weight": 1.5,
+        "requires_line_of_sight": true
+      },
+      "AirChain02": {
+        "base_weight": 0.7,
+        "min_distance": 450.0,
+        "max_distance": 2200.0,
+        "max_facing_angle": 70.0,
+        "repeat_penalty": 0.0,
+        "unused_weight_gain": 0.1,
+        "max_weight": 1.5,
+        "requires_line_of_sight": true
+      },
+      "DashF": {
+        "base_weight": 1.0,
+        "min_distance": 650.0,
+        "max_distance": 5000.0,
+        "max_facing_angle": 15.0,
+        "repeat_penalty": 1.0,
+        "unused_weight_gain": 0.0,
+        "max_weight": 1.0,
+        "requires_line_of_sight": true
+      }
+    },
+    "scene": {
+      "map": "/Game/Map/BH3/L_KevinBoss_P3",
+      "encounter_actor_label": "Kevin_DemonBattle_Encounter",
+      "encounter_location": [
+        0.0,
+        0.0,
+        125.0
+      ],
+      "player_start_location": [
+        1000.0,
+        0.0,
+        150.0
+      ],
+      "encounter_seed": 411,
+      "status": "existing_scene_native_readback_pending",
+      "ownership": "original_level_author",
+      "coordinates_status": "proposal_only_use_native_level_author_receipt"
+    },
+    "state_blueprint": "/Game/Characters/Boss/Kevin/DemonBattle/Blueprints/BP_BossState_Kevin",
+    "target_service": "/Game/Characters/Boss/Kevin/DemonBattle/Data/BTS_Kevin_Decision",
+    "air_chain_status": "finite_source_xyz_then_native_falling_real_landed_and_landing_recovery_blueprint_entrypoints",
+    "use_native_approach": false,
+    "approach_policy": "完整 Dash_F 原曲线由动作池经 GAS 执行；不发起 MoveTo，不缩放或裁剪原轨迹。"
+  }
 }

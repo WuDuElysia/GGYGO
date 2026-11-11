@@ -1,5 +1,5 @@
 {
-  "status": "proposal_only_pending_root_contract",
+  "status": "KVB-20261105-01_all79_source_classified; 75_valid_4_empty; UE_authoring_pending",
   "source": "F:\\AnimeStudio\\Exports\\BH3\\Animator\\Kevin\\05_BOSS_411_DemonBattle",
   "source_clips": 79,
   "importable_sequences": 75,
@@ -35,7 +35,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "state_or_pose",
+      "production_reason": "待机/飞行保持姿态；由实际状态消费，不作为攻击",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_page": "poses_01.png",
+      "native_duration_evidence_seconds": 2.183333396911621,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Force_Kill_ThrowSkill_AS",
@@ -86,7 +99,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "paired_or_external_control",
+      "production_reason": "缺目标配对、约束/释放/退出轨迹；不启用伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        29.1064030292346,
+        30.47077939989275,
+        55.07427973031014
+      ],
+      "pose_page": "poses_01.png",
+      "native_duration_evidence_seconds": 3.5833332538604736,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Force_Kill_ThrowSkill_BS",
@@ -137,7 +163,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "paired_or_external_control",
+      "production_reason": "缺目标配对、约束/释放/退出轨迹；不启用伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        29.529095030357446,
+        33.37351796420829,
+        87.7878170920557
+      ],
+      "pose_page": "poses_01.png",
+      "native_duration_evidence_seconds": 4.183333396911621,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Be_Executed_AS",
@@ -180,7 +219,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "paired_or_external_control",
+      "production_reason": "缺目标配对、约束/释放/退出轨迹；不启用伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        41.50025420195485,
+        177.86974784296004,
+        521.6060740763216
+      ],
+      "pose_page": "poses_01.png",
+      "native_duration_evidence_seconds": 3.549999952316284,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Be_Executed",
@@ -221,7 +273,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "paired_or_external_control",
+      "production_reason": "缺目标配对、约束/释放/退出轨迹；不启用伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        177.86970190665073,
+        0.0
+      ],
+      "pose_page": "poses_01.png",
+      "native_duration_evidence_seconds": 8.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fly_Loop",
@@ -267,7 +332,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "state_or_pose",
+      "production_reason": "待机/飞行保持姿态；由实际状态消费，不作为攻击",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.25590717792510986,
+        14.31695556640625,
+        185.90029907226562
+      ],
+      "pose_page": "poses_01.png",
+      "native_duration_evidence_seconds": 0.03333333507180214,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Execute_Wing_Defence_BS",
@@ -310,7 +388,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "FireWingGuard"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        5.742857887608997,
+        16.97520441189546,
+        37.331565789734306
+      ],
+      "pose_page": "poses_02.png",
+      "native_duration_evidence_seconds": 0.5,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Execute_Wing_Defence_Loop",
@@ -347,7 +440,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "FireWingGuard"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.4374461163728389,
+        1.682365417244597,
+        2.1847190791189703
+      ],
+      "pose_page": "poses_02.png",
+      "native_duration_evidence_seconds": 2.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Execute_Wing_Defence_AS",
@@ -390,7 +498,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "FireWingGuard"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        27.277663193948904,
+        32.313360197359856,
+        127.26986694335938
+      ],
+      "pose_page": "poses_02.png",
+      "native_duration_evidence_seconds": 2.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOS_411_Ani_Counter",
@@ -436,7 +559,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Counter"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        14.107086169113922,
+        2.8757551687957204,
+        12.54089354452094
+      ],
+      "pose_page": "poses_02.png",
+      "native_duration_evidence_seconds": 1.1666666269302368,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Wing_Defence_Break(80-200)",
@@ -482,7 +620,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "defence_or_break_variant",
+      "production_reason": "防御/破防/执行表现，原准入和配对未知，不自动给无敌或反伤",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        30.45138995938848,
+        77.91202916575502,
+        149.40332020873288
+      ],
+      "pose_page": "poses_02.png",
+      "native_duration_evidence_seconds": 4.933333396911621,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Move_L_BS",
@@ -525,7 +676,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "locomotion_segment",
+      "production_reason": "侧移起步/循环/停止姿态；不是独立攻击，需消费实际CMC移动模式",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        70.06835079193115,
+        1.5534057610430665,
+        8.01670809675479
+      ],
+      "pose_page": "poses_02.png",
+      "native_duration_evidence_seconds": 0.5666666626930237,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Move_L_Loop",
@@ -568,7 +732,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "locomotion_segment",
+      "production_reason": "侧移起步/循环/停止姿态；不是独立攻击，需消费实际CMC移动模式",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        219.10025787353516,
+        3.7071226764469145,
+        3.767157051114636
+      ],
+      "pose_page": "poses_03.png",
+      "native_duration_evidence_seconds": 1.0833333730697632,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Move_L_AS",
@@ -611,7 +788,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "locomotion_segment",
+      "production_reason": "侧移起步/循环/停止姿态；不是独立攻击，需消费实际CMC移动模式",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        85.80795224840188,
+        4.133514396966106,
+        7.750267505645752
+      ],
+      "pose_page": "poses_03.png",
+      "native_duration_evidence_seconds": 0.6833333373069763,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Move_R_BS",
@@ -654,7 +844,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "locomotion_segment",
+      "production_reason": "侧移起步/循环/停止姿态；不是独立攻击，需消费实际CMC移动模式",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        51.51276874542236,
+        2.0601882926739563,
+        4.9317065322324405
+      ],
+      "pose_page": "poses_03.png",
+      "native_duration_evidence_seconds": 0.5666666626930237,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Move_R_Loop",
@@ -697,7 +900,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "locomotion_segment",
+      "production_reason": "侧移起步/循环/停止姿态；不是独立攻击，需消费实际CMC移动模式",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        219.10028457641602,
+        3.679908614587177,
+        3.592553153607167
+      ],
+      "pose_page": "poses_03.png",
+      "native_duration_evidence_seconds": 1.0833333730697632,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Move_R_AS",
@@ -740,7 +956,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "locomotion_segment",
+      "production_reason": "侧移起步/循环/停止姿态；不是独立攻击，需消费实际CMC移动模式",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        83.90988159179688,
+        2.5229263305664062,
+        1.8786462715615926
+      ],
+      "pose_page": "poses_03.png",
+      "native_duration_evidence_seconds": 0.6833333373069763,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_01",
@@ -786,7 +1015,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Fire01"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        18.111214168634152,
+        84.23519574781744,
+        1008.1170645228844
+      ],
+      "pose_page": "poses_03.png",
+      "native_duration_evidence_seconds": 2.8333332538604736,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Ice_Attack_02",
@@ -832,7 +1076,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Ice02"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        32.204013924079376,
+        57.76213836544312,
+        129.43218990558785
+      ],
+      "pose_page": "poses_04.png",
+      "native_duration_evidence_seconds": 1.850000023841858,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_02",
@@ -879,7 +1138,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Fire02"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        488.8342187841704,
+        306.9431076595316,
+        1876.1284212892872
+      ],
+      "pose_page": "poses_04.png",
+      "native_duration_evidence_seconds": 4.2166666984558105,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Ice_Attack_01",
@@ -933,7 +1207,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Ice01"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        28.672799945535775,
+        55.30204772949219,
+        142.04861450195312
+      ],
+      "pose_page": "poses_04.png",
+      "native_duration_evidence_seconds": 2.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Wing_Defence_BS",
@@ -976,7 +1265,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "defence_or_break_variant",
+      "production_reason": "防御/破防/执行表现，原准入和配对未知，不自动给无敌或反伤",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        5.742857887608997,
+        16.97520441189546,
+        37.331565789734306
+      ],
+      "pose_page": "poses_04.png",
+      "native_duration_evidence_seconds": 0.5,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Wing_Defence_Loop",
@@ -1013,7 +1315,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "defence_or_break_variant",
+      "production_reason": "防御/破防/执行表现，原准入和配对未知，不自动给无敌或反伤",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.4374461163728389,
+        1.682365417244597,
+        2.1847190791189703
+      ],
+      "pose_page": "poses_04.png",
+      "native_duration_evidence_seconds": 2.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Wing_Defence_ThrowSkill",
@@ -1056,7 +1371,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "paired_or_external_control",
+      "production_reason": "缺目标配对、约束/释放/退出轨迹；不启用伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        26.646770311112434,
+        32.01949253861473,
+        83.27081964836736
+      ],
+      "pose_page": "poses_04.png",
+      "native_duration_evidence_seconds": 1.5666667222976685,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Wing_Defence_ThrowSkill_BS",
@@ -1099,7 +1427,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "paired_or_external_control",
+      "production_reason": "缺目标配对、约束/释放/退出轨迹；不启用伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        27.277663193948904,
+        32.313360197359856,
+        127.26986694335938
+      ],
+      "pose_page": "poses_05.png",
+      "native_duration_evidence_seconds": 2.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Wing_ThrowSkill_AS",
@@ -1150,7 +1491,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "paired_or_external_control",
+      "production_reason": "缺目标配对、约束/释放/退出轨迹；不启用伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        29.10640527063853,
+        30.470779363546768,
+        55.07427880738042
+      ],
+      "pose_page": "poses_05.png",
+      "native_duration_evidence_seconds": 3.4666666984558105,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Dash_B",
@@ -1196,7 +1550,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "DashB"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        12.431296239141997,
+        50.42790214535917,
+        689.1626584721812
+      ],
+      "pose_page": "poses_05.png",
+      "native_duration_evidence_seconds": 1.25,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Dash_F",
@@ -1239,7 +1608,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "DashF"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        21.6358825864804,
+        45.149435552217994,
+        712.0112914806376
+      ],
+      "pose_page": "poses_05.png",
+      "native_duration_evidence_seconds": 1.0666667222976685,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_03_Loop",
@@ -1286,7 +1670,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "attack_variant",
+      "production_reason": "完整Fire03已覆盖；Loop源非循环且首尾不闭合，Loop_End为恢复变体",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        32.74810755959311,
+        72.12388656674726,
+        286.38037109375
+      ],
+      "pose_page": "poses_05.png",
+      "native_duration_evidence_seconds": 1.1166666746139526,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_03",
@@ -1333,7 +1730,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Fire03"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        43.79720444814727,
+        72.1238849765601,
+        410.9490966749081
+      ],
+      "pose_page": "poses_05.png",
+      "native_duration_evidence_seconds": 3.2333333492279053,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_04_BS",
@@ -1379,7 +1791,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "airborne_path_variant",
+      "production_reason": "短片包含保持姿态或外部大位移，缺外部路径/等待条件，不按后缀拼完整技能",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        6.241143819674792,
+        1661.320671051796,
+        12.051877493218985
+      ],
+      "pose_page": "poses_06.png",
+      "native_duration_evidence_seconds": 1.6166666746139526,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_04_Air_Wait",
@@ -1419,7 +1844,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "airborne_path_variant",
+      "production_reason": "短片包含保持姿态或外部大位移，缺外部路径/等待条件，不按后缀拼完整技能",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_page": "poses_06.png",
+      "native_duration_evidence_seconds": 0.03333333507180214,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_04_Down_Loop",
@@ -1454,7 +1892,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "airborne_path_variant",
+      "production_reason": "短片包含保持姿态或外部大位移，缺外部路径/等待条件，不按后缀拼完整技能",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        1.2030467987060547,
+        226.09588623046875,
+        0.45778846740722656
+      ],
+      "pose_page": "poses_06.png",
+      "native_duration_evidence_seconds": 0.03333333507180214,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_04_Down_AS",
@@ -1500,7 +1951,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "airborne_path_variant",
+      "production_reason": "短片包含保持姿态或外部大位移，缺外部路径/等待条件，不按后缀拼完整技能",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        37.3099246729173,
+        78.02654599092632,
+        79.93625952849764
+      ],
+      "pose_page": "poses_06.png",
+      "native_duration_evidence_seconds": 2.450000047683716,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_04_Down_Loop_Spline",
@@ -1535,7 +1999,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "airborne_path_variant",
+      "production_reason": "短片包含保持姿态或外部大位移，缺外部路径/等待条件，不按后缀拼完整技能",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        1.2030467987060547,
+        226.09588623046875,
+        0.45778846740722656
+      ],
+      "pose_page": "poses_06.png",
+      "native_duration_evidence_seconds": 0.03333333507180214,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_ThrowUp_02_Y",
@@ -1573,7 +2050,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_or_external_trajectory",
+      "production_reason": "抛起/下落/倒地辅助；零时长和短Take不能假定滞空时长",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        9.51016962389916,
+        123.77120891195754,
+        134.53500366210938
+      ],
+      "pose_page": "poses_06.png",
+      "native_duration_evidence_seconds": 0.4333333373069763,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_ThrowFall_Y",
@@ -1599,7 +2089,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_or_external_trajectory",
+      "production_reason": "抛起/下落/倒地辅助；零时长和短Take不能假定滞空时长",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_page": "poses_07.png",
+      "native_duration_evidence_seconds": 1.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_StandUp",
@@ -1637,7 +2140,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_presentation",
+      "production_reason": "受击/起身/眩晕表现，不请求攻击和伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        32.901237363042085,
+        106.9920883140601,
+        267.02091977203287
+      ],
+      "pose_page": "poses_07.png",
+      "native_duration_evidence_seconds": 2.700000047683716,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_04",
@@ -1683,7 +2199,24 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Fire04",
+        "AirChain01",
+        "AirChain02"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        37.31048595743904,
+        1730.0761424118555,
+        79.93625803534266
+      ],
+      "pose_page": "poses_07.png",
+      "native_duration_evidence_seconds": 5.183333396911621,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_03_Loop_End",
@@ -1730,7 +2263,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "attack_variant",
+      "production_reason": "完整Fire03已覆盖；Loop源非循环且首尾不闭合，Loop_End为恢复变体",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        34.64822623043441,
+        56.3052062131562,
+        125.61035153009789
+      ],
+      "pose_page": "poses_07.png",
+      "native_duration_evidence_seconds": 2.2666666507720947,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Ice_Attack_03_BS",
@@ -1773,7 +2319,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Ice03"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        18.391512929068472,
+        44.41722106933594,
+        77.5220183577424
+      ],
+      "pose_page": "poses_07.png",
+      "native_duration_evidence_seconds": 0.9333333373069763,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Ice_Attack_03_Loop",
@@ -1813,7 +2374,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Ice03"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        1.2962951543652892,
+        1.3925552299216122,
+        1.0457267758353055
+      ],
+      "pose_page": "poses_07.png",
+      "native_duration_evidence_seconds": 0.2666666805744171,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Ice_Attack_03_AS",
@@ -1856,7 +2432,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Ice03"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        25.5180277530918,
+        18.76125332678579,
+        42.1273193359375
+      ],
+      "pose_page": "poses_08.png",
+      "native_duration_evidence_seconds": 0.8500000238418579,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Wing_Defence_Simple",
@@ -1899,7 +2490,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "defence_or_break_variant",
+      "production_reason": "防御/破防/执行表现，原准入和配对未知，不自动给无敌或反伤",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        20.883799005349317,
+        32.31336075627161,
+        70.36469268197554
+      ],
+      "pose_page": "poses_08.png",
+      "native_duration_evidence_seconds": 3.183333396911621,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Ice_Attack_04",
@@ -1953,7 +2557,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Ice04"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        29.16354184909101,
+        50.286303802546044,
+        142.04861450195312
+      ],
+      "pose_page": "poses_08.png",
+      "native_duration_evidence_seconds": 2.183333396911621,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Ice_Attack_05",
@@ -1999,7 +2618,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Ice05"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        32.20401238407813,
+        53.95700050467292,
+        176.7371824611877
+      ],
+      "pose_page": "poses_08.png",
+      "native_duration_evidence_seconds": 2.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fly_Attack_01",
@@ -2042,7 +2676,23 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Fly01",
+        "AirChain01"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        41.049024484250374,
+        243.7952561875284,
+        34.435154856619434
+      ],
+      "pose_page": "poses_08.png",
+      "native_duration_evidence_seconds": 3.933333396911621,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fly_Attack_02",
@@ -2085,7 +2735,23 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Fly02",
+        "AirChain02"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        45.07580547563373,
+        224.12969183393858,
+        27.70535879325659
+      ],
+      "pose_page": "poses_08.png",
+      "native_duration_evidence_seconds": 3.433333396911621,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fly_Attack_03_AS",
@@ -2128,7 +2794,24 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Fly03",
+        "AirChain01",
+        "AirChain02"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        7.66249656380417,
+        11.333190723320058,
+        11.50258383209639
+      ],
+      "pose_page": "poses_09.png",
+      "native_duration_evidence_seconds": 1.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fly_Attack_03_Summon",
@@ -2169,7 +2852,24 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Fly03",
+        "AirChain01",
+        "AirChain02"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        2.1083984375,
+        0.0
+      ],
+      "pose_page": "poses_09.png",
+      "native_duration_evidence_seconds": 1.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fly_Attack_03_Between",
@@ -2212,7 +2912,24 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Fly03",
+        "AirChain01",
+        "AirChain02"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        6.844014158271481,
+        12.255248698831792,
+        4.364984507961113
+      ],
+      "pose_page": "poses_09.png",
+      "native_duration_evidence_seconds": 1.100000023841858,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fly_Attack_03_Shoot",
@@ -2253,7 +2970,24 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Fly03",
+        "AirChain01",
+        "AirChain02"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        1.39520263671875,
+        0.0
+      ],
+      "pose_page": "poses_09.png",
+      "native_duration_evidence_seconds": 1.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fly_Attack_03_BS",
@@ -2296,7 +3030,24 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "Fly03",
+        "AirChain01",
+        "AirChain02"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        8.256887226230322,
+        6.25189133351671,
+        10.66233246354382
+      ],
+      "pose_page": "poses_09.png",
+      "native_duration_evidence_seconds": 0.7333333492279053,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_04_Charge",
@@ -2339,7 +3090,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "airborne_path_variant",
+      "production_reason": "短片包含保持姿态或外部大位移，缺外部路径/等待条件，不按后缀拼完整技能",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.26220130920410156,
+        6.3800582878869605,
+        0.14751052856445312
+      ],
+      "pose_page": "poses_09.png",
+      "native_duration_evidence_seconds": 0.3333333432674408,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Attack_04_ChargeEnd",
@@ -2385,7 +3149,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "airborne_path_variant",
+      "production_reason": "短片包含保持姿态或外部大位移，缺外部路径/等待条件，不按后缀拼完整技能",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        37.30992495189872,
+        62.04499426706701,
+        79.93626399412884
+      ],
+      "pose_page": "poses_10.png",
+      "native_duration_evidence_seconds": 2.4833333492279053,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fly_Evade",
@@ -2431,7 +3208,22 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "skill_segment",
+      "production_reason": "使用实际完整Take及已审身体端点；不是一片段一技能",
+      "assembly_ids": [
+        "FlyEvade"
+      ],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        4.662431622544459,
+        37.392532065011096,
+        695.491454871023
+      ],
+      "pose_page": "poses_10.png",
+      "native_duration_evidence_seconds": 1.25,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_340_Ani_Stun",
@@ -2463,7 +3255,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_presentation",
+      "production_reason": "受击/起身/眩晕表现，不请求攻击和伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_page": "poses_10.png",
+      "native_duration_evidence_seconds": 2.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Hit_L",
@@ -2503,7 +3308,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_presentation",
+      "production_reason": "受击/起身/眩晕表现，不请求攻击和伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        3.1367758890952064,
+        5.884704584127476,
+        8.597495552754836
+      ],
+      "pose_page": "poses_10.png",
+      "native_duration_evidence_seconds": 1.2833333015441895,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Hit_H_F",
@@ -2543,7 +3361,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_presentation",
+      "production_reason": "受击/起身/眩晕表现，不请求攻击和伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        9.89203627003123,
+        17.449592048056047,
+        21.312526194504528
+      ],
+      "pose_page": "poses_10.png",
+      "native_duration_evidence_seconds": 1.4166666269302368,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Hit_H_B",
@@ -2583,7 +3414,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_presentation",
+      "production_reason": "受击/起身/眩晕表现，不请求攻击和伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        14.100212473520681,
+        14.067962646047164,
+        29.544002080268612
+      ],
+      "pose_page": "poses_10.png",
+      "native_duration_evidence_seconds": 1.4166666269302368,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Hit_Throw",
@@ -2620,7 +3464,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_presentation",
+      "production_reason": "受击/起身/眩晕表现，不请求攻击和伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        1.7492493284312562e-07,
+        22.92158031463623,
+        4.001844848934212
+      ],
+      "pose_page": "poses_11.png",
+      "native_duration_evidence_seconds": 0.4333333373069763,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_ThrowBlowFall_Y",
@@ -2646,7 +3503,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_or_external_trajectory",
+      "production_reason": "抛起/下落/倒地辅助；零时长和短Take不能假定滞空时长",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_page": "poses_11.png",
+      "native_duration_evidence_seconds": 1.0,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_ThrowDown",
@@ -2684,7 +3554,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_or_external_trajectory",
+      "production_reason": "抛起/下落/倒地辅助；零时长和短Take不能假定滞空时长",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0008043050765991211,
+        136.17237854003906,
+        22.546630859375
+      ],
+      "pose_page": "poses_11.png",
+      "native_duration_evidence_seconds": 0.15000000596046448,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_ThrowUp_01_Y",
@@ -2722,7 +3605,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_or_external_trajectory",
+      "production_reason": "抛起/下落/倒地辅助；零时长和短Take不能假定滞空时长",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        9.51016962389916,
+        123.77120891195754,
+        134.53500366210938
+      ],
+      "pose_page": "poses_11.png",
+      "native_duration_evidence_seconds": 0.4333333373069763,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_ThrowBlow_Y",
@@ -2768,7 +3664,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_or_external_trajectory",
+      "production_reason": "抛起/下落/倒地辅助；零时长和短Take不能假定滞空时长",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        8.500554309765816,
+        197.1982984175198,
+        398.48687744140625
+      ],
+      "pose_page": "poses_11.png",
+      "native_duration_evidence_seconds": 0.6166666746139526,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_KnockDown",
@@ -2806,7 +3715,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_or_external_trajectory",
+      "production_reason": "抛起/下落/倒地辅助；零时长和短Take不能假定滞空时长",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0007345676422119141,
+        136.17237854003906,
+        22.546630859375
+      ],
+      "pose_page": "poses_11.png",
+      "native_duration_evidence_seconds": 0.15000000596046448,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_ThrowBlowEnd_Y",
@@ -2844,7 +3766,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "reaction_or_external_trajectory",
+      "production_reason": "抛起/下落/倒地辅助；零时长和短Take不能假定滞空时长",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.058330535888671875,
+        8.148736953735352,
+        1.507568359375
+      ],
+      "pose_page": "poses_12.png",
+      "native_duration_evidence_seconds": 0.03333333507180214,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_ThrowSkill_DragLoop_Idle",
@@ -2870,7 +3805,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "paired_or_external_control",
+      "production_reason": "缺目标配对、约束/释放/退出轨迹；不启用伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_page": "poses_12.png",
+      "native_duration_evidence_seconds": 0.05000000074505806,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_ThrowSkill_DragLoop_Down",
@@ -2896,7 +3844,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "paired_or_external_control",
+      "production_reason": "缺目标配对、约束/释放/退出轨迹；不启用伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_page": "poses_12.png",
+      "native_duration_evidence_seconds": 0.03333333507180214,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_ThrowSkill_DragLoop_Mid",
@@ -2922,7 +3883,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "paired_or_external_control",
+      "production_reason": "缺目标配对、约束/释放/退出轨迹；不启用伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_page": "poses_12.png",
+      "native_duration_evidence_seconds": 0.0833333358168602,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_ThrowSkill_DragLoop_Up",
@@ -2948,7 +3922,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "paired_or_external_control",
+      "production_reason": "缺目标配对、约束/释放/退出轨迹；不启用伤害",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_page": "poses_12.png",
+      "native_duration_evidence_seconds": 0.11666666716337204,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Die",
@@ -2994,7 +3981,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "death_presentation",
+      "production_reason": "Health只读驱动，非循环保持末姿态；原根前移约594cm，不叠加CMC位移",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        10.270821809768677,
+        74.20847116237222,
+        594.2703857421875
+      ],
+      "pose_page": "poses_12.png",
+      "native_duration_evidence_seconds": 1.350000023841858,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Execute_Defence_01",
@@ -3035,7 +4035,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "defence_or_break_variant",
+      "production_reason": "防御/破防/执行表现，原准入和配对未知，不自动给无敌或反伤",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        0.0,
+        59.924949645996094,
+        0.0
+      ],
+      "pose_page": "poses_13.png",
+      "native_duration_evidence_seconds": 0.550000011920929,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Execute_Defence_02",
@@ -3081,7 +4094,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "defence_or_break_variant",
+      "production_reason": "防御/破防/执行表现，原准入和配对未知，不自动给无敌或反伤",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        9.11939045847811,
+        8.447448727119564,
+        15.676163671314866
+      ],
+      "pose_page": "poses_13.png",
+      "native_duration_evidence_seconds": 0.550000011920929,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Fire_Execute_BS_Test",
@@ -3127,7 +4153,20 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "test_variant",
+      "production_reason": "来源测试变体，无生产动作合同",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false,
+      "source_root_range_cm": [
+        8.393358934851964,
+        16.336570735407705,
+        28.107254010926553
+      ],
+      "pose_page": "poses_13.png",
+      "native_duration_evidence_seconds": 0.6666666865348816,
+      "duration_scope": "prior_native_readback; current_UE_readback_pending"
     },
     {
       "name": "BOSS_411_Ani_Add_HitBox",
@@ -3150,7 +4189,12 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "empty_source",
+      "production_reason": "原FBX无动画曲线，不生成序列或技能",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false
     },
     {
       "name": "BOSS_411_Ani_Normal_HitBox",
@@ -3173,7 +4217,12 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "empty_source",
+      "production_reason": "原FBX无动画曲线，不生成序列或技能",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false
     },
     {
       "name": "BOSS_411_Ani_No_Weapon",
@@ -3196,7 +4245,12 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "empty_source",
+      "production_reason": "原FBX无动画曲线，不生成序列或技能",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false
     },
     {
       "name": "BOSS_411_Ani_Have_Weapon",
@@ -3219,7 +4273,13 @@
       "damage_windows": [],
       "damage_window_evidence": "none_in_export; requires gameplay specification and visual annotation",
       "montage_status": "proposal_only; not created",
-      "family_order_status": "not established by source metadata"
+      "family_order_status": "not established by source metadata",
+      "production_role": "empty_source",
+      "production_reason": "原FBX无动画曲线，不生成序列或技能",
+      "assembly_ids": [],
+      "source_pose_evidence": "Saved/Codex/KevinBossAssembly_20261105_R1/Animation/SourcePoses_R3/source_pose_catalog.json",
+      "ue_current_visual_verified": false
     }
-  ]
+  ],
+  "skill_assemblies_config": "BH3_Kevin_Combat_Montage_Config.json#skill_assemblies"
 }

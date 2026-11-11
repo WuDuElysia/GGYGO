@@ -1,0 +1,426 @@
+{
+  "schema": "GGYGO.KevinAbilities/v1",
+  "task": "KVB-20261105-01",
+  "status": "source_configuration_assets_not_created_runtime_unverified",
+  "base": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities",
+  "native_parent": "/Script/GGYGO.GGYGOBossAttackAbility",
+  "animation_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Montage_Config.json",
+  "fx_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json",
+  "audio_config": "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Audio_Config.json",
+  "damage_effect": "/Game/GameplayEffects/Damage/GE_Damage_SetByCaller.GE_Damage_SetByCaller_C",
+  "trace": {
+    "start_socket": "KevinWeaponTraceStart",
+    "end_socket": "KevinWeaponTraceEnd",
+    "radius": 32.0
+  },
+  "area": {
+    "Ice03": {
+      "offset": [
+        150,
+        0,
+        -125
+      ],
+      "radius": 450
+    },
+    "Fire04": {
+      "offset": [
+        0,
+        0,
+        -125
+      ],
+      "radius": 550
+    }
+  },
+  "projectile": {
+    "radius": 32.0,
+    "speed": 1800.0,
+    "lifetime": 3.0,
+    "gravity": 0.0,
+    "socket": "KevinWeaponTraceEnd",
+    "offset": [
+      0,
+      0,
+      0
+    ]
+  },
+  "initial_effects": [
+    "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_InitialAttributes_KVB.GE_Kevin_InitialAttributes_KVB_C"
+  ],
+  "initial_attributes": {
+    "max_health": 1200,
+    "health": 1200,
+    "max_poise": 100,
+    "poise": 100
+  },
+  "persistent_abilities": [
+    "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Death_KVB.BP_GA_Kevin_Death_KVB_C"
+  ],
+  "death": {
+    "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Death_KVB.BP_GA_Kevin_Death_KVB_C",
+    "native_parent": "/Script/GGYGO.GGYGOBossDeathAbility",
+    "presentation_sequence_key": "death",
+    "duration_source": "actual_USkeleton_compatible_AnimSequence.GetPlayLength",
+    "finish_contract": "共享BP CancelOther→StartDeath→等待CDO保留时长→正常End；Cleanup仅释放原Health义务，ABP唯一播Die。",
+    "animation_completion_proven": false
+  },
+  "abilities": [
+    {
+      "key": "Ice01",
+      "animation_id": "Ice01",
+      "action_tag": "BossAction.Attack.Melee.Ice01",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Ice01_KVB.BP_GA_Kevin_Ice01_KVB_C",
+      "enabled": true,
+      "entrypoint": true,
+      "enable_gate": "",
+      "damage": 12,
+      "poise_damage": 8,
+      "cooldown_seconds": 3,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Ice01",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Ice01_KVB.GE_Kevin_Cooldown_Ice01_KVB_C",
+      "flow": {
+        "flight_landing": false,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": false
+    },
+    {
+      "key": "Ice02",
+      "animation_id": "Ice02",
+      "action_tag": "BossAction.Kevin.Ice02",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Ice02_KVB.BP_GA_Kevin_Ice02_KVB_C",
+      "enabled": true,
+      "entrypoint": true,
+      "enable_gate": "",
+      "damage": 10,
+      "poise_damage": 6,
+      "cooldown_seconds": 3,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Ice02",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Ice02_KVB.GE_Kevin_Cooldown_Ice02_KVB_C",
+      "flow": {
+        "flight_landing": false,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": false
+    },
+    {
+      "key": "Ice03",
+      "animation_id": "Ice03",
+      "action_tag": "BossAction.Kevin.Ice03",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Ice03_KVB.BP_GA_Kevin_Ice03_KVB_C",
+      "enabled": true,
+      "entrypoint": true,
+      "enable_gate": "",
+      "damage": 18,
+      "poise_damage": 12,
+      "cooldown_seconds": 10,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Ice03",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Ice03_KVB.GE_Kevin_Cooldown_Ice03_KVB_C",
+      "flow": {
+        "flight_landing": false,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": false
+    },
+    {
+      "key": "Ice04",
+      "animation_id": "Ice04",
+      "action_tag": "BossAction.Kevin.Ice04",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Ice04_KVB.BP_GA_Kevin_Ice04_KVB_C",
+      "enabled": true,
+      "entrypoint": true,
+      "enable_gate": "",
+      "damage": 16,
+      "poise_damage": 10,
+      "cooldown_seconds": 6,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Ice04",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Ice04_KVB.GE_Kevin_Cooldown_Ice04_KVB_C",
+      "flow": {
+        "flight_landing": false,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": false
+    },
+    {
+      "key": "Ice05",
+      "animation_id": "Ice05",
+      "action_tag": "BossAction.Kevin.Ice05",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Ice05_KVB.BP_GA_Kevin_Ice05_KVB_C",
+      "enabled": true,
+      "entrypoint": true,
+      "enable_gate": "",
+      "damage": 14,
+      "poise_damage": 8,
+      "cooldown_seconds": 5,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Ice05",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Ice05_KVB.GE_Kevin_Cooldown_Ice05_KVB_C",
+      "flow": {
+        "flight_landing": false,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": false
+    },
+    {
+      "key": "Fire01",
+      "animation_id": "Fire01",
+      "action_tag": "BossAction.Kevin.Fire01",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Fire01_KVB.BP_GA_Kevin_Fire01_KVB_C",
+      "enabled": true,
+      "entrypoint": true,
+      "enable_gate": "",
+      "damage": 12,
+      "poise_damage": 8,
+      "cooldown_seconds": 6,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Fire01",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Fire01_KVB.GE_Kevin_Cooldown_Fire01_KVB_C",
+      "flow": {
+        "flight_landing": false,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": false
+    },
+    {
+      "key": "Fire02",
+      "animation_id": "Fire02",
+      "action_tag": "BossAction.Kevin.Fire02",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Fire02_KVB.BP_GA_Kevin_Fire02_KVB_C",
+      "enabled": true,
+      "entrypoint": true,
+      "enable_gate": "",
+      "damage": 16,
+      "poise_damage": 10,
+      "cooldown_seconds": 10,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Fire02",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Fire02_KVB.GE_Kevin_Cooldown_Fire02_KVB_C",
+      "flow": {
+        "flight_landing": true,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": true
+    },
+    {
+      "key": "Fire03",
+      "animation_id": "Fire03",
+      "action_tag": "BossAction.Kevin.Fire03",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Fire03_KVB.BP_GA_Kevin_Fire03_KVB_C",
+      "enabled": true,
+      "entrypoint": true,
+      "enable_gate": "",
+      "damage": 10,
+      "poise_damage": 6,
+      "cooldown_seconds": 8,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Fire03",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Fire03_KVB.GE_Kevin_Cooldown_Fire03_KVB_C",
+      "flow": {
+        "flight_landing": false,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": false
+    },
+    {
+      "key": "Fire04",
+      "animation_id": "Fire04",
+      "action_tag": "BossAction.Kevin.Fire04",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Fire04_KVB.BP_GA_Kevin_Fire04_KVB_C",
+      "enabled": true,
+      "entrypoint": false,
+      "enable_gate": "",
+      "damage": 28,
+      "poise_damage": 20,
+      "cooldown_seconds": 14,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Fire04",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Fire04_KVB.GE_Kevin_Cooldown_Fire04_KVB_C",
+      "flow": {
+        "flight_landing": true,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": false
+    },
+    {
+      "key": "Fly01",
+      "animation_id": "Fly01",
+      "action_tag": "BossAction.Kevin.Fly01",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Fly01_KVB.BP_GA_Kevin_Fly01_KVB_C",
+      "enabled": true,
+      "entrypoint": false,
+      "enable_gate": "",
+      "damage": 12,
+      "poise_damage": 8,
+      "cooldown_seconds": 8,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Fly01",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Fly01_KVB.GE_Kevin_Cooldown_Fly01_KVB_C",
+      "flow": {
+        "flight_landing": true,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": false
+    },
+    {
+      "key": "Fly02",
+      "animation_id": "Fly02",
+      "action_tag": "BossAction.Kevin.Fly02",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Fly02_KVB.BP_GA_Kevin_Fly02_KVB_C",
+      "enabled": true,
+      "entrypoint": false,
+      "enable_gate": "",
+      "damage": 12,
+      "poise_damage": 8,
+      "cooldown_seconds": 8,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Fly02",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Fly02_KVB.GE_Kevin_Cooldown_Fly02_KVB_C",
+      "flow": {
+        "flight_landing": true,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": false
+    },
+    {
+      "key": "Fly03",
+      "animation_id": "Fly03",
+      "action_tag": "BossAction.Kevin.Fly03",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Fly03_KVB.BP_GA_Kevin_Fly03_KVB_C",
+      "enabled": true,
+      "entrypoint": false,
+      "enable_gate": "",
+      "damage": 10,
+      "poise_damage": 6,
+      "cooldown_seconds": 10,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Fly03",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Fly03_KVB.GE_Kevin_Cooldown_Fly03_KVB_C",
+      "flow": {
+        "flight_landing": true,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": true,
+      "projectile_visual_ref": "Fly03"
+    },
+    {
+      "key": "Counter",
+      "animation_id": "Counter",
+      "action_tag": "BossAction.Kevin.Counter",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_Counter_KVB.BP_GA_Kevin_Counter_KVB_C",
+      "enabled": true,
+      "entrypoint": true,
+      "enable_gate": "",
+      "damage": 10,
+      "poise_damage": 6,
+      "cooldown_seconds": 6,
+      "cooldown_tag": "Cooldown.Boss.Kevin.Counter",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_Counter_KVB.GE_Kevin_Cooldown_Counter_KVB_C",
+      "flow": {
+        "flight_landing": false,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": false
+    },
+    {
+      "key": "AirChain01",
+      "animation_id": "AirChain01",
+      "action_tag": "BossAction.Kevin.AirChain01",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_AirChain01_KVB.BP_GA_Kevin_AirChain01_KVB_C",
+      "enabled": true,
+      "entrypoint": true,
+      "enable_gate": "",
+      "damage": 0.0,
+      "poise_damage": 0.0,
+      "cooldown_seconds": 20.0,
+      "cooldown_tag": "Cooldown.Boss.Kevin.AirChain01",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_AirChain01_KVB.GE_Kevin_Cooldown_AirChain01_KVB_C",
+      "flow": {
+        "flight_landing": true,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "area_ref": "Fire04",
+      "projectile_visual_ref": "Fly03",
+      "require_persistent_audio": true
+    },
+    {
+      "key": "AirChain02",
+      "animation_id": "AirChain02",
+      "action_tag": "BossAction.Kevin.AirChain02",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_AirChain02_KVB.BP_GA_Kevin_AirChain02_KVB_C",
+      "enabled": true,
+      "entrypoint": true,
+      "enable_gate": "",
+      "damage": 0.0,
+      "poise_damage": 0.0,
+      "cooldown_seconds": 22.0,
+      "cooldown_tag": "Cooldown.Boss.Kevin.AirChain02",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_AirChain02_KVB.GE_Kevin_Cooldown_AirChain02_KVB_C",
+      "flow": {
+        "flight_landing": true,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "area_ref": "Fire04",
+      "projectile_visual_ref": "Fly03",
+      "require_persistent_audio": true
+    },
+    {
+      "key": "DashF",
+      "animation_id": "DashF",
+      "action_tag": "BossAction.Kevin.DashF",
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/BP_GA_Kevin_DashF_KVB.BP_GA_Kevin_DashF_KVB_C",
+      "enabled": true,
+      "entrypoint": true,
+      "enable_gate": "",
+      "damage": 0.0,
+      "poise_damage": 0.0,
+      "cooldown_seconds": 0.35,
+      "cooldown_tag": "Cooldown.Boss.Kevin.DashF",
+      "cooldown_effect": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/GE_Kevin_Cooldown_DashF_KVB.GE_Kevin_Cooldown_DashF_KVB_C",
+      "flow": {
+        "flight_landing": false,
+        "landing_timeout_seconds": 10.0,
+        "recovery_play_rate": 1.0
+      },
+      "require_persistent_audio": false,
+      "action_role": "movement",
+      "source_boundary": "用户选择完整 Dash_F 分段追击；无伤害，原位移不按剩余距离缩放。复用同 Boss 闪避声音候选 E3188014124，原版动作映射与时点未证实。"
+    }
+  ],
+  "unavailable_pairs": [
+    "Force_Kill_ThrowSkill",
+    "Wing_ThrowSkill",
+    "Be_Executed"
+  ],
+  "auxiliary_animations": [
+    "DashB",
+    "FlyEvade",
+    "FireWingGuard"
+  ],
+  "source_boundary": "13原攻击族与2项目有限地空链；曲线后原生重力+真实Landed+Recovery为明确项目玩法，未知原外部下降轨迹仍未恢复。数值/窗口/声关联非原版已证。",
+  "runtime_or_visual_verified": false,
+  "network_verified": false,
+  "templates": {
+    "ground": {
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/Templates/BP_GA_BossGroundFlow_KVB.BP_GA_BossGroundFlow_KVB_C",
+      "native_parent": "/Script/GGYGO.GGYGOBossAttackAbility",
+      "abstract": true
+    },
+    "flight": {
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/Templates/BP_GA_BossFlightFlow_KVB.BP_GA_BossFlightFlow_KVB_C",
+      "native_parent": "/Script/GGYGO.GGYGOBossAttackAbility",
+      "abstract": true
+    },
+    "death": {
+      "ability": "/Game/Characters/Boss/Kevin/DemonBattle/Abilities/Templates/BP_GA_BossDeathFlow_KVB.BP_GA_BossDeathFlow_KVB_C",
+      "native_parent": "/Script/GGYGO.GGYGOBossDeathAbility",
+      "abstract": true
+    }
+  },
+  "area_basis_contract": "世界范围Basis由共享BP显式选原Avatar.GetActorTransform，Native只变换显式局部几何。"
+}

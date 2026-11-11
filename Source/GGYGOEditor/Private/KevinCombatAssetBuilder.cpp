@@ -1,5 +1,6 @@
-/** @file KevinCombatAssetBuilder.cpp @brief Explicit Kevin Slot registration and new-only animation preparation; gameplay belongs to BP/GAS. */
+/** @file KevinCombatAssetBuilder.cpp @brief Kevin Slot、受控姿态图迁移与新 Montage 制作；业务保存在可编辑资产。 */
 #include "Animation/Notifies/GGYGOAnimNotifyState_GameplayEventWindow.h"
+#include "KevinBossAnimBlueprintAuthor.h"
 #include "Animation/Runtime/GGYGOMontageGuardAnimInstance.h"
 #include "Animation/Data/GGYGOActionMotionSourceBinding.h"
 #include "Character/Data/GGYGOActionMotionEvaluation.h"
@@ -205,17 +206,21 @@ bool PrepareMontage(const FJson& Action, USkeleton* Skeleton, FName Slot, FPrepa
 		return Fail(Plan.Path + TEXT(": authored segment differs; preserved"));
 	TArray<const FAnimNotifyEvent*> HitEvents;
 	for (const FAnimNotifyEvent& Event : Montage->Notifies)
-		if (Event.NotifyStateClass && Event.NotifyStateClass->IsA<UGGYGOAnimNotifyState_GameplayEventWindow>()) HitEvents.Add(&Event);
+	{
+		const auto* Window = Cast<UGGYGOAnimNotifyState_GameplayEventWindow>(Event.NotifyStateClass);
+		// FX 和持续音效也使用同一状态类；这里只核本制作器负责的通用命中标签对。
+		if (Window && (Window->GetBeginEventTag() == GGYGOGameplayTags::Event_Montage_HitWindowBegin
+			|| Window->GetEndEventTag() == GGYGOGameplayTags::Event_Montage_HitWindowEnd))
+			HitEvents.Add(&Event);
+	}
 	HitEvents.Sort([](const FAnimNotifyEvent& A, const FAnimNotifyEvent& B) { return A.GetTime() < B.GetTime(); });
 	if (HitEvents.Num() != Plan.Windows.Num()) return Fail(Plan.Path + TEXT(": authored gameplay windows differ; preserved"));
-	const FStructProperty* BeginProperty = FindFProperty<FStructProperty>(UGGYGOAnimNotifyState_GameplayEventWindow::StaticClass(), TEXT("BeginEventTag"));
-	const FStructProperty* EndProperty = FindFProperty<FStructProperty>(UGGYGOAnimNotifyState_GameplayEventWindow::StaticClass(), TEXT("EndEventTag"));
 	for (int32 Index = 0; Index < HitEvents.Num(); ++Index)
 	{
 		const FAnimNotifyEvent& Event = *HitEvents[Index];
-		if (!BeginProperty || !EndProperty
-			|| *BeginProperty->ContainerPtrToValuePtr<FGameplayTag>(Event.NotifyStateClass.Get()) != GGYGOGameplayTags::Event_Montage_HitWindowBegin
-			|| *EndProperty->ContainerPtrToValuePtr<FGameplayTag>(Event.NotifyStateClass.Get()) != GGYGOGameplayTags::Event_Montage_HitWindowEnd
+		const auto* Window = CastChecked<UGGYGOAnimNotifyState_GameplayEventWindow>(Event.NotifyStateClass);
+		if (Window->GetBeginEventTag() != GGYGOGameplayTags::Event_Montage_HitWindowBegin
+			|| Window->GetEndEventTag() != GGYGOGameplayTags::Event_Montage_HitWindowEnd
 			|| !FMath::IsNearlyEqual(Event.GetTime(), Plan.Windows[Index].X, .001f)
 			|| !FMath::IsNearlyEqual(Event.GetTime() + Event.GetDuration(), Plan.Windows[Index].Y, .001f)
 			|| Plan.Windows[Index].Y >= Length - Montage->BlendOut.GetBlendTime())
@@ -473,8 +478,10 @@ bool HasIdleSlotChain(UAnimBlueprint* BP, UAnimSequence* StandBy, FName Slot)
 struct FPreparedAnimBP
 {
 	FString Path;
-	TStrongObjectPtr<UAnimSequence> StandBy;
+	TStrongObjectPtr<UAnimSequence> StandBy, Death, Air;
 	TStrongObjectPtr<UAnimBlueprint> Existing;
+	bool bHealthDeath = false;
+	bool bMigrateIdle = false;
 };
 
 bool PrepareAnimBP(const FJson& Config, USkeleton* Skeleton, FName Slot, FPreparedAnimBP& Plan, FJson& Report)
@@ -482,10 +489,27 @@ bool PrepareAnimBP(const FJson& Config, USkeleton* Skeleton, FName Slot, FPrepar
 	FString IdlePath, Mode;
 	if (!Config || !Config->TryGetStringField(TEXT("asset"), Plan.Path)
 		|| !Config->TryGetStringField(TEXT("idle_sequence"), IdlePath)
-		|| !Config->TryGetStringField(TEXT("mode"), Mode) || Mode != TEXT("guard_standard_slot_idle_loop"))
+		|| !Config->TryGetStringField(TEXT("mode"), Mode)
+		|| (Mode != TEXT("guard_standard_slot_idle_loop") && Mode != TEXT("guard_standard_slot_health_death")))
 		return Fail(TEXT("AnimBP asset/idle/explicit ordinary Guard mode missing or invalid"));
 	Report->SetStringField(TEXT("asset"), Plan.Path);
 	Plan.StandBy.Reset(Load<UAnimSequence>(IdlePath));
+	Plan.bHealthDeath = Mode == TEXT("guard_standard_slot_health_death");
+	if (Plan.bHealthDeath)
+	{
+		FString DeathPath;
+		if (!Config->TryGetStringField(TEXT("death_sequence"), DeathPath)) return Fail(TEXT("explicit death sequence required"));
+		Plan.Death.Reset(Load<UAnimSequence>(DeathPath));
+		if (!Plan.Death || Plan.Death->GetSkeleton() != Skeleton || Plan.Death->GetPackage()->IsDirty()
+			|| !FMath::IsFinite(Plan.Death->GetPlayLength()) || Plan.Death->GetPlayLength() <= 0)
+			return Fail(TEXT("invalid/unsaved death sequence"));
+		FString AirPath;
+		if (!Config->TryGetStringField(TEXT("air_sequence"), AirPath)) return Fail(TEXT("explicit airborne presentation sequence required"));
+		Plan.Air.Reset(Load<UAnimSequence>(AirPath));
+		if (!Plan.Air || Plan.Air->GetSkeleton() != Skeleton || Plan.Air->GetPackage()->IsDirty()
+			|| !FMath::IsFinite(Plan.Air->GetPlayLength()) || Plan.Air->GetPlayLength() <= 0)
+			return Fail(TEXT("invalid/unsaved airborne presentation sequence"));
+	}
 	if (!Plan.StandBy || Plan.StandBy->GetSkeleton() != Skeleton || Plan.StandBy->GetPackage()->IsDirty()
 		|| !FMath::IsFinite(Plan.StandBy->GetPlayLength()) || Plan.StandBy->GetPlayLength() <= 0)
 		return Fail(Plan.Path + TEXT(": invalid/unsaved idle animation: ") + IdlePath);
@@ -502,8 +526,11 @@ bool PrepareAnimBP(const FJson& Config, USkeleton* Skeleton, FName Slot, FPrepar
 		return true;
 	}
 	const auto* Defaults = BP->GeneratedClass ? Cast<UGGYGOMontageGuardAnimInstance>(BP->GeneratedClass->GetDefaultObject()) : nullptr;
+	Plan.bMigrateIdle = Plan.bHealthDeath && HasIdleSlotChain(BP, Plan.StandBy.Get(), Slot);
 	if (BP->TargetSkeleton != Skeleton || BP->ParentClass != UGGYGOMontageGuardAnimInstance::StaticClass()
-		|| !Defaults || !Defaults->RequiredPoseCorrectionSlot.IsNone() || !HasIdleSlotChain(BP, Plan.StandBy.Get(), Slot)
+		|| !Defaults || !Defaults->RequiredPoseCorrectionSlot.IsNone()
+		|| !(Plan.bHealthDeath ? (Plan.bMigrateIdle || KevinBossAnimation::HasHealthDeathChain(BP, Plan.Death.Get(), Slot))
+			: HasIdleSlotChain(BP, Plan.StandBy.Get(), Slot))
 		|| (BP->Status != BS_UpToDate && BP->Status != BS_UpToDateWithWarnings))
 		return Fail(Plan.Path + TEXT(": compiled Guard/ordinary Slot/idle chain contract failed; graph preserved"));
 	Plan.Existing.Reset(BP);
@@ -514,12 +541,13 @@ bool PrepareAnimBP(const FJson& Config, USkeleton* Skeleton, FName Slot, FPrepar
 
 bool CreateAnimBP(const FPreparedAnimBP& Plan, USkeleton* Skeleton, USkeletalMesh* Mesh, FName Slot, FJson& Report)
 {
-	if (Plan.Existing) return true;
+	if (Plan.Existing && !Plan.bMigrateIdle) return true;
 	UAnimBlueprintFactory* Factory = NewObject<UAnimBlueprintFactory>();
 	Factory->ParentClass = UGGYGOMontageGuardAnimInstance::StaticClass();
 	Factory->TargetSkeleton = Skeleton;
 	Factory->PreviewSkeletalMesh = Mesh;
-	UAnimBlueprint* BP = Cast<UAnimBlueprint>(Factory->FactoryCreateNew(UAnimBlueprint::StaticClass(), CreatePackage(*Plan.Path),
+	UAnimBlueprint* BP = Plan.Existing.Get();
+	if (!BP) BP = Cast<UAnimBlueprint>(Factory->FactoryCreateNew(UAnimBlueprint::StaticClass(), CreatePackage(*Plan.Path),
 		FName(*FPackageName::GetLongPackageAssetName(Plan.Path)), RF_Public | RF_Standalone | RF_Transactional, nullptr, GWarn));
 	if (!BP) return Fail(Plan.Path + TEXT(": AnimBP factory failed"));
 	TStrongObjectPtr<UAnimBlueprint> KeepAlive(BP);
@@ -527,7 +555,15 @@ bool CreateAnimBP(const FPreparedAnimBP& Plan, USkeleton* Skeleton, USkeletalMes
 	UEdGraph* Graph = nullptr;
 	for (UEdGraph* Candidate : BP->FunctionGraphs) if (Candidate->GetFName() == TEXT("AnimGraph")) Graph = Candidate;
 	if (!Graph || !Graph->GetSchema()) return Fail(Plan.Path + TEXT(": AnimGraph/schema missing"));
-	// Only a newly created factory graph is replaced. Existing authored topology is read-only.
+	if (Plan.bMigrateIdle && Graph->Nodes.Num() != 3)
+		return Fail(Plan.Path + TEXT(": authored nodes outside the legacy three-node pose chain preserved"));
+	if (Plan.bHealthDeath)
+	{
+		FString Error;
+		if (!KevinBossAnimation::CanAddHealthDeath(BP, Error)) return Fail(Plan.Path + TEXT(": ") + Error);
+	}
+	BP->Modify();
+	// 新工厂图，或明确认出的旧三节点图；其它作者拓扑保持只读。
 	const auto FactoryNodes = Graph->Nodes;
 	for (UEdGraphNode* Node : FactoryNodes) Graph->RemoveNode(Node);
 	auto* Player = AddNode<UAnimGraphNode_SequencePlayer>(Graph, -500);
@@ -542,15 +578,23 @@ bool CreateAnimBP(const FPreparedAnimBP& Plan, USkeleton* Skeleton, USkeletalMes
 		|| !Graph->GetSchema()->TryCreateConnection(Output, SlotInput)
 		|| !Graph->GetSchema()->TryCreateConnection(SlotOutput, RootInput))
 		return Fail(Plan.Path + TEXT(": AnimBP pose links failed"));
+	if (Plan.bHealthDeath)
+	{
+		FString Error;
+		if (!KevinBossAnimation::AddHealthDeath(BP, Graph, Plan.Death.Get(), Plan.Air.Get(), Root, Error))
+			return Fail(Plan.Path + TEXT(": ") + Error);
+	}
 	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(BP);
 	FKismetEditorUtilities::CompileBlueprint(BP);
 	const auto* Defaults = BP->GeneratedClass ? Cast<UGGYGOMontageGuardAnimInstance>(BP->GeneratedClass->GetDefaultObject()) : nullptr;
 	if ((BP->Status != BS_UpToDate && BP->Status != BS_UpToDateWithWarnings) || !Defaults
-		|| !Defaults->RequiredPoseCorrectionSlot.IsNone() || !HasIdleSlotChain(BP, Plan.StandBy.Get(), Slot))
+		|| !Defaults->RequiredPoseCorrectionSlot.IsNone()
+		|| !(Plan.bHealthDeath ? KevinBossAnimation::HasHealthDeathChain(BP, Plan.Death.Get(), Slot)
+			: HasIdleSlotChain(BP, Plan.StandBy.Get(), Slot)))
 		return Fail(Plan.Path + TEXT(": AnimBP compile/Guard/pose contract failed; new package remains unsaved"));
-	FAssetRegistryModule::AssetCreated(BP);
+	if (!Plan.Existing) FAssetRegistryModule::AssetCreated(BP);
 	if (!Save(BP)) return Fail(Plan.Path + TEXT(": AnimBP save failed; inspect before retry"));
-	Report->SetStringField(TEXT("status"), TEXT("created"));
+	Report->SetStringField(TEXT("status"), Plan.Existing ? TEXT("updated_owned_legacy") : TEXT("created"));
 	Report->SetBoolField(TEXT("compiled_pose_chain"), true);
 	Report->SetBoolField(TEXT("saved_this_run"), true);
 	return true;
@@ -851,16 +895,18 @@ void Build(const TArray<FString>& Args)
 {
 	if (Args.Num() < 2)
 	{
-		Fail(TEXT("Expected <audit-standby|build-standby|audit-actions|build-actions|audit-sockets|build-sockets|prepare-slot> <config> [exact new packages; or exact existing Mesh plus new Saved backup for build-sockets; or exact Skeleton for prepare-slot]"));
+		Fail(TEXT("Expected <audit-standby|build-standby|audit-actions|build-actions|audit-presentations|build-presentations|audit-sockets|build-sockets|prepare-slot> <config> [exact new packages; or exact existing Mesh plus new Saved backup for build-sockets; or exact Skeleton for prepare-slot]"));
 		return;
 	}
 	const bool bStandby = Args[0] == TEXT("audit-standby") || Args[0] == TEXT("build-standby");
 	const bool bActions = Args[0] == TEXT("audit-actions") || Args[0] == TEXT("build-actions");
+	const bool bPresentations = Args[0] == TEXT("audit-presentations") || Args[0] == TEXT("build-presentations");
 	const bool bSockets = Args[0] == TEXT("audit-sockets") || Args[0] == TEXT("build-sockets");
 	const bool bBuildSockets = Args[0] == TEXT("build-sockets");
 	const bool bPrepareSlot = Args[0] == TEXT("prepare-slot");
-	const bool bWrite = Args[0] == TEXT("build-standby") || Args[0] == TEXT("build-actions") || bPrepareSlot || bBuildSockets;
-	if ((!bStandby && !bActions && !bSockets && !bPrepareSlot) || (!bWrite && Args.Num() != 2)
+	const bool bWrite = Args[0] == TEXT("build-standby") || Args[0] == TEXT("build-actions")
+		|| Args[0] == TEXT("build-presentations") || bPrepareSlot || bBuildSockets;
+	if ((!bStandby && !bActions && !bPresentations && !bSockets && !bPrepareSlot) || (!bWrite && Args.Num() != 2)
 		|| (bPrepareSlot && Args.Num() != 3) || (bBuildSockets && Args.Num() != 4))
 	{
 		Fail(TEXT("Unknown mode or unexpected audit arguments"));
@@ -928,7 +974,7 @@ void Build(const TArray<FString>& Args)
 	{
 		const TArray<TSharedPtr<FJsonValue>>* Selected = nullptr;
 		const TArray<TSharedPtr<FJsonValue>>* Catalog = nullptr;
-		if (!Config->TryGetArrayField(TEXT("selected_actions"), Selected) || Selected->IsEmpty()
+		if (!Config->TryGetArrayField(bPresentations ? TEXT("selected_presentations") : TEXT("selected_actions"), Selected) || Selected->IsEmpty()
 			|| !Config->TryGetArrayField(TEXT("actions"), Catalog))
 		{ Fail(TEXT("Explicit nonempty selected_actions/catalog required; no default action batch")); return; }
 		TArray<FPreparedMontage> Plans;
@@ -959,7 +1005,7 @@ void Build(const TArray<FString>& Args)
 			Rows.Add(MakeShared<FJsonValueObject>(Row));
 			bSuccess = PrepareMontage(Action, Skeleton, Slot, Plan, Row);
 			if (!bSuccess) break;
-			if (!Plan.bRequiresXYZ || !FPackageName::IsValidLongPackageName(Plan.Path)
+			if (Plan.bRequiresXYZ != bActions || !FPackageName::IsValidLongPackageName(Plan.Path)
 				|| (Plan.Existing && !FPackageName::DoesPackageExist(Plan.Path))
 				|| !Plan.Path.StartsWith(TEXT("/Game/Characters/Boss/Kevin/DemonBattle/Animation/Montage/"))
 				|| Targets.Contains(Plan.Path))
@@ -1096,6 +1142,10 @@ bool FKevinAuthoredGraphSafetyTest::RunTest(const FString& Parameters)
     Montage->CompositeSections.Reset(); Montage->AddAnimCompositeSection(TEXT("Main"), 0);
     Montage->CompositeSections[0].NextSectionName = NAME_None;
     Montage->Notifies.AddDefaulted_GetRef().NotifyName = TEXT("ArtistFootstep");
+    auto* PresentationWindow = NewObject<UGGYGOAnimNotifyState_GameplayEventWindow>(Montage);
+    PresentationWindow->InitializeEventTags(FGameplayTag::RequestGameplayTag(TEXT("Event.Montage.Kevin.LandingRecovery.FX.Impact.Begin")),
+        FGameplayTag::RequestGameplayTag(TEXT("Event.Montage.Kevin.LandingRecovery.FX.Impact.End")));
+    Montage->Notifies.AddDefaulted_GetRef().NotifyStateClass = PresentationWindow;
     Montage->BlendIn.SetBlendTime(.42f);
     Montage->bEnableAutoBlendOut = true;
     Montage->RateScale = 1.f;
@@ -1111,6 +1161,7 @@ bool FKevinAuthoredGraphSafetyTest::RunTest(const FString& Parameters)
     FPreparedMontage MontagePlan;
     TestTrue(TEXT("Existing montage validates without regeneration"), PrepareMontage(Action, Idle->GetSkeleton(), TEXT("DefaultSlot"), MontagePlan, Row));
     TestEqual(TEXT("Artist notify survives"), Montage->Notifies[0].NotifyName, FName(TEXT("ArtistFootstep")));
+    TestTrue(TEXT("表现状态窗保留且不计入命中窗口"), Montage->Notifies[1].NotifyStateClass == PresentationWindow);
     TestEqual(TEXT("Artist blend survives"), Montage->BlendIn.GetBlendTime(), .42f);
     TestFalse(TEXT("Montage verification does not dirty package"), Package->IsDirty());
     return true;
