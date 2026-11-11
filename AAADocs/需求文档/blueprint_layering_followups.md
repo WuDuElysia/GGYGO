@@ -1,6 +1,6 @@
 # 蓝图分层收尾：改键页面、死亡自动替补与资产图读回
 
-状态：改键页面（B06）和死亡自动替补（B08）都已迁到共享蓝图并验证完成；四项资产图读回还没做，交给 Codex。审查明细见 [Blueprint_Layering_Audit](../Coordination/Blueprint_Layering_Audit.md)。
+状态：改键页面（B06）和死亡自动替补（B08）已迁到共享蓝图并验证完成；四项资产图只读审查（Q02～Q05）于 2026-11-11 完成，未新增确认分层问题。读图不代替运行和视听验收。审查明细见 [Blueprint_Layering_Audit](../Coordination/Blueprint_Layering_Audit.md)。
 
 ## 目标
 
@@ -23,16 +23,17 @@
 
 - 改键页面：在我方可见 Editor、真实 Windows 前台、两轮 PIE 里走完全部步骤。冲突提示"S 已被「后退」使用，未修改。"；选键 Escape 只取消选择；页面 Escape 关闭；W→I 后 I 能走、W 不动；`SaveGames/EnhancedInputUserSettings.sav` 写出，第二轮 PIE 读回 I；恢复默认后 W 恢复；按住 W 穿过菜单后不残留移动；PIE 结束时页面退役；没有弄脏任何包。证据 `.agents/tasks/requirements-closeout/evidence/I03.md`，运行 `Saved/Kiro/requirements-closeout/I03/Run_R6/`。没有覆盖实体键鼠和跨进程读回。
 - 死亡替补：集中真实 RHI 运行中，生产共享图的联机死亡自动换人、后台队员死亡不切换、无人存活不假成功三类断言通过（`Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/RHI_Integrated_R1/return.json`）；之后的角色阴影修复联机回归里 SquadSwitch 8 例也全部通过。
-- 四项资产图读回没做。
+- 四项资产图审查已完成：死亡链使用 Character 本次保存的共享模板，Stop／Slot／BodyLean／恢复组合位于 ABP，默认镜头与资源变体使用资产配置，GA／Notify／Cue／Niagara／材质与现有组件引用均已核对。未修改源码或生产包，未重测 B06／B08；独立只读 Editor 均正常退出，读前／读后脏包为空。证据见 `Saved/Codex/I14_20261111/Core/readback.json`、`References/readback.json`、`Components/readback.json`，对应日志保留原错误及补读结果。
+- 当前配置边界：默认 Experience 只含 Pyrios PawnData，授予 Combo／Dodge／HitReact／Death；没有 SquadTransition 或两特殊技能授予。两特殊技能资产虽已保存，其 Montage 只有技能声与 FX 窗；保存的角色组件模板没有 LocomotionFXComponent。此处只记录配置事实，特殊技能和移动表现接线由 [FX／Audio 原需求](fx_audio_wiring.md) 继续，不另开重复制作。
+- 未覆盖：本次只读没有执行 PIE、真实 RHI、试听、Cook、实体设备或联机测试；不补签死亡／过渡动画、动态镜头覆盖、倾角与起停跳变、原版视听还原、冷首击或活尾。
 
 ## 未完成项
 
-1. 用编辑器 Python 只读读回四项资产，写结论，并更新审查文档里对应 Q02～Q05 的状态。
-2. 待用户判断、不阻塞：改键页面"恢复默认""关闭"按钮字号偏大、白字浅灰底对比度低；面板半透明，角色从背后透出。
-3. 评审建议、不阻塞：`CommitNativeSelection` 在 Profile 为空、Key 无效或找不到映射时静默返回；`OpenKeySettings` 在 CreateWidget 后重验失败时没有日志。可补 Unavailable 结果或诊断。
+1. 待用户判断、不阻塞：改键页面"恢复默认""关闭"按钮字号偏大、白字浅灰底对比度低；面板半透明，角色从背后透出。
+2. 评审建议、不阻塞：`CommitNativeSelection` 在 Profile 为空、Key 无效或找不到映射时静默返回；`OpenKeySettings` 在 CreateWidget 后重验失败时没有日志。可补 Unavailable 结果或诊断。
 
 ## 验收标准
 
 - 改键：页面可见；W 改成 I 后按 I 能移动、W 不再生效；冲突提示出现；恢复默认后 W 恢复；隔离用户目录写出存档、新会话读回；关页后不卡键。（已满足）
 - 死亡替补：当前出战死亡切到下一个存活队员、后台死亡不切换、无人存活不假成功。（已满足）
-- 四项读回各有结论；有对象特化写在 C++ 的列为新问题，没有就关闭该项。
+- 四项读回各有结论；有对象特化写在 C++ 的列为新问题，没有就关闭该项。（已满足：Q02～Q05 只读审查关闭，配置缺口及运行未覆盖单独保留。）

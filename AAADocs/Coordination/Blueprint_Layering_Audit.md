@@ -2,11 +2,11 @@
 
 任务：BLA-20261105-01。唯一报告／活动入口：本页。统筹：`01a1347b-ccee-7081-a783-0c3127b3dd48`；审查：`01a1aa9d-f20e-7092-8741-87890a6f1049`。
 
-**2026-11-11：B06、B08 已验证完成；Q02～Q05 资产图读回和 Kevin 的 Q01 交给 Codex，见 [Codex 交接](Handover_Codex.md)。**
+**2026-11-11：B06、B08 已验证完成；Q02～Q05 只读资产审查已完成，未新增确认分层问题。Kevin 的 Q01 随原需求继续；本次读图不补签运行、视听或联机验收。**
 
 **第二轮实质复审完成：当前确认 2 项分层问题（B06、B08）；其余 7 项当前没有必须继续迁出 C++ 的依据，B04 旧命中撤回。** Kevin 制作链已沿最新接口重读，交回版本已消除期间读到的旧调用／旧字段差异，不留作未完成整改。Q01～Q05 是资产图／运行证据边界，不是另外五项确认违规。
 
-本轮沿**当前** B01～B09、Q01～Q05 和 Kevin 新增改动的必要依赖复审，实际追读激活、调用、事件、作者配置和清理链，**不是仅重分旧结论**。没有重做第一轮 603 件清点或扩到其它需求。本页之外无写入；未启动 UE、构建、测试、制作／保存包，未冻结作者、派发整改或修改排程、Obsidian、Git。下列批次供统筹交原组长实施，本报告不授写权。
+2026-11-05 的第二轮源码复审沿 B01～B09、Q01～Q05 和 Kevin 新增改动的必要依赖，追读激活、调用、事件、作者配置和清理链，当时未启动 UE。2026-11-11 另以隔离 NullRHI Editor 补齐下方 Q02～Q05 的保存资产读回，只写审查文档和自有 Saved 证据；没有修改源码或资产、重做第一轮 603 件清点、运行游戏或重测 B06／B08。本报告不授其它任务写权。
 
 ## 判定与当前状态
 
@@ -18,7 +18,8 @@
 | --- | --- | --- |
 | 确认必须调整的分层位置 | B06、B08 | **已验证完成（2026-11-11）**：两项都已迁到共享蓝图并在真实运行中通过，见各节关闭记录和[蓝图分层收尾](../需求文档/blueprint_layering_followups.md)。 |
 | 当前不用强制迁移／撤回 | B01、B02、B03、B04、B05、B07、B09 | 撤销按旧编号整体迁出的建议；实际资产接线仍按 Q 项核，不预建接口或第二套状态机。 |
-| 尚缺实际资产／运行证据 | Q01～Q05 | 在各自原制作验收补最小证据；不据未知派发迁移，不为本轮另启 UE／全库导出。 |
+| 只读资产审查已完成 | Q02～Q05 | 已读当前保存图、CDO 和直接引用。未新增对象业务固定在 C++ 的具体问题；配置缺口与运行未覆盖见下文。 |
+| 随原需求继续 | Q01 | Kevin 实际资产与运行验收仍由原负责人完成，不据未知派发迁移。 |
 
 ## 当前确认必须改的两个批次
 
@@ -58,7 +59,7 @@
 
 重读 `Source/GGYGO/AbilitySystem/Abilities/GGYGOPlayerComboAbility.cpp:865` 激活及 `:1966` 原 Step 请求消费；`:1992` 首段从 0 开始，`:1993` 后续读取 ComboSteps 的 NextStepIndex。`GGYGOComboTypes.h:37`～`:56` 配 Montage／Section／NextStepIndex，后续配作者 Notify／窗口。没有本轮确认的角色／招式特化组合隐藏在这些入口。
 
-本轮重核当前 `Content/Characters/Player/Pyrios/Abilities/GA_Pyrios_Attack_Combo.uasset` 为 45,776B，SHA256 `16EF3CE5DF98787342192C761B3D68FF187FDF7E5E6A844AB8EDDA0D41BE9B7A`，与 R53 准确读回一致；实际三段映射 1／2／0，Montage 为 Normal01／02／03。对象配置三段不代表机制写死三段。撤回因消费配置表／数据子类或 StartStep 未暴露 BP 而要求新增图／接口的建议。输入身份、预测、窗口和清理保留；完整共享图仍未知，不以图哈希判空图。
+2026-11-11 直接读取 `GA_Pyrios_Attack_Combo` 的 ComboSteps 和 EventGraph：三段 NextStepIndex 为 1／2／0，Montage 为 Normal01／02／03；两枚默认事件节点均 Disabled，实际使用通用原生消费链。对象配置三段不代表机制写死三段。撤回因消费配置表／数据子类或 StartStep 未暴露 BP 而要求新增图／接口的建议；输入身份、预测、窗口和清理保留。详见 Q05。
 
 ### B03：目标、范围基准和正常完成策略已由 BP 显式提供
 
@@ -90,26 +91,77 @@
 
 因此旧参数调用、退役字段、落地配置漏消费和死亡模板漏消费不计当前缺陷；不要求每招独立图。这里只确认本轮所查接口静态对齐，**未执行 Python／反射调用、编译 BP 或验证整个制作链通过**。
 
-## Q01～Q05：仍未知及最小证据
+## Q01～Q05：资产读回结论与剩余边界
 
 | 编号 | 本轮事实与未知边界 | 最小证据／关闭条件 |
 | --- | --- | --- |
 | Q01 Kevin State／BTS／BT／GA | 已读新事实接口、实际 K2／BT 作者及共享模板消费。按当前配置准确检查 15 技能＋1 死亡＋3 模板共 19 个目标包，磁盘均未见；仅证这些包尚无落盘身份，不推断内存未保存图。当前需求也仍制作／验证未完成。 | 原制作窗读 `/Game/Characters/Boss/Kevin/DemonBattle/Abilities/Templates/` 下 BP_GA_BossGroundFlow_KVB／BP_GA_BossFlightFlow_KVB／BP_GA_BossDeathFlow_KVB 的事件、关键调用、exec／Token／失败／几何和等待参数连接；15 子类真实父类／必要 CDO；Definition 的 StateClass／Service／阶段池、实际 State／BTS／BT 图和授予引用。提供准确包身份／保存读回，不要求子类复制图。地面完成、飞行真实 Landed 后收尾、目标失效、死亡正常／中止仍按原集中运行验收。 |
-| Q02 玩家 Death／SquadTransition | `GGYGODeathAbility.cpp:35`、`GGYGOSquadTransitionAbility.cpp:23` 的 BP 接管支路、原生通用播放回调与 Health 清理已复读，未定位本轮新增对象特化；旧报告不绑定当前全图。 | 当前实际授予类、共享父流程、子类 CDO／Montage、正常／中止连线及包身份。区分通用播放和额外表现业务，不因不覆写 K2_ActivateAbility 判违规。B08 只处理自动替补触发，不借缺图迁走整个进退场／生命周期。 |
-| Q03 ABP_Pyrios | 源码语义／适配和作者工具不能证明当前生产图；无新完整图。B07／B09 均无强制迁移依据。 | 实际共享 ABP 的 Stop 语义／索引消费、相关过渡、Slot／BodyLean／倾角与恢复连接，对象序列／曲线配置及必要包身份；核模板＋数据能否表达差异。不导出全库、不另造 CMC FSM。 |
-| Q04 Camera | 已核通用计算与 Hero 所有权，当前默认／GA 覆盖实际选择链和演出图未补签。 | 实际 PawnData.DefaultCameraMode、GA 覆盖／释放、必要共享镜头图及对象曲线／参数／包身份。无具体演出分支证据就不派数学迁移。 |
-| Q05 Audio／FX／材质 | 沿 GA／作者窗制作消费复核了接口，未打开当前图、看原图或听音。脚本／配置不证明组合、音色、时窗或可见结果正确。 | 各原作者验收中读实际共享图／子资产、Notify 时窗、GA／Cue／组件引用和包身份；必要真实视听按原目标验。不要求每资源变体独立图，不签原版音效恢复／画面通过。 |
+| Q02 玩家 Death／SquadTransition | **只读审查关闭。** 已读默认 Experience、PawnData 授予、Death CDO／Montage、保存后的共享角色死亡图及正常／中止调用链。未新增分层问题。 | 默认授予链没有 SquadTransition 子类，因此没有可补签的生产过渡 Montage／图。未运行死亡／换人场景，不重复 B08。 |
+| Q03 ABP_Pyrios | **只读审查关闭。** Stop 索引、过渡端点及 Getter 绑定、FullBody Slot、BodyLean、显示角和恢复图、对象序列与曲线均有保存图证据。B07／B09 无新增强制迁移依据。 | 不代表起停跳变、倾角、TurnBack 连续性或画面验收通过；这些仍按走跑需求处理。 |
+| Q04 Camera | **只读审查关闭。** 默认模式与参数已读，当前授予 GA 没有镜头覆盖；通用覆盖／清理保留原 Hero、Spec 和 generation 所有权。 | 没有实际配置的 GA 演出覆盖图可验，不补签动态覆盖／释放或取景效果。 |
+| Q05 Audio／FX／材质 | **只读审查关闭。** 已读普攻及两技能的 Montage 通知、GA 配置、五份命中 Cue、Niagara 作者图／Renderer／材料引用、角色共享材质图和组件模板。未新增分层问题。 | 两特殊技能未在默认 PawnData 授予；其 Montage 只有技能声和 FX 窗，未见命中／连段窗。真实声音、画面、资源就绪和联机表现继续由原需求验收。 |
 
-本轮实际消费的已有准确证据：
+### 读回范围与证据
 
-- `Saved/Codex/FXProduction_20261026_R1/ColdRead_20261102_R1/Run_R53/Leaf/readback.json` 的 `observations.ga['/Game/Characters/Player/Pyrios/Abilities/GA_Pyrios_Attack_Combo']`：父类 `/Script/GGYGO.GGYGOPlayerComboAbility`，包 SHA 与本轮一致，实际 combo_steps 已复读；图哈希 `314371a8ae322de71667ff7a256f90ff9c56ba93d2cdae928cfd0624edb26b3d`，**没有完整节点连接**。
-- 第一轮已消费 `Saved/Codex/FXProduction_20261026_R1/Production_R107/return.json`／`Leaf/readback.json`，当时 Combo SHA `4559BD58…` 与当前不同，仅历史线索。`Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/Asset_R24e/asset_report.json` 只证当时 Death 创建保存，不签当前图。本轮未重读这些历史大报告或刷新 Death 包身份。
+入口为 `/Game/BP/GamePlay/BP_GameMode` → `/Game/System/Experiences/DA_Experience_Default` → `/Game/Characters/Player/Pyrios/DA/DA_Pawn_Pyrios`。Experience 的 GameFeaturesToEnable 为空，默认名单只有该 PawnData；这是默认装配配置，不代表地图覆盖、玩家存档编队或运行中额外授予的快照。随后只跟随本项 GA、Montage、Cue、组件和材质直接引用，未扩做历史全库审计。
+
+- [Core/readback.json](../../Saved/Codex/I14_20261111/Core/readback.json)：生产 PawnData、四个已配置能力、角色继承／死亡图、ABP、默认镜头及五份命中 Cue；同目录 T3D 保存对象属性与原生引脚连接。
+- [References/readback.json](../../Saved/Codex/I14_20261111/References/readback.json)：默认 Experience、ComboSteps、两特殊技能、六个 Montage 的通知及直接表现引用；同目录 T3D 和 `graph_evidence.json` 保存 Niagara／材质节点与引用。
+- [Components/readback.json](../../Saved/Codex/I14_20261111/Components/readback.json)：通过 SubobjectDataSubsystem 读取已有组件模板及扭曲 Profile；不调用会创建继承覆盖的 GetObjectForBlueprint。
+
+各隔离 Editor 均正常退出，读前／读后脏包为空，无保存操作。`ReadStateMachineTransitions` 不支持 Conduit，已用实际 T3D 中的状态端点和 TransitionGraph 引脚补核，未把该辅助接口的失败写成通过。首次组件枚举调用的 Python 接口不存在，原错误留在 References；Components 使用项目现有接口补读。启动日志中的既有 `LogAutomationTest: Error: Condition failed` 也保留；本项没有运行自动化测试，不以 exit0 声称工程无错误。
+
+### Q02：实际死亡与换人配置
+
+`DA_AbilitySet_Pyrios` 当前授予 Combo、共享 Dodge、共享 HitReact、`GA_Pyrios_Death`，没有引用旁边的 `DA_AbilitySet_Common`。Death 继承 `GGYGODeathAbility`，以 `Event.Death` 触发；EventGraph 的 Activate／End 默认节点均 Disabled，无接管连线。CDO 的 DeathMontage 是 `/Game/Characters/Player/Pyrios/Animation/AM_Pyrios_Death`，FullBody 槽、Death Section 引用 `Avatar_Male_Size03_Pyrois_Ani_Death`，无 Notify。
+
+正常完成采用原生通用 Montage Task 的 BlendOut／Completed，Interrupted／Cancelled／Failed 走取消；终止清理消费本次捕获的 Health 并调用 FinishDeath。随后 Character 原生下一帧派发 `K2_HandleDeathFinished`。Character 负责人确认七个目标包已保存后，本项独立读到 `BP_Character`、`BP_HeroCharacter`、`BP_BossCharacter` 三份共享图的 `Entry → UninitAndDestroy → Return true`；`BP_PC_Pyrios`、`BP_Enemy`、`BP_BaseCharacter`、`BP_Boss_Test` 继承对应模板。具体 Pawn 处理已在共享蓝图。
+
+默认授予链未出现 SquadTransition 子类或进退场事件触发器。原生 `GGYGOSquadTransitionAbility` 默认 TransitionMontage=None；其通用 Task 正常 Completed 结束，Interrupted／Cancelled／Failed 取消，缺 Montage 明确诊断并取消。这里只确认现有配置没有该过渡资产，不声称已实现或验证进退场动画，也不据此迁走 Squad 生命周期机制。
+
+### Q03：ABP 的停止、Slot 与侧倾图
+
+`/Game/BP/Anim/ABP_Pyrios` 继承 ZZZAnimInstance。Stop 图将 `StateMemory.StopValue` 接到 Select 索引：0→WalkStartEnd，1→WalkEnd，2→RunEnd，再送 `GetSeqByKey` 和不循环 SequencePlayer。AnimSet 把这些键绑定到 Pyrios 对应的 Walk_Start_End／Walk_End／Run_End；IdleLoop、WalkStart、TurnBack 和 WalkRun BlendSpace 也由资产配置。
+
+NotMoving 在有移动输入时进 Conduit，由 IsAnimationRunGait 分流到 EnterMove／Moving；EnterMove 无输入进 Stop，剩余比例≤0.03 进 Moving。Moving 在无输入且非 TurnBack 曲线驱动时进 Stop；Stop 有输入回 Conduit，剩余比例≤0.5 进 NotMoving。两个剩余时间 Getter 分别确实绑定 EnterMove 和 Stop。Moving 内 WalkRun→TurnBack 条件是曲线驱动且 TurnBack Pose 活跃；返回条件为 Pose 已结束，或既非曲线驱动也非 RunOut。
+
+主状态机输出进入 `GGYGOActionPoseSlot(FullBody)`，经空间转换与 Inertialization 到 Root；槽持续更新 SourcePose。Moving 内子状态机接 BodyLean，LeanDegrees 来自蓝图 `MovingLeanDisplayedAngle`，轴和 Up 来自通用动画事实，Alpha 受表现与输出有效标志共同控制。EnterMovingLean／ExitMovingLean／节点重新相关时清理显示角、步态和原 Motion 上下文；UpdateMovingLean 显式选择 TurnBack 恢复、步态混合或普通恢复。普通恢复用 Tuning.RecoveryResponseSpeed=8 和动画 Delta 做指数衰减；TurnBack 按本次源序列时间读取 MovingLeanRecoveryCurve，再将进入角插值到 0，曲线关键点为 (0,0)、(0.15,1)、(2.383333,1)。步行／跑步角度曲线、序列选择和这些恢复组合都在 ABP／CDO 中，不另建 CMC 权威。
+
+### Q04：默认镜头与覆盖所有权
+
+PawnData.DefaultCameraMode 指向 `/Game/Camera/Modes/BP_CameraMode_ThirdPerson_Pyrios`，父类 GGYGOCameraMode_ThirdPerson；EventGraph 没有节点，是数据变体。当前 FOV=85、TargetOffset=(-350,0,60)、Pitch=-70～70、BlendTime=0.5；WalkRunSteeringOffset 关闭，其曲线和增益虽已配置，不能据此声称运行中启用。
+
+四个默认授予 GA 和额外读取的两特殊技能均为 AbilityCameraMode=None、位置／FOV 偏移为 0。若以后配置覆盖，GGYGOGameplayAbility 在激活准入后应用，Hero 按最新能力覆盖或 PawnData 默认模式选择；统一终止清理以原 Hero、SpecHandle、generation 释放本次模式和偏移，正常与取消共用该清理链。本次未发现藏在原生中的具体招式镜头编排。
+
+### Q05：实际声音、特效、材质与引用
+
+普攻 ComboSteps 为 Normal01→Normal02→Normal03→Normal01；两特殊技能各只有一步，NextStepIndex=-1。它们都继承 GGYGOPlayerComboAbility，没有启用的 Activate／End 接管图。特效系统分别是 Normal01／02 的单个 MainComposition、Normal03 的七个 SystemUnits、Special／ExSpecial 各两个 SystemUnits。系统选择、事件 Tag、附着空间及正常 `DeactivateDetachKeepWorld`／中止 `DestroyImmediately` 均在 CDO；原生 MontageActionResources／Niagara Task 负责窗口认证和资源生命周期。
+
+以下为实际保存的 Montage 时间，单位秒。首帧 PlaySound／FX Begin 的引擎触发时间为 0.0001，作者 LinkValue 为 0；区间终点按通知 EndLink 读取，不把首帧偏移累加成作者时间。
+
+| Montage | FX 窗 | Hit 窗 | Combo 窗 | CancelPoint／MoveCancelPoint 触发时刻 |
+| --- | --- | --- | --- | --- |
+| Normal01 | 0～1.683333 | 0.066667～0.233333 | 0.266667～1.916667 | 0.275024／1.683233 |
+| Normal02 | 0～1.35 | 0.066667～0.25 | 0.283333～1.65 | 0.294345／1.349900 |
+| Normal03 | 0～1.4 | 0.333333～0.9 | 0.933333～1.7 | 1.111460／1.399900 |
+| Special01 | 0～2.016667 | 无 | 无 | 无 |
+| ExSpecial01 | 0～2.35 | 无 | 无 | 无 |
+
+五份 Montage 的 PlaySound 均直连对应 Skill SoundWave 且 bFollow=True，当前没有 SoundCue 混音图参与该引用链；Normal01 音量倍率为 0.354813。五份 `GCN_Pyrios_Hit_*` 由各 Step.HitCueTag 引用，继承通用 HitImpact Cue，空 EventGraph，DefaultEffect 指向各动作 Impact SoundWave，ImpactEffect=None，Burst 音频／粒子为空。声音区分由资产表达；这不证明两特殊技能有命中能力或音色、响度、时点符合原版。
+
+直接读到了 13 个 Niagara 系统的作者节点／引脚、EmitterState／SpawnBurst／ParticleState 等模块及 Mesh／Sprite／Ribbon／ProjectedDecal／SignedField Renderer 配置，并沿 Renderer 材质实例读到父图。例如 Normal01 主弧 Mesh 使用共享 FXMD_DAO 网格和对应材质实例，扭曲支路使用独立 SignedField Renderer、显式材质与 Profile。共享材质中的 Custom 节点、纹理／动态参数输入和输出组合属于可编辑资产图；本项没有验证 GPU 执行或画面。
+
+角色 StylizedRenderComponent 的三个材质槽使用 `MI_Pyrois_Body_1`／`Body_2`／`Weapon01`，共同父图为 `M_Pyrois_Toon`；主 Custom 输出经 Project Toon Composite 和 EyeAdaptationInverse 接 EmissiveColor。轮廓图独立为 `M_Pyrois_Outline`，颜色、背面遮罩和法线挤出分别接 Emissive／OpacityMask／WPO。旧 GGYGOPyriosRenderComponent 只保留序列化兼容类，执行继承通用 GGYGOCharacterRenderComponent。具体受光／资源配置仍由保存的角色蓝图和材质提供。
+
+通过只读 SubobjectDataSubsystem 核对现有及继承组件模板后，`BP_PC_Pyrios` 没有配置 GGYGOLocomotionFXComponent；当前移动表现组件接线仍留在 FX 原需求，不能由攻击 Niagara 的存在推定冲刺／转身特效已接好。
+
+**未覆盖与后续归属。** 本次未做 PIE、真实 RHI、试听、Cook、实体设备或联机测试；未判断原版视听还原、冷首击、活尾和起停跳变通过。两特殊技能的默认授予与通知缺口、移动表现接线由 [FX／Audio 接线需求](../需求文档/fx_audio_wiring.md) 的原负责人处理；本项只记录当前引用，不修改或重复制作。未发现需另列的对象业务 C++ 分层整改项。
 
 ## 统筹核收与后续
 
 B06、B08 两项整改已在 2026-11-11 验证完成（见上方两节的状态）。不要按旧的"9 项确认"或"3 项确认"派发 B01／B03／原 B04 的整体迁移。Kevin 原批已在做的共享图接线按原任务完成，不另立重复整改线。
 
-仍未完成的是 Q02～Q05 资产图读回和 Kevin 整体需求（含 Q01），已交给 Codex，见 [Codex 交接](Handover_Codex.md)。各项通过后在本页原位更新，源码、资产、运行、联机分别写明验证级别。
+Q02～Q05 的只读资产审查已完成；Kevin 整体需求（含 Q01）和各表现需求的运行验收仍按各自记录推进。默认配置没有授予的能力不写成已接入，读到图也不写成运行或联机通过。
 
 ## 第一轮范围与历史身份（仅保留覆盖证据）
 
