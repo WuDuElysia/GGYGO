@@ -1,9 +1,8 @@
 /** @file GGYGOCharacterShadowCapture.cpp
- *  @brief 原生SceneDepth/R32f输入、显式预算与延迟渲染资源归还。
+ *  @brief 原生SceneDepth/R32f输入、显式预算与捕获资源归还。
  */
 #include "GGYGOCharacterShadowCapture.h"
 
-#include "Async/Async.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -14,7 +13,6 @@
 #include "GameFramework/Actor.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Math/OrthoMatrix.h"
-#include "RenderingThread.h"
 #include "RHI.h"
 #include "UObject/StrongObjectPtr.h"
 #include "UObject/UObjectIterator.h"
@@ -63,16 +61,19 @@ FGGYGOCharacterShadowCapture::~FGGYGOCharacterShadowCapture()
 		Material->SetScalarParameterValue(TEXT("UseCharacterShadowCaptures"), 0);
 	}
 	for (const auto& Capture : Retired->Captures)
-		if (IsValid(Capture.Get())) { Capture->DestroyComponent(); }
-	// 原生OnUnregister移除尚未执行的延迟capture；已排入RT的普通capture先于此标记归还。
-	// Capture/RT的强引用最后在GT释放，不将CaptureSceneDeferred返回当完成回执。
-	ENQUEUE_RENDER_COMMAND(ReturnGGYGOShadowResources)([Retired](FRHICommandListImmediate&)
 	{
-		AsyncTask(ENamedThreads::GameThread, [Retired]()
+		if (IsValid(Capture.Get()))
 		{
-			for (const auto& Texture : Retired->Textures) { Texture->ReleaseResource(); }
-		});
-	});
+			Capture->TextureTarget = nullptr;
+			Capture->DestroyComponent(); // 原生OnUnregister撤销尚未执行的capture。
+		}
+	}
+	// 原生ReleaseResource按渲染队列归还RHI资源，UTexture的销毁栅栏保护已排队命令。
+	// 本次GT退役即放弃Capture和RT的强引用，允许随原World进入同一次GC。
+	for (const auto& Texture : Retired->Textures)
+	{
+		Texture->ReleaseResource();
+	}
 }
 
 bool FGGYGOCharacterShadowCapture::ValidateSettings(const FGGYGOCharacterShadowSettings& S, FString& Reason)
@@ -154,7 +155,10 @@ bool FGGYGOCharacterShadowCapture::Update(UActorComponent& Owner, USkeletalMeshC
 	const FVector Right = Directional->GetRightVector();
 	const FVector Up = Directional->GetUpVector();
 	const FVector Origin = Center - Forward * S.DepthHalfExtentCm;
-	const double ObjectWidth = 2 * (Mesh.Bounds.SphereRadius + S.ObjectMarginCm);
+	// 原生 CalcBounds 只把半径/半轴乘 BoundsScale、不移中心；该倍率是给剔除与 VSM 缓存失效用的保守扩张，
+	// 对象捕获按除回倍率后的姿态包围取景，避免扩张后对象阴影图分辨率被稀释。
+	const double ObjectWidth = Mesh.BoundsScale > 0
+		? 2 * (Mesh.Bounds.SphereRadius / Mesh.BoundsScale + S.ObjectMarginCm) : 0;
 	if (Center.ContainsNaN() || Origin.ContainsNaN() || Forward.ContainsNaN() || Right.ContainsNaN() || Up.ContainsNaN()
 		|| !FMath::IsFinite(ObjectWidth) || ObjectWidth <= 0 || ObjectWidth > MAX_flt
 		|| ObjectWidth * 0.5 + 1 >= S.DepthHalfExtentCm
@@ -162,11 +166,7 @@ bool FGGYGOCharacterShadowCapture::Update(UActorComponent& Owner, USkeletalMeshC
 	{ Reason = TEXT("原Mesh bounds/光源变换超出有效float32阴影输入范围"); return false; }
 	if (!Resources)
 	{
-		Resources = MakeShareable(new FResources, [](FResources* Retired)
-		{
-			if (IsInGameThread()) { delete Retired; }
-			else { AsyncTask(ENamedThreads::GameThread, [Retired]() { delete Retired; }); }
-		});
+		Resources = MakeUnique<FResources>();
 		Resources->Mesh = &Mesh;
 		Resources->ObjectResolution = S.ObjectResolution;
 		Resources->CascadeResolution = S.CascadeResolution;
@@ -226,7 +226,7 @@ bool FGGYGOCharacterShadowCapture::Update(UActorComponent& Owner, USkeletalMeshC
 			{ Reason = TEXT("注册深度捕获时原组件/World已改变"); return false; }
 		}
 	}
-	const auto Current = Resources;
+	const FResources* const Current = Resources.Get();
 	if (Current->Mesh.Get() != &Mesh || Current->ObjectResolution != S.ObjectResolution
 		|| Current->CascadeResolution != S.CascadeResolution)
 	{ Reason = TEXT("阴影租用期的Mesh/RT尺寸已改变；须显式RefreshMaterials归还后重建"); return false; }

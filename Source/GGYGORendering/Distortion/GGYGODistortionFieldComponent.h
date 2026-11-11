@@ -15,7 +15,7 @@ class UPrimitiveComponent;
 class UWorld;
 
 UENUM(BlueprintType)
-enum class EGGYGODistortionMaterialRole : uint8 { Unavailable, NoCustomField, DualSignedField, Invalid };
+enum class EGGYGODistortionMaterialRole : uint8 { Unavailable, NoCustomField, DualSignedField, Invalid, PendingCompilation };
 
 UCLASS(ClassGroup=(Rendering), meta=(BlueprintSpawnableComponent))
 class GGYGORENDERING_API UGGYGODistortionFieldComponent : public UActorComponent
@@ -36,6 +36,11 @@ public:
 	 * 只证明当前shader角色，不证明原renderer/材质资产/画面资格；不使用fallback。 */
 	UFUNCTION(BlueprintCallable, Category="Distortion|Validation")
 	static EGGYGODistortionMaterialRole QueryMaterialFieldRole(
+		UMaterialInterface* Material, UWorld* World, FString& OutReason);
+
+	/** GT准备原World平台下的材质角色。仅提交已准备的原生编译任务，PendingCompilation表示确有在途工作。
+	 * 等待和取消由调用方原生命周期负责；取得角色仍须经过原ShaderMap和证书校验。 */
+	static EGGYGODistortionMaterialRole PrepareMaterialFieldRole(
 		UMaterialInterface* Material, UWorld* World, FString& OutReason);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Distortion")
@@ -71,5 +76,8 @@ protected:
 #endif
 
 private:
+	static EGGYGODistortionMaterialRole ReadMaterialFieldRole(
+		UMaterialInterface* Material, UWorld* World, FString& OutReason, bool bPrepareCompilation);
+
 	TWeakObjectPtr<UGGYGODistortionSubsystem> RegisteredSubsystem;
 };

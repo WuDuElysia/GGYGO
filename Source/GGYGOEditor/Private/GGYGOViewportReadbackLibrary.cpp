@@ -69,6 +69,7 @@ struct FGGYGOViewportPixelReadbackState
 	FIntPoint Size = FIntPoint::ZeroValue;
 	EPixelFormat Format = PF_Unknown;
 	FString OutputPath;
+	int32 MaxPngBytes = 0; // 在 GT 建立任务时设定，随后由后台只读。
 	FString Error;
 	int64 FileSize = 0;
 	TArray<uint8> EncodedBytes; // 仅兼容bytes模式；ToFile不向GT传PNG数组。
@@ -98,6 +99,12 @@ namespace GGYGOViewportReadback
 	{
 #if PLATFORM_WINDOWS && PLATFORM_64BITS
 		if (State->bCancelled.Load()) { return; }
+		if (State->MaxPngBytes > 0 && Png.Num() > State->MaxPngBytes)
+		{
+			State->SetError(FString::Printf(TEXT("PngByteLimitExceeded: EncodedBytes=%lld MaxPngBytes=%d"),
+				Png.Num(), State->MaxPngBytes));
+			return;
+		}
 		const double WriteStart = FPlatformTime::Seconds();
 		HANDLE Handle = ::CreateFileW(*State->OutputPath, GENERIC_READ | GENERIC_WRITE, 0, nullptr,
 			CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
@@ -416,17 +423,18 @@ UGGYGOViewportReadbackTask* UGGYGOViewportReadbackLibrary::BeginGameViewportRead
 }
 
 UGGYGOViewportReadbackTask* UGGYGOViewportReadbackLibrary::BeginGameViewportReadbackToFile(
-	UWorld* ExpectedWorld, const FString& AbsolutePngPath)
+	UWorld* ExpectedWorld, const FString& AbsolutePngPath, int32 MaxPngBytes)
 {
 	check(IsInGameThread());
 	UGGYGOViewportReadbackTask* Task = NewObject<UGGYGOViewportReadbackTask>(GetTransientPackage(), NAME_None, RF_Transient);
-	if (AbsolutePngPath.IsEmpty())
+	if (AbsolutePngPath.IsEmpty() || MaxPngBytes < 0)
 	{
 		Task->Result.Status = EGGYGOViewportReadbackStatus::Pending;
-		Task->Fail(TEXT("ToFile必须明确绝对PNG输出路径。"));
+		Task->Fail(AbsolutePngPath.IsEmpty() ? TEXT("ToFile必须明确绝对PNG输出路径。")
+			: TEXT("ToFile MaxPngBytes 须为非负字节数。"));
 		return Task;
 	}
-	Task->Initialize(ExpectedWorld, true, AbsolutePngPath);
+	Task->Initialize(ExpectedWorld, true, AbsolutePngPath, MaxPngBytes);
 	return Task;
 }
 
@@ -452,7 +460,8 @@ UGGYGOViewportReadbackTask* UGGYGOViewportReadbackLibrary::BeginNextPIEPlayerVie
 	return Task;
 }
 
-void UGGYGOViewportReadbackTask::Initialize(UWorld* ExpectedWorld, bool bReadPixels, const FString& AbsolutePngPath)
+void UGGYGOViewportReadbackTask::Initialize(UWorld* ExpectedWorld, bool bReadPixels, const FString& AbsolutePngPath,
+	int32 MaxPngBytes)
 {
 	Result.bPlayerViewOnly = !bReadPixels;
 	Result.Status = EGGYGOViewportReadbackStatus::Pending;
@@ -484,6 +493,7 @@ void UGGYGOViewportReadbackTask::Initialize(UWorld* ExpectedWorld, bool bReadPix
 			}
 			Result.OutputFilePath = Output;
 			PixelReadback->OutputPath = Output;
+			PixelReadback->MaxPngBytes = MaxPngBytes;
 		}
 	}
 	if (!IsValid(ExpectedWorld) || !ExpectedWorld->IsGameWorld() || !GEngine)

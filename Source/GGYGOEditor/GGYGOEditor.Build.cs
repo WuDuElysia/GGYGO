@@ -1,5 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+using System.IO;
 using UnrealBuildTool;
 
 public class GGYGOEditor : ModuleRules
@@ -42,5 +43,22 @@ public class GGYGOEditor : ModuleRules
 			"ImageWrapper",               // 后台 PNG 编码；GT 入场只核模块已预载
 			"UnrealEd"
 		});
+
+		// 同帧测试读取此版本的 FViewInfo 私有布局，其传递头也使用 Renderer/Internal。
+		string rendererDirectory = Path.Combine(EngineDirectory, "Source", "Runtime", "Renderer");
+		string rendererPrivate = Path.Combine(rendererDirectory, "Private");
+		string rendererInternal = Path.Combine(rendererDirectory, "Internal");
+		bool useNativeMeshProbe = Target.Platform == UnrealTargetPlatform.Win64
+			&& Target.Version.MajorVersion == 5 && Target.Version.MinorVersion == 8
+			&& Target.Version.PatchVersion == 1 && Target.Version.Changelist == 56057345
+			&& File.Exists(Path.Combine(rendererPrivate, "SceneRendering.h"))
+			&& File.Exists(Path.Combine(rendererInternal, "TranslucentPassResource.h"));
+		PrivateDefinitions.Add($"GGYGO_WITH_NATIVE_MESH_PROBE={(useNativeMeshProbe ? 1 : 0)}");
+		if (useNativeMeshProbe)
+		{
+			PrivateIncludePaths.Add(rendererPrivate);
+			PrivateIncludePaths.Add(rendererInternal);
+			PrivateDependencyModuleNames.Add("Renderer");
+		}
 	}
 }

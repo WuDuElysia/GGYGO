@@ -49,5 +49,5 @@ public:
 		FString& Reason);
 private:
 	struct FResources;
-	TSharedPtr<FResources, ESPMode::ThreadSafe> Resources;
+	TUniquePtr<FResources> Resources;
 };

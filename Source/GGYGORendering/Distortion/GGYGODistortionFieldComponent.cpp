@@ -16,6 +16,7 @@
 #include "Materials/MaterialInstance.h"
 #if WITH_EDITOR
 #include "MaterialCachedData.h"
+#include "ShaderCompiler.h"
 #include "Materials/MaterialExpressionMaterialFunctionCall.h"
 #include "Materials/MaterialFunctionInterface.h"
 #include "Materials/GGYGOMaterialExpressionDistortionField.h"
@@ -127,6 +128,18 @@ EGGYGODistortionMaterialRole UGGYGODistortionFieldComponent::QueryMaterialFieldD
 EGGYGODistortionMaterialRole UGGYGODistortionFieldComponent::QueryMaterialFieldRole(
 	UMaterialInterface* Material, UWorld* World, FString& OutReason)
 {
+	return ReadMaterialFieldRole(Material, World, OutReason, false);
+}
+
+EGGYGODistortionMaterialRole UGGYGODistortionFieldComponent::PrepareMaterialFieldRole(
+	UMaterialInterface* Material, UWorld* World, FString& OutReason)
+{
+	return ReadMaterialFieldRole(Material, World, OutReason, true);
+}
+
+EGGYGODistortionMaterialRole UGGYGODistortionFieldComponent::ReadMaterialFieldRole(
+	UMaterialInterface* Material, UWorld* World, FString& OutReason, bool bPrepareCompilation)
+{
 	check(IsInGameThread());
 	OutReason.Reset();
 	if (!IsValid(Material) || !IsValid(World) || World->bIsTearingDown)
@@ -141,7 +154,8 @@ EGGYGODistortionMaterialRole UGGYGODistortionFieldComponent::QueryMaterialFieldR
 		OutReason = TEXT("原World尚无Scene，不能判作普通材质");
 		return EGGYGODistortionMaterialRole::Unavailable;
 	}
-	const FMaterialResource* Resource = Material->GetMaterialResource(Scene->GetShaderPlatform());
+	const EShaderPlatform ShaderPlatform = Scene->GetShaderPlatform();
+	FMaterialResource* const Resource = Material->GetMaterialResource(ShaderPlatform);
 	if (!IsValid(Material) || !IsValid(World) || World->bIsTearingDown || World->Scene != Scene)
 	{
 		OutReason = TEXT("查询原材质资源时材质/World已改变");
@@ -153,11 +167,52 @@ EGGYGODistortionMaterialRole UGGYGODistortionFieldComponent::QueryMaterialFieldR
 		return EGGYGODistortionMaterialRole::Unavailable;
 	}
 #if WITH_EDITOR
+	bool bPendingCompilation = false;
+	if (bPrepareCompilation && GShaderCompilingManager && !Resource->IsGameThreadShaderMapComplete()
+		&& Resource->GetCompileErrors().IsEmpty())
+	{
+		if (Resource->IsCachingShaders())
+		{
+			const TWeakObjectPtr<UMaterialInterface> OriginalMaterial(Material);
+			const TWeakObjectPtr<UWorld> OriginalWorld(World);
+			// 原生轮询在缓存未就绪时立即返回，缓存交付可以调用完成回调。
+			bPendingCompilation = !Resource->IsCompilationFinished();
+			if (!OriginalMaterial.IsValid() || !OriginalWorld.IsValid() || World->bIsTearingDown
+				|| World->Scene != Scene || Scene->GetShaderPlatform() != ShaderPlatform
+				|| Material->GetMaterialResource(ShaderPlatform) != Resource)
+			{
+				OutReason = TEXT("缓存交付时原材质/World/平台或资源已改变");
+				return EGGYGODistortionMaterialRole::Invalid;
+			}
+		}
+		if (!Resource->IsCachingShaders() && !Resource->IsGameThreadShaderMapComplete()
+			&& Resource->GetCompileErrors().IsEmpty())
+		{
+			if (AllowShaderCompiling())
+			{
+				// 原生入口核原编译ID与Map，并按优先级去重。
+				Resource->SubmitCompileJobs_GameThread(EShaderCompileJobPriority::Normal);
+			}
+			bPendingCompilation = !Resource->IsCompilationFinished();
+		}
+	}
 	if (!Resource->GetCompileErrors().IsEmpty())
 	{
 		OutReason = TEXT("原材质存在实际编译错误，不能认证 field 角色：\n")
 			+ FString::Join(Resource->GetCompileErrors(), TEXT("\n"));
 		return EGGYGODistortionMaterialRole::Invalid;
+	}
+	if (bPrepareCompilation && !Resource->IsGameThreadShaderMapComplete())
+	{
+		if (bPendingCompilation)
+		{
+			OutReason = FString::Printf(TEXT("原平台材质正在缓存或编译ShaderMap（Platform=%d）"),
+				static_cast<int32>(ShaderPlatform));
+			return EGGYGODistortionMaterialRole::PendingCompilation;
+		}
+		OutReason = FString::Printf(TEXT("原平台ShaderMap不完整且没有可等待的编译（Platform=%d Manager=%d）"),
+			static_cast<int32>(ShaderPlatform), GShaderCompilingManager != nullptr);
+		return EGGYGODistortionMaterialRole::Unavailable;
 	}
 #endif
 	const EGGYGODistortionMaterialRole Role = QueryGGYGOSignedFieldCompiledRole_GameThread(*Resource, OutReason);

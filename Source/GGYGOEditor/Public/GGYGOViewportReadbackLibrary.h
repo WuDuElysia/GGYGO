@@ -127,7 +127,7 @@ public:
 private:
 	friend class UGGYGOViewportReadbackLibrary;
 	friend struct FGGYGOPlayerViewExtension;
-	void Initialize(UWorld* ExpectedWorld, bool bReadPixels = true, const FString& AbsolutePngPath = FString());
+	void Initialize(UWorld* ExpectedWorld, bool bReadPixels = true, const FString& AbsolutePngPath = FString(), int32 MaxPngBytes = 0);
 	void AdvancePixelReadback();
 	void CancelPixelReadback();
 	void UpdateResourceReleaseState();
@@ -187,11 +187,13 @@ public:
 	static UGGYGOViewportReadbackTask* BeginGameViewportReadback(UWorld* ExpectedWorld);
 
 	/** 同一异步核心的文件模式；明确绝对 .png 路径及已存在父目录，不覆盖或删除已有文件。
+	 * @param MaxPngBytes 正数限制本次最终 PNG 字节数，超限在创建文件前失败；0 沿原上限。
 	 * Complete 须文件关闭/读回相等及自有资源归还；失败/取消可保留本次部分文件供外层取证。
 	 * 调用方沿既有帧入口轮询 ReadResult；取消后也须 drain bResourcesReleased 才结束宿主。
 	 */
 	UFUNCTION(BlueprintCallable, Category = "GGYGO|Editor|Viewport")
-	static UGGYGOViewportReadbackTask* BeginGameViewportReadbackToFile(UWorld* ExpectedWorld, const FString& AbsolutePngPath);
+	static UGGYGOViewportReadbackTask* BeginGameViewportReadbackToFile(UWorld* ExpectedWorld, const FString& AbsolutePngPath,
+		int32 MaxPngBytes = 0);
 
 	/** 为已存在的原 viewport 布防，观察后继自然 SetupView；全局首 Draw 使用下一次 PIE 预布防入口。
 	 * @param ExpectedPlayer 明确属于原 World/viewport 的实际 LocalPlayer；PC/PCM/Pawn 就绪后只固定一次。
