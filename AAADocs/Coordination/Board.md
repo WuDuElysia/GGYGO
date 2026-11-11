@@ -25,7 +25,7 @@
 | CR-R7 剩余候选盘点 | AbilitySystem 原会话（Codex） | 已完成并分仓 push：修复同 Spec 嵌套 Try 借用输入重试来源，编译和六项回归通过，统筹／Input 消费侧评审无阻塞；优化与延期玩法保留。[实现提交](https://github.com/WuDuElysia/GGYGO_Source/commit/7acd129) | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)、[修复清单](Module_Audit_Repair_Ledger.md) |
 | 死亡结束后的 Pawn 处理改由蓝图决定 | Character 原会话（Codex） | 已完成并分仓 push：三份共享模板、四份既有蓝图接线；编译和 10 项回归通过，含 D3D12 联机死亡替补，Teams 接口评审无阻塞；独立进程、Cook 未验。[实现提交](https://github.com/WuDuElysia/GGYGO/commit/42d42aa) | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「死亡结束后的 Pawn 处理」 |
 | 动画层去掉 ZZZ 兼容层 | Codex（待统筹指定） | 未开始，等走跑起停跳变的用户回答 | [zzz_anim_compat_layer_removal](../需求文档/zzz_anim_compat_layer_removal.md) |
-| 各 spec 勾选状态回写 | AbilitySystem 原会话（Codex） | 接续七份 spec 与需求状态表回写，依据当前交付记录逐项核对；未覆盖、原失败及用户待定项保持，不因相邻场景通过代签 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md) |
+| 各 spec 勾选状态回写 | AbilitySystem 原会话（Codex） | 七份 spec 与需求状态表已回写、本地提交并核收，未覆盖、原失败和用户待定项保持；无 UE／构建在途。推送被自动审批拒绝，要求明确授权远端 GGYGO 的 origin/main，等待该决定后完成交付 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md) |
 | 旧 ZZZ 动画 spec 残余任务 | Kiro | 已完成：用户 11-10 决定不管，三个旧 spec 关闭 | [zzz_legacy_anim_spec_closeout](../需求文档/zzz_legacy_anim_spec_closeout.md) |
 
 ## 占用表
