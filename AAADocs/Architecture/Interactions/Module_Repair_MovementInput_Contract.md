@@ -53,7 +53,7 @@ Source 的 OutError 为可定位诊断，准备／查询失败清对应输出。
 4. 原 Move Triggered 核实际 Action／原输入作用域，查询原 Source Request 后，继续按 ControlRotation.Yaw 做既有 camera-relative AddMovementInput，由 CMC 唯一执行。值近零仅跳过值投影，不推导释放。
 5. Source 的待发事实按同一调用栈有序交付，真实 Release／Neutral 先签发再允许 receiver 重入新 Press；它不是延迟帧队列。真实外调返栈按实际可能变化的原资源重取核验，同栈纯查询段复用已验证输入。
 6. ReleasePlayerInput 先摘原 Scope／Observer 和注册槽、封原资源，并在 Source／CMC／ASC 外调前归还本次 ForceWalk 请求；再用原句柄、原 Subsystem／PlayerInput、原 priority 和 CountRegistrations 归还自己的绑定／IMC 注册。旧清理不得操作重入后建立的后继资源，不用 ClearAllMappings。
-7. 输入与 ASC 关联、订阅和 finite retry 属于各自原资源寿命，见 [Input 活动入口](../../Modules/Input/Module_Repair_07_Subleases.md)。ASC 唯一在 PostProcessInput 消费，清理使用原请求身份；原移动来源不能借 ASC Tag 或后继关联复活。
+7. 输入与 ASC 关联、订阅和 finite retry 属于各自原资源寿命。ASC 唯一在 PostProcessInput 消费，清理使用原请求身份；原移动来源不能借 ASC Tag 或后继关联复活。
 
 ## 网络、验证和架构笔记边界
 
@@ -67,7 +67,7 @@ Source 的 OutError 为可定位诊断，准备／查询失败清对应输出。
 - 暂停／Flush、映射与输入栈变化、Controller／输入对象更换后的真实释放再按与恢复；FAILED 保持及失败后的合法新请求，继续按实际场景核验，不做隐式恢复。
 - 普通 Ready／Released 后实际输入重建、同 H Refreshed 不重建、旧回调／清理不串入后继，以及 StopPIE 原 Subsystem 失效诊断的闭合状态，须有原作者的对应运行回执。
 - 历史 Host／夹具前置、WalkStartProfile／正式 Run 等资产与执行缺口，以及旧诊断 -1 deadline 预期与有限原期限的差异，保留原说明；不能由文档整理认定已修复或仍可用旧断言验收新合同。
-- 原 Gate42／50／51／52／53 等失败与后继分层结果、D16 的受限成功、第17次输入身份污染红诊断全部保全。是否由后继同范围证据关闭只认原正式回执，本轮不改变失败、断言或未知状态；输入身份失败入口见[原验证记录](../../Modules/Input/Module_Repair_07_Validation.md)。
+- 原 Gate42／50／51／52／53 等失败与后继分层结果、D16 的受限成功、第17次输入身份污染红诊断全部保全。是否由后继同范围证据关闭只认原正式回执，本轮不改变失败、断言或未知状态。
 - 真硬件、真实焦点／设备切换与丢失事件、正式 Profile／Run、远端／listen／SimulatedProxy／网络回放及完整业务验收，分别保留未验边界，不借普通回归、软件键或数值结果填完成。
 - 受影响的 Obsidian Input／Movement 图文同步仍由统筹另行安排；本轮不写外部笔记。CR 冗余整改只索引[唯一修复条目](../../Coordination/Module_Audit_Repair_Ledger.md)，不由本次归档授予 Source 写权。
 

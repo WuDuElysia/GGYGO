@@ -6,7 +6,7 @@
 
 项目任务通信由当前统筹自主判断及授权，参与原会话按本轮具体范围直接收敛接口；真人授权可从根会话最近必要用户消息核证。直发受工具限制时由统筹转交，不向用户逐条申请通信许可，不将跨聊回发或循环确认设为完成门禁；需求／玩法／实质兼容选择仍由用户确认。
 
-职责与决策见[AGENTS.md](../../AGENTS.md)，当前任务／共享窗口见[有效排程](Module_Repair_Parallel_Schedule.md)。[修复清单](Module_Audit_Repair_Ledger.md)用于定位编号及必要证据，不从历史租约推当前权限。21个原组长已实际关闭Kiro、保留绑定并直接Codex接续；gpt-6.1-sol／xhigh、Fast关闭约定保持，通知不代实际档位核实。
+职责与决策见[AGENTS.md](../../AGENTS.md)，当前任务／共享窗口见[有效排程](Module_Repair_Parallel_Schedule.md)。[修复清单](Module_Audit_Repair_Ledger.md)用于定位编号及必要证据，不从历史租约推当前权限。21个原组长已实际关闭Kiro、保留绑定并直接Codex接续；当前派发使用 gpt-6-astra／xhigh，Fast 关闭，通知不代实际档位核实。
 
 | 模块 | 保留会话标题 | 唯一派发 threadId |
 | --- | --- | --- |

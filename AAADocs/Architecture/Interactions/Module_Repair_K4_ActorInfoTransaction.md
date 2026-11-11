@@ -13,7 +13,7 @@
 
 Context 中的 Binding 和 LastActorInfoWrite 身份由 ASC 签发；相同 Pawn 或 ActorInfo 指针不足以认证同一次资源。来源快照由外层资源限定寿命，不能作为另一套绑定或 Ready 状态。
 
-源码入口：[ASC 公共接口](../../../Source/GGYGO/AbilitySystem/GGYGOAbilitySystemComponent.h)、[私有协议](../../../Source/GGYGO/AbilitySystem/Private/GGYGOAvatarBindingProtocol.h)、[Host 消费者](../../../Source/GGYGO/Combatants/GGYGOCombatantState.cpp)。身份值定义见[绑定契约](Module_Repair_K4_AvatarBindingIdentity.md)。
+源码入口：[ASC 公共接口](../../../Source/GGYGO/AbilitySystem/GGYGOAbilitySystemComponent.h)、[私有协议](../../../Source/GGYGO/AbilitySystem/Private/GGYGOAvatarBindingProtocol.h)、[Host 消费者](../../../Source/GGYGO/Combatants/GGYGOCombatantState.cpp)。
 
 ## 事务与发布接口
 
