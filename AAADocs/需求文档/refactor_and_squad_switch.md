@@ -17,7 +17,7 @@
   - 玩家换人冷却 0.5 秒（整队共用，只限玩家请求，从替换在场队员的换人成功起算）。
   - 出战队员倒下动作播完后自动切到下一个存活队员，倒下期间不能手动切；全员倒下时保持现状。
   - 7 个 GA 维持换下即取消；进退场资产以后做（缺省时跳过）；换人不配手柄键；做键盘改键界面。
-- 11-10：死亡结束后的 Pawn 去留改由共享角色蓝图决定（选 B，未做）。
+- 11-10：死亡结束后的 Pawn 去留改由共享角色蓝图决定（选 B，已实现并验证，见下文）。
 - 技术决定（已定案）：HealthSet 保留分类帧。原因是 Lyra 做法在服务器（含 listen 主机）上，持续 GE 下调 MaxHealth 时不广播 MaxHealthChanged。
 
 ## 方案要点
@@ -94,6 +94,15 @@
 - 未做：`BoundsScale` 11 的 GPU／VSM 开销没测；修后单机倒下没有单独重拍。
 - 正背对照里与原图 `AAADocs/Assets/Pyrios/Rendering/References/20261009_Pyrios_*.png` 的差异不属于阴影问题，是否另开需求由用户决定：胸口光球偏暗、蓝色手臂发光偏弱、背面头发偏灰紫偏亮、斗篷没有蓝色渐变且金色细线显示为橙红（斗篷只读暂挂）。
 
+## 死亡结束后的 Pawn 处理
+
+- HealthComponent 仍唯一持有死亡阶段并广播 `OnDeathFinished`。CharacterBase 保留原生 `SetTimerForNextTick`，下一帧才调用 `K2_HandleDeathFinished()`；自动替补仍在原死亡广播内同步完成。没有新增死亡状态、计时器协议或替补策略。
+- `K2_HandleDeathFinished()` 返回 true 表示蓝图已处理，可以选择保留 Pawn；未覆盖或返回 false 会输出含 Pawn 路径的 Error，不执行默认销毁。`UninitAndDestroy()` 是供蓝图选择的受保护清理原语：各端仅释放本 Pawn 仍持有的 ASC 关联并隐藏，服务器另行解除控制并沿用 0.1 秒 LifeSpan。选销毁的执行时点仍晚于死亡结束及自动替补广播。
+- `/Game/BP/Character/BP_Character`、`BP_HeroCharacter`、`BP_BossCharacter` 分别继承三个原生角色分支，图中显式调用 `UninitAndDestroy` 后返回 true。既有 `BP_Enemy`／`BP_BaseCharacter`、`BP_PC_Pyrios`、`BP_Boss_Test` 分别继承对应共享模板；对象原有组件、变量和业务图保持。后续角色应继承相应模板，或明确覆盖死亡处理图。制作／读回入口为 [wire_character_death_policy.py](../Scripts/wire_character_death_policy.py)。
+- 已编译，10 项相关回归通过：两项 `GGYGO.Character.DeathPolicy` 验证广播期间不清理、下一帧选择、显式保留、未配置诊断、客户端不发起销毁和生产 Pyrios 蓝图入口；`GGYGO.Teams.SquadSwitch` 七项单机与一项 D3D12 listen-server 用例通过，含死亡自动替补、后台死亡不切换和无人存活不假成功。
+- 证据：[初次构建](../../Saved/Codex/CharacterDeathPolicy_20261111/build.log)、[夹具修复后的共同增量构建](../../Saved/Codex/I22_20261111/build.log)、[单机七项与首轮专项夹具失败](../../Saved/Codex/CharacterDeathPolicy_20261111/tests.log)、[专项两项及 D3D12 联机通过](../../Saved/Codex/CharacterDeathPolicy_20261111/rhi2.log)、[全部共享图与继承的保存后冷读回](../../Saved/Codex/CharacterDeathPolicy_20261111/final_readback.log)。专项夹具修复仅补 `InitializeActorsForPlay`，不放宽断言。NullRHI 联机在攻击步骤因必需渲染资源不可用超时，未把它当作联机通过；D3D12 已走通完整用例。
+- 未验证独立进程客户端、Cook／打包，以及选择保留 Pawn 后的复活玩法。原有启动阶段 `LogAutomationTest: Error: Condition failed` 不属于这些专项叶，日志保留，未在本需求排查。
+
 ## 消息路由与 SyncMarker 工具
 
 - 消息路由在遍历父 Tag 时，按当前 Tag 删除类型已失效的监听并输出该 Tag，保留每通道独立编号及原生弱引用机制。不会把父监听的编号拿到子通道删除，子通道和有效父监听可继续接收广播。
@@ -109,7 +118,6 @@
 交给 Codex，顺序和第一步见 [Codex 交接](../Coordination/Handover_Codex.md)。
 
 3. CR-R7 剩余候选逐项核对，按[修复清单](../Coordination/Module_Audit_Repair_Ledger.md)出状态表；含新登记的 CR-1111-D1（显式开关诊断 `ProjectDiagnostics.Input.ActivationOrigin.NestedSameSpecRawTry` 失败）。小缺陷直接修，优化交用户。
-4. 死亡结束后的 Pawn 去留改由蓝图决定：`AGGYGOCharacterBase::OnDeathFinished` 现在固定下一帧 `UninitAndDestroy`。C++ 保留死亡结束广播、下一帧时序和权限检查，把去留交给共享角色蓝图；生产蓝图配成等价的下一帧销毁，未配置时明确报错。销毁必须晚于自动替补所在的那次广播。
 5. 各 spec 勾选状态回写（依赖最小联机完成），同时更新上面的状态表。
 6. 原统筹待修问题里还开着的：
    - PIE 结束时 Enhanced Input 报 `IMC_Squad`／`IMC_Default`／`IMC_MouseLook` "仍在应用、可能泄漏"的 Warning（LocalPlayer 子系统先于 Controller／Pawn 的 EndPlay 反初始化），本批没有复查。
