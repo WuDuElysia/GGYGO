@@ -1,6 +1,6 @@
 # 最小联机验证：纠正重放与特效晚加入
 
-状态：未开始，交给 Codex。源码在当前构建里，双端真实渲染一次都没跑通，上次的原因是机器内存不够同时起两个编辑器。
+状态：由 AbilitySystem 原 Codex 会话端到端接续验证与必要修复。源码在当前构建里，双端真实渲染仍未通过；先复用已有代码和测试入口，双端运行与其它我方 Editor 按占用和实测资源协调。
 
 ## 目标
 
@@ -20,17 +20,17 @@
 
 - 用纠正接收日志和初始取消日志作为证据，不另做第二套同步机制。
 - 特效晚加入的观察入口：`UGGYGOPlayerActionObservation::BeginNetworkFXObservation`／`SelectNetworkFXPublisher`／`ReadNetworkFXChannel`（Editor 模块），运行时 `UGGYGOMontageFXReplicationComponent::OnPublisherRegistered` 和 `StateReceived` 观察记录只在 Editor 构建里存在。
-- 跑之前关掉我方其它 UE 实例并实测剩余内存；内存确实不够时如实记为阻塞，写出实测数字。
+- 跑之前与占用者协调，待其它我方 UE 工作正常收尾后实测剩余内存；不终止其它作者的健康实例，不碰用户编辑器。内存确实不够时如实记录阻塞和实测数字，离线实现和测试准备继续。
 
 ## 当前状态
 
 - 纠正接收日志和初始取消的源码已在当前构建里。工作树里另有一批未提交改动，按内容判断属于这条线（作者没有登记，归属是收尾时读 diff 推断的）：GA 权威取消诊断日志、WaitComboInput 首次数据后清除远端等待、Montage Task 在 GA 进入原生 Cancel 后不再重入 Cancel、动作根运动源按 LocalID 跨取消状态匹配、特效晚加入观察入口。它们已随整个工作树编译，单机冒烟也在跑它们，但没有联机运行证据，所以没有提交 Git，清单见[交接文档](../Coordination/Handover_Codex.md)。
-- 以前实测双端起步约需物理内存 14.8 GiB、提交 24.1 GiB；当前空闲物理内存约 15.5 GiB，余量很小。
+- 以前实测双端起步约需物理内存 14.8 GiB、提交 24.1 GiB；启动前重新测可用物理和提交内存，不沿用旧空闲值。
 - 特效晚加入以前只看到过同一个键的最终状态，没看到实际画面。
 
 ## 未完成项
 
-1. 第一个独立验收点：关掉其它我方编辑器、测内存后起双端，跑纠正重放和只按攻击两个试次。
+1. 第一个独立验收点：其它我方编辑器正常收尾并释放资源、实测内存可用后起双端，跑纠正重放和只按攻击两个试次。
 2. 在同一个双端环境里依次跑三个特效晚加入试次，每次截客户端视口并查看。
 3. 勾选 `.kiro/specs/abilitysystem-activation-lifecycle/tasks.md` 和 `.kiro/specs/fx-montage-publication-ownership/tasks.md` 的对应项，然后提交相关源码。
 

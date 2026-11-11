@@ -120,7 +120,7 @@
 - CR-1111-D1 已修复：CheckCost 内同 Spec 的 raw Try 失败曾先认领外层输入来源。InputBuffer 现在记录同步 Can 层级，并将原生结果与输入 Try 的进入层级对应；内层原生失败及 GA 反馈照常，外层原请求仍获得一次合法重试通知和原截止。没有改变原生 Try、调度或玩法策略。
 - 改动仅为 `GGYGOAbilityInputBuffer.h/.cpp` 与 `GGYGOGameplayAbility.cpp` 的 Can 范围；保留 GA 文件中最小联机的既有诊断改动。原两条失败断言和原日志保留，诊断测试源未改。
 - `GGYGOEditor Win64 Development` 增量编译通过；独立 NullRHI Editor 的六项自动化全部通过、每项无 error／warning：原嵌套来源诊断、失败回调释放占用者、同一时刻重入物理请求、组准入、按来源退休请求、切回留场成员。证据：[构建日志](../../Saved/Codex/I23_20261111/build.log)、[运行日志](../../Saved/Codex/I23_20261111/editor.log)、[自动化报告](../../Saved/Codex/I23_20261111/Automation/index.json)。
-- 未做本修复的生产实机输入、联机和 Cook 验证；不改变最小联机及其它需求的未完成状态。退出时 MCP 服务有 socket 收尾错误，Editor 进程正常退出 0，专项自动化结果未受影响。
+- 统筹与 Input 消费侧差分评审均无阻塞：同步 Can 层级和一次消费保持原来源、截止与清理隔离。Can 内 raw Try 成功分支没有独立专项证据；未做本修复的生产实机输入、联机和 Cook 验证，不改变其它需求的未完成状态。退出时 MCP 服务有 socket 收尾错误，Editor 进程正常退出 0，专项自动化结果未受影响。
 
 ## 未完成项
 
