@@ -6,7 +6,7 @@
 
 `CheckAvatarBindingCleanupContext` 与失败 Init 清理入口使用不同来源。前者核对已提交 Context 的精确 cleanup 快照；后者仅消费原失败 Operation 的返回时实际写入证明，不提交绑定、不创建 Receipt/Notice/Ready。工作查询、既有成功事务与发布契约继续按各自规则执行。
 
-Host 旧工作查询与固定 PreserveOwner、CombatantState 失败 Init 分支未迁移；完整调用链尚未关闭。R0 第36次 2 Fail/12 错误及各历史阶段未运行证据原样保留。本文档写权限仅见[两文件同步预检](Module_Repair_K4_AvatarBindingIdentity.md)，不含源码/测试/全局入口/Obsidian/Canvas。
+Host 旧工作查询与固定 PreserveOwner、CombatantState 失败 Init 分支未迁移；完整调用链尚未关闭。R0 第36次 2 Fail/12 错误及各历史阶段未运行证据原样保留。本文档写权限仅见两文件同步预检（原 Module_Repair_K4_AvatarBindingIdentity.md，已删除），不含源码/测试/全局入口/Obsidian/Canvas。
 
 ## 历史记录（原第1～17节）
 
@@ -619,7 +619,7 @@ query只证明尚未消费的原清理资源/同步作用域，不能要求Ready
 
 ### 18.1 唯一归属、顺序和接口边界
 
-ASC 唯一拥有原 ActorInfo 写入、绑定/操作身份、native Busy 与清理来源证明；Host 继续负责 Avatar 选择及自身请求/发布生命周期，消费者清理自己的资源。两源码原子步骤先冻结“已提交来源可清理”的契约，再冻结“失败 Init 原写入可消费”的契约；本轮仅同步这两份既有记录，精确文件、基线、非目标、验收和停止点见[同步预检](Module_Repair_K4_AvatarBindingIdentity.md)。
+ASC 唯一拥有原 ActorInfo 写入、绑定/操作身份、native Busy 与清理来源证明；Host 继续负责 Avatar 选择及自身请求/发布生命周期，消费者清理自己的资源。两源码原子步骤先冻结“已提交来源可清理”的契约，再冻结“失败 Init 原写入可消费”的契约；本轮仅同步这两份既有记录，精确文件、基线、非目标、验收和停止点见同步预检（原 Module_Repair_K4_AvatarBindingIdentity.md，已删除）。
 
 | 来源/动作 | 输入与权限 | 结果边界 |
 | --- | --- | --- |

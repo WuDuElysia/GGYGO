@@ -83,7 +83,7 @@
   - 检查磁盘余量并告知，编译 GGYGOEditor
   - 运行 Requirement 9.2 列出的全部测试
   - PIE 与最小联机按 Requirement 9.4、9.5 验证。
-  - [ ] N0/N1：复用 Build_R48 和原 D3D12 双端入口，按原资源门和 [N3 当前排程](../../../AAADocs/Coordination/Module_Repair_Parallel_Schedule.md) 采集同窗内存。闩停只记资源失败。真实 attack-only 中，同一原 Montage 和 Task 自然结束，同一 RMS 按真实步长消费最后的 XYZ/Yaw，GA 未取消且原资源全部归还。退出退役的取消不作自然收尾证据。
+  - [ ] N0/N1：复用 Build_R48 和原 D3D12 双端入口，按[最小联机需求记录](../../../AAADocs/需求文档/minimal_multiplayer.md)的内存要求采集同窗内存（当前负责人和占用见[看板](../../../AAADocs/Coordination/Board.md)）。闩停只记资源失败。真实 attack-only 中，同一原 Montage 和 Task 自然结束，同一 RMS 按真实步长消费最后的 XYZ/Yaw，GA 未取消且原资源全部归还。退出退役的取消不作自然收尾证据。
   - [ ] N5：读回具名 NET 的两项 lag 与五项 incoming，FrameDelay、Bloat 或 Loss 非零拒绝。记录预测段 1、服务器拒绝、沿 Mode2 原 basis 重放段 0、随后真正新起段 1；另证 Initial 无法提供时同激活 Reliable TargetDataCancelled 和准确归还。attack-only 独立取证，原双打断点和纠正身份保持。
   - _Requirements: 9.1-9.5_
   - 已完成编译与 NullRHI 测试（Build_R6～R10、Test_R7～R10，结论见活动记录"第 4 步"）；PIE 单机与最小联机需真实 RHI，另批

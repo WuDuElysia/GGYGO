@@ -50,7 +50,7 @@
   - [x] 编译 GGYGOEditor：Build_R5 成功（19 个 action）
   - [x] NullRHI 测试：Test_R6 共 74 例（批次 1 回归 58 例＋FX 6 例＋Locomotion 10 例），71 通过。未通过 3 例均非本步引入：`Admission.GroupLifecycle`、`PlayerCombo.ActivationCommitAndEndReentry`（第 4 步）；`Movement.Locomotion.InputConsumer.FailedRequestRecovery` 行为断言全部完成，因生产 Error 日志未声明为预期而判失败，2026-10-02 起已失败（当时 2 条，现 3 条，新增一条为 CMC 来源准入拒绝），属 Movement 模块
   - [x] Editor 中核对 CharacterSlot／BossState 蓝图子类已获得新组件：`GGYGO.FX.MontagePublication.HostSubclassAudit`（Test_R16a，NullRHI）由资产注册表列出 CombatantState 全部 9 个子类，项目中没有蓝图子类；每个类的 CDO 都带 `MontageFXReplication` 组件
-  - [ ] PIE 单机与最小联机（Requirement 5.3、5.4）：真实 RHI 下观察 FX 出现、结束与 Abort；Test_R19 的 NullRHI 不覆盖 FX。联机各用独立试次和同版生产配置，当前入口见 [N3 排程](../../../AAADocs/Coordination/Module_Repair_Parallel_Schedule.md)。
+  - [ ] PIE 单机与最小联机（Requirement 5.3、5.4）：真实 RHI 下观察 FX 出现、结束与 Abort；Test_R19 的 NullRHI 不覆盖 FX。联机各用独立试次和同版生产配置，当前入口见[最小联机需求记录](../../../AAADocs/需求文档/minimal_multiplayer.md)，负责人和占用见[看板](../../../AAADocs/Coordination/Board.md)。
     - [ ] N2 live_first：配对同发布键、代次和原组件，记录发布、快照、Controller 就绪与终态；按 BeginServerTime 核 Age。在同一 Active 帧取得实际 B 视口 PNG 并查看。Controller 就绪前已闭窗记未覆盖；被动 VM 队列位不能证明进入 Native、GPU/PSO 就绪或画面。保持原 FX 时长和闭窗语义。
     - [ ] N3 closed_first：证 B 确实在 A 闭窗后首获相关性，收到完整复制快照、同键未 RemoteCreated，视口无补播。
     - [ ] N4 reacquire：证同连接原 ActorChannel Close／CleanUp（原因、索引、NetGUID）、新 Proxy 和剩余 Age 的 FX；旧资源退役不得触及同键后继。缺连接、快照或画面证据时分别保留缺证。

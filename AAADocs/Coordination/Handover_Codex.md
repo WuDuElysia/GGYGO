@@ -1,6 +1,6 @@
 # 交接给 Codex（2026-11-11）
 
-Kiro 的需求收尾批次到此结束。下面是已完成的内容、等用户决定的三项、剩余工作，以及工作树里没有提交的文件。
+Kiro 的需求收尾批次到此结束。下面是已完成的内容、等用户决定的事、剩余工作，以及工作树里没有提交的文件。
 
 ## 新工作流
 
@@ -28,19 +28,43 @@ Kiro 的需求收尾批次到此结束。下面是已完成的内容、等用户
 
 注意：重导入的网格 `/Game/Characters/Shared/FX/ZZZ/Meshes/FXMD_DAO_001_ced427b6fbbf` 在 `.gitignore` 忽略的素材目录里，不在 Git 中，修复只存在于本机；原包备份在 `Saved/Kiro/requirements-closeout/I01/Backup/`，重导入工具是 `Saved/Kiro/requirements-closeout/I01/fix_dao_mesh.py`。同理，`BP_PC_Pyrios` 的 `BoundsScale` 修复依赖的物理资产和骨骼网格也是本地导入资产。
 
-## 等用户决定的三项
+### 已提交的 `BP_PC_Pyrios` 里有什么
 
-这三项的自动化部分都已通过，只差用户的选择。用户回答后由指定的负责人接着做。
+`Content/BP/Character/Player/BP_PC_Pyrios.uasset` 上一次提交是 10-04，本批一起提交的版本里有三批改动：
 
-1. **起步／停步的骨盆单帧跳变**（[walkrun_turnback_production_camera](../需求文档/walkrun_turnback_production_camera.md)）。WalkStart 结尾骨盆单帧移动约 10.7～10.9 cm（平跑每帧不到 1 cm），RunStop 入口 4～10 cm，逐帧图 `Saved/Kiro/requirements-closeout/I04/Run_R7/start_pop_consecutive.png`。
-   - A：接受现状。
-   - B：另开动画修复，在 ABP_Pyrios 里定位那条约 0.01 s 的过渡，改成 0.1～0.2 s 惯性化或相位匹配；起停观感会变，要重拍验收。
-   - 附带问：RunStop 开头几帧的前冲（`Run_End` 根运动自带）接受不接受。
+1. 首击资源准备请求（之前 Codex 批次制作，本批普攻首击验证过）：`SetAbilityInputResourcePreparation` 和 Normal01 的 NS 列表。
+2. Mesh `BoundsScale` 11（本批角色阴影修复）。
+3. 早期渲染批次（10-24～11-02，脚本 `wire_pyrios_runtime_key_light.py` 等的产物，本批没有当作需求单独验收）：
+   - BeginPlay 主灯接线（节点注释带 `GGYGO.RuntimeKeyLight` 标记）：按 Actor Tag `GGYGO.KeyLight` 找本 World 里唯一的 DirectionalLight，设为角色渲染组件的显式主灯；数量不是 1 时停用角色渲染组件并打印"主灯绑定拒绝"。
+   - 角色渲染组件配置：`KeyLightSelection`＝Explicit、阴影设置（级联分辨率／宽度、深度捕获、对象阴影分辨率）、`AdditionalLighting`、`FXLightSelection`（NapPointFromNativeRadius）、`EditorPreviewTransport`、`bTraceKeyLightOcclusion`。对应的 C++ 类型在 HEAD 里（11-04 提交）。
+
+第 3 批没有单独验收，但本批所有真实渲染运行用的都是这份蓝图：在 `L_Movement_Test` 上主灯绑定成功，角色受光正常；在 `L_KevinBoss_P1` 上绑定被拒（走跑记录、第三段音效记录都写了）。依赖关系：
+
+- `L_Movement_Test` 的 `DirectionalLight_0` 带 Tag `GGYGO.KeyLight`。这个地图改动原来没提交，收尾时按字节比对过，只有这个 Tag 和编辑器视口相机位置（`EditorViews`，只在编辑器里用）两处变化，已作为依赖补提交。
+- `Untitled` 地图的主灯在 World Partition 外部 Actor 里，外部 Actor 目录被 `.gitignore` 忽略，只在本机。
+- `L_KevinBoss_P1`、`L_KevinBoss_P3`、`L_BossAI_Test` 都没有这个 Tag，生产角色在这些地图上会停用角色渲染组件，第三段场景材质特效登记也会被拒、GA 提前结束。Kevin 地图装配（I18）时要给 P3 的主灯加 Tag。
+- 主灯和渲染相关的两个脚本 `wire_pyrios_runtime_key_light.py`、`configure_ggygo_level_key_light.py` 没有提交（见「没有提交的文件」），它们的产物已经在 HEAD 里，不要重跑写入。
+
+## 等用户决定的事
+
+前三项是需求，自动化部分都已跑完，只差用户的选择；第四项是文档去留。用户回答后由指定的负责人接着做。
+
+1. **走跑与转身**（[walkrun_turnback_production_camera](../需求文档/walkrun_turnback_production_camera.md)），两个问题：
+   - 起步／停步的骨盆单帧跳变：WalkStart 结尾骨盆单帧移动约 10.7～10.9 cm（平跑每帧不到 1 cm），RunStop 入口 4～10 cm，逐帧图 `Saved/Kiro/requirements-closeout/I04/Run_R7/start_pop_consecutive.png`。
+     - A：接受现状。
+     - B：另开动画修复，在 ABP_Pyrios 里定位那条约 0.01 s 的过渡，改成 0.1～0.2 s 惯性化或相位匹配；起停观感会变，要重拍验收。
+     - 附带问：RunStop 开头几帧的前冲（`Run_End` 根运动自带）接受不接受。
+   - 20° 档侧倾按哪个部位算：同一帧骨盆倾 19.8°（在 ±2° 内），头部倾 22.7°（超出 2.7°）。
+     - A：按骨盆算，本条按现状验收。
+     - B：按头部算，要先查头部为什么多倾约 3° 再调，侧倾观感会变，要重拍。
 2. **普攻第三段音效试听**（[normal03_audio](../需求文档/normal03_audio.md)）。在 `L_Movement_Test` 的 PIE 里打出第三段，空挥一次、打中一次。
    - A：两种声音都可以；B：技能声要换；C：命中声要换；D：时点不对（早了还是晚了）。
 3. **普攻连段的预输入**（[normal01_first_strike](../需求文档/normal01_first_strike.md)）。spec 5.3 写"连段缓冲输入在下一段生效"，当前只接受攻击接续点（Normal01 在 0.275 s）之后的按下，之前的按下直接被拒。
    - A：接受现状，改 spec 5.3 措辞后勾选 `.kiro/specs/abilitysystem-input-request/tasks.md` 任务 5；手感不变。
    - B：另立需求接回预输入；手感会变，要重跑普攻冒烟。
+4. **旧排程历史文件要不要留**：`AAADocs/Coordination/Module_Repair_Parallel_Schedule_History_20261013.md`（约 1.7 MB、2905 行的租约／回执过程日志）以前没有入库，规则整理那次提交把它连同旧排程正文里 Codex 11-02～11-09 没提交的更新一起入了库，提交说明没写这件事。现在它只作历史参考，其中指向已删除文档的链接已改成纯文字。
+   - A：保留，作历史参考。
+   - B：删除，过程历史以 Git 为准（旧排程正文里有链接指向它，删除时要一起改成纯文字）。
 
 不阻塞、可顺带问用户的小问题：改键页按钮字号和面板透明度要不要改；第三段打中时要不要加只在命中时出现的特效（只能用替代素材）；着色器 DDC 真冷首击要不要做（数据远超 1 GiB）；正背对照里胸口光球、手臂发光、头发和斗篷颜色与原图的差异要不要另开需求。
 
@@ -57,37 +81,25 @@ Kiro 的需求收尾批次到此结束。下面是已完成的内容、等用户
 | I15 | Kevin（一）：特效剩余 35 包（22 NS＋13 命中 Cue） | 上次制作在比对第一个材质实例时把父材质继承值当成覆盖而中止，没保存 | 改成只比对实际开启的覆盖位，再跑 `AAADocs/Scripts/build_bh3_kevin_fx.py`。**这是 Kevin 的第一个独立验收点**：35 包落盘、Niagara 编译无错、读回正确、有参考／原创对照表 | [kevin_boss_assembly](../需求文档/kevin_boss_assembly.md) |
 | I16（依赖 I15） | Kevin（二）：26 份派生原地动画、ABP、Montage、窗口标签 | Editor 制作源码已写，包没做 | 运行动画制作入口并读回根轨迹 | 同上 |
 | I17（依赖 I16） | Kevin（三）：3 模板＋15 技能＋死亡 GA、State／BTS／BT／Definition，两阶段 50% 切换；关闭 Q01 | 19 个目标包磁盘上都没有 | 跑 `wire_kevin_boss_abilities.py`／`wire_bh3_kevin_combat.py` | 同上 |
-| I18（依赖 I17） | Kevin（四）：`L_KevinBoss_P3` 可交战装配 | 场景脚本和导航 Agent 配置已写，地图没保存 | 跑 `configure_kevin_boss_p3.py`，只保存 P3 | 同上 |
+| I18（依赖 I17） | Kevin（四）：`L_KevinBoss_P3` 可交战装配 | 场景脚本和导航 Agent 配置已写，地图没保存 | 跑 `configure_kevin_boss_p3.py`，只保存 P3；P3 的主灯要加 Tag `GGYGO.KeyLight`，否则生产角色会停用角色渲染组件（见上文「已提交的 `BP_PC_Pyrios` 里有什么」） | 同上 |
 | I19（依赖 I18） | Kevin（五）：真实 RHI 打一场完整战斗到 Boss 死亡 | 没有任何运行证据 | 实战录关键帧和声音事件 | 同上 |
 | I20 | 最小联机（一）：双端起步、预测被拒后的纠正重放、只按攻击自然结束 | 双端从没跑通（上次客户端提交内存不足）。旧实测双端约需物理 14.8 GiB、提交 24.1 GiB，当前空闲约 15.5 GiB | 关掉其它我方 UE，先测内存再起双端。**第一个独立验收点**：纠正重放和只按攻击两个试次的日志；内存确实不够时标阻塞并写实测数字 | [minimal_multiplayer](../需求文档/minimal_multiplayer.md) |
 | I21（依赖 I20） | 最小联机（二）：特效晚加入、闭窗后加入、重获相关性 | 只见过同一键的最终状态，没见过画面 | 在 I20 的双端环境里依次跑三个试次，截客户端视口 | 同上 |
-| I22 | 消息路由父 Tag 失效监听清理；SyncMarker 工具迁到 GGYGOEditor | 两处都确认未修 | `GameplayMessageSubsystem.cpp` 第 100 行改成用当前遍历的 Tag 删除，加回归测试；SyncMarker 先查 BP／资产引用再迁并加 CoreRedirects | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「当前状态」 |
+| I22 | 消息路由父 Tag 失效监听清理；SyncMarker 工具迁到 GGYGOEditor | 两处都确认未修 | `GameplayMessageSubsystem.cpp` 第 100 行改成用当前遍历的 Tag 删除，加回归测试；SyncMarker 先查 BP／资产引用再迁并加 CoreRedirects | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「未完成项」 |
 | I23（依赖 I22） | CR-R7 剩余候选逐项核对，小缺陷直接修，优化交用户 | 台账候选未逐项核；新登记 CR-1111-D1（`NestedSameSpecRawTry` 诊断失败，日志 `Saved/Kiro/requirements-closeout/I08/Diag_R1/Editor/editor.log`） | 按[修复清单](Module_Audit_Repair_Ledger.md)出候选状态表 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md) |
-| I24 | 死亡结束后的 Pawn 去留改由共享角色蓝图决定（用户选 B） | `AGGYGOCharacterBase::OnDeathFinished` 仍固定下一帧 `UninitAndDestroy` | C++ 保留死亡结束广播、下一帧时序和权限检查，把去留交给蓝图；生产蓝图配成等价的下一帧销毁，未配置时报错。销毁必须晚于自动替补所在的那次广播。回归 SquadSwitch 8 例和联机死亡自动换人 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「当前状态」 |
-| I27（依赖 I04 的用户回答） | 去掉 ZZZ 动画兼容层，改为项目自己的角色动画实例 | 见下节 | 先只读读回 ABP_Pyrios 的实际消费面 | 本文「去掉 ZZZ 动画兼容层」 |
+| I24 | 死亡结束后的 Pawn 去留改由共享角色蓝图决定（用户选 B） | `AGGYGOCharacterBase::OnDeathFinished` 仍固定下一帧 `UninitAndDestroy` | C++ 保留死亡结束广播、下一帧时序和权限检查，把去留交给蓝图；生产蓝图配成等价的下一帧销毁，未配置时报错。销毁必须晚于自动替补所在的那次广播。回归 SquadSwitch 8 例和联机死亡自动换人 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「未完成项」 |
+| I27（依赖 I04 的用户回答） | 去掉 ZZZ 动画兼容层，改为项目自己的角色动画实例 | 未开始 | 先只读读回 ABP_Pyrios 的实际消费面 | [zzz_anim_compat_layer_removal](../需求文档/zzz_anim_compat_layer_removal.md) |
 | I26（依赖 I08、I10、I20、I21） | 各 spec 的 tasks.md 勾选状态回写 | 多个检查点未回写 | 等依赖完成后统一回写，同步整改记录的状态表 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md) |
-
-### 去掉 ZZZ 动画兼容层
-
-- 现状：`Source/GGYGO/Animation/zzzAnim` 共 15 个文件，`UZZZAnimInstance`（继承 `UGGYGOAnimInstanceBase`）是 `ABP_Pyrios` 的父类。每帧链路是：基类发布的 AnimationStateFrame → 旧快照适配器转成 `FZZZAnimSnapshot` → `FZZZLocomotionEvents` 写进 `FZZZAnimStateMemory`（GaitBlendY、StopValue 整数）→ AnimGraph 读取。头文件自己写明 `AnimBlendX/Y`、`AnimCurveVelocity*`、`ActualVelocity*`、`bTurnBackRunOut` 没有 AnimGraph 节点消费。`ABP_Kevin_DemonBattle` 不继承它。
-- 做法：
-  1. 只读读回 ABP_Pyrios 的实际消费面（过渡、状态图、StopValue／GaitBlendY／`GetSeqByKey`／侧倾属性）。
-  2. 新建项目命名的角色动画实例，让 ABP 直接读 AnimationStateFrame 的走跑混合和停止类型；删掉旧快照适配器、LocomotionEvents、StateMemory 和无消费属性。
-  3. 用 CoreRedirects 改名，只重绑 ABP_Pyrios 这一个共享资产，编译保存。
-  4. 更新 `GGYGOAnimationLifecycleTest`、`StateFrameTest`，回归走跑、起停、TurnBack 和侧倾，复用 `Saved/Kiro/requirements-closeout/I04/prod_camera_run.py` 的生产机位场景，读数和 I04 对比。
-- 不动：注释里说明源资产来自 ZZZ 的部分，以及编辑器控制台命令名。
-- 验收：zzzAnim 目录删除；ABP 编译无警告；测试通过；生产机位读数与 I04 一致。用户偏好里"ZZZ 动画层 spec 使用 zzz- 前缀"这条若不再适用，交付时提示用户。
-- 若用户对起停跳变选了 B，修复会改 ABP_Pyrios 的过渡，和本项写同一个共享资产，两项要排先后或由同一负责人做。
 
 ## 没有提交的文件
 
-本批只提交了规则文档整理、过时文档删除，以及有本批验证证据的源码、资产、脚本和文档。下面这些仍在工作树里，**不要删除**；负责对应需求的人验证后自己提交。归属是收尾时读 diff 和修改时间判断的，没有作者登记，拿不准就先问用户。
+本批只提交了规则文档整理、过时文档删除，以及有本批验证证据的源码、资产、脚本和文档（`L_Movement_Test` 的主灯 Tag 作为已提交蓝图的依赖补提交，见上文）。下面这些仍在工作树里，**不要删除**；负责对应需求的人验证后自己提交。归属是收尾时读 diff 和修改时间判断的，没有作者登记，拿不准就先问用户。
 
 注意：已提交的 HEAD 快照没有单独编译过，本批的编译和测试针对的是完整工作树（含下列未提交改动）。不要只拿 HEAD 去构建或判断回归。
 
 ### 父仓 `F:/ue_project/GGYGO`
 
-- **用户的改动，不得删除或提交**：`AAADocs/Modules/CombatActions/Module_Repair_04_Subleases.md`（4 行 Combo／FX 内容）。
+- **用户的改动，不得删除或提交**：`AAADocs/Modules/CombatActions/Module_Repair_04_Subleases.md`（4 行 Combo／FX 内容）。文件里有 3 处链接指向 `Module_Repair_04_Subleases_History_20261013.md` 和 `Module_Repair_04_Validation.md`，这两份文档已按用户确认删除；文件是用户的，链接没有改。
 - **Kevin Boss**（源码已编译，包没做，没有运行证据）：
   - `Config/DefaultEngine.ini`（KevinBoss 导航 Agent）、`Config/DefaultGame.ini`（Kevin Cue 路径）、`Config/Tags/BH3_Kevin_AudioTags.ini`、`Config/Tags/KevinBossAnimationTags.ini`、`Config/Tags/KevinBossTags.ini`；
   - `AAADocs/Assets/BH3/KevinDemonBattle/` 下 `BH3_Kevin_Combat_Action_Manifest.json`、`BH3_Kevin_Combat_Montage_Config.json`、`BH3_Kevin_Combat_Wiring_Config.json`（修改）和 `BH3_Kevin_Ability_Config.json`、`BH3_Kevin_Audio_Config.json`、`BH3_Kevin_FX_Config.json`、`BH3_Kevin_P3_Scene_Config.json`（新增）；
@@ -98,10 +110,10 @@ Kiro 的需求收尾批次到此结束。下面是已完成的内容、等用户
 - **投影贴花渲染器**（Normal02 同帧投影修正，早期批次，本批没有单独验收）：`Source/GGYGORendering/Niagara/GGYGOProjectedDecalRenderer.h/.cpp`。
 - **早期特效／材质批次**（10-24～11-02，本批没有验证，归特效与音效接线盘点）：
   - `AAADocs/Scripts/` 下修改的 `build_nap_avatar_simple_materials.py`、`build_pyrios_ghost_fx.py`、`build_pyrios_materials.py`、`capture_pyrios_fx.py`、`capture_pyrios_toon.py`、`gen_nap_avatar_hlsl.py`、`nap_avatar_simple_material_plan.py`、`nap_avatar_toon.hlsl`、`nap_avatar_toon_inputs.json`、`pyrios_material_plan.py`、`verify_pyrios_renderer.py`、`wire_pyrios_locomotion_pose.py`、`wire_pyrios_normal01_fx_window.py`、`wire_pyrios_skill_actions.py`、`zzz_fx_asset_session.py`、`zzz_fx_build.py`、`zzz_fx_import_assets.py`、`zzz_fx_material.py`、`zzz_fx_material_ue.py`、`zzz_fx_native_shader.py`、`zzz_fx_niagara.py`、`zzz_fx_niagara_ue.py`、`zzz_fx_particle_motion.py`、`zzz_fx_particle_renderer.py`、`zzz_fx_particle_uv.py`、`zzz_mesh_fbx.py`；
-  - `AAADocs/Scripts/` 下新增的 `build_projected_fx_materials.py`、`configure_ggygo_level_key_light.py`、`gen_nap_avatar_simple_hlsl.py`、`gen_projected_fx_hlsl.py`、`nap_avatar_simple_programs.json`、`projected_fx_material_plan.py`、`projected_fx_programs.json`、`wire_pyrios_runtime_key_light.py`、`tests/test_zzz_fx_transform_chain.py`，以及 `RenderingOverlay/` 整个目录（17 个文件，引擎／UBT 覆层稿）；
+  - `AAADocs/Scripts/` 下新增的 `build_projected_fx_materials.py`、`configure_ggygo_level_key_light.py`（产物已在 HEAD：`L_Movement_Test` 主灯 Tag）、`gen_nap_avatar_simple_hlsl.py`、`gen_projected_fx_hlsl.py`、`nap_avatar_simple_programs.json`、`projected_fx_material_plan.py`、`projected_fx_programs.json`、`wire_pyrios_runtime_key_light.py`（产物已在 HEAD：`BP_PC_Pyrios` 的主灯接线，不要重跑写入）、`tests/test_zzz_fx_transform_chain.py`，以及 `RenderingOverlay/` 整个目录（17 个文件，引擎／UBT 覆层稿）；
   - `AAADocs/Assets/Pyrios/Rendering/Pyrios_Toon_Globals.json`（修改）、`Pyrios_ProjectedFX_Rendering.json`、`Pyrios_Simple_Rendering.json`（新增）；
   - `AAADocs/Assets/Pyrios/FX/Converted/` 下 13 个新增 FBX。
-- **归属不明的资产**（11-04 之前就被改过、一直没提交；本批运行用到了它们，但没核对改了什么）：`Content/BP/Anim/ABP_Pyrios.uasset`、`Content/Characters/Player/Pyrios/Abilities/GA_Pyrios_Attack_Combo.uasset`、`Content/Characters/Player/Pyrios/Animation/Attack/AM_Pyrios_Attack_Normal_01.uasset`、`AM_Pyrios_Attack_Normal_02.uasset`、`AM_Pyrios_Attack_Normal_03.uasset`、`Content/Map/L_Movement_Test.umap`、`Content/Map/Untitled.umap`、`Content/AI/Boss/Test/BB_Boss_Test.uasset`、`BT_Boss_Test.uasset`，以及新增的 `DA_AbilitySet_Diagnostic_TargetVitals.uasset`、`DA_Boss_Diagnostic_TargetVitals.uasset`、`DA_Pawn_Diagnostic_TargetVitals.uasset`（普攻第三段音效取证用它们当诊断目标）。
+- **归属不明的资产**（11-04 之前就被改过、一直没提交；本批运行用到了它们，但没核对改了什么）：`Content/BP/Anim/ABP_Pyrios.uasset`、`Content/Characters/Player/Pyrios/Abilities/GA_Pyrios_Attack_Combo.uasset`、`Content/Characters/Player/Pyrios/Animation/Attack/AM_Pyrios_Attack_Normal_01.uasset`、`AM_Pyrios_Attack_Normal_02.uasset`、`AM_Pyrios_Attack_Normal_03.uasset`、`Content/Map/Untitled.umap`、`Content/AI/Boss/Test/BB_Boss_Test.uasset`、`BT_Boss_Test.uasset`，以及新增的 `DA_AbilitySet_Diagnostic_TargetVitals.uasset`、`DA_Boss_Diagnostic_TargetVitals.uasset`、`DA_Pawn_Diagnostic_TargetVitals.uasset`（普攻第三段音效取证用它们当诊断目标）。
 - **与本批无关的他人改动**：`AAADocs/Scripts/anim_rootmotion_extract.py`（11-10 被别人改过）、`.codex/config.toml`（Codex 工具配置）。
 - **本机工作文件**：`.agents/tasks/requirements-closeout/` 下的清单、证据、脚本和报告，不入库。
 - `Source/GGYGO` 显示为已修改，是因为子仓工作树还有下面的未提交改动；子仓指针已提交到本批的子仓提交。

@@ -2098,7 +2098,7 @@ Combat A1完整归还已根核：三GA＋Set四包保存，create41352／父6708
 
 当前条目保留：需求与验收、原作者与边界、最新正式事实及验证层、必要前置和可独立项、根决定／理由、准确接口／证据入口。源码和正式读回才是事实依据，消息只是变化通知；原参与作者直接收敛最小接口，根不代模块设计／实现。
 
-真人已确认按此工作流优化。Animation／Movement／Input入口已正式交回、根读回及完整SHA匹配；这三项只完成导航／历史标签，未迁出完整旧正文，不等于归档减量。Audio已实际归档，稳定正文39453→9599B，根实读历史原文段39453B及互链，旧失败保留。其余按实际交回核收，Combat查询／FX本次容量失败不记完成；不把文档整理设成实现前置。入口：[Animation](../Modules/Animation/Module_Repair_11_Subleases.md)、[Movement](../Modules/Movement/Module_Repair_10_Subleases.md#当前任务与验证入口)、[Input](../Modules/Input/Module_Repair_07_Subleases.md)、[Audio契约](../Modules/Audio/Audio_Contract.md)、[Audio历史](../Modules/Audio/Audio_Contract_History_20261013.md)。.git仍只读。
+真人已确认按此工作流优化。Animation／Movement／Input入口已正式交回、根读回及完整SHA匹配；这三项只完成导航／历史标签，未迁出完整旧正文，不等于归档减量。Audio已实际归档，稳定正文39453→9599B，根实读历史原文段39453B及互链，旧失败保留。其余按实际交回核收，Combat查询／FX本次容量失败不记完成；不把文档整理设成实现前置。入口：Animation（原 Module_Repair_11_Subleases.md，已删除）、Movement（原 Module_Repair_10_Subleases.md，已删除）、Input（原 Module_Repair_07_Subleases.md，已删除）、[Audio契约](../Modules/Audio/Audio_Contract.md)、[Audio历史](../Modules/Audio/Audio_Contract_History_20261013.md)。.git仍只读。
 
 消息只交变化＋接收者下一动作＋入口；先核工具真实结果，再报告。消费者实际读／消费后核收一次，不循环确认；纠正送受影响者并说明替代哪条旧事实。机器保护JSON先选结论、差集及必要身份字段，不整份快照吐进上下文。根核关键身份／验收，不逐内部步骤审批或机械重核全库。
 
@@ -2127,11 +2127,11 @@ Combat A1完整归还已根核：三GA＋Set四包保存，create41352／父6708
 
 | 模块 | 活动入口字节：整理前 → 整理后 | 原文历史 |
 | --- | --- | --- |
-| Animation Runtime | 76149 → 5292 | [原文](../Modules/Animation/Module_Repair_11_Subleases_History_20261013.md) |
-| Movement | 103024 → 6615 | [原文](../Modules/Movement/Module_Repair_10_Subleases_History_20261013.md) |
-| Input | 34837 → 4302 | [原文](../Modules/Input/Module_Repair_07_Subleases_History_20261013.md) |
-| Combat查询 | 37909 → 5741 | [原文](../Modules/Combat/Module_Repair_12_Subleases_History_20261013.md) |
-| Combat动作 | 25266 → 2974 | [原文](../Modules/CombatActions/Module_Repair_04_Subleases_History_20261013.md) |
+| Animation Runtime | 76149 → 5292 | 原文（原 Module_Repair_11_Subleases_History_20261013.md，已删除） |
+| Movement | 103024 → 6615 | 原文（原 Module_Repair_10_Subleases_History_20261013.md，已删除） |
+| Input | 34837 → 4302 | 原文（原 Module_Repair_07_Subleases_History_20261013.md，已删除） |
+| Combat查询 | 37909 → 5741 | 原文（原 Module_Repair_12_Subleases_History_20261013.md，已删除） |
+| Combat动作 | 25266 → 2974 | 原文（原 Module_Repair_04_Subleases_History_20261013.md，已删除） |
 | FX | 47595 → 6853 | [原文](../Modules/Character/Rendering/ZZZ_FX_Handoff_History_20261013.md) |
 
 活动正文合计324780 → 31777字节，减少90.2%；这只证明文件减量，不代表聊天token实测。统筹核83个活动链接及必要锚点均可解析，六份旧正文身份均保持。作者声明及实际写集仅所属Markdown，与P4完整父保护和manifest无交集；统筹四文档写集亦无交集，保护扫描命名空间无重叠。
