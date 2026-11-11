@@ -17,12 +17,12 @@
 | 特效与音效接线（普攻、技能、冲刺、转身） | Codex（待统筹指定） | 未开始：盘点表未写，Normal02／Normal03 和两个技能未实拍，冲刺和转身未接 | [fx_audio_wiring](../需求文档/fx_audio_wiring.md) |
 | 改键页面迁共享 UMG（蓝图分层 B06） | Kiro | 已完成：生产 Controller 使用 `WBP_KeySettings`，真实前台两轮 PIE 走通改键、冲突、恢复默认、存档读回、关页不卡键（[证据](../../.agents/tasks/requirements-closeout/evidence/I03.md)） | [blueprint_layering_followups](../需求文档/blueprint_layering_followups.md)、[审查明细](Blueprint_Layering_Audit.md) |
 | 死亡自动替补迁共享蓝图（蓝图分层 B08） | Kiro | 已完成：C++ 只发布死亡事实，`BP_PlayerState` 请求替补；联机死亡自动换人、后台死亡不切换、无人存活不假成功三类断言通过（[集中 RHI 回执](../../Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/RHI_Integrated_R1/return.json)） | [blueprint_layering_followups](../需求文档/blueprint_layering_followups.md)、[审查明细](Blueprint_Layering_Audit.md) |
-| 蓝图分层 Q02～Q05 资产图读回 | Codex（待统筹指定） | 未开始 | [blueprint_layering_followups](../需求文档/blueprint_layering_followups.md) |
+| 蓝图分层 Q02～Q05 资产图读回 | System 原会话（Codex） | 已完成并 push：四项保存图、配置和直接引用审查通过，未新增分层问题；特殊技能／过渡授予和移动 FX 配置边界已记，运行视听未验。[审查提交](https://github.com/WuDuElysia/GGYGO/commit/2d07708) | [blueprint_layering_followups](../需求文档/blueprint_layering_followups.md) |
 | 角色受光与阴影（倒下帧条纹、换人拖影、正背对照） | Kiro | 已完成：条纹是 VSM 缓存残影，`BP_PC_Pyrios` Mesh `BoundsScale` 设为 11、对象阴影宽度除回倍率后修掉，联机客户端倒下帧无条纹；拖影是换人相机跳变的运动模糊。`BP_PC_Pyrios` 依赖地图里唯一带 `GGYGO.KeyLight` Tag 的平行光，目前只有 `L_Movement_Test` 有（[证据](../../.agents/tasks/requirements-closeout/evidence/I10.md)） | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「角色受光与阴影」 |
 | Kevin Boss 完整组装 | Codex（待统筹指定） | 未开始制作：源码和脚本已写好未提交；第一个验收点是特效剩余 35 包 | [kevin_boss_assembly](../需求文档/kevin_boss_assembly.md) |
 | 最小联机：纠正重放与特效晚加入 | Codex（待统筹指定） | 未通过：双端因内存不足从未跑通；相关源码未提交 | [minimal_multiplayer](../需求文档/minimal_multiplayer.md) |
 | 消息路由失效监听清理与 SyncMarker 工具归位 | System 原会话（Codex） | 已完成并分仓 push：编译、3 项相关自动化及 Python 绑定通过，Messages／Animation 差分评审无阻塞；Cook 和历史蓝图包重载未验。[实现提交](https://github.com/WuDuElysia/GGYGO/commit/6d4fb73) | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「消息路由与 SyncMarker 工具」 |
-| CR-R7 剩余候选盘点 | Codex（待统筹指定） | 未开始 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)、[修复清单](Module_Audit_Repair_Ledger.md) |
+| CR-R7 剩余候选盘点 | AbilitySystem 原会话（Codex） | 已接续：逐项核对现有候选及同 Spec 嵌套重试来源失败；确认的小缺陷修复并自验，优化与用户待定玩法保持待定 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)、[修复清单](Module_Audit_Repair_Ledger.md) |
 | 死亡结束后的 Pawn 处理改由蓝图决定 | Character 原会话（Codex） | 已完成并分仓 push：三份共享模板、四份既有蓝图接线；编译和 10 项回归通过，含 D3D12 联机死亡替补，Teams 接口评审无阻塞；独立进程、Cook 未验。[实现提交](https://github.com/WuDuElysia/GGYGO/commit/42d42aa) | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「死亡结束后的 Pawn 处理」 |
 | 动画层去掉 ZZZ 兼容层 | Codex（待统筹指定） | 未开始，等走跑起停跳变的用户回答 | [zzz_anim_compat_layer_removal](../需求文档/zzz_anim_compat_layer_removal.md) |
 | 各 spec 勾选状态回写 | Codex（待统筹指定） | 未开始，等最小联机完成 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md) |
