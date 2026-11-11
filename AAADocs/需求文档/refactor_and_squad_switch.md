@@ -100,6 +100,7 @@
 - `K2_HandleDeathFinished()` 返回 true 表示蓝图已处理，可以选择保留 Pawn；未覆盖或返回 false 会输出含 Pawn 路径的 Error，不执行默认销毁。`UninitAndDestroy()` 是供蓝图选择的受保护清理原语：各端仅释放本 Pawn 仍持有的 ASC 关联并隐藏，服务器另行解除控制并沿用 0.1 秒 LifeSpan。选销毁的执行时点仍晚于死亡结束及自动替补广播。
 - `/Game/BP/Character/BP_Character`、`BP_HeroCharacter`、`BP_BossCharacter` 分别继承三个原生角色分支，图中显式调用 `UninitAndDestroy` 后返回 true。既有 `BP_Enemy`／`BP_BaseCharacter`、`BP_PC_Pyrios`、`BP_Boss_Test` 分别继承对应共享模板；对象原有组件、变量和业务图保持。后续角色应继承相应模板，或明确覆盖死亡处理图。制作／读回入口为 [wire_character_death_policy.py](../Scripts/wire_character_death_policy.py)。
 - 已编译，10 项相关回归通过：两项 `GGYGO.Character.DeathPolicy` 验证广播期间不清理、下一帧选择、显式保留、未配置诊断、客户端不发起销毁和生产 Pyrios 蓝图入口；`GGYGO.Teams.SquadSwitch` 七项单机与一项 D3D12 listen-server 用例通过，含死亡自动替补、后台死亡不切换和无人存活不假成功。
+- Teams 原会话已评审本次接口差分和受影响调用链，确认同栈替补、下一帧蓝图处理、ASC 原 Avatar 释放边界及客户端权限保持，未发现阻塞问题。
 - 证据：[初次构建](../../Saved/Codex/CharacterDeathPolicy_20261111/build.log)、[夹具修复后的共同增量构建](../../Saved/Codex/I22_20261111/build.log)、[单机七项与首轮专项夹具失败](../../Saved/Codex/CharacterDeathPolicy_20261111/tests.log)、[专项两项及 D3D12 联机通过](../../Saved/Codex/CharacterDeathPolicy_20261111/rhi2.log)、[全部共享图与继承的保存后冷读回](../../Saved/Codex/CharacterDeathPolicy_20261111/final_readback.log)。专项夹具修复仅补 `InitializeActorsForPlay`，不放宽断言。NullRHI 联机在攻击步骤因必需渲染资源不可用超时，未把它当作联机通过；D3D12 已走通完整用例。
 - 未验证独立进程客户端、Cook／打包，以及选择保留 Pawn 后的复活玩法。原有启动阶段 `LogAutomationTest: Error: Condition failed` 不属于这些专项叶，日志保留，未在本需求排查。
 

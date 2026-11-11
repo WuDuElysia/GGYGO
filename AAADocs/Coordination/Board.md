@@ -23,7 +23,7 @@
 | 最小联机：纠正重放与特效晚加入 | Codex（待统筹指定） | 未通过：双端因内存不足从未跑通；相关源码未提交 | [minimal_multiplayer](../需求文档/minimal_multiplayer.md) |
 | 消息路由失效监听清理与 SyncMarker 工具归位 | System 原会话（Codex） | 已完成并分仓 push：编译、3 项相关自动化及 Python 绑定通过，Messages／Animation 差分评审无阻塞；Cook 和历史蓝图包重载未验。[实现提交](https://github.com/WuDuElysia/GGYGO/commit/6d4fb73) | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「消息路由与 SyncMarker 工具」 |
 | CR-R7 剩余候选盘点 | Codex（待统筹指定） | 未开始 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)、[修复清单](Module_Audit_Repair_Ledger.md) |
-| 死亡结束后的 Pawn 处理改由蓝图决定 | Character 原会话（Codex） | 已完成并分仓 push：三份共享模板、四份既有蓝图接线；编译和 10 项回归通过，含 D3D12 联机死亡替补；独立进程、Cook 未验。[实现提交](https://github.com/WuDuElysia/GGYGO/commit/42d42aa) | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「死亡结束后的 Pawn 处理」 |
+| 死亡结束后的 Pawn 处理改由蓝图决定 | Character 原会话（Codex） | 已完成并分仓 push：三份共享模板、四份既有蓝图接线；编译和 10 项回归通过，含 D3D12 联机死亡替补，Teams 接口评审无阻塞；独立进程、Cook 未验。[实现提交](https://github.com/WuDuElysia/GGYGO/commit/42d42aa) | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「死亡结束后的 Pawn 处理」 |
 | 动画层去掉 ZZZ 兼容层 | Codex（待统筹指定） | 未开始，等走跑起停跳变的用户回答 | [zzz_anim_compat_layer_removal](../需求文档/zzz_anim_compat_layer_removal.md) |
 | 各 spec 勾选状态回写 | Codex（待统筹指定） | 未开始，等最小联机完成 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md) |
 | 旧 ZZZ 动画 spec 残余任务 | Kiro | 已完成：用户 11-10 决定不管，三个旧 spec 关闭 | [zzz_legacy_anim_spec_closeout](../需求文档/zzz_legacy_anim_spec_closeout.md) |
