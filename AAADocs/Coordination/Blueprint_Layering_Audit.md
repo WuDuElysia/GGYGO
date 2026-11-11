@@ -137,7 +137,7 @@ B06、B08 两项整改已在 2026-11-11 验证完成（见上方两节的状态�
 | `Source/GGYGO/Combat` | 7（测试 2） | MeleeTrace、范围 Overlap／弹体 Sweep 与窗口去重；机制保留，窗口与组合交调用方。 |
 | `Source/GGYGO/System` | 8 | AssetManager、共享 GameData／GE 加载、Tag、InitState 注册；未见按角色／Boss 名称决定业务的分支。 |
 | `Source/GGYGO/Physics`、`Messages` | 2、1 | 带 Tag 的物材、消息载荷；符合数据／接口职责。 |
-| `Source/GGYGO` 根级 | 5 | 模块／Build.cs，以及 `SyncMarkerImporter.*`。后者含具体旧角色默认目录，但调用链是显式导入工具，不是运行时选招／表现控制器，不能因路径名直接判业务违规。 |
+| `Source/GGYGO` 根级 | 5（原审查时） | 模块／Build.cs，以及原审查时的 `SyncMarkerImporter.*`。该工具现已迁到 GGYGOEditor，保留原反射入口并配置 CoreRedirects，见 [I22](../需求文档/refactor_and_squad_switch.md)；具体旧角色默认目录只用于显式资产导入。 |
 | `Source/GGYGOEditor` | 42（测试 5） | 全部原生制作／图编辑／曲线／Montage／Niagara 桥、观察与读回、Kevin 两 Builder／AnimBP 作者、Boss BT／决策图作者及新增 `GGYGOBossAbilityGraphLibrary.*`；按最终图编辑性及制作／运行分离核查，见 Q01／C05。 |
 | `Source/GGYGOAnimGraph` | 6 | Slot／BodyLean 编辑节点、编译校验及模块注册；符合编辑器机制。 |
 | `Source/GGYGORendering` | 38 | 灯事实、阴影捕获、Distortion Profile／World／View／RDG、材质表达式、ProjectedDecal／SignedField Renderer／VF；符合渲染机制，不迁移渲染线程算法到 BP。 |

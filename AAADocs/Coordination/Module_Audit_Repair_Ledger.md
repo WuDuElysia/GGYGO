@@ -80,7 +80,7 @@
 
 当前交付后的整批收口方向：
 
-Kiro 11-05 余项 spec 的 D 批次先核实际缺陷与独立写集。候选为 ASC 组准入测试日志（A1）、相邻换人后置检查（A3）、Sync Marker 工具归位（E1）、ZZZ 适配映射（E2）、GameplayMessageRouter 清除失效监听（E3）。E3 已静态确认：监听 HandleID 按 Tag 列表独立递增。遍历父 Tag 时用广播子 Channel 删除，会保留失效父监听，并在子列表有相同 ID 时误删有效监听。修复限定失效分支按当前 Tag 清理，回归应证两列表相同 ID、父失效项被移除、子监听连续两次可收到。该文件属于 Build_R48 的 937 项原输入。暂留原写集；当前优先 V4 缺陷，等绑定归还再由原 Messages 作者按实证差分合并构建。A2/B1–B3 等 AbilitySystem／FX 写集交付；C1 等自然收尾与预测纠正验收；C2 等 Input／Character 写集交付；D1 需受控 Editor 资产窗；F1 死亡回收待玩法决定。独立项也先核真实保护交集，已验证阶段不为整理候选重开。
+Kiro 11-05 余项 spec 的 D 批次先核实际缺陷与独立写集。候选为 ASC 组准入测试日志（A1）、相邻换人后置检查（A3）、Sync Marker 工具归位（E1）、ZZZ 适配映射（E2）、GameplayMessageRouter 清除失效监听（E3）。E3 已由 I22 完成修复和真实自动化回归：父 Tag 的失效监听按原列表清理，子监听连续两次可收到，且不重复诊断失效父监听；当前实现及日志见 [消息路由与 SyncMarker 工具](../需求文档/refactor_and_squad_switch.md#消息路由与-syncmarker-工具)。A2/B1–B3 等 AbilitySystem／FX 写集交付；C1 等自然收尾与预测纠正验收；C2 等 Input／Character 写集交付；D1 需受控 Editor 资产窗；F1 死亡回收待玩法决定。独立项也先核真实保护交集，已验证阶段不为整理候选重开。
 
 - 侧倾表现由Animation牵头，曲线选择／求值及角色启用策略迁现有ABP；移动选择由Movement牵头，在MovementSet／角色BP明确策略，Physics保认证事实、确定性预测及唯一执行。不得新增BP Tick、表现时钟，或在历史重放中重选当前输入。
 - 角色GA/BP编排缺口由AbilitySystem牵头提供窄接口，Combat／BossAI保持现有段序、窗口与参数资产；同步收敛Builder扩展顺序、同次窗口解析与共用资源持有机制，保权威及独立生命周期。
@@ -99,7 +99,7 @@ Kiro 11-05 余项 spec 的 D 批次先核实际缺陷与独立写集。候选为
 
 | 编号／所属 | 评审事实与准确入口 | 建议、优先级与后续触发 |
 | --- | --- | --- |
-| CR-1014-T1／Animation 编辑器工具 | [SyncMarkerImporter.cpp](../../Source/GGYGO/SyncMarkerImporter.cpp) 的批量／单文件入口各自清空并写 Marker，未排序或刷新同步缓存；[AnimSyncMarkerTools.cpp](../../Source/GGYGO/Animation/AnimSyncMarkerTools.cpp) 会排序／刷新，但数组不等长时取 Min，解析器也会跳过部分无效条目。均属资产工具，不计入运行时业务职责问题。 | 下次使用或整理该工具前处理。建议两工具头／实现迁入既有 Source/GGYGOEditor/Public 与 Private，导出改用 GGYGOEDITOR_API；JSON 解析与唯一 Marker 写入实现分开，完整校验后写入、失败保持原数据。迁模块前核 Blueprint／Python 调用与 /Script/GGYGO 到 /Script/GGYGOEditor 的类路径兼容，按实际消费者保留入口或精确重定向。本轮不移动文件。 |
+| CR-1014-T1／Animation 编辑器工具 | [SyncMarkerImporter.cpp](../../Source/GGYGOEditor/Private/SyncMarkerImporter.cpp) 已迁到编辑器模块，保留反射函数与控制台入口，旧类路径配置精确 CoreRedirects；迁移验收见 [I22](../需求文档/refactor_and_squad_switch.md)。批量／单文件入口仍各自清空并写 Marker，未排序或刷新同步缓存；[AnimSyncMarkerTools.cpp](../../Source/GGYGO/Animation/AnimSyncMarkerTools.cpp) 会排序／刷新，但数组不等长时取 Min，解析器也会跳过部分无效条目。均属资产工具。 | 剩余候选为 AnimSyncMarkerTools 归位、JSON 完整校验及唯一 Marker 写入实现，失败保持原数据。I22 只完成已分配的 SyncMarkerImporter 模块迁移，不关闭这些数据处理候选；后续使用／整理工具时单独处理。 |
 | CR-1014-B1／Combat 动作 | [ComboTypes::FGGYGOComboWindowState](../../Source/GGYGO/AbilitySystem/Abilities/GGYGOComboTypes.h) 仍有 Store／Consume／ExpiresAt；[PlayerCombo::HandleInputPressed](../../Source/GGYGO/AbilitySystem/Abilities/GGYGOPlayerComboAbility.cpp) 已要求作者点后真实新请求，生产无旧缓存方法调用，InputBufferSeconds 无读取点；[旧纯测试](../../Source/GGYGO/AbilitySystem/Tests/GGYGOComboWindowTest.cpp) 仍验证预输入消费。 | 中低，延期；下次改 Combo 输入／窗口时收尾。清理无生产消费者的非反射缓存逻辑，使测试契约对应实际入口；反射查询、序列化字段及网络窗口字段先核消费者，保留历史／失败证据，不恢复旧预输入玩法。 |
 | CR-1014-B2／Combat 动作、BossAI | 玩家已使用 [MontageActionResources](../../Source/GGYGO/AbilitySystem/Abilities/GGYGOMontageActionResources.h)；[BossMelee](../../Source/GGYGO/AI/Boss/Abilities/GGYGOBossMeleeAbility.cpp) 仍单独持有 Task、CMC 句柄、完成事实、订阅与释放。存在相同机制的重复维护，尚未证明因此发生运行错误。 | 中低，延期；下次两边共同修改资源生命周期时比较并复用一致部分。Profile、超时及接续政策仍由所属 GA 决定，不强行合并能力或增加模式框架。 |
 | CR-1014-B3／Input 唯一作者 | [HeroComponent](../../Source/GGYGO/Character/Components/GGYGOHeroComponent.cpp) 同时承担 InitState／相机协调、输入绑定资源、移动装配与能力输入观察生命周期。当前拥有关系有明确来源，本轮未确认第二输入消费权威。 | 低，延期；随正常 Input 重构评估。可将绑定／会话资源整理为 Hero 私有普通 C++ 协作者；PlayerInput 继续拥有设备事实，ASC 继续唯一拥有请求与 retry 消费，不增加组件或调度器。 |

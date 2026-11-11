@@ -96,8 +96,8 @@ void UGameplayMessageSubsystem::BroadcastMessageInternal(FGameplayTag Channel, c
 				{
 					if (Listener.bHadValidType && !Listener.ListenerStructType.IsValid())
 					{
-						UE_LOG(LogGameplayMessageSubsystem, Warning, TEXT("Listener struct type has gone invalid on Channel %s. Removing listener from list"), *Channel.ToString());
-						UnregisterListenerInternal(Channel, Listener.HandleID);
+						UE_LOG(LogGameplayMessageSubsystem, Warning, TEXT("Listener struct type has gone invalid on Channel %s. Removing listener from list"), *Tag.ToString());
+						UnregisterListenerInternal(Tag, Listener.HandleID);
 						continue;
 					}
 

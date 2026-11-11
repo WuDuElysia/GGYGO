@@ -94,12 +94,20 @@
 - 未做：`BoundsScale` 11 的 GPU／VSM 开销没测；修后单机倒下没有单独重拍。
 - 正背对照里与原图 `AAADocs/Assets/Pyrios/Rendering/References/20261009_Pyrios_*.png` 的差异不属于阴影问题，是否另开需求由用户决定：胸口光球偏暗、蓝色手臂发光偏弱、背面头发偏灰紫偏亮、斗篷没有蓝色渐变且金色细线显示为橙红（斗篷只读暂挂）。
 
+## 消息路由与 SyncMarker 工具
+
+- 消息路由在遍历父 Tag 时，按当前 Tag 删除类型已失效的监听并输出该 Tag，保留每通道独立编号及原生弱引用机制。不会把父监听的编号拿到子通道删除，子通道和有效父监听可继续接收广播。
+- `SyncMarkerImporter.h/.cpp` 已迁入 `Source/GGYGOEditor/Public`／`Private`，导出为 `GGYGOEDITOR_API`。类名、两项反射函数、参数、默认值和 `SyncMarkerImport` 控制台命令保持；只修改并标脏动画，保存由调用方负责。未新增运行时到编辑器的依赖。
+- `Config/DefaultEngine.ini` 的单条 ClassRedirects 将 `/Script/GGYGO.SyncMarkerImporter` 重定向到 `/Script/GGYGOEditor.SyncMarkerImporter`。迁移前核对 Source／Config／脚本及 Content／项目 Plugins 内 4812 个资产包的 UTF-8／UTF-16 类名和函数引用，未找到消费者。Python 仍使用 `unreal.SyncMarkerImporter`；显式裸字符串 `LoadClass` 不应用 ClassRedirects，应使用新模块路径或先解析软类引用。
+- 已编译、已在 UE NullRHI 中测试。消息回归 `GGYGO.Messages.Router.ExpiredParentListener` 验证失效类型仅诊断一次、子监听连续收消息和父级 ExactMatch／PartialMatch 行为。`GGYGO.Editor.Animation.SyncMarkerImporter` 两项验证 Class import 所用的原生重定向、软引用、蓝图成员函数解析、单文件与控制台批量导入及标脏；真实 Editor Python 核实两个绑定入口。
+- Messages 与 Animation 原会话已分别评审受影响差分，未发现阻塞问题；本次迁移保持原函数签名和导入行为。
+- 证据为 [增量构建](../../Saved/Codex/I22_20261111/build.log)、[消息回归及首轮夹具失败](../../Saved/Codex/I22_20261111/editor.log)、[SyncMarker 修正夹具后的两项通过及 Python 读回](../../Saved/Codex/I22_20261111/Rerun/editor.log)。首轮误用了 `RF_Transient` 动画和绕过 CoreRedirects 的裸类加载／文本成员导入；修正夹具后只复验失败两项，未改断言所保护的标脏和函数可用行为。
+- 未验证 Cook／打包及历史蓝图包的重新加载（未发现实际引用包）。启动日志中的 13 条 `LogAutomationTest: Error: Condition failed` 发生在专项测试开始前，原样保留，来源未在本需求排查；三个专项叶自身均为 Success、无 error／warning。Marker 排序、缓存刷新、完整 JSON 校验与 `AnimSyncMarkerTools` 归位仍属于 [CR-1014-T1](../Coordination/Module_Audit_Repair_Ledger.md)，本次模块迁移不关闭这些候选。
+
 ## 未完成项
 
 交给 Codex，顺序和第一步见 [Codex 交接](../Coordination/Handover_Codex.md)。
 
-1. 消息路由失效监听清理：`GameplayMessageSubsystem.cpp` 第 100 行用广播的 Channel 去删父 Tag 列表里的失效监听，应改成当前遍历的 Tag，并加回归测试。
-2. SyncMarker 工具归位：`Source/GGYGO/SyncMarkerImporter.*` 迁到 GGYGOEditor，先查蓝图／资产引用，加 CoreRedirects 保持类路径兼容。
 3. CR-R7 剩余候选逐项核对，按[修复清单](../Coordination/Module_Audit_Repair_Ledger.md)出状态表；含新登记的 CR-1111-D1（显式开关诊断 `ProjectDiagnostics.Input.ActivationOrigin.NestedSameSpecRawTry` 失败）。小缺陷直接修，优化交用户。
 4. 死亡结束后的 Pawn 去留改由蓝图决定：`AGGYGOCharacterBase::OnDeathFinished` 现在固定下一帧 `UninitAndDestroy`。C++ 保留死亡结束广播、下一帧时序和权限检查，把去留交给共享角色蓝图；生产蓝图配成等价的下一帧销毁，未配置时明确报错。销毁必须晚于自动替补所在的那次广播。
 5. 各 spec 勾选状态回写（依赖最小联机完成），同时更新上面的状态表。
