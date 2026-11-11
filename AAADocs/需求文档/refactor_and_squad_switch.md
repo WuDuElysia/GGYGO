@@ -1,8 +1,8 @@
 # 代码整改（CR-R7 扩展）与换人续放：活动记录
 
-更新：2026-11-12。本页是这一批整改的唯一记录，保存用户决定、目标、未完成项和验收标准。需求状态和占用以[看板](../Coordination/Board.md)为准，剩余工作已交给 Codex，见 [Codex 交接](../Coordination/Handover_Codex.md)。续接时以本页和代码为准，不依赖旧聊天。
+更新：2026-11-11。本页是这一批整改的唯一记录，保存用户决定、目标、未完成项和验收标准。需求状态和占用以[看板](../Coordination/Board.md)为准，剩余工作已交给 Codex，见 [Codex 交接](../Coordination/Handover_Codex.md)。续接时以本页和代码为准，不依赖旧聊天。
 
-## 当前状态（2026-11-12）
+## 当前状态（2026-11-11）
 
 - 七步整改（冗余清理、输入请求、FX 发布、激活生命周期、Avatar 绑定、换人续放、HealthSet）的源码已完成并测过，结果见下文各节。
 - 死亡自动替补迁到共享蓝图（蓝图分层 B08）：已完成。C++ 只发布 `OnActiveMemberDeathFinished(Slot, Avatar)`，共享 `BP_PlayerState` 在同一次广播里调用 `RequestNextAfterActiveMemberDeath`；联机死亡自动换人、后台死亡不切换、无人存活不假成功三类断言通过。见[蓝图分层收尾](blueprint_layering_followups.md)。

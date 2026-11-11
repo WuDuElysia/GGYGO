@@ -2,7 +2,7 @@
 
 统筹维护需求列表；所有人自己维护占用表。规则见 [TaskWorkflow](../Rules/TaskWorkflow.md)。
 
-**2026-11-12 交接**：Kiro 这一批到此结束，剩余工作交给 Codex，先读 [Codex 交接](Handover_Codex.md)。证据文件在 `.agents/` 和 `Saved/` 下，只在本机，不入库。
+**2026-11-11 交接**：Kiro 这一批到此结束，剩余工作交给 Codex，先读 [Codex 交接](Handover_Codex.md)。证据文件在 `.agents/` 和 `Saved/` 下，只在本机，不入库。
 
 ## 需求
 
