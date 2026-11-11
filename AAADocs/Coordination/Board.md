@@ -21,7 +21,7 @@
 | 角色受光与阴影（倒下帧条纹、换人拖影、正背对照） | Kiro | 已完成：条纹是 VSM 缓存残影，`BP_PC_Pyrios` Mesh `BoundsScale` 设为 11、对象阴影宽度除回倍率后修掉，联机客户端倒下帧无条纹；拖影是换人相机跳变的运动模糊。`BP_PC_Pyrios` 依赖地图里唯一带 `GGYGO.KeyLight` Tag 的平行光，目前只有 `L_Movement_Test` 有（[证据](../../.agents/tasks/requirements-closeout/evidence/I10.md)） | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「角色受光与阴影」 |
 | Kevin Boss 完整组装 | Codex（待统筹指定） | 未开始制作：源码和脚本已写好未提交；第一个验收点是特效剩余 35 包 | [kevin_boss_assembly](../需求文档/kevin_boss_assembly.md) |
 | 最小联机：纠正重放与特效晚加入 | Codex（待统筹指定） | 未通过：双端因内存不足从未跑通；相关源码未提交 | [minimal_multiplayer](../需求文档/minimal_multiplayer.md) |
-| 消息路由失效监听清理与 SyncMarker 工具归位 | Codex（待统筹指定） | 未开始 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「未完成项」 |
+| 消息路由失效监听清理与 SyncMarker 工具归位 | System 原会话（Codex） | 已完成并分仓 push：编译、3 项相关自动化及 Python 绑定通过，Messages／Animation 差分评审无阻塞；Cook 和历史蓝图包重载未验。[实现提交](https://github.com/WuDuElysia/GGYGO/commit/6d4fb73) | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「消息路由与 SyncMarker 工具」 |
 | CR-R7 剩余候选盘点 | Codex（待统筹指定） | 未开始 | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)、[修复清单](Module_Audit_Repair_Ledger.md) |
 | 死亡结束后的 Pawn 处理改由蓝图决定 | Codex（待统筹指定） | 未开始（用户 11-10 选 B） | [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「未完成项」 |
 | 动画层去掉 ZZZ 兼容层 | Codex（待统筹指定） | 未开始，等走跑起停跳变的用户回答 | [zzz_anim_compat_layer_removal](../需求文档/zzz_anim_compat_layer_removal.md) |
