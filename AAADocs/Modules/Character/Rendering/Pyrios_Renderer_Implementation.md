@@ -44,6 +44,8 @@ SceneLightStrength = min(OutputScale * Factor, MaxStrength)
 
 `bTraceKeyLightOcclusion` 的 Visibility 射线只给角色级遮挡。它不提供原游戏逐对象/级联阴影贴图，也不是逐像素投影阴影。
 
+地面上的角色阴影来自 UE 场景主灯的 VSM，不经角色 Capture。Pyrios Mesh 的包围盒由物理资产算出，只覆盖躯干；武器、头发、斗篷和小腿在动画中远超该范围，VSM 按图元包围盒失效缓存页，超出部分的旧姿态阴影会残留成地面条纹（倒下、转身最明显）。`BP_PC_Pyrios` 的 Mesh `BoundsScale` 因此为 11（`AAADocs/Scripts/set_pyrios_mesh_bounds_scale.py`，依据见[需求记录](../../../需求文档/refactor_and_squad_switch.md)「角色受光与阴影」）；改回 1 会重现条纹。`FGGYGOCharacterShadowCapture` 的对象阴影宽度按 `2 × (SphereRadius / BoundsScale + ObjectMarginCm)` 取景，扩张不稀释对象阴影图分辨率。
+
 ### 材质光照和后处理
 
 表面 Master 为 Unlit，原 Toon 公式在 Emissive 路径内计算。UE DirectionalLight 作为方向、颜色和受控强度的输入；UE 默认 Lit BRDF、Lumen GI、Skylight 与点光没有再次叠加到该表面。原游戏的附加灯、阴影资源、曝光、LUT 和 Pass 调度不能从材质 JSON 推出，当前未实现完整多灯或逐像素 Toon 阴影。

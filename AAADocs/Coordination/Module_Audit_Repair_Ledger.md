@@ -2,9 +2,9 @@
 
 ## CR-20261014：业务代码冗余、模块职责与防御收口
 
-状态：2026-10-19起停止Kiro调用，由Root按现行CodeConventions审查，原模块作者实现。当前42件源码单CPP include修复后已通过R7标准完整构建及保护，Root实核软件；按用户当前要求先作阶段Git检查点，原18项及生产／视觉／设备／联机未验边界保持。前一37条R5已Build／保护通过，18原专项严格14项通过；四未过项的源码修复已静态核收，运行复验待做。生产、视觉、设备及联机仍未验，CR未全部完成；唯一窗口与机器证据见[当前排程](Module_Repair_Parallel_Schedule.md)。
+状态：2026-10-28。已停止Kiro调用，由Root按现行CodeConventions审核、原模块作者实现。当前42件源码已通过R8标准完整Target和原18项严格验证（18成功、0错误／0警告），R14进一步通过生产普攻两轮数值、自然结束、首投影及资源／完整保护归还。真实设备、其余视觉／音频、受影响联机及下表未应用整改仍待，CR未全部完成；当前窗口与准确机器证据只见[活动排程](Module_Repair_Parallel_Schedule.md)。
 
-当前已应用产物：[r1补丁](../../Saved/Codex/CR_20261015_KiroDraft_R1/CR_20261015_KiroDraft_R1_r1.patch)及[应用身份](../../Saved/Codex/CR_20261015_KiroDraft_R1/input_manifest_r1.json)保持冻结，r1准确八改／两删及R5十Source已核；三测试日志登记修复后的构建／必要叶结果见首段，准确身份与原失败见[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-17-r6日志登记修复与三叶通过)。生产PIE／联机仍未验，待实施草稿按下方分项读取。
+已应用产物：[r1补丁](../../Saved/Codex/CR_20261015_KiroDraft_R1/CR_20261015_KiroDraft_R1_r1.patch)及[应用身份](../../Saved/Codex/CR_20261015_KiroDraft_R1/input_manifest_r1.json)保持冻结；后继已应用源码以R8／当前软件集合为准。旧R5／R6／R7准备与失败已迁[历史](Module_Repair_Parallel_Schedule_History_20261013.md#2026-10-21-cr入口过期阶段状态迁出)，不再用旧14／18结果覆盖R8事实；下表保留各职责未完成项。
 
 评审依据：Kiro评审会话`01a138f5-b16c-7781-b8f2-003f2878f94a`，最终回执turn`01a13917-7fcc-7e43-9637-ac11ab2b34bf`的“来自Kiro”；仅按需读该最终回执，不搬过程全文。X1～X7及A／M／P／C／AN／F／B／T项均为待核结论，行数／词频／ASCII资产名字表0命中及启发式无调用方不证明可安全删除；未细读区域不作为已确认根因。
 
@@ -38,6 +38,59 @@
 
 交付标准：每个采纳项有当前准确代码／资产依据、原失效与最小复现、保留／删除保护的理由；按独立变化原因和寿命收敛，实际构建／受影响运行／必要联机分别验证。因需求歧义等待只阻相关项。完整已验需求按当次交付归档；未实现／未知／失败保留，不把候选记录或源码瘦身当完成。
 
+### CR-20261014-R7
+
+2026-10-28 用户追加全模块 C++／蓝图职责和冗余防御复查，原21组长回执已收齐。2026-11-02 用户将顺序改为当前最小点完成后先完成Kiro任务；Kiro已确认该指令取代“旧批次完整验收提交后”的前提。新7步方案与换人续放只在[代码整改活动记录](../需求文档/refactor_and_squad_switch.md)维护，不在本节复制正文。Root仍独占本节及共享排程，实际授权以[当前窗口](Module_Repair_Parallel_Schedule.md)为准：本轮仅移交第1步收窄源码／文档写集给原Kiro会话，其余作者冻结；旧业务验收暂停但未取消，候选问题不自动取得写权。
+
+复查范围：
+
+- 检查当前生产调用链中的机制与业务归属。C++保留通用机制、权限、生命周期及必要接口；角色差异、招式组合、表现流程、Montage／FX／Audio编排、动画窗口、运动侧倾与姿态策略、曲线及参数应由BP／ABP／Montage／配置资产组织。不能只把参数暴露给蓝图，实际角色流程仍硬编码在C++；也不把GAS／CMC／网络权威、底层渲染／转换算法机械搬到蓝图。区分运行时业务与编辑器资产制作工具。
+- 检查职责混杂、重复接口与转发层、重复状态／缓存／调度、历史迁移残留、重复全量校验，以及无实际失效依据的防御、重试和兜底。沿实际调用链判断，保留真实输入、外调、异步、网络及资源清理边界的必要保护，不按判空数量或行数裁剪。
+- 各模块核当前源码及真实BP／资产消费者；无读取条件的资产行为明确未核实，不用C++检索无引用断言无人使用。原有已确认行为保持，跨模块由实际状态拥有者牵头，按最小接口提出迁移／收敛方案。
+
+交回要求：每模块一次给出已查范围及主要结论；按共性归并，优先列最多5项高价值问题。每项含绝对路径／行或函数、实际调用依据、影响、推荐归属及最小迁移／合并／退役方案；需迁入BP者明确应由哪个现有BP／ABP／Montage／配置承载、C++留下何种通用接口。确认缺陷与候选优化、必要保留及未核实边界分开。发现阻断当前主线的真实缺陷仅单独标明，由Root协调，不自行扩改。无问题亦列覆盖范围和保留依据。
+
+复查状态：21／21原模块已交完整只读回执，Root已按实际拥有者归并入下表；Audio首轮政策确认未算审查，补交结论后才核收。所有结论为静态／既有资产读回证据，整改、编译及运行未实施。原会话保留完整路径／行和保留依据，未覆盖或变更模型设置。
+
+当前权限：只读本模块及必要调用者／接口、已有资产读回与导出。不得改源码／BP／资产／配置／共享文档，不新增独立报告、Canvas、任务JSON、全库快照／扫描，不启动UE、编译、测试或Raw导出，不调用Kiro或创建临时会话／子代理。后续整改按完整可集成批次分配唯一写入者，集中实现与配置、编译和受影响验证；相同问题与本清单既有条目合并，不另复制任务正文。
+
+| 原模块 | 本轮复查状态 |
+| --- | --- |
+| Camera | 已交只读回执：GA Offset失败替换先撤旧、稳定模式完整校验重复、仅写镜像／旧说明；通用层硬约束Walk增益弱于Run属角色策略。机位/FOV等已有Camera BP保存，需保投影准入和所有权。 |
+| AbilitySystem 通用基础 | 已交只读回执：角色流程迁BP前需窄选择／owned请求接口；命中扣Cost与当前Owned命中链不衔接（资产启用未核实）；同栈重复校验／无消费者工厂可收敛。与动作、BossAI及既有R3/R5合并，通用权威和清理保留。 |
+| Input | 已交只读回执：通用装配强制MouseLook策略、同栈重复路由校验、无消费原生查询和Hero职责候选；与既有B3/R4合并，保设备事实、唯一ASC消费及释放屏障。手柄独立配置非当前故障，资产消费者另核。 |
+| Character 装配与生命周期 | 已交只读回执：DeathFinished固定回收／隐藏策略与外部决策契约冲突（需后续玩法确认）、旧ASC-only BP手动装配接口残留、virtual Health handler双层校验条件收敛；保Native装配／权限／精确订阅与资源关闭责任，原Pyrios渲染类仅兼容壳。 |
+| Animation 运行时 | 已交只读回执：侧倾camera事实接口与曲线选择／求值策略耦合，迁现有ABP UpdateMovingLean；旧ZZZ Snap/Context/StateMemory逐帧派生链与C++ Stop节点索引收口，真实ABP消费先迁；Marker重复归既有T1。保骨链/Slot/同源时间及远端凭据机制。 |
+| Animation 资产生产 | 已交只读回执：Marker多入口写入／部分解析合并既有T1；点Notify与State通用准入、Lean历史迁移与当前制作耦合可收敛。已核编排在GA/Montage/ABP资产，State迁时未生产保存边界保持，不把工具角色路径当运行时硬编码。 |
+| Movement | 已交只读回执：升跑保持／起停与TurnBack策略同速度来源开关耦合，可由MovementSet显式承载、角色BP选择；CMC保确定性预测执行。重复曲线／源绑定校验、Dodge占位及兼容入口核退役；同Physics／Animation归并，不机械搬状态机或姿态权威。 |
+| Teams | 已交只读回执：无出战位时Next/Previous漏查候选、调试编队拒绝后仍保存；复制到齐通知缺口待联机核实；无消费原生入口及重复保护可收敛。现有角色配置已由PawnData／AbilitySet／Experience承载。 |
+| GameFeature | 已交只读回执：旧Loaded入口／无消费者输出、重复闭包与GameMode准入校验、空配置提前注册资源；插件选择已由Experience资产承载，无当前主线阻断。原会话保留具体路径／行及必要生命周期保护依据，待Root合并分项。 |
+| BossAI | 已交只读回执：同次选招全表校验重复；Boss在BP Spec扩展后覆盖伤害输入（实际BP覆盖未核实）。由AbilitySystem牵头收口Builder扩展顺序，角色参数保留在既有GA BP，机制不机械迁移。 |
+| Combatants | 已交只读回执：Host同步本地发布经自订阅绕行、调用方遍历步骤历史取提交结果、Health同H初始化重复校验；与AbilitySystem／Character和既有R3合并，保不同寿命身份及真实外调保护。 |
+| System | 已交只读回执：旧单包／Cold SUPPORT_PIN过期（当前多包Author不受影响）；持锁阶段重复重建／哈希软件证据、无消费者非反射查询、配置注释残留。运行时核心未见角色流程硬编码，后续先核Cold实际入口，不以本审查扩当前前置。 |
+| Combat 命中查询 | 已交只读回执：同帧控制点／资源全链重复读取、同寿命派生状态副本可收敛；每招Shape／窗口已由GA配置及Montage承载，无已证当前主线阻断，反射旧接口先核BP消费者。 |
+| Combat 玩家动作/GA 集成 | 已交只读回执：旧预输入缓存／配置／测试契约残留、显式GE同栈重复校验、玩家/Boss Montage资源持有机制重复；合并既有B1/B2/B5。GA段序、倍率、窗口及Cue已有资产配置，保双完成事实、权威与原资源清理。 |
+| Physics | 已交只读回执：CMC固定组织步态／TurnBack选择，camera侧倾策略混入执行层；单源重复绑定校验、旧Locomotion Profile与未消费Move phase可收敛。由Animation／Movement牵头BP/ABP策略迁移，保预测决定、原生区间、网络配对及Action Profile。 |
+| Messages | 已交只读回执：父通道失效监听注销用错通道（生产触发未核实）、属性委托契约注释与GAS重入链冲突、无消费者返回／残留状态；真实不同寿命保护保留，待Root与实际拥有者合并。 |
+| 地编与测试场景工具 | 已交只读回执：旧制作入口PIE禁入不全、场景生成器未接主灯Tag、异常清理后凭据丢失及只读API前置过宽；无已证当前主线阻断，整改延期。 |
+| Character 渲染子模块 | 已交只读回执：通用材质／Mesh制作诊断挂在Decal类型属职责候选，固定Profile策略每ViewFamily重建为未测优化候选；渲染机制保C++/shader，角色差异由BP/MI/组件/Profile承载，World共用Profile不可按角色复制绕权威。 |
+| 资源解包（独立工具工作线） | 已交只读回执：CLI失败退出码与跳过混同、动画来源／Override／筛选重复且不一致、输入旁分片半成品可能复用、非法显式配置静默默认；Wwise执行器重复为优化候选。无BP迁移职责，存量产物影响未核实。 |
+| Audio 音效 | 已补交完整只读回执：Cue预载／角色预热职责重复与说明冲突、公共Flesh Tag由空测试Cue承接（Boss实际覆盖未核）、父Burst与自定义HitImpact双播放链候选。Pyrios五独立Tag当前不受旧路由影响，选声/组合/时点继续由Cue BP/Montage配置，原版及设备听感未验。 |
+| FX 特效表现 | 已交只读回执：播放合同公共校验口径不一致、同次配置重复解析FX窗口、平移／旋转时重复写相同bounds；现行角色编排已有ComboStep.FX／Montage／Cue承载，未证角色名硬编码。保GAS/发布仲裁/远端Age恢复与尾粒子生命周期。 |
+
+当前交付后的整批收口方向：
+
+Kiro 11-05 余项 spec 的 D 批次先核实际缺陷与独立写集。候选为 ASC 组准入测试日志（A1）、相邻换人后置检查（A3）、Sync Marker 工具归位（E1）、ZZZ 适配映射（E2）、GameplayMessageRouter 清除失效监听（E3）。E3 已静态确认：监听 HandleID 按 Tag 列表独立递增。遍历父 Tag 时用广播子 Channel 删除，会保留失效父监听，并在子列表有相同 ID 时误删有效监听。修复限定失效分支按当前 Tag 清理，回归应证两列表相同 ID、父失效项被移除、子监听连续两次可收到。该文件属于 Build_R48 的 937 项原输入。暂留原写集；当前优先 V4 缺陷，等绑定归还再由原 Messages 作者按实证差分合并构建。A2/B1–B3 等 AbilitySystem／FX 写集交付；C1 等自然收尾与预测纠正验收；C2 等 Input／Character 写集交付；D1 需受控 Editor 资产窗；F1 死亡回收待玩法决定。独立项也先核真实保护交集，已验证阶段不为整理候选重开。
+
+- 侧倾表现由Animation牵头，曲线选择／求值及角色启用策略迁现有ABP；移动选择由Movement牵头，在MovementSet／角色BP明确策略，Physics保认证事实、确定性预测及唯一执行。不得新增BP Tick、表现时钟，或在历史重放中重选当前输入。
+- 角色GA/BP编排缺口由AbilitySystem牵头提供窄接口，Combat／BossAI保持现有段序、窗口与参数资产；同步收敛Builder扩展顺序、同次窗口解析与共用资源持有机制，保权威及独立生命周期。
+- Camera、Input、Character分别收口角色策略硬约束和契约；DeathFinished是否必然回收Pawn等真实玩法歧义，待实施时给具体场景请用户决定。本轮不臆定新死亡资产或扩展手柄需求。
+- 重复配置／几何／路由校验、镜像状态和旧入口按真实拥有者与既有R2/R3/R4/B1～B6归并；静态确认缺陷与未启用／未实测风险分开，不能为精简删除真实重入、网络、清理和反射资产保护。
+- Editor Marker、制作诊断、宿主与CLI职责分别由原工具作者集中整理；旧工具或非当前生产消费者问题不作为主线新前置。角色差异不应藏在C++，通用渲染、转换、GAS／CMC机制也不机械搬BP。
+
+审查过程与完整回执仅留原会话；本节保留当前问题、归属与未核边界。当前完整需求交付后再统一分配源码／资产写入批次、实现配置、集中编译与受影响验证；整改真正验收且保护归还后再归档，不以本次复查完成代整改完成。
+
+
 ### 原静态延期候选（关联R2，保留原证据）
 
 此前用户决定：Sync Marker归入编辑器工具整理，其余影响不大时先记录。下表与新Kiro评审合并在本需求唯一入口，未重复另建任务；当前未实施、未编译、未运行UE，也未核验完整BP／资产消费者。
@@ -52,9 +105,10 @@
 | CR-1014-B3／Input 唯一作者 | [HeroComponent](../../Source/GGYGO/Character/Components/GGYGOHeroComponent.cpp) 同时承担 InitState／相机协调、输入绑定资源、移动装配与能力输入观察生命周期。当前拥有关系有明确来源，本轮未确认第二输入消费权威。 | 低，延期；随正常 Input 重构评估。可将绑定／会话资源整理为 Hero 私有普通 C++ 协作者；PlayerInput 继续拥有设备事实，ASC 继续唯一拥有请求与 retry 消费，不增加组件或调度器。 |
 | CR-1014-B4／Animation | [ZZZLocomotionEvents](../../Source/GGYGO/Animation/zzzAnim/Locomotion/ZZZLocomotionEvents.cpp) 仅作两个字段映射，却维护 SetContext／Reset；[ZZZAnimContext](../../Source/GGYGO/Animation/zzzAnim/Data/ZZZAnimContext.h) 的 IsValid 要求 Tuning，实际生产调用未设置它且映射不消费它。IsValid 本轮未发现生产调用，不列为已触发故障。 | 低，延期；下次整理旧 ZZZ 兼容适配时改为显式引用参数的纯映射，或并入现有快照适配器。保留 AnimBP 反射字段及真实轴映射。 |
 | CR-1014-B5／AbilitySystem、Combat 动作、BossAI | [PlayerCombo::ValidateDamageEffectDependency](../../Source/GGYGO/AbilitySystem/Abilities/GGYGOPlayerComboAbility.cpp) 检查显式 GE 类及 Abstract／Deprecated／NewerVersionExists；[BossMelee::ResolveMeleeConfiguration](../../Source/GGYGO/AI/Boss/Abilities/GGYGOBossMeleeAbility.cpp) 主要检查解析结果非空，规则存在差异。未确认现有坏资产或实际触发。 | 中低，延期；下次修改伤害 GE 配置／依赖解析时统一纯解析校验。各 GA 显式决定必需 GE 或允许无 GE 的正常模式，不合并两种玩法政策、不新增隐式共享兜底。 |
-| CR-1014-B6／Combat 动作 | [PlayerCombo::InitializeAbilityActivation／CleanupAbilityResourcesForTermination](../../Source/GGYGO/AbilitySystem/Abilities/GGYGOPlayerComboAbility.cpp) 的资源残留条件先检查 StepMotionResources.IsValid，又检查只从该对象派生的 Task／FX／注册／watchdog；这些条件不能额外发现残留。 | 低，延期；随同文件正常修改顺手收敛表达。保留独立 InputTask／Trace／Mesh 资源检查及真实测试观察接口。 |
+| CR-1014-B6／Combat 动作 | [PlayerCombo::InitializeAbilityActivation／CleanupAbilityResourcesForTermination](../../Source/GGYGO/AbilitySystem/Abilities/GGYGOPlayerComboAbility.cpp) 四getter均纯派生于StepMotionResources，原OR重复不能发现额外残留。 | 沿原Initial清理修改等价收敛；当前cpp2F3223A9含接收点纯日志，R8真实编译／链接通过。独立InputTask／Trace／Mesh／注册及route检查、getter真实消费者保持；运行／联机未验，不签CR完成。 |
+| CR-1111-D1／AbilitySystem 输入重试 | 2026-11-11 I08 跑显式开关诊断 `ProjectDiagnostics.Input.ActivationOrigin.NestedSameSpecRawTry`（需 `-GGYGOInputActivationOriginDiagnostic`，[诊断源](../../Source/GGYGO/AbilitySystem/Tests/GGYGOInputActivationOriginDiagnostic.cpp) `RunNestedSameSpecDiagnostic`）Fail，2 条 Error：`Inner raw failure must not borrow outer input retry source` 期望 0 实际 1；`Legitimate outer retry keeps one notice` 期望 1 实际 0。即同 Spec 嵌套 raw Try 失败时，内层借用了外层输入请求的重试来源，外层合法重试通知丢失。同批另两叶 `QueuedFailureReleasesBlockerBeforeNotice`、`RetryIdentity.SameTimeReentrantPhysicalRequest` 通过。历史记录没有它通过的证据；生产 PIE 只有攻击能力，未见触发。日志 `Saved/Kiro/requirements-closeout/I08/Diag_R1/Editor/editor.log`。 | 未修，单列待 AbilitySystem 处理（I23 盘点时一并核）。先确认是 ASC 重试来源归属缺陷还是诊断期望与现行契约不符，再修根因；不为通过而放宽断言。不在 I08 范围。 |
 
-必要保留：外调／原生返栈后的原身份核验、先摘资源后释放、网络权限、幂等清理、合法异步等待、自然混出最后位移区间及远端 Held 节点消费证明。ASC／Task／CMC 身份事实寿命不同，不因本次精简候选合并。以上候选均未授予新实现窗口，后续只沿[当前排程](Module_Repair_Parallel_Schedule.md)及原模块作者安排；不作为当前姿态／移动／Slot／独立打断验收的新增前置。
+必要保留：外调／原生返栈后的原身份核验、先摘资源后释放、网络权限、幂等清理、合法异步等待、自然混出最后位移区间及远端 Held 节点消费证明。ASC／Task／CMC 身份事实寿命不同，不因本次精简候选合并。仅B6随本轮原Combat两源窗口顺手收敛，其余候选仍未授新实现窗口；后续只沿[当前排程](Module_Repair_Parallel_Schedule.md)及原模块作者安排，不作为当前姿态／移动／Slot／独立打断验收的新增前置。
 
 ## 历史修复编号与未验边界
 

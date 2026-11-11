@@ -25,7 +25,7 @@
     - _Requirements: 1.3_
 
 - [x] 2. 按结果执行
-  - [ ] 2.1 等价时：HealthSet 改用 Lyra_Approach，删除分类帧（不适用：存在消费方可见差异）
+  - 2.1 不执行。简化后的回卷、重入和客户端上限投影缺等价证明，采用下方 2.2 保留分类帧。
     - _Requirements: 2.1_
   - [x] 2.2 不等价时：保留分类帧，补写头文件说明
     - 收尾定案（技术决定）：保留分类帧，不做"服务器 PostAttributeChange 广播、客户端只在 OnRep 广播并删去 RepNotifyFrame／NetReceiveFrame"的简化。该简化没有回卷、重入和客户端上限投影的等价证明（HealthMessage 的 RepNotify*、ClientMaxNetReceive 正是覆盖这些情形），现行实现在复现与联机中都给出正确结果，没有失效依据驱动改动

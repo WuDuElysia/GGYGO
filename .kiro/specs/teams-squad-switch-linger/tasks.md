@@ -78,5 +78,6 @@
   - 死亡能力 `UGGYGODeathAbility` 与 Pyrios 资产（AM_Pyrios_Death、GA_Pyrios_Death，替换 DA_AbilitySet_Pyrios 中的 GA_Death）
   - 键盘改键界面 `SGGYGOKeyBindingMenu`（控制台 `GGYGOOpenKeySettings`），IMC_Default 主键位可改键
   - 测试：`UncancelableContinuesOnField`（替换 `UncancelableRejectsBeforeEffects`）、`PlayerCooldownAndDeathAutoSwitch`；联机测试补冷却、改键、客户端移动与普攻、主机按键、死亡自动换人。Test_R34 全部通过
-  - 未验：真实 RHI 画面；客户端再次附身先前控制过的队员后不能移动（Movement owner-sync，已交原模块）
+  - R36b、R38 证客户端再次附身旧队员后双端恢复移动（分别各 641.3、674.4 cm）；R38 的联机换人叶通过。两窗全局退出均为 exit 3，原保护归还；引擎退出断言保留。
+  - [x] V5 换人稳定后阴影：同一客户端换人完成后取稳定帧和同帧 ShadowCapture 投影参数，与单机基准人工比对。联机测试新增 07 稳定帧（相机 10 帧不动且换人后 ≥1.5 s）与 08 关运动模糊帧并记录同帧参数（I10，`Saved/Kiro/requirements-closeout/I10/MP_Fix_R1`、`MP_Fix_R2_NoMB`）：ObjectWidth 144.29／144.46 cm、ShadowForward 与 Origin0 和单机 Death_R4 基准（144.62 cm）一致；R38 的条纹是 VSM 缓存残影（Mesh 包围盒不含武器／斗篷，已以 BoundsScale 11 修），06 拖影是换人视角跳变的运动模糊（全程关运动模糊时 06 清晰）。真实设备及 Montage／FX 画面另按对应 spec 取证。
   - _Requirements: 用户决定_

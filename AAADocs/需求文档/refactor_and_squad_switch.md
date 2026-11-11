@@ -1,8 +1,21 @@
 # 代码整改（CR-R7 扩展）与换人续放：活动记录
 
-更新：2026-11-04。本页是这一批的唯一活动记录，保存用户决定、目标、未完成项和验收标准，执行者为 Kiro（Claude Opus 5.5）。共享窗口、写入者和构建排期仍以[当前排程](../Coordination/Module_Repair_Parallel_Schedule.md)为准，本页不分配窗口；请统筹在[修复清单 CR-R7](../Coordination/Module_Audit_Repair_Ledger.md#cr-20261014-r7)原条目中索引本页，不另复制正文。续接时以本页为准，不依赖旧聊天。
+更新：2026-11-12。本页是这一批整改的唯一记录，保存用户决定、目标、未完成项和验收标准。需求状态和占用以[看板](../Coordination/Board.md)为准，剩余工作已交给 Codex，见 [Codex 交接](../Coordination/Handover_Codex.md)。续接时以本页和代码为准，不依赖旧聊天。
 
-## 现状
+## 当前状态（2026-11-12）
+
+- 七步整改（冗余清理、输入请求、FX 发布、激活生命周期、Avatar 绑定、换人续放、HealthSet）的源码已完成并测过，结果见下文各节。
+- 死亡自动替补迁到共享蓝图（蓝图分层 B08）：已完成。C++ 只发布 `OnActiveMemberDeathFinished(Slot, Avatar)`，共享 `BP_PlayerState` 在同一次广播里调用 `RequestNextAfterActiveMemberDeath`；联机死亡自动换人、后台死亡不切换、无人存活不假成功三类断言通过。见[蓝图分层收尾](blueprint_layering_followups.md)。
+- 角色受光与阴影（下文问题 7 的渲染部分）：已完成，见「角色受光与阴影」一节。
+- 未完成，交给 Codex：
+  - 消息路由失效监听清理：`GameplayMessageSubsystem.cpp` 第 100 行用广播的 Channel 去删父 Tag 列表里的失效监听，应改成当前遍历的 Tag，并加回归测试。
+  - SyncMarker 工具归位：`Source/GGYGO/SyncMarkerImporter.*` 迁到 GGYGOEditor，加 CoreRedirects 保持类路径兼容。
+  - CR-R7 剩余候选逐项核对（含新登记的 CR-1111-D1：`ProjectDiagnostics.Input.ActivationOrigin.NestedSameSpecRawTry` 显式开关诊断失败）。
+  - 死亡结束后的 Pawn 处理改由蓝图决定（用户 11-10 选 B）：`AGGYGOCharacterBase::OnDeathFinished` 现在固定下一帧 `UninitAndDestroy`。C++ 保留死亡结束广播、下一帧执行的时序约束和权限检查，把 Pawn 去留交给共享角色蓝图；生产蓝图配置成与现在等价的下一帧销毁，未配置时明确报错。销毁必须晚于自动替补所在的那次死亡结束广播。
+  - 各 spec 勾选状态回写（依赖最小联机完成）。
+  - 下文「收尾续二」统筹待修问题清单里仍未关闭的项。
+
+## 现状（2026-11-04 记录，历史）
 
 - 第 1 步 abilitysystem-redundancy-cleanup、第 2 步 abilitysystem-input-request、首击 B：源码完成，批次 1 已集中编译并跑 NullRHI 测试（结果见下）。
 - 真实 RHI 已跑（结果与统筹待修问题清单见「收尾续二」）：Kevin 冒烟、NativeBirth 通过；PlayerCombo 生产冒烟 7 例因 FX 材质 shader map 未就绪失败；联机换人断言无错但结束 PIE 时崩溃。人工 PIE、FX 联机未验。首击 B 的端到端效果需要这些冒烟或人工 PIE 确认。第 1 步任务 6（Legacy 消费者）已在收尾完成。
@@ -185,7 +198,7 @@
 4. FX／Rendering：冷会话里 DualSignedField 材质 `MI_Eff_Others_LKJ_GUID52624181…` 当前平台 shader map 未完整，`GGYGOSignedFieldMeshPass` 判 Unavailable，FX Task 明确失败，攻击 GA 随之结束；同一会话 17 秒内每次攻击都失败，Niagara 也一直未 Ready。需 FX／Rendering 决定按“等待真实异步就绪”处理还是预热着色器；用户首次进游戏的第一刀同样会失败。测试会话的公共 DDC 写入被拒（`LogDerivedDataCache: Failed to write`），每次会话都是冷着色器状态。
 5. Rendering：`FGGYGOCharacterShadowCapture` 析构后经 RT→GT 异步任务才释放 SceneCapture／RT 强引用，EndPlayMap 的 GC 先于该任务，`SceneCaptureComponent2D` 留住 PIE 世界，触发 PlayLevel.cpp:553 断言（自动化下致命）。RT 的 Outer 是拥有组件，同样会留住世界。
 6. 引擎：R35c 退出时 `FVirtualTextureBuiltData::GetTileOffset` 越界断言（Renderer 模块关闭阶段），测试已结束，仅记录。
-7. 画面：倒下过程镜头未取到倒下的队员（05），角色阴影呈块状／放射条纹（05、06），需 Camera 与 Rendering 人工看图判断。
+7. 画面：倒下过程镜头未取到倒下的队员（05），角色阴影呈块状／放射条纹（05、06），需 Camera 与 Rendering 人工看图判断。（11-11：条纹与拖影已查清，条纹已修，见「角色受光与阴影」。）
 8. Pyrios 资产脚本：`wire_pyrios_skill_inputs.py` 的 IMC_Default 哈希基线因本批给 IMC_Default 加了可改键名而失效，该脚本会拒绝运行，需原作者更新基线。
 9. 业务缺口：公共 GA_Death 仍是空图（Pyrios 用 GA_Pyrios_Death）；全员倒下后无失败／复活流程；进退场 GA／Montage 缺省跳过。
 10. 未验：预测连段纠正重放、FX 晚加入、改键界面画面；提交 4fc37dc／57ebdd1、54fa94d／38be612 未单独编译过（只验证过合并后的状态）。
@@ -194,6 +207,20 @@
 - 联机未覆盖：预测连段的纠正重放、复活（项目尚无复活流程）、FX 晚加入、再次附身后的客户端移动（见上问题 1）。
 - 改键界面只在代码与改键管线上验证（联机测试经用户设置改键生效），界面本身未看画面。
 - 业务缺口：进退场 GA 与 Montage（缺省跳过）；需要留场的技能把 AvatarExitPolicy 改为 ContinueInBackground（用户以后自行配置）；全员倒下后的失败／复活流程。
+
+## 角色受光与阴影（已完成，2026-11-11）
+
+结论：倒下和转身时地面的放射条纹是 VSM 缓存残影，已修；换人瞬间的拖影是换人时相机跳变造成的运动模糊，属正常表现；换人稳定后的阴影参数和单机一致。证据 `.agents/tasks/requirements-closeout/evidence/I10.md`，运行目录 `Saved/Kiro/requirements-closeout/I10/`。
+
+- 原因：Pyrios Mesh 的包围盒由物理资产算出，只覆盖躯干；武器、斗篷、小腿骨在动画中远超出去。VSM 按图元包围盒决定哪些缓存页要重画，包围盒外的投影不重画，旧姿态的阴影留在地面形成条纹。
+- 改动和接口：
+  - `BP_PC_Pyrios` 的 Mesh `BoundsScale` 从 1 改为 11（写入脚本 `AAADocs/Scripts/set_pyrios_mesh_bounds_scale.py`，只保存该蓝图）。逐帧跟踪整段倒下 Montage，所需倍率最大 9.458，11 约留 16% 余量。物理资产和骨骼网格是本地导入资产、不入库，所以不改它们。
+  - `FGGYGOCharacterShadowCapture`：对象阴影宽度 `ObjectWidth = 2 × (SphereRadius / BoundsScale + ObjectMarginCm)`，扩大包围盒不会稀释对象阴影图分辨率；`BoundsScale <= 0` 时宽度为 0，被原有校验拒绝。
+  - 联机测试 `GGYGO.Teams.SquadSwitch.ListenServerClientRequest` 在真实 RHI 且给了 `-GGYGOCaptureDir` 时，死亡自动换人后加取稳定帧和关运动模糊帧，并记录同帧阴影参数，结束时恢复 `r.MotionBlurQuality`。断言没有放宽。
+- 仍有效的约束：新增动作如果让武器或斗篷伸得更远，要重新逐帧跟踪所需倍率；以后若把物理资产入库，可以给武器、斗篷、小腿加不参与碰撞的包围体，再把倍率降回去。
+- 验证级别：已编译；已测试（`GGYGO.Rendering` 4 例、`GGYGO.Teams.SquadSwitch` 8 例全部通过）；已在 UE 里运行（真实 D3D12，单机正背机位实拍）；已联机验证（监听服务器＋1 客户端，客户端倒下帧地面无条纹，稳定帧对象阴影宽度 144.3 cm，与单机基准 144.6 cm 一致）。
+- 正背对照里与原图 `AAADocs/Assets/Pyrios/Rendering/References/20261009_Pyrios_*.png` 的差异不属于阴影问题，本项没改，是否另开需求由用户决定：胸口光球只是暗蓝小点、蓝色手臂发光偏弱、背面头发偏灰紫偏亮、斗篷没有蓝色渐变且金色细线显示为橙红（斗篷只读暂挂）。
+- 未做：`BoundsScale` 11 的 GPU／VSM 开销没测；对象阴影 RT 没有做可视化导出；修后单机倒下没有单独重拍。
 
 ## 额度
 
