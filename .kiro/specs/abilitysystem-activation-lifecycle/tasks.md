@@ -4,7 +4,9 @@
 
 整改第 4 步，改动面最大。执行规则与命令同第 1 步，输出目录为 `Saved/Kiro/abilitysystem-activation-lifecycle/`。开工前确认第 3 步已验收。
 
-本 spec 内按小步编译：每完成 1-6 中的一项先编译一次（只编译，不跑完整测试），检查点 8 再跑完整测试。
+当前按第 1 步 Overview 所链接的项目规则执行；本次状态核对只读取已有证据，不启动 UE 或重跑测试。
+
+状态（2026-11-12）：激活寿命实现、相关回归、单机基本动作链及最小联机纠正已交付；任务 8 保留部分完成。现有交付记录没有给出 Requirement 9.2 中 `GGYGO.Editor.Animation` 完整过滤器的对应报告，不能把局部 Editor 测试推成整组通过。
 
 ## Tasks
 
@@ -13,7 +15,7 @@
   - 确认没有动画蓝图使用非 Guard 的 AnimInstance（在 Kiro 自己的 Editor 实例中查看全部 ABP 父类）
   - 确认 N3 纠正重放测试入口位置
   - _Requirements: 4.5, 9.5_
-  - 结果（11-03）：生产动画蓝图 ABP_Pyrios（GGYGOAnimInstanceBase）与 ABP_Kevin_DemonBattle 都继承 Guard，按资产父类引用离线核对；N3 入口未核，随任务 8 的联机验证一起做
+  - 生产动画蓝图 ABP_Pyrios（GGYGOAnimInstanceBase）与 ABP_Kevin_DemonBattle 均继承 Guard；真实玩家／Kevin 运行入口已有交付记录。纠正入口为 `run_minimal_multiplayer.ps1 -Case correction`，已完成真实双端验证，见任务 8。
 
 - [x] 1. 激活身份与结束
   - [x] 1.1 精简 FActivationProof，在 NotifyAbilityActivated 中签发，EndAbility 覆盖中退役并调用 CleanupAbilityResourcesForTermination
@@ -74,15 +76,15 @@
 
 - [x] 7. 测试适配
   - OnAbilityTerminationCompleted 的使用改为 OnAbilityEnded；依赖钩子的测试改用子类覆盖；补齐 ABA 外部契约测试；删除内部状态断言
-  - 批次 1 遗留：`PlayerCombo.ActivationCommitAndEndReentry` 第 3～5 子例在 Montage Ready 回调、End 广播或延期 End 后用裸 `TryActivateAbility` 重激活，后继 Initial 没有输入 edge，被现行来源规则拒绝；按任务 2.2 的新 Initial 路由重定这些子例的期望（后继须有自己的输入来源，或改为验证明确拒绝且旧栈不清理后继）
-  - 批次 1 遗留：`Admission.GroupLifecycle` 报 reason=14（NativeEndNotObserved），2026-10-05 起已失败，随任务 1、6.3 一并处理
+  - `PlayerCombo.ActivationCommitAndEndReentry` 的旧裸重激活夹具已适配原输入来源，`Verify_R2/Test_R9`／`Test_R10`／`Test_R16a/Automation/index.json` 均为 Success，原失败保留。
+  - `Admission.GroupLifecycle` 的旧 NativeEndNotObserved 失败已闭合，`Verify_R2/Test_R9/Automation/index.json` 为 Success；同 Spec 嵌套 Try 的后续来源问题在 `Saved/Codex/I23_20261111/Automation/index.json` 的原诊断及五项相关回归中通过。
   - Boss 测试的 protected 接口与精确日志断言随共享资源迁移
   - _Requirements: 7.2, 8.1-8.7, 9.3, 10.6_
 
 - [~] 8. 检查点：编译、测试、PIE、联机
-  - 检查磁盘余量并告知，编译 GGYGOEditor
-  - 运行 Requirement 9.2 列出的全部测试
-  - PIE 与最小联机按 Requirement 9.4、9.5 验证。
+  - [x] GGYGOEditor 编译通过，最终联机源码构建为 `Saved/Codex/MinimalMultiplayer_20261111/build_tail_observation.log`。
+  - [~] Requirement 9.2 自动化：`Verify_R2/Test_R9`、`Test_R10`、`Test_R16a` 保留各组结果及 ABA 回归；Test_R9 的 Camera 失败原样保留，其不属于本条要求的过滤器。当前 `GGYGO.Editor.Animation` 只找到 [SyncMarker 两项专项](../../../Saved/Codex/I22_20261111/Rerun/editor.log) 等局部交付，完整组结果未覆盖，不重跑或推断补齐。
+  - [x] Requirement 9.4 基本动作链：三段普攻见 [生产冒烟](../../../AAADocs/需求文档/normal01_first_strike.md)，Special／ExSpecial 实跑和自然清理见 [FX 接线](../../../AAADocs/需求文档/fx_audio_wiring.md)，TurnBack 动作见 [生产镜头观察](../../../AAADocs/需求文档/walkrun_turnback_production_camera.md)，Boss 连续选招与正式战斗见 [Kevin 交付](../../../AAADocs/需求文档/kevin_boss_assembly.md)。保留两项 PoseFailure 原 Fail；以上不签用户待定的起停／镜头行为或视听还原。
   - [x] N0/N1：D3D12 双端真实 attack-only 中，同一原 Montage／Task 自然结束，同一 RMS 按真实步长消费最后的 XYZ／Yaw，GA 未取消且原资源全部归还；内存预检与断言证据见[最小联机需求记录](../../../AAADocs/需求文档/minimal_multiplayer.md)。
   - [x] N5：具名 NET 读回仅有 lag；预测段 1 被服务器拒绝，沿 Mode2 原 basis 重放段 0，随后真正新起段 1，两端自然结束并清理。Initial 无法提供的独立试次证明同激活 Reliable TargetDataCancelled 与精准归还。模拟代理独立 Apply／imported RMS 不属于 requirements 9.5 的前提，未扩建该执行链；证据与边界见最小联机需求记录。
   - _Requirements: 9.1-9.5_

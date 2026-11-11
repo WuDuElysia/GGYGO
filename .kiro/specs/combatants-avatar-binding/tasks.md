@@ -4,7 +4,7 @@
 
 整改第 5 步。执行规则与命令同第 1 步，输出目录为 `Saved/Kiro/combatants-avatar-binding/`。开工前确认第 4 步已验收。
 
-本 spec 按"先新流程跑通，再删旧协议"的顺序推进：任务 1-2 完成后编译并跑一次 PIE 出生流程，再做任务 3。
+状态（2026-11-12）：源码及绑定回归完成，真实 RHI 客户端出生、移动、攻击、换人后重新操作及死亡替补已有证据，Boss 正式出场与出招已有单机证据。复活流程尚不存在，另一独立观察客户端在换人后的表现未单独取证；任务 6 保持部分完成。
 
 实现与计划的差异见 design.md 末尾"实现差异"。
 
@@ -29,7 +29,7 @@
     - _Requirements: 2.3, 5.2_
   - [x] 2.3 GameMode、BossEncounter、SquadComponent 调用点适配（GameMode、BossEncounter 接口未变；Squad 改用资源句柄）
     - _Requirements: 5.1, 6.1_
-  - [~] 2.4 中间检查：PIE 需用户批准，未执行；以 Build_R11／R12 与 NullRHI Test_R11／R12 代替
+  - [x] 2.4 出生流程验证：Build_R11／R12 与 NullRHI Test_R11／R12 的证据保留；后续真实 RHI 已走通生产出生和客户端操作，证据见任务 6。
     - _Requirements: 6.1_
 
 - [x] 3. 删除绑定协议
@@ -53,7 +53,10 @@
 - [~] 6. 检查点：编译、测试、PIE、联机
   - [x] 编译 GGYGOEditor：Build_R11 成功；修正释放顺序后 Build_R12 成功
   - [x] Requirement 7.2 测试：Test_R12 111 例 108 通过；3 例为既有失败（Camera.ModeOwnershipAndAvatarReceiver 未绑定仲裁、Input.MovementOrigin.NativeBirthFirstDigitalPress 需原生窗口、Locomotion.InputConsumer.FailedRequestRecovery 未声明的生产 Error 日志），失败内容与本步之前一致
-  - [~] PIE（Requirement 7.3）与最小联机（Requirement 7.4）：收尾在 L_Movement_Test 上跑了 NullRHI 同进程监听服务器＋1 客户端（`GGYGO.Teams.SquadSwitch.ListenServerClientRequest`，Test_R19）——生产 GameMode 装配两名队员、客户端出生并附身首位、客户端请求切换后服务器与客户端看到同一出战角色；再次切到待命队员后，客户端控制该队员，其 HealthComponent 经本地 ASC 订阅取得的数值与服务器一致。未验：客户端移动与攻击（需真实输入）、死亡与重生、Boss 出场与出招、画面
+  - [x] 真实 RHI 出生／操作／换人：`Saved/Codex/CharacterDeathPolicy_20261111/rhi2.log` 的 `GGYGO.Teams.SquadSwitch.ListenServerClientRequest` 为 Success，覆盖客户端初次及重新附身后的移动、攻击、Z／C 请求切换、死亡自动替补和两端状态一致；更早集中运行见 `Verify_R2/RHI_Integrated_R1/Automation/index.json`。
+  - [x] Boss 出场与连续出招：[Kevin 正式战斗交付](../../../AAADocs/需求文档/kevin_boss_assembly.md) 已核对原 Encounter、绑定、技能与死亡清理，不扩大为 Kevin 联机。
+  - [ ] 复活：项目没有复活流程，不能由死亡替补或再次附身推断通过。
+  - [ ] 独立第三端观察换人：上述换人用例是同进程 listen-server＋一个客户端；最小联机的独立观察端验证的是普攻／FX，未执行换人，不能补签 Requirement 7.4 的其它客户端切换画面。
   - _Requirements: 7.1-7.4_
 
 - [x] 7. 更新活动记录

@@ -2,7 +2,9 @@
 
 ## Overview
 
-整改第 2 步。执行规则与命令同第 1 步（见 `../abilitysystem-redundancy-cleanup/tasks.md` 的 Overview），输出目录为 `Saved/Kiro/abilitysystem-input-request/`（Before/、before_manifest.tsv、Patches/、after_summary.tsv、make_patches.py）。批次 1 中与第 1 步同批推进，额度解决前只改源码。
+整改第 2 步。当前协作规则同第 1 步 Overview，既有证据位于 `Saved/Kiro/abilitysystem-input-request/` 与共同验证目录。
+
+状态（2026-11-12）：源码、编译及约定回归完成；真实 RHI 生产冒烟与共享 UMG 改键操作已有证据。任务 5 保持未勾：门前预输入待用户决定，生产占用后缓冲、过截止不重试及实体设备／断连／外部失焦未覆盖。
 
 ## Tasks
 
@@ -12,7 +14,7 @@
   - 现状差异：`InitAbilityActorInfo` 原先只在 Avatar 变化时清空输入，Owner 变化不清空；单一失效方式要求两者都清空，已补上
   - _Requirements: 1.6, 2.6_
 
-- [x] 1. ASC 输入记录收敛（源码，未编译）
+- [x] 1. ASC 输入记录收敛
   - [x] 1.1 Request_Record 与 Edge 删除 Owner／Avatar／World 快照；Record 增加 Source；Receive 增加来源参数（默认无来源），既有身份复核时比较来源
     - _Requirements: 2.1, 2.5_
   - [x] 1.2 具名谓词 `IsAbilityInputActorInfoUsable`、`RequestMatchesSpec`、`IsBeforeDeadline` 取代 `IsAbilityInputContextCurrent`／`IsAbilityInputRequestCurrent`；ProcessAbilityInput 入口查一次 ActorInfo（不可用即清空返回），外调后只核 Revision 与输入阻断
@@ -24,7 +26,7 @@
   - [x] 1.5 Outcome 已只有四项；Reason 删除 InvalidEndKind、SerialExhausted、RevisionExhausted
     - _Requirements: 3.1, 3.2_
 
-- [x] 2. Hero 输入结构收敛（源码，未编译）
+- [x] 2. Hero 输入结构收敛
   - [x] 2.1 删除 FAbilityInputObservation，`FAbilityActionBinding` 直接保存 `bPressed`、`CurrentRequest`（身份、Tag、截止、Token）和已报原因
     - _Requirements: 1.1_
   - [x] 2.2 删除 FAbilityInputAssociation，会话直接保存 `AssociatedResource` 与 `AssociatedSubscription`；关联变化、会话退役、Closing／Released 通知都走 `RetireSessionAbilityRequests` → `EndAbilityInputRequestsFromSource`
@@ -53,6 +55,8 @@
   - [x] V2 两 PoseFailure：复跑结果与之前一致，每叶两条关联诊断（Acquire／Poll 各一条 MontageTask.Pose，加同 Task 的 RequiredDependencyFailed），清理与自然后继断言通过。按既有测试契约保留未过滤 Error 与原 Fail。
   - [x] V3 之前一次冒烟里出现过的额外攻击：新的冒烟里 NewPress 叶通过，观察到的按键只有夹具自己提交的，没有复现，不追。
   - [x] V4 改键实际生效和持久化（自动化范围）：真实 RHI、L_Movement_Test、生产 Controller 下，用生产菜单把"移动 · 前进"从 W 改到 I 后首按即移动，异步存档写出，第二轮新会话从磁盘读回后仍是 I；恢复默认后 I 无位移、W 恢复并再次写盘。另一轮不改键，验证菜单返回、按住键穿过菜单后释放能恢复移动。证据 [V4i](../../../Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/RHI_KeySettings_V4i/return.json)、[V4h](../../../Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/RHI_KeySettings_V4h/return.json)。按键经 Editor 的 PC.InputKey 桥注入，不代表实体设备；设备断连和外部失焦没有覆盖。
+  - [x] 当前共享 UMG 页面已按 [B06 交付](../../../AAADocs/需求文档/blueprint_layering_followups.md) 走过真实前台两轮 PIE：改键、冲突、存档读回、恢复默认、关页不卡键；此结论不扩大为实体键鼠或跨进程读回。
+  - [x] 同 Spec 嵌套 Try 的原输入来源隔离已修复，`Saved/Codex/I23_20261111/Automation/index.json` 六项通过；原 `NestedSameSpecRawTry` 失败已闭合。该修复不补签上述预输入或过截止行为。
   - _Requirements: 5.1-5.3_
 
 - [x] 6. 更新活动记录

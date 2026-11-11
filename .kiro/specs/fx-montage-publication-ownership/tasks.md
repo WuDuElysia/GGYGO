@@ -4,6 +4,8 @@
 
 整改第 3 步。执行规则与命令同第 1 步，输出目录为 `Saved/Kiro/fx-montage-publication-ownership/`（Before/、before_manifest.tsv、Patches/、after_summary.tsv、make_patches.py、edit_*.py）。编译与测试证据与批次 1 同目录：`Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/Build_R5`、`Test_R6`。重核结论与实现差异见 design.md 对应节。
 
+状态（2026-11-12）：发布所有权实现及最小联机已交付；单机普攻出现／正常结束已有运行证据，TurnBack 烟雾与真实打断 Abort 画面未覆盖，因此任务 6 只记部分完成。用户提出的视听返修仍由原需求跟进。
+
 ## Tasks
 
 - [x] 0. 开工重核
@@ -46,11 +48,12 @@
   - 既有 FX 发布测试改用宿主组件语义；新增 `ShutdownClosesResidualLeases`（残留 lease 寿命终点 Abort 关闭、诊断一次、持有者迟到关闭为 AlreadyClosed）与 `ReplicationHostLifecycle`（注册即建立发行者、FindForASC、缺来源拒绝并诊断、重注册复用资源视图）
   - _Requirements: 4.1-4.7, 1.6_
 
-- [ ] 6. 检查点：编译、测试、PIE、联机
+- [~] 6. 检查点：编译、测试、PIE、联机
   - [x] 编译 GGYGOEditor：Build_R5 成功（19 个 action）
   - [x] NullRHI 测试：Test_R6 共 74 例（批次 1 回归 58 例＋FX 6 例＋Locomotion 10 例），71 通过。未通过 3 例均非本步引入：`Admission.GroupLifecycle`、`PlayerCombo.ActivationCommitAndEndReentry`（第 4 步）；`Movement.Locomotion.InputConsumer.FailedRequestRecovery` 行为断言全部完成，因生产 Error 日志未声明为预期而判失败，2026-10-02 起已失败（当时 2 条，现 3 条，新增一条为 CMC 来源准入拒绝），属 Movement 模块
   - [x] Editor 中核对 CharacterSlot／BossState 蓝图子类已获得新组件：`GGYGO.FX.MontagePublication.HostSubclassAudit`（Test_R16a，NullRHI）由资产注册表列出 CombatantState 全部 9 个子类，项目中没有蓝图子类；每个类的 CDO 都带 `MontageFXReplication` 组件
-  - [ ] PIE 单机与最小联机（Requirement 5.3、5.4）：真实 RHI 下观察 FX 出现、结束与 Abort；Test_R19 的 NullRHI 不覆盖 FX。联机各用独立试次和同版生产配置，当前入口见[最小联机需求记录](../../../AAADocs/需求文档/minimal_multiplayer.md)，负责人和占用见[看板](../../../AAADocs/Coordination/Board.md)。
+  - [~] PIE 单机（Requirement 5.3）：[首击与生产冒烟](../../../AAADocs/需求文档/normal01_first_strike.md) 及 [FX 当前运行记录](../../../AAADocs/需求文档/fx_audio_wiring.md) 覆盖三段普攻的实际 FX 出现与自然结束／清理；Normal03 分阶段实拍已有。TurnBack 当前只有声音边沿证据，准确烟雾来源未确定；真实连段打断时的 Abort 画面尚未验证，不能用 Normal 停止或资源数值替代。
+  - [x] 最小联机（Requirement 5.4）：D3D12 独立试次的首次活动相关性、闭窗首次相关性、同连接重获，以及追赶隐藏后的活尾回归均通过。当前证据见[最小联机需求记录](../../../AAADocs/需求文档/minimal_multiplayer.md)。
     - [x] N2 live_first：同发布键／代次／原组件的发布、完整快照、Controller、BeginServerTime 对齐及终态通过；同一 Active Draw 的实际 PNG 已查看，下劈弧和地面层可见。原 FX 时长与闭窗语义保持，证据见最小联机需求记录。
     - [x] N3 closed_first：B 在 A 闭窗后首获相关性，收到完整复制快照、同键未 RemoteCreated，实际视口无补播。
     - [x] N4 reacquire：同连接原 ActorChannel Close／CleanUp 的原因、索引和 NetGUID、新 Proxy、剩余 Age 的同帧可见 FX 均通过；旧资源退役后同键新 generation 继续推进。原生 RelevantTimeout 的进程内测试覆盖为 0.05 秒，不代验生产默认关闭等待时长。

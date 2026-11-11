@@ -4,12 +4,9 @@
 
 整改第 1 步，共 7 步，按 [活动记录](../../../AAADocs/需求文档/refactor_and_squad_switch.md) 的顺序执行。
 
-执行规则（后续各步沿用）：
-- 由 Kiro 在既有会话内顺序执行，不启用子代理。
-- 写集、保护输入和窗口以统筹授权为准；源码／文档窗内不启动 UE、不构建、不跑测试、不做 Git。
-- 实现前把写集文件的预像与身份存到 `Saved/Kiro/<spec>/Before/` 和 `before_manifest.tsv`，交回时附 unified diff（`Patches/`）与当前身份（`after_summary.tsv`）。
-- 编译与测试只在统筹设定的验证窗口执行：编译前在聊天告知，检查内存、磁盘与既有新增额度。UE 只启动和正常退出 Kiro 自己的实例，日志与输出写到 `Saved/Kiro/<spec>/`。
-- 不降低断言，不排除失败场景，失败日志保留。
+当前执行规则以 [TaskWorkflow](../../../AAADocs/Rules/TaskWorkflow.md) 和 [VerificationDelivery](../../../AAADocs/Rules/VerificationDelivery.md) 为准。以下路径保留既有证据，不继续使用旧额度、保护身份或分步授权流程。
+
+状态（2026-11-12）：源码、消费者核查及约定编译／自动化验证完成；生产冒烟已跑，22 项 Success 与两项契约性 Fail 分别保留。`[x]` 表示该项的明确范围已完成，`[~]` 表示只完成部分；未勾项不由相邻场景代签。
 
 编译命令：
 `F:\UE_5.8\Engine\Build\BatchFiles\Build.bat GGYGOEditor Win64 Development -Project="F:\ue_project\GGYGO\GGYGO.uproject" -WaitMutex -NoHotReload`
@@ -74,10 +71,11 @@
   - PlayerCombo 夹具改走真实输入在第 2 步
   - _Requirements: 9.1-9.3, 10.4, 11.1-11.5_
 
-- [x] 8. 检查点：编译、测试（NullRHI 部分完成）
+- [x] 8. 检查点：编译与约定自动化验证
   - 与第 2 步合批：`Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/`，Build～Build_R4 成功；Test_R1（59 例）后修复重跑至 Test_R5
-  - 本步用例（PlayerCombo、HitSemantics、BossAI）除 `ActivationCommitAndEndReentry` 外全部通过；该例的裸重激活与 10-25 输入来源规则冲突，归第 4 步
-  - 未验：PlayerCombo 生产冒烟 7 例与 Kevin 冒烟（真实 RHI，需另批额度）、人工 GUI、FX 联机（任务 6 已在收尾完成）
+  - 本步的 PlayerCombo、HitSemantics、BossAI 用例已有通过证据；原 `ActivationCommitAndEndReentry` 失败已在激活生命周期整改中修复，`Test_R9`／`Test_R10`／`Test_R16a/Automation/index.json` 均记录 Success，原失败日志保留。
+  - PlayerCombo 生产冒烟：见 [I08](../../../.agents/tasks/requirements-closeout/evidence/I08.md)，24 项中 22 Success、2 PoseFailure 契约性 Fail；两叶清理与自然后继断言通过，生产 Error 和原 Fail 不过滤、不改写。Kevin 正式单机战斗与连续出招见 [Kevin 交付](../../../AAADocs/需求文档/kevin_boss_assembly.md)。
+  - FX 联机已独立完成，见 [最小联机](../../../AAADocs/需求文档/minimal_multiplayer.md)；Legacy 消费者由任务 6 的 Editor 核查闭合。这些结果不代验实体设备、全角色画面或完整网络矩阵。
   - _Requirements: 10.1-10.4_
 
 - [x] 9. 更新活动记录

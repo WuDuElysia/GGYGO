@@ -1,6 +1,6 @@
 # 代码整改（CR-R7 扩展）与换人续放
 
-更新：2026-11-11。需求状态和占用以[看板](../Coordination/Board.md)为准，剩余工作已交给 Codex，见 [Codex 交接](../Coordination/Handover_Codex.md)。过程历史以 Git 为准。
+更新：2026-11-12。需求状态和占用以[看板](../Coordination/Board.md)为准，剩余工作已交给 Codex，见 [Codex 交接](../Coordination/Handover_Codex.md)。过程历史以 Git 为准。
 
 ## 目标
 
@@ -34,7 +34,7 @@
 | 6 | [teams-squad-switch-linger](../../.kiro/specs/teams-squad-switch-linger/tasks.md) | 见下面「换人续放」。 |
 | 7 | [abilitysystem-healthset-repnotify](../../.kiro/specs/abilitysystem-healthset-repnotify/tasks.md) | 保留分类帧（见用户决定）；属性反算迁到 `GGYGOAttributeBase::CalculateBaseForCurrent`，ASC 不再提供反算入口。 |
 
-规范澄清已写入 [CodeConventions](../Architecture/CodeConventions.md)：外调正向清单、后置检查举证、原生寿命与身份合并、预备配置要有明确来源／寿命／清理点。
+规范澄清已写入 [CodeConventions](../Rules/CodeConventions.md)：外调正向清单、后置检查举证、原生寿命与身份合并、预备配置要有明确来源／寿命／清理点。
 
 ### 换人续放
 
@@ -59,24 +59,25 @@
 
 ## 当前状态
 
-- 7 步源码全部完成，已编译，NullRHI 自动化测试通过（含 SquadSwitch 8 例、HealthSet 复现回归）。
+- 7 步源码全部完成并已编译，相关自动化已有通过记录（含 SquadSwitch 8 例、HealthSet 复现回归）；各报告中的原失败保留，完整验收范围见下表，不能合写为七份 spec 全部验收。
 - 真实 RHI 已验证：
   - 普攻生产冒烟 24 项中 22 项通过，2 例 PoseFailure 按约定保留失败（见 [normal01_first_strike](normal01_first_strike.md)）。
   - 联机（监听服务器＋1 客户端）换人：客户端 RPC 和 Z／C 按键换人、冷却、改键生效、再次附身后双端都能移动、普攻激活、死亡自动换人、生命／上限／破韧复制一致。
   - 改键页面和死亡自动替补（蓝图分层 B06、B08）已完成，见[蓝图分层收尾](blueprint_layering_followups.md)。
+  - 独立进程最小联机已完成：原动作自然收尾、纠正重放、Initial 取消、FX 首次活动相关性／闭窗首次相关性／同连接重获，以及活尾实拍。最终编译与 17 项相关回归通过，边界和证据见[最小联机](minimal_multiplayer.md)。
   - 角色受光与阴影已完成，见下节。
 - 原统筹待修问题里已关闭的：再次附身后客户端不能移动（CMC owner-sync 修正）；Locomotion 输入测试留住测试世界；冷会话首击因 FX 材质未就绪失败（首击等资源就绪）；角色阴影捕获在 PIE 结束时留住世界；倒下画面的阴影条纹。
-- spec 勾选状态还没回写，见未完成项。
+- 七份 spec 的勾选和下表已按当前交付记录回写；本次只核对已有报告、日志和需求记录，没有启动 UE 或重跑测试。部分完成与未覆盖项分别保留。
 
-| Spec | 状态 |
-| --- | --- |
-| 1 冗余清理 | 源码完成，已测；生产冒烟已跑（同上） |
-| 2 输入请求 | 源码完成，已测；任务 5 等用户决定连段预输入 |
-| 3 FX 发布 | 源码完成，已测；FX 的单机 PIE 和最小联机未验 |
-| 4 激活生命周期 | 源码完成，已测；纠正重放和最小联机未验 |
-| 5 Avatar 绑定 | 源码完成，已测；联机出生与换人已验，复活未验（项目没有复活流程） |
-| 6 换人续放 | 源码完成，已测，真实 RHI 联机已验；进退场资产缺省跳过 |
-| 7 HealthSet | 已定案并测过；死亡的联机数值未单独核对 |
+| Spec | 已完成范围 | 未完成或未覆盖 |
+| --- | --- | --- |
+| 1 冗余清理 | 源码、消费者核查及约定自动化完成；普攻生产冒烟与 Kevin 单机战斗已跑 | 冒烟两项 PoseFailure 的原 Fail 按约定保留；实体设备与完整网络矩阵不在已验范围 |
+| 2 输入请求 | 源码及相关回归完成；生产冒烟、共享 UMG 改键和同 Spec 嵌套输入来源修复已有证据 | 任务 5 保留未勾：预输入待用户决定；生产能力占用后的排队、超过截止不再重试及实体设备／焦点丢失边界未覆盖 |
+| 3 FX 发布 | 发布所有权与相关回归完成；普攻出现／自然清理、最小联机及活尾已验 | 任务 6 部分完成：TurnBack 准确烟雾来源未确定，真实打断 Abort 画面未验；用户视听返修由原需求跟进 |
+| 4 激活生命周期 | 源码、核心回归、基本动作链、纠正重放与最小联机已交付 | 任务 8 部分完成：Requirement 9.2 的完整 `GGYGO.Editor.Animation` 报告未找到，局部专项不代签整组；玩法／镜头待定项保持 |
+| 5 Avatar 绑定 | 绑定回归、真实 RHI 出生／移动／攻击／重新附身／死亡替补及 Boss 单机出场已验 | 任务 6 部分完成：项目没有复活流程；独立第三端观察换人未覆盖，普攻／FX 观察端结果不代签换人 |
+| 6 换人续放 | 约定测试编队范围内的编译、自动化与真实 RHI 联机已验；共享 UMG 改键和蓝图死亡替补已交付 | 两份 Pyrios 实例与夹具续放 GA 不代验生产续放技能配置；进退场资产缺省按决定跳过，实体设备手感未验 |
+| 7 HealthSet | 保留分类帧已定案；反算迁移、回归及真实 RHI 扣血／上限／破韧的双端数值和广播已验 | 任务 4 部分完成：死亡替补已验，但死者的双端 Health／DeathState／死亡广播未逐边沿配对；单机受击／破韧／死亡表现缺完整专项证据 |
 
 ### 角色受光与阴影（已完成）
 
@@ -126,8 +127,8 @@
 
 交给 Codex，顺序和第一步见 [Codex 交接](../Coordination/Handover_Codex.md)。
 
-5. 各 spec 勾选状态回写（依赖最小联机完成），同时更新上面的状态表。
-6. 原统筹待修问题里还开着的：
+1. 七份 spec 的剩余验收与待定项见上表；预输入、起停跳变和镜头衡量口径仍等原问题的用户决定。勾选回写已完成，不代表这些项目已验收。
+2. 原统筹待修问题里还开着的：
    - PIE 结束时 Enhanced Input 报 `IMC_Squad`／`IMC_Default`／`IMC_MouseLook` "仍在应用、可能泄漏"的 Warning（LocalPlayer 子系统先于 Controller／Pawn 的 EndPlay 反初始化），本批没有复查。
    - `AAADocs/Scripts/wire_pyrios_skill_inputs.py` 对 `IMC_Default` 的基线因加了可改键名而失效，脚本会拒绝运行，等 E／R／F 输入线恢复时更新。
    - 业务缺口：公共 `GA_Death` 仍是空图；全员倒下后没有失败／复活流程；进退场 GA／Montage 缺省跳过；需要留场的技能由用户以后把 `AvatarExitPolicy` 改为 ContinueInBackground。

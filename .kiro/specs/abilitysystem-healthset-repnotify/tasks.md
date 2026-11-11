@@ -4,7 +4,7 @@
 
 整改第 7 步，先验证后决定。执行规则与命令同第 1 步，输出目录为 `Saved/Kiro/abilitysystem-healthset-repnotify/`。按顺序在第 6 步验收后执行（两步都会改 ASC 文件，同一文件只有一个写入者）。
 
-状态（2026-11-03 收尾）：复现完成，走 Requirement 2.2（保留分类帧），这是技术决定、不再交用户；反算已迁出 ASC；NullRHI 测试通过；监听服务器＋1 客户端 PIE 中受击扣血、MaxHealth 持续下调、破韧的服务器与客户端数值及广播一致（Test_R19）。死亡未在联机中验证。
+状态（2026-11-12）：复现定案为 Requirement 2.2（保留分类帧），属性反算已迁出 ASC；相关自动化通过。真实 RHI 最小联机已检查扣血、MaxHealth 持续下调及破韧的两端数值／广播。服务器死亡完成与客户端自动替补控制也有证据，但死亡边沿的两端 Health／DeathState／广播未单独配对，Requirement 5.3 保持部分完成。
 
 ## Tasks
 
@@ -38,7 +38,9 @@
 - [~] 4. 检查点：编译、测试、PIE、联机
   - Build_R14、Build_R15 通过；Test_R14（21 例）、Test_R15（HealthRepro 回归断言）全部通过
   - 联机（Test_R19，NullRHI 同进程监听服务器＋1 客户端）：服务器对客户端出战队员施加即时伤害 10、持续 GE 下调 MaxHealth 20、削韧至 0；Health 不超过新上限；客户端 ASC 属性与 HealthComponent 数值等于服务器，两端 HealthChanged／MaxHealthChanged 都广播（持续 GE 下调上限时服务器也广播，即复现中 Lyra 写法缺失的那一项），服务器 PoiseBroken 广播、客户端 PoiseChanged 广播
-  - 未验：死亡的联机表现；单机 PIE 的受击画面
+  - [x] 真实 RHI 的扣血／上限／破韧复制：`Saved/Codex/CharacterDeathPolicy_20261111/rhi2.log` 的 `ListenServerClientRequest` 为 Success，明确记录两端 ASC／HealthComponent 数值与广播一致，覆盖同一生命阶段；不再仅限 Test_R19 的 NullRHI 结果。
+  - [~] 死亡：上述同一叶断言服务器死亡完成、服务器替补和客户端控制／镜头切至替补。没有逐边沿核对客户端死者的 Health／DeathState／广播，不能由自动替补成功代签完整死亡一致性。
+  - [ ] 单机受击、破韧及死亡表现与完整死亡两端配对：缺本 spec 对应的独立证据，保持未覆盖；现有 Boss 战斗画面不能代替原 HealthSet 消费者的完整核对。
   - _Requirements: 4.1-4.4, 5.1-5.3_
 
 - [x] 5. 更新活动记录
