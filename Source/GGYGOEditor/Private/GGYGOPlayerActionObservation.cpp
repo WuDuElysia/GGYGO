@@ -7,19 +7,54 @@
 #include "Character/Components/GGYGOCharacterMovementComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
+#include "Application/ThrottleManager.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Dom/JsonObject.h"
 #include "Editor.h"
+#include "Engine/ActorChannel.h"
+#include "Engine/Engine.h"
+#include "Engine/NetConnection.h"
+#include "Engine/NetDriver.h"
+#include "Engine/PackageMapClient.h"
 #include "Engine/World.h"
 #include "FX/Components/GGYGOMontageFXReplicationComponent.h"
 #include "FX/GGYGOMontageFXPublication.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
+#include "GameFramework/WorldSettings.h"
 #include "NiagaraComponent.h"
 #include "Serialization/JsonSerializer.h"
+#include "Teams/GGYGOCharacterSlot.h"
 #include "UObject/Package.h"
 
 namespace GGYGOPlayerActionObservation
 {
+	void AddRecordPage(FJsonObject& Result, const TArray<TSharedPtr<FJsonValue>>& Records,
+		int32 FirstRecordIndex, int32 MaxRecordCount)
+	{
+		const bool bValidRange = FirstRecordIndex >= 0 && FirstRecordIndex <= Records.Num() && MaxRecordCount >= -1;
+		Result.SetNumberField(TEXT("record_count"), Records.Num());
+		Result.SetNumberField(TEXT("records_start_index"), FirstRecordIndex);
+		Result.SetBoolField(TEXT("read_success"), bValidRange);
+		TArray<TSharedPtr<FJsonValue>> Page;
+		if (bValidRange)
+		{
+			const int32 AvailableCount = Records.Num() - FirstRecordIndex;
+			const int32 Count = MaxRecordCount == -1 ? AvailableCount : FMath::Min(MaxRecordCount, AvailableCount);
+			Page.Reserve(Count);
+			for (int32 Offset = 0; Offset < Count; ++Offset) { Page.Add(Records[FirstRecordIndex + Offset]); }
+		}
+		else
+		{
+			Result.SetStringField(TEXT("read_diagnostic"), FString::Printf(
+				TEXT("[Combat.Observation] 记录范围无效：FirstRecordIndex=%d MaxRecordCount=%d RecordCount=%d。"),
+				FirstRecordIndex, MaxRecordCount, Records.Num()));
+		}
+		Result.SetArrayField(TEXT("records"), Page);
+	}
+
 	TSharedPtr<FJsonObject> History(const FGGYGOPlayerComboObservationFacts& Facts)
 	{
 		auto Result = MakeShared<FJsonObject>();
@@ -170,6 +205,7 @@ namespace GGYGOPlayerActionObservation
 		case EGGYGOMontageFXObservationKind::ComponentUnregistered: return TEXT("ComponentUnregistered");
 		case EGGYGOMontageFXObservationKind::ComponentDestroyed: return TEXT("ComponentDestroyed");
 		case EGGYGOMontageFXObservationKind::PublisherClosed: return TEXT("PublisherClosed");
+		case EGGYGOMontageFXObservationKind::StateReceived: return TEXT("StateReceived");
 		}
 		checkNoEntry();
 		return TEXT("Invalid");
@@ -222,10 +258,352 @@ struct UGGYGOPlayerActionObservation::FState
 	FString FXDiagnostic;
 };
 
+struct UGGYGOPlayerActionObservation::FNetworkFXState
+{
+	struct FPublisherWindow
+	{
+		TWeakObjectPtr<UGGYGOMontageFXReplicationComponent> Host;
+		TWeakObjectPtr<UGGYGOMontageFXPublicationOwner> Publisher;
+		TSharedPtr<FGGYGOMontageFXObservation> Window;
+		uint64 Registration = 0;
+		uint64 RegisteredFrame = 0;
+	};
+
+	FName Context;
+	int32 PIEInstance = INDEX_NONE;
+	FString TrialId;
+	int32 MaxRecords = 0;
+	FDelegateHandle RegisteredHandle;
+	FDelegateHandle WorldCleanupHandle;
+	FDelegateHandle EndPIEHandle;
+	TArray<FPublisherWindow> Candidates;
+	FPublisherWindow Selected;
+	TWeakObjectPtr<UWorld> ClientWorld;
+	TSharedPtr<FJsonObject> Source;
+	TArray<TSharedPtr<FJsonValue>> Records;
+	bool bActive = true;
+	bool bEvidenceIncomplete = false;
+	FString Diagnostic;
+	FString StopReason;
+};
+
 UGGYGOPlayerActionObservation* UGGYGOPlayerActionObservation::CreateObservation()
 {
 	check(IsInGameThread());
 	return NewObject<UGGYGOPlayerActionObservation>(GetTransientPackage(), NAME_None, RF_Transient);
+}
+
+FString UGGYGOPlayerActionObservation::ReadLocomotionState(UGGYGOCharacterMovementComponent* Movement)
+{
+	check(IsInGameThread());
+	auto Result = MakeShared<FJsonObject>();
+	Result->SetBoolField(TEXT("available"), IsValid(Movement) && IsValid(Movement->GetWorld()));
+	if (IsValid(Movement) && IsValid(Movement->GetWorld()))
+	{
+		Result->SetStringField(TEXT("movement"), Movement->GetPathName());
+		Result->SetStringField(TEXT("frame"), LexToString(GFrameCounter));
+		Result->SetNumberField(TEXT("motion_type"), static_cast<uint8>(Movement->GetLocomotionMotionType()));
+		Result->SetNumberField(TEXT("stop_type"), static_cast<uint8>(Movement->GetStopMotionType()));
+		Result->SetBoolField(TEXT("has_curve_root_motion"), Movement->HasCurveRootMotionSource());
+		Result->SetBoolField(TEXT("curve_driving_speed"), Movement->IsCurveDrivingSpeed());
+		const auto Interval = Movement->GetMotionExecutionSnapshot();
+		Result->SetNumberField(TEXT("interval_status"), static_cast<uint8>(Interval.Status));
+		Result->SetNumberField(TEXT("source_kind"), static_cast<uint8>(Interval.SourceKind));
+		Result->SetNumberField(TEXT("interval_motion_type"), static_cast<uint8>(Interval.MotionType));
+		Result->SetNumberField(TEXT("motion_sequence"), Interval.MotionSequence);
+		Result->SetStringField(TEXT("completed_frame"), LexToString(Interval.CompletedFrame));
+		Result->SetNumberField(TEXT("motion_start_seconds"), Interval.MotionStartSeconds);
+		Result->SetNumberField(TEXT("motion_end_seconds"), Interval.MotionEndSeconds);
+		Result->SetBoolField(TEXT("ended"), Interval.bEnded);
+		Result->SetStringField(TEXT("diagnostic"), Interval.Diagnostic);
+	}
+	FString Json;
+	FJsonSerializer::Serialize(Result, TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&Json));
+	return Json;
+}
+
+FString UGGYGOPlayerActionObservation::ReadWorldClock(UWorld* World)
+{
+	check(IsInGameThread());
+	auto Result = MakeShared<FJsonObject>();
+	const bool bAvailable = IsValid(World) && World->IsGameWorld();
+	Result->SetBoolField(TEXT("available"), bAvailable);
+	if (bAvailable)
+	{
+		Result->SetStringField(TEXT("world"), World->GetPathName());
+		Result->SetStringField(TEXT("frame"), LexToString(GFrameCounter));
+		Result->SetNumberField(TEXT("world_seconds"), World->GetTimeSeconds());
+		Result->SetNumberField(TEXT("real_seconds"), World->GetRealTimeSeconds());
+		Result->SetNumberField(TEXT("unpaused_seconds"), World->GetUnpausedTimeSeconds());
+		Result->SetNumberField(TEXT("delta_seconds"), World->GetDeltaSeconds());
+		Result->SetBoolField(TEXT("paused"), World->IsPaused());
+		Result->SetBoolField(TEXT("should_tick"), World->ShouldTick());
+		Result->SetBoolField(TEXT("slate_allows_expensive_tasks"), FSlateThrottleManager::Get().IsAllowingExpensiveTasks());
+		Result->SetNumberField(TEXT("effective_time_dilation"), World->GetWorldSettings()->GetEffectiveTimeDilation());
+		const AGameStateBase* GameState = World->GetGameState();
+		Result->SetBoolField(TEXT("has_game_state"), GameState != nullptr);
+		if (GameState) { Result->SetNumberField(TEXT("server_world_seconds"), GameState->GetServerWorldTimeSeconds()); }
+	}
+	FString Json;
+	FJsonSerializer::Serialize(Result, TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&Json));
+	return Json;
+}
+
+bool UGGYGOPlayerActionObservation::BeginNetworkFXObservation(UWorld* BeforeTravelWorld, const FString& TrialId,
+	int32 MaxRecords, FString& OutDiagnostic)
+{
+	check(IsInGameThread());
+	const FWorldContext* Context = GEngine && IsValid(BeforeTravelWorld) ? GEngine->GetWorldContextFromWorld(BeforeTravelWorld) : nullptr;
+	if (State || NetworkFX || HasAnyFlags(RF_ClassDefaultObject | RF_BeginDestroyed | RF_FinishDestroyed)
+		|| !Context || Context->WorldType != EWorldType::PIE || Context->ContextHandle.IsNone()
+		|| Context->PIEInstance < 0 || BeforeTravelWorld->GetNetMode() != NM_Standalone
+		|| BeforeTravelWorld->bIsTearingDown || TrialId.TrimStartAndEnd().IsEmpty()
+		|| MaxRecords < 1 || MaxRecords > 4096)
+	{
+		OutDiagnostic = TEXT("[FX.Observation] 需要 Travel 前原 Standalone PIE Context 和有限收件窗口。");
+		return false;
+	}
+	OutDiagnostic.Reset();
+	NetworkFX = MakeShared<FNetworkFXState>();
+	NetworkFX->Context = Context->ContextHandle;
+	NetworkFX->PIEInstance = Context->PIEInstance;
+	NetworkFX->TrialId = TrialId;
+	NetworkFX->MaxRecords = MaxRecords;
+	NetworkFX->RegisteredHandle = UGGYGOMontageFXReplicationComponent::OnPublisherRegistered().AddUObject(
+		this, &ThisClass::OnNetworkFXPublisherRegistered);
+	NetworkFX->WorldCleanupHandle = FWorldDelegates::OnWorldCleanup.AddUObject(this, &ThisClass::OnWorldCleanup);
+	NetworkFX->EndPIEHandle = FEditorDelegates::EndPIE.AddUObject(this, &ThisClass::OnEndPIE);
+	return true;
+}
+
+void UGGYGOPlayerActionObservation::OnNetworkFXPublisherRegistered(UGGYGOMontageFXReplicationComponent& Host,
+	UGGYGOMontageFXPublicationOwner& Publisher)
+{
+	const auto Original = NetworkFX;
+	UWorld* World = Host.GetWorld();
+	const FWorldContext* Context = GEngine && IsValid(World) ? GEngine->GetWorldContextFromWorld(World) : nullptr;
+	if (!Original || !Original->bActive || Original->Source || !Context || Context->WorldType != EWorldType::PIE
+		|| Context->ContextHandle != Original->Context || Context->PIEInstance != Original->PIEInstance
+		|| World->GetNetMode() != NM_Client || !Cast<AGGYGOCharacterSlot>(Host.GetOwner()))
+	{ return; }
+	FString Diagnostic;
+	const auto Window = Publisher.BeginObservation(Original->MaxRecords, Diagnostic, true);
+	if (!Window)
+	{
+		Original->bEvidenceIncomplete = true;
+		Original->Diagnostic = MoveTemp(Diagnostic);
+		return;
+	}
+	Original->Candidates.Add({&Host, &Publisher, Window, Publisher.GetRegistrationSerial(), GFrameCounter});
+}
+
+bool UGGYGOPlayerActionObservation::SelectNetworkFXPublisher(UAbilitySystemComponent* Issuer, FString& OutDiagnostic)
+{
+	check(IsInGameThread());
+	const auto Original = NetworkFX;
+	auto* Host = IsValid(Issuer) ? UGGYGOMontageFXReplicationComponent::FindForASC(Issuer) : nullptr;
+	auto* Publisher = Host ? Host->GetPublicationOwner() : nullptr;
+	if (!Original || !Original->bActive || Original->Source || Original->bEvidenceIncomplete || !IsValid(Publisher))
+	{
+		OutDiagnostic = TEXT("[FX.Observation] 无法选择实际原 Slot 的一次预布防窗口。");
+		return false;
+	}
+	const auto* Candidate = Original->Candidates.FindByPredicate([Host, Publisher](const auto& Item)
+	{
+		return Item.Host.Get() == Host && Item.Publisher.Get() == Publisher
+			&& Item.Registration == Publisher->GetRegistrationSerial();
+	});
+	if (!Candidate)
+	{
+		OutDiagnostic = TEXT("[FX.Observation] 原 Slot 当前注册代次缺 Travel 前布防；不能补订阅。");
+		return false;
+	}
+	Original->Selected = *Candidate;
+	for (const auto& Item : Original->Candidates)
+	{ if (Item.Window != Original->Selected.Window) { Item.Window->Stop(); } }
+	Original->Candidates.Reset();
+	Original->ClientWorld = Host->GetWorld();
+	Original->Source = MakeShared<FJsonObject>();
+	for (const auto& Item : {TPair<const TCHAR*, UObject*>(TEXT("issuer"), Issuer),
+		{TEXT("fx_host"), Host}, {TEXT("publisher"), Publisher}, {TEXT("slot"), Host->GetOwner()}, {TEXT("world"), Host->GetWorld()}})
+	{
+		Original->Source->SetStringField(Item.Key, Item.Value->GetPathName());
+		Original->Source->SetStringField(FString(Item.Key) + TEXT("_id"), LexToString(Item.Value->GetUniqueID()));
+	}
+	Original->Source->SetStringField(TEXT("owner_registration"), LexToString(Original->Selected.Registration));
+	Original->Source->SetStringField(TEXT("registered_frame"), LexToString(Original->Selected.RegisteredFrame));
+	Original->Source->SetStringField(TEXT("world_context_handle"), Original->Context.ToString());
+	Original->Source->SetNumberField(TEXT("pie_instance"), Original->PIEInstance);
+	return DrainNetworkFX(OutDiagnostic);
+}
+
+bool UGGYGOPlayerActionObservation::DrainNetworkFX(FString& OutDiagnostic)
+{
+	check(IsInGameThread());
+	const auto Original = NetworkFX;
+	if (!Original || !Original->bActive || !Original->Selected.Window)
+	{
+		OutDiagnostic = TEXT("[FX.Observation] 原连续观察尚未选择实际 Publisher。");
+		return false;
+	}
+	auto* Host = Original->Selected.Host.Get();
+	auto* Publisher = Original->Selected.Publisher.Get();
+	TArray<FGGYGOMontageFXObservationFact> Facts;
+	const bool bDrained = Original->Selected.Window->Drain(Facts, OutDiagnostic);
+	if (!IsValid(Host) || !IsValid(Publisher) || !Original->ClientWorld.IsValid()
+		|| Host->GetWorld() != Original->ClientWorld.Get() || Host->GetPublicationOwner() != Publisher
+		|| Publisher->GetRegistrationSerial() != Original->Selected.Registration)
+	{ OutDiagnostic = TEXT("[FX.Observation] 原 Slot Publisher 已换代或原 Client World 已退役。"); }
+	for (const auto& Fact : Facts)
+	{
+		if (Fact.OwnerRegistration != Original->Selected.Registration
+			|| Fact.Publisher != Original->Selected.Publisher || Fact.Issuer.Get() != Host
+			|| Fact.World != Original->ClientWorld || Original->Records.Num() >= Original->MaxRecords)
+		{
+			OutDiagnostic = TEXT("[FX.Observation] 连续原窗收到异源事实或容量已满。");
+			break;
+		}
+		auto Row = MakeShared<FJsonObject>();
+		Row->SetStringField(TEXT("kind"), GGYGOPlayerActionObservation::FXKind(Fact.Kind));
+		Row->SetStringField(TEXT("native_event_frame"), LexToString(Fact.NativeFrame));
+		Row->SetStringField(TEXT("state_revision"), LexToString(Fact.StateRevision));
+		Row->SetStringField(TEXT("occurrence"), LexToString(Fact.Occurrence));
+		Row->SetStringField(TEXT("avatar_id"), LexToString(Fact.AvatarObjectId));
+		if (Fact.Kind == EGGYGOMontageFXObservationKind::StateReceived)
+		{
+			TArray<TSharedPtr<FJsonValue>> Keys;
+			for (const uint64 Key : Fact.ActiveOccurrences)
+			{ Keys.Add(MakeShared<FJsonValueString>(LexToString(Key))); }
+			Row->SetArrayField(TEXT("active_occurrences"), MoveTemp(Keys));
+		}
+		if (Fact.bHasTerminal)
+		{
+			Row->SetStringField(TEXT("terminal_occurrence"), LexToString(Fact.Terminal.Occurrence));
+			Row->SetStringField(TEXT("close_revision"), LexToString(Fact.Terminal.CloseRevision));
+			Row->SetStringField(TEXT("close_reason"), Fact.Terminal.Reason == EGGYGOMontageFXCloseReason::Normal ? TEXT("Normal") : TEXT("Abort"));
+		}
+		Original->Records.Add(MakeShared<FJsonValueObject>(Row));
+	}
+	if (!bDrained || !OutDiagnostic.IsEmpty())
+	{
+		Original->bEvidenceIncomplete = true;
+		Original->Diagnostic = OutDiagnostic;
+	}
+	return !Original->bEvidenceIncomplete;
+}
+
+void UGGYGOPlayerActionObservation::ReleaseNetworkFX(const FString& Reason)
+{
+	const auto Original = NetworkFX;
+	if (!Original || !Original->bActive) { return; }
+	if (Original->Selected.Window)
+	{
+		FString Diagnostic;
+		DrainNetworkFX(Diagnostic);
+		Original->Selected.Window->Stop();
+		Original->Selected.Window.Reset();
+	}
+	for (const auto& Item : Original->Candidates) { Item.Window->Stop(); }
+	Original->Candidates.Reset();
+	Original->StopReason = Reason;
+	Original->bActive = false;
+	UGGYGOMontageFXReplicationComponent::OnPublisherRegistered().Remove(Original->RegisteredHandle);
+	FWorldDelegates::OnWorldCleanup.Remove(Original->WorldCleanupHandle);
+	FEditorDelegates::EndPIE.Remove(Original->EndPIEHandle);
+}
+
+FString UGGYGOPlayerActionObservation::GetNetworkFXObservationJson(int32 FirstRecordIndex, int32 MaxRecordCount) const
+{
+	check(IsInGameThread());
+	auto Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("schema"), TEXT("GGYGO.NetworkFXPublisherObservation/v1"));
+	Result->SetBoolField(TEXT("has_window"), NetworkFX.IsValid());
+	if (NetworkFX)
+	{
+		Result->SetStringField(TEXT("trial_id"), NetworkFX->TrialId);
+		Result->SetBoolField(TEXT("active"), NetworkFX->bActive);
+		Result->SetBoolField(TEXT("evidence_incomplete"), NetworkFX->bEvidenceIncomplete);
+		Result->SetStringField(TEXT("diagnostic"), NetworkFX->Diagnostic);
+		Result->SetStringField(TEXT("stop_reason"), NetworkFX->StopReason);
+		if (NetworkFX->Source) { Result->SetObjectField(TEXT("original_source"), NetworkFX->Source); }
+		GGYGOPlayerActionObservation::AddRecordPage(*Result, NetworkFX->Records, FirstRecordIndex, MaxRecordCount);
+	}
+	FString Json;
+	FJsonSerializer::Serialize(Result, TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&Json));
+	return Json;
+}
+
+FString UGGYGOPlayerActionObservation::ReadNetworkFXChannel(UWorld* World, int32 ViewerPlayerId, APawn* Pawn)
+{
+	check(IsInGameThread());
+	auto Result = MakeShared<FJsonObject>();
+	UNetDriver* Driver = IsValid(World) && World->WorldType == EWorldType::PIE && !World->bIsTearingDown
+		? World->GetNetDriver() : nullptr;
+	const bool bClient = Driver && World->GetNetMode() == NM_Client;
+	const bool bListen = Driver && World->GetNetMode() == NM_ListenServer;
+	APlayerController* Viewer = nullptr;
+	if (bClient || bListen)
+	{
+		for (auto It = World->GetPlayerControllerIterator(); It; ++It)
+		{
+			auto* PC = It->Get();
+			const auto* PS = IsValid(PC) ? PC->GetPlayerState<APlayerState>() : nullptr;
+			if (!PS || PS->GetPlayerId() != ViewerPlayerId || PC->IsLocalController() != bClient) { continue; }
+			if (Viewer) { Viewer = nullptr; break; }
+			Viewer = PC;
+		}
+	}
+	UNetConnection* Connection = Viewer ? Viewer->GetNetConnection() : nullptr;
+	if (bClient && Viewer) { Connection = Driver->ServerConnection.Get(); }
+	if (IsValid(Connection) && Connection->GetDriver() == Driver
+		&& (!bListen || (Connection->PlayerController == Viewer && Driver->ClientConnections.Contains(Connection)))
+		&& (ChannelConnection.IsExplicitlyNull() || (ChannelConnection.Get() == Connection && ChannelWorld.Get() == World))
+		&& (!Pawn || (IsValid(Pawn) && Pawn->GetWorld() == World && Pawn->GetLocalRole() == (bClient ? ROLE_SimulatedProxy : ROLE_Authority))))
+	{
+		const bool bOpen = Connection->GetConnectionState() == USOCK_Open;
+		if (bOpen && ChannelConnection.IsExplicitlyNull())
+		{
+			ChannelConnection = Connection;
+			ChannelWorld = World;
+		}
+		auto* Channel = Pawn ? Connection->FindActorChannelRef(Pawn) : nullptr;
+		const auto& GuidCache = Driver->GetNetGuidCache();
+		FNetworkGUID Guid;
+		if (bClient && Channel) { Guid = Channel->ActorNetGUID; }
+		else if (Pawn && GuidCache.IsValid()) { Guid = GuidCache->GetNetGUID(Pawn); }
+		Result->SetStringField(TEXT("world"), World->GetPathName());
+		Result->SetNumberField(TEXT("connection_id"), Connection->GetUniqueID());
+		Result->SetNumberField(TEXT("viewer_player_id"), ViewerPlayerId);
+		Result->SetBoolField(TEXT("connection_open"), bOpen);
+		Result->SetBoolField(TEXT("actor_channel_absent"), Pawn && !Channel);
+		Result->SetStringField(TEXT("observed_frame"), LexToString(GFrameCounter));
+		Result->SetNumberField(TEXT("relevant_timeout"), Driver->RelevantTimeout);
+		if (Pawn)
+		{
+			Result->SetStringField(TEXT("pawn"), Pawn->GetPathName());
+			Result->SetStringField(TEXT("pawn_full_name"), Pawn->GetFullName());
+			Result->SetNumberField(TEXT("pawn_id"), Pawn->GetUniqueID());
+			Result->SetNumberField(TEXT("net_cull_distance_squared"), Pawn->GetNetCullDistanceSquared());
+			if (bListen && IsValid(Connection->ViewTarget))
+			{
+				// 复用 NetDriver 同一真实 Viewer 的视点与 Pawn 原相关性判定。
+				FVector ViewLocation;
+				FRotator ViewRotation;
+				Viewer->GetPlayerViewPoint(ViewLocation, ViewRotation);
+				Result->SetNumberField(TEXT("viewer_distance_squared"), FVector::DistSquared(ViewLocation, Pawn->GetActorLocation()));
+				Result->SetBoolField(TEXT("pawn_relevant_to_viewer"), Pawn->IsNetRelevantFor(Viewer, Connection->ViewTarget, ViewLocation));
+			}
+		}
+		if (Guid.IsValid()) { Result->SetStringField(TEXT("pawn_net_guid"), Guid.ToString()); }
+		if (Channel && Channel->GetActor() == Pawn)
+		{
+			Result->SetNumberField(TEXT("channel_index"), Channel->ChIndex);
+			Result->SetNumberField(TEXT("channel_id"), Channel->GetUniqueID());
+		}
+	}
+	FString Json;
+	FJsonSerializer::Serialize(Result, TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&Json));
+	return Json;
 }
 
 bool UGGYGOPlayerActionObservation::BeginFXObservation(UAbilitySystemComponent* Issuer,
@@ -233,7 +611,7 @@ bool UGGYGOPlayerActionObservation::BeginFXObservation(UAbilitySystemComponent* 
 {
 	check(IsInGameThread());
 	OutDiagnostic.Reset();
-	if (State.IsValid() || HasAnyFlags(RF_ClassDefaultObject | RF_BeginDestroyed | RF_FinishDestroyed)
+	if (State.IsValid() || NetworkFX || HasAnyFlags(RF_ClassDefaultObject | RF_BeginDestroyed | RF_FinishDestroyed)
 		|| !IsValid(Issuer) || !IsValid(Pawn) || !IsValid(Mesh)
 		|| Issuer->HasAnyFlags(RF_ClassDefaultObject) || !IsValid(Pawn->GetWorld()) || !Pawn->GetWorld()->IsGameWorld()
 		|| Mesh->GetOwner() != Pawn || Mesh->GetWorld() != Pawn->GetWorld()
@@ -296,7 +674,7 @@ bool UGGYGOPlayerActionObservation::BeginObservation(UGGYGOPlayerComboAbility* A
 {
 	check(IsInGameThread());
 	OutDiagnostic.Reset();
-	if (State.IsValid() || HasAnyFlags(RF_ClassDefaultObject | RF_BeginDestroyed | RF_FinishDestroyed)
+	if (State.IsValid() || NetworkFX || HasAnyFlags(RF_ClassDefaultObject | RF_BeginDestroyed | RF_FinishDestroyed)
 		|| !IsValid(Ability) || Ability->HasAnyFlags(RF_ClassDefaultObject)
 		|| !IsValid(ASC) || !IsValid(Pawn) || !IsValid(Mesh) || !IsValid(Montage)
 		|| TrialId.TrimStartAndEnd().IsEmpty() || MaxRecords < 1 || MaxRecords > 4096)
@@ -368,6 +746,7 @@ bool UGGYGOPlayerActionObservation::BeginObservation(UGGYGOPlayerComboAbility* A
 bool UGGYGOPlayerActionObservation::Sample(double ElapsedSeconds, FString& OutDiagnostic)
 {
 	check(IsInGameThread());
+	if (NetworkFX) { return DrainNetworkFX(OutDiagnostic); }
 	OutDiagnostic.Reset();
 	const auto Original = State;
 	if (!Original.IsValid() || !Original->bActive || !FMath::IsFinite(ElapsedSeconds)
@@ -696,11 +1075,14 @@ void UGGYGOPlayerActionObservation::ReleaseObservation(const FString& Reason)
 void UGGYGOPlayerActionObservation::StopObservation()
 {
 	check(IsInGameThread());
+	ReleaseNetworkFX(TEXT("StoppedByCaller"));
 	ReleaseObservation(TEXT("StoppedByCaller"));
 }
 
 void UGGYGOPlayerActionObservation::OnWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources)
 {
+	if (NetworkFX && NetworkFX->ClientWorld == TWeakObjectPtr<UWorld>(World))
+	{ ReleaseNetworkFX(TEXT("OriginalWorldCleanup")); }
 	if (State.IsValid() && State->bActive && State->World == TWeakObjectPtr<UWorld>(World))
 	{
 		ReleaseObservation(TEXT("OriginalWorldCleanup"));
@@ -709,16 +1091,18 @@ void UGGYGOPlayerActionObservation::OnWorldCleanup(UWorld* World, bool bSessionE
 
 void UGGYGOPlayerActionObservation::OnEndPIE(bool bSimulating)
 {
+	ReleaseNetworkFX(TEXT("EndPIE"));
 	ReleaseObservation(TEXT("EndPIE"));
 }
 
 void UGGYGOPlayerActionObservation::BeginDestroy()
 {
+	ReleaseNetworkFX(TEXT("ObjectDestroyed"));
 	ReleaseObservation(TEXT("ObjectDestroyed"));
 	Super::BeginDestroy();
 }
 
-FString UGGYGOPlayerActionObservation::GetObservationJson() const
+FString UGGYGOPlayerActionObservation::GetObservationJson(int32 FirstRecordIndex, int32 MaxRecordCount) const
 {
 	check(IsInGameThread());
 	auto Result = MakeShared<FJsonObject>();
@@ -750,7 +1134,7 @@ FString UGGYGOPlayerActionObservation::GetObservationJson() const
 		}
 		Result->SetBoolField(TEXT("subscriptions_released"), !State->EndedHandle.IsValid()
 			&& !State->WorldCleanupHandle.IsValid() && !State->EndPIEHandle.IsValid() && !State->FXWindow.IsValid());
-		Result->SetArrayField(TEXT("records"), State->Records);
+		GGYGOPlayerActionObservation::AddRecordPage(*Result, State->Records, FirstRecordIndex, MaxRecordCount);
 	}
 	FString Json;
 	if (!FJsonSerializer::Serialize(Result, TJsonWriterFactory<>::Create(&Json)))

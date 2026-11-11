@@ -1,41 +1,53 @@
-# 最小联机验证：纠正重放与特效晚加入
+# 最小联机：纠正重放与特效晚加入
 
-状态：由 AbilitySystem 原 Codex 会话端到端接续验证与必要修复。源码在当前构建里，双端真实渲染仍未通过；先复用已有代码和测试入口，双端运行与其它我方 Editor 按占用和实测资源协调。
+状态：六个正常场景及活尾专项均完成；源码编译、17 项脚本回归、D3D12 双端数值断言和要求的客户端画面检查通过。Movement 核心差分评审无阻塞，FX 活尾问题已修复并完成定点复核与运行验证。负责人为 AbilitySystem 原会话。
 
 ## 目标
 
-在监听服务器加一个客户端、两端都用真实渲染的情况下，确认下面几种联机情况真实可用：
+在监听服务器、预测 owner 和独立观察客户端使用真实渲染的条件下，验证原激活的纠正重放、初始输入不可用、动作自然完成，以及 FX 首次相关性、闭窗首次相关性和同连接重获。
 
-1. 客户端预测打出第 1 段，服务器拒绝；客户端按原来的基准回到第 0 段重放，之后再真正新起第 1 段。
-2. 客户端拿不到初始目标数据时，同一次激活发出可靠的取消消息，并正确归还资源。
-3. 只按攻击（不带移动）时，同一个 Montage 和 Task 自然结束；根运动按实际步长消费最后的位移和朝向；GA 没被取消。
-4. 特效晚加入的三种情况：
-   - 远端在特效播放窗口内第一次进入相关范围，要看到实际特效画面，播放进度按服务器时间对齐；
-   - 窗口已经关闭后才第一次进入，收到完整的复制状态，但不重新创建、不补播；
-   - 同一个连接先失去再重新获得相关性，旧通道关闭、新代理出现并显示剩余特效，旧资源退役不影响同一个键的后续特效。
+## 方案与接口
 
-网络模拟只开延迟；读回确认丢帧、包膨胀、丢包都为 0。
+- `WaitComboInput` 收到原激活的有效 Initial 后清除原生必需远端数据等待；后续攻击为可选输入。初始不可用仍走同 Spec／ActivationKey 的可靠取消并精准归还。
+- PlayerCombo 在 GA 原生取消期间关闭 Montage Task 的 native OnCancelled 回调，避免再次请求 Cancel；Task 自身失败与 BP 通知保留。
+- 动作 RMS 取消时立即清零贡献，转为待移除的 Additive，保留原 LocalID 供原生匹配与清理。已有映射可跨取消状态匹配，但原配置及资源仍须一致；自然末段只在原 GA 有效且原 Task 自然完成时有限 drain，最后 XYZ／Yaw 必须实际消费。有效 Authority End 立即归还同激活的本地预测资源。
+- FX 发布归 `MontageFXReplicationComponent`／`MontageFXPublicationOwner`，资源持有者关闭自身 lease。远端组件在原 Solo Tick 中持续以 BeginServerTime 求 DesiredAge；依赖就绪且实际 Controller Age 达标才显示，同帧同步原 Niagara 场景代理的渲染状态。追赶不足再次隐藏；有效活尾恢复原时间模式、清 seek 并恢复原渲染值，由原 Tick 自然结束。
+- Editor 的 `PlayerActionObservation` 提供连续复制收件、原通道读回、原 World／Locomotion 只读快照和可选分页。结束时分页合并与原无参全量比对；观察不推进或替换生产执行。
+- requirements 9.5 的纠正范围是 owner／Authority 的拒绝、原 basis 重放、新段、真实末段及精准退役。统筹与 Movement 确认：当前模拟代理没有独立 action RMS Apply；不为校验器扩建复制链。代理胶囊沿 ReplicatedMovement／CMC smoothing，动作姿态沿 GAS ReplicatedAnimMontage；RemoteMotionPose 只补普通 Locomotion 单 Sequence。代理 imported RMS 与单独复制帧配对保持未覆盖，不由其它链的存在代签。
 
-## 方案要点
+## 验证入口与环境约束
 
-- 用纠正接收日志和初始取消日志作为证据，不另做第二套同步机制。
-- 特效晚加入的观察入口：`UGGYGOPlayerActionObservation::BeginNetworkFXObservation`／`SelectNetworkFXPublisher`／`ReadNetworkFXChannel`（Editor 模块），运行时 `UGGYGOMontageFXReplicationComponent::OnPublisherRegistered` 和 `StateReceived` 观察记录只在 Editor 构建里存在。
-- 跑之前与占用者协调，待其它我方 UE 工作正常收尾后实测剩余内存；不终止其它作者的健康实例，不碰用户编辑器。内存确实不够时如实记录阻塞和实测数字，离线实现和测试准备继续。
+入口是 `AAADocs/Scripts/run_minimal_multiplayer.ps1`、`observe_minimal_multiplayer.py`、`verify_minimal_multiplayer.py`；断言、原输入、状态通信分别位于对应的 `minimal_multiplayer_checks.py`、`minimal_multiplayer_input.py`、`minimal_multiplayer_status.py`。
 
-## 当前状态
+运行使用自有两个 D3D12 离屏 Editor：同进程监听服务器和预测 owner，加独立观察客户端。脚本走原生产数字键装配，网络配置读回只允许 lag，FrameDelay／Bloat／Loss 为零。输出与 UserDir 隔离；启动前检查 Editor／UBT 冲突和实际物理／提交余量。不开 SaveAll，不改用户资产。
 
-- 纠正接收日志和初始取消的源码已在当前构建里。工作树里另有一批未提交改动，按内容判断属于这条线（作者没有登记，归属是收尾时读 diff 推断的）：GA 权威取消诊断日志、WaitComboInput 首次数据后清除远端等待、Montage Task 在 GA 进入原生 Cancel 后不再重入 Cancel、动作根运动源按 LocalID 跨取消状态匹配、特效晚加入观察入口。它们已随整个工作树编译，单机冒烟也在跑它们，但没有联机运行证据，所以没有提交 Git，清单见[交接文档](../Coordination/Handover_Codex.md)。
-- 以前实测双端起步约需物理内存 14.8 GiB、提交 24.1 GiB；启动前重新测可用物理和提交内存，不沿用旧空闲值。
-- 特效晚加入以前只看到过同一个键的最终状态，没看到实际画面。
+各实际 PIE World 在输入前用 `CreateForSystemAssets` 等待原三段 Combo 的 9 个 Niagara System 材质准备完成。自有 Editor 关闭 Slate UI 节流及后台 Level Editor 实时绘制，浮动 PIE 为约 640×360。以上是本需求的非冷加载夹具，不构成冷首击验收。
 
-## 未完成项
+FX 用原 Normal03 三连的下劈／地面单元，原可见点约为 Age 0.8 秒，不延长资产或通知。截图在可见点前两原生步长预约，每张按真实 Draw 帧的实际 Age 与复制状态核验。重获使用原生进程内 `RelevantTimeout=0.05`，原通道实际关闭后恢复 cull 并 `ForceNetUpdate`；客户端独立核 Close／CleanUp、同连接同 NetGUID 的新代理和旧资源退役，不修改生产默认等待时长。
 
-1. 第一个独立验收点：其它我方编辑器正常收尾并释放资源、实测内存可用后起双端，跑纠正重放和只按攻击两个试次。
-2. 在同一个双端环境里依次跑三个特效晚加入试次，每次截客户端视口并查看。
-3. 勾选 `.kiro/specs/abilitysystem-activation-lifecycle/tasks.md` 和 `.kiro/specs/fx-montage-publication-ownership/tasks.md` 的对应项，然后提交相关源码。
+## 验证结果
+
+证据根目录：`Saved/Codex/MinimalMultiplayer_20261111/`。各正常场景的 `checks.json` 保留数值结果，画面结论列在下表；原失败数据保留，不改写为通过。
+
+| 场景 | 实际结果与证据 |
+| --- | --- |
+| 只按攻击 | `Run_03/attack_only/checks.json`：同原 Montage／Task／GA 自然结束，真实 Native 步长及最后 XYZ／Yaw 消费，资源清空。 |
+| 初始输入不可用 | `Run_06/initial_unavailable/checks.json`：同激活唯一可靠取消链，无完整 TargetData、无起段 RMS，原任务及 GA 清空。 |
+| 纠正重放 | `Run_28/correction/checks.json`：预测段 1 拒绝 → Mode2 原 basis 重放段 0 → 新段 1；两端原动作自然完成，原普通 WalkStop 也自然结束，最终公开资源清空。 |
+| 闭窗首次相关性 | `Run_12/closed_first/checks.json`：完整空活动状态、无同键重建；客户端 PNG 已查看，无补播。 |
+| 活窗首次相关性 | `Run_26/live_first/checks.json` 与 `observer/client_1.png`：同帧实际 Age 约 0.8333，目标约 0.8563；实际图可见下劈弧与地面层。 |
+| 同连接重获 | `Run_31/reacquire/checks.json` 与 `observer/client.png`：旧通道实际 Close／CleanUp，新代理仍属同连接同 NetGUID；旧资源归还后新 generation 推进；同帧 Age 约 0.8333，实际图清楚显示下劈弧和地面亮光。 |
+| 追赶隐藏后的活尾专项 | `Run_29/live_first/checks.json` 与 `observer/client.png`：仅降低原组件公开 seek CPU 预算，原实例 reached 后实际落后并隐藏；正常闭窗恢复原时间模式与渲染，实际尾图可见地面余光和粒子，随后自然完成与销毁。此试次单列为回归，不代替正常活窗验收。 |
+
+最终源码编译：`build_tail_observation.log`，Succeeded。17 项相关 Python 回归、Python／PowerShell 语法及差分检查通过。全部自有 Editor 正常退出；当前无 UE／UBT 占用。
+
+## 未验证边界
+
+Cook、性能、物理输入设备、前台焦点切换、完整丢包／高延迟矩阵、其它角色与全部动作、生产默认相关性等待时长，以及模拟代理独立 RMS 导入执行未验。Obsidian Canvas 已检查 JSON、ID、边端点与链接，未进行原生 Obsidian 渲染检查。
 
 ## 验收标准
 
-- 日志能看到：预测第 1 段 → 服务器拒绝 → 重放第 0 段 → 新的第 1 段。
-- 有取消消息和资源归还的日志；只按攻击时有自然结束的证据。
-- 三个特效晚加入试次各有日志和客户端画面，画面符合上面的预期。
+- 同原激活完成预测拒绝、原基准重放、新接受段与精准清理。
+- 初始不可用可靠取消；独立只按攻击以原资源自然完成，不能用退出取消替代。
+- 三个 FX 相关性场景都有完整数值证据和符合预期的真实客户端画面。
+- 结构文档只写当前职责与接口，流程图只写实际触发、调用和结果；任务状态与验证结果留在本记录。

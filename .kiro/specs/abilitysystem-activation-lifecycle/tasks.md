@@ -83,10 +83,10 @@
   - 检查磁盘余量并告知，编译 GGYGOEditor
   - 运行 Requirement 9.2 列出的全部测试
   - PIE 与最小联机按 Requirement 9.4、9.5 验证。
-  - [ ] N0/N1：复用 Build_R48 和原 D3D12 双端入口，按[最小联机需求记录](../../../AAADocs/需求文档/minimal_multiplayer.md)的内存要求采集同窗内存（当前负责人和占用见[看板](../../../AAADocs/Coordination/Board.md)）。闩停只记资源失败。真实 attack-only 中，同一原 Montage 和 Task 自然结束，同一 RMS 按真实步长消费最后的 XYZ/Yaw，GA 未取消且原资源全部归还。退出退役的取消不作自然收尾证据。
-  - [ ] N5：读回具名 NET 的两项 lag 与五项 incoming，FrameDelay、Bloat 或 Loss 非零拒绝。记录预测段 1、服务器拒绝、沿 Mode2 原 basis 重放段 0、随后真正新起段 1；另证 Initial 无法提供时同激活 Reliable TargetDataCancelled 和准确归还。attack-only 独立取证，原双打断点和纠正身份保持。
+  - [x] N0/N1：D3D12 双端真实 attack-only 中，同一原 Montage／Task 自然结束，同一 RMS 按真实步长消费最后的 XYZ／Yaw，GA 未取消且原资源全部归还；内存预检与断言证据见[最小联机需求记录](../../../AAADocs/需求文档/minimal_multiplayer.md)。
+  - [x] N5：具名 NET 读回仅有 lag；预测段 1 被服务器拒绝，沿 Mode2 原 basis 重放段 0，随后真正新起段 1，两端自然结束并清理。Initial 无法提供的独立试次证明同激活 Reliable TargetDataCancelled 与精准归还。模拟代理独立 Apply／imported RMS 不属于 requirements 9.5 的前提，未扩建该执行链；证据与边界见最小联机需求记录。
   - _Requirements: 9.1-9.5_
-  - 已完成编译与 NullRHI 测试（Build_R6～R10、Test_R7～R10，结论见活动记录"第 4 步"）；PIE 单机与最小联机需真实 RHI，另批
+  - 编译与既有 NullRHI 测试证据保持；最小联机已完成 D3D12 双端验证。此勾选不替代其余单机、Cook 或完整网络矩阵。
 
 - [x] 9. 更新活动记录
   - _Requirements: 9.6_

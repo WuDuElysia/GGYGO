@@ -12,6 +12,10 @@ class UWorld;
 class UAbilitySystemComponent;
 class UGGYGOAbilitySystemComponent;
 class UGGYGOPlayerComboAbility;
+class UGGYGOCharacterMovementComponent;
+class UGGYGOMontageFXReplicationComponent;
+class UGGYGOMontageFXPublicationOwner;
+class UNetConnection;
 struct FAbilityEndedData;
 class FJsonObject;
 struct FGGYGOMontageFXObservationFact;
@@ -36,6 +40,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GGYGO|Combat|Observation")
 	static UGGYGOPlayerActionObservation* CreateObservation();
 
+	/** 同次读回原 World 时钟、暂停、倍率和 Slate 的 PIE Tick 门限；不推进或修改任何状态。 */
+	UFUNCTION(BlueprintPure, Category = "GGYGO|Combat|Observation")
+	static FString ReadWorldClock(UWorld* World);
+
+	/** 读取普通移动状态、实际曲线源和当前完成区间，区分语义旧值与仍活动的资源。 */
+	UFUNCTION(BlueprintPure, Category = "GGYGO|Combat|Observation")
+	static FString ReadLocomotionState(UGGYGOCharacterMovementComponent* Movement);
+
 	/** @param Ability 同 ASC 的实际原实例，拒绝 CDO、未起段、歧义或已换源。
 	 * @param TrialId 宿主实际采用的非空标识；不自动产生或替换本轮标识。
 	 * @param MaxRecords 1..4096 的有限采样容量。
@@ -54,6 +66,22 @@ public:
 	bool BeginFXObservation(UAbilitySystemComponent* Issuer, APawn* Pawn, USkeletalMeshComponent* Mesh,
 		const FString& TrialId, int32 MaxRecords, FString& OutDiagnostic);
 
+	/** 在 B 的原 Standalone PIE Context、Travel 前布防；目的 Client World 的原 Slot 注册即开始收件。 */
+	UFUNCTION(BlueprintCallable, Category = "GGYGO|FX|Observation")
+	bool BeginNetworkFXObservation(UWorld* BeforeTravelWorld, const FString& TrialId, int32 MaxRecords, FString& OutDiagnostic);
+
+	/** 原 GetActiveSlot 映射就绪后选取已布防的宿主。选定后跨 Pawn 退役保留原 Publisher 窗。 */
+	UFUNCTION(BlueprintCallable, Category = "GGYGO|FX|Observation")
+	bool SelectNetworkFXPublisher(UAbilitySystemComponent* Issuer, FString& OutDiagnostic);
+
+	/** 与动作观察使用相同分页范围；默认全量，范围错误不改变收件窗。 */
+	UFUNCTION(BlueprintPure, Category = "GGYGO|FX|Observation")
+	FString GetNetworkFXObservationJson(int32 FirstRecordIndex = 0, int32 MaxRecordCount = -1) const;
+
+	/** 首次读回固定打开的真实连接；后续拒绝连接或 World 换代。Pawn 为空时只读连接。 */
+	UFUNCTION(BlueprintCallable, Category = "GGYGO|FX|Observation")
+	FString ReadNetworkFXChannel(UWorld* World, int32 ViewerPlayerId, APawn* Pawn);
+
 	/** @param ElapsedSeconds 既有宿主提供的实际单调时间；不得倒退，不创建另一时钟。
 	 * @return 是否记录此采样；原 Task 已退役时实时快照明确不可用，原历史独立保留。 */
 	UFUNCTION(BlueprintCallable, Category = "GGYGO|Combat|Observation")
@@ -63,17 +91,26 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GGYGO|Combat|Observation")
 	void StopObservation();
 
+	/** 只读记录范围；默认返回全部，MaxRecordCount=0 只读元信息，-1 读取余下全部。
+	 * 范围错误返回 read_success=false，不丢弃原始记录或改变观察寿命。 */
 	UFUNCTION(BlueprintPure, Category = "GGYGO|Combat|Observation")
-	FString GetObservationJson() const;
+	FString GetObservationJson(int32 FirstRecordIndex = 0, int32 MaxRecordCount = -1) const;
 
 	virtual void BeginDestroy() override;
 private:
 	struct FState;
+	struct FNetworkFXState;
 	TSharedPtr<FState> State;
+	TSharedPtr<FNetworkFXState> NetworkFX;
+	TWeakObjectPtr<UNetConnection> ChannelConnection;
+	TWeakObjectPtr<UWorld> ChannelWorld;
 	void OnOriginalAbilityEnded(const FAbilityEndedData& Data);
 	void OnWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources);
 	void OnEndPIE(bool bSimulating);
 	void ReleaseObservation(const FString& Reason);
 	bool SampleFX(double ElapsedSeconds, FString& OutDiagnostic);
 	bool AppendFXFacts(const TArray<FGGYGOMontageFXObservationFact>& Facts, double ElapsedSeconds, FString& OutDiagnostic);
+	void OnNetworkFXPublisherRegistered(UGGYGOMontageFXReplicationComponent& Host, UGGYGOMontageFXPublicationOwner& Publisher);
+	bool DrainNetworkFX(FString& OutDiagnostic);
+	void ReleaseNetworkFX(const FString& Reason);
 };

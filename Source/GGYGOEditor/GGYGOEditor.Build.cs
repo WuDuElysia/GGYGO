@@ -37,6 +37,7 @@ public class GGYGOEditor : ModuleRules
 			"GameplayAbilities",       // Combat ActionObservation 的 GAS 直接依赖。
 			"GameplayTasks",           // Pose Observation 公开 KnownTasks 迭代器的直接链接依赖。
 			"Json",                       // Kevin 动作清单与生成配置
+			"SlateCore",                  // 只读 PIE World Tick 的原 Slate 节流条件。
 			"KismetCompiler",             // 生成后编译 ABP
 			"RHI",                        // GPU staging readback 与原表面格式转换
 			"RenderCore",                 // 原渲染命令队列，不阻塞 GT 等待 GPU
