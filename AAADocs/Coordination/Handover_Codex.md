@@ -26,6 +26,8 @@ Kiro 的需求收尾批次到此结束。下面是已完成的内容、等用户
 
 普攻第一段主弧修好了（共享网格 `FXMD_DAO_001_ced427b6fbbf` 角点 UV／顶点色错位，按角点展开的 FBX 原位重导入），未预热的第一刀会等渲染资源就绪后再出刀且特效同帧可见，见 [normal01_first_strike](../需求文档/normal01_first_strike.md)。改键页面迁到共享 UMG 并在真实前台走通全部操作，出战队员死亡后的自动替补改由共享 `BP_PlayerState` 发起，见 [blueprint_layering_followups](../需求文档/blueprint_layering_followups.md)。角色倒下时地面的放射条纹（VSM 缓存残影）修掉了，换人拖影确认是相机跳变的运动模糊，见 [refactor_and_squad_switch](../需求文档/refactor_and_squad_switch.md)「角色受光与阴影」。普攻第三段的技能声和命中声分别完成了自动化取证，见 [normal03_audio](../需求文档/normal03_audio.md)。另外用户已决定：生产镜头保持近景（脚被截掉可以接受）；三个旧 ZZZ 动画 spec 直接关闭（[zzz_legacy_anim_spec_closeout](../需求文档/zzz_legacy_anim_spec_closeout.md)）。
 
+注意：重导入的网格 `/Game/Characters/Shared/FX/ZZZ/Meshes/FXMD_DAO_001_ced427b6fbbf` 在 `.gitignore` 忽略的素材目录里，不在 Git 中，修复只存在于本机；原包备份在 `Saved/Kiro/requirements-closeout/I01/Backup/`，重导入工具是 `Saved/Kiro/requirements-closeout/I01/fix_dao_mesh.py`。同理，`BP_PC_Pyrios` 的 `BoundsScale` 修复依赖的物理资产和骨骼网格也是本地导入资产。
+
 ## 等用户决定的三项
 
 这三项的自动化部分都已通过，只差用户的选择。用户回答后由指定的负责人接着做。
