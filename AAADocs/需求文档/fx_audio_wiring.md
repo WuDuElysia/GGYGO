@@ -1,6 +1,6 @@
 # 特效与音效接线：普攻、技能、冲刺和转身
 
-状态：**攻击 FX 的本批实现、编译和单机运行验证已完成；挂点入口评审缺陷已修复并自测，待统筹复核及受影响集成。整体音效／闪避需求仍未完成。** 用户于 2026-11-12 允许按参考重建缺失攻击 FX，随后明确接受少量外观差异，要求先完成整体和代码，挂点细调由用户后续在蓝图操作。原调用缺源的部分标为项目配置，不冒称原版调用表已恢复；不再追加第三段本体显隐制作。
+状态：**攻击 FX 的本批实现、编译和单机运行验证已完成；挂点入口评审缺陷已修复，统筹复核及受影响集成通过。整体音效／闪避需求仍未完成。** 用户于 2026-11-12 允许按参考重建缺失攻击 FX，随后明确接受少量外观差异，要求先完成整体和代码，挂点细调由用户后续在蓝图操作。原调用缺源的部分标为项目配置，不冒称原版调用表已恢复；不再追加第三段本体显隐制作。
 
 ## 目标
 
@@ -56,6 +56,7 @@
 | 最终编译 | `attack_fx_final_build.log`：GGYGOEditor Win64 Development 成功 |
 | 原生自动化 | `CodeValidation_20261112/Report/index.json`：8 项 FX 配置／发布回归均成功；其中 2 项既有夹具带残余 lease teardown 警告，诊断保留 |
 | 挂点入口补修 | `AttachmentEntryFix_20261112/build.log` 编译成功；`Report/index.json` 的 10 项入口／窗口／配置／发布回归通过。新增用例经真实 PlayerInput→Hero→ASC 入口覆盖 Attached 全覆盖、有继承者、World 无效起点及有效起点四种情况；拒绝诊断保留。`Runtime_Special/run.json` 进一步验证实际窗口：坏默认挂点＋两个覆盖单元正常创建，5 张实拍、3 次命中、自然结束及全 FX 清理通过；`restored.json` 确认临时配置恢复且未保存 |
+| 统筹集成 | `RootIntegration_20261112/build.log`：共享工作树增量构建成功，目标已是最新；`Report/index.json`：10 项相关回归成功，保留两项既有清理警告。`Runtime/run.json`：D3D12 普攻和 ExSpecial 两场冒烟通过，本次命中分别为 3／5 次，实际 FX 创建、自然结束及全部清理通过；7 张截图落盘，已查看普攻地面层和强化技能武器发光画面。临时授予恢复、PIE 结束后关闭自有 Editor，无生产资产保存；此轮不补签逐层视觉等价或独立挂点联机 |
 | Python | 本批变换链 13 项、原 Shader 22 项、Renderer 9 项通过；纹理整数读取／稀疏 UV 的 3 项针对性检查也通过（`CodeValidation_20261112/source_import_checks.log`）。见 `VisualSourceAudit_R1/*regression.log` 与 `AttackPhasePreparation_20261112/particle_renderer_regression_r2.log` |
 | 资产制作及接线 | `AttackPhaseAuthor_20261112/result.json`、`AttackPhaseWiring_20261112_R3/wiring.json`：16 系统完成，Normal03／Special／ExSpecial 为 7／2／8 单元；`final_readback.json` 确认运行后磁盘接线保持 |
 | 自然结束 | `AttackPhaseRuntime_Natural_R1/run.json`：Combo／Special／ExSpecial 均通过；51 张实拍，命中分别 2／3／4 次，原 GA 自然结束且 FX 全部清理 |
