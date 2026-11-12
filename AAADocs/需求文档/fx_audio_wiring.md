@@ -1,6 +1,6 @@
 # 特效与音效接线：普攻、技能、冲刺和转身
 
-状态：**攻击 FX 的本批实现、编译和单机运行验证已完成；整体音效／闪避需求仍未完成。** 用户于 2026-11-12 允许按参考重建缺失攻击 FX，随后明确接受少量外观差异，要求先完成整体和代码，挂点细调由用户后续在蓝图操作。原调用缺源的部分标为项目配置，不冒称原版调用表已恢复；不再追加第三段本体显隐制作。
+状态：**攻击 FX 的本批实现、编译和单机运行验证已完成；挂点入口评审缺陷已修复并自测，待统筹复核及受影响集成。整体音效／闪避需求仍未完成。** 用户于 2026-11-12 允许按参考重建缺失攻击 FX，随后明确接受少量外观差异，要求先完成整体和代码，挂点细调由用户后续在蓝图操作。原调用缺源的部分标为项目配置，不冒称原版调用表已恢复；不再追加第三段本体显隐制作。
 
 ## 目标
 
@@ -12,7 +12,7 @@
 ## 方案要点
 
 - **离线制作代码**：`zzz_fx_*` 消费原网格、纹理、材质和曲线，制作 UE 资产。`prepare_pyrios_attack_phases.py` 消费 [Pyrios_Attack_Phases.json](../Assets/Pyrios/FX/Pyrios_Attack_Phases.json)，用阶段局部 `System.Age` 和源内部 Delay 编排可见阶段；粒子自身 Age 和寿命保留。Normal03 后半段沿用 [Pyrios_Normal03_Phases.json](../Assets/Pyrios/FX/Pyrios_Normal03_Phases.json)。这些脚本不承担游戏运行时的第二套调度。
-- **运行时代码**：`FGGYGONiagaraEffectUnit::ResolveAttachment` 统一解析单元挂点／相对变换，本地 Task 创建与 Montage FX 发布消费同一结果。默认继承原动作配置；独立覆盖只接受 Attached，创建／发布前拒绝不存在的挂点或无效变换。沿用原 GA、Task、Publication 与资源关闭链，没有新增角色专用 C++、Tick 或管理器。
+- **运行时代码**：`FGGYGONiagaraEffectUnit::ResolveAttachment` 统一解析单元挂点／相对变换，本地 Task 创建与 Montage FX 发布消费同一结果。默认继承原动作配置；独立覆盖只接受 Attached。动作入场与窗口消费共用 `ValidateFXSocketsOnMesh`：全部单元覆盖时忽略未使用的默认挂点，有继承单元时仍检查默认挂点，World 始终检查动作起点；创建／发布前拒绝实际使用的无效挂点或变换。沿用原 GA、Task、Publication 与资源关闭链，没有新增角色专用 C++、Tick 或管理器。
 - **投影贴花**：原 `GGYGOProjectedDecalRenderer` 在引擎重建代理、首次 PostTick 尚未发生时，沿同一 GT 准备方法提交当前真实粒子数据；同时补齐 Native Decal Renderer 初始化。数据仍须匹配原实例、当前缓冲、年龄和材质，缺项明确失败。此早期修正随本次代码交付，已有最终编译及 Normal02 地面可见性证据；未单独覆盖所有代理重建场景。
 - **生产接线**：`wire_pyrios_attack_phases.py` 只替换三动作的 FX 单元，并同步 `BP_PC_Pyrios.AbilityInputRenderSystems`。具体挂点保存在 GA，正常闭窗使用 `DeactivateDetachKeepWorld`，打断使用 `DestroyImmediately`；发布记录携带解析后的单元变换。
 - **准备入口**：生产 Pawn 的原资源门准备全部实际引用系统；Pending 时仍拒绝本次按下，不缓存或补发输入。测试也等待这条原链，不额外预热或绕过准入。
@@ -55,6 +55,7 @@
 | --- | --- |
 | 最终编译 | `attack_fx_final_build.log`：GGYGOEditor Win64 Development 成功 |
 | 原生自动化 | `CodeValidation_20261112/Report/index.json`：8 项 FX 配置／发布回归均成功；其中 2 项既有夹具带残余 lease teardown 警告，诊断保留 |
+| 挂点入口补修 | `AttachmentEntryFix_20261112/build.log` 编译成功；`Report/index.json` 的 10 项入口／窗口／配置／发布回归通过。新增用例经真实 PlayerInput→Hero→ASC 入口覆盖 Attached 全覆盖、有继承者、World 无效起点及有效起点四种情况；拒绝诊断保留。`Runtime_Special/run.json` 进一步验证实际窗口：坏默认挂点＋两个覆盖单元正常创建，5 张实拍、3 次命中、自然结束及全 FX 清理通过；`restored.json` 确认临时配置恢复且未保存 |
 | Python | 本批变换链 13 项、原 Shader 22 项、Renderer 9 项通过；纹理整数读取／稀疏 UV 的 3 项针对性检查也通过（`CodeValidation_20261112/source_import_checks.log`）。见 `VisualSourceAudit_R1/*regression.log` 与 `AttackPhasePreparation_20261112/particle_renderer_regression_r2.log` |
 | 资产制作及接线 | `AttackPhaseAuthor_20261112/result.json`、`AttackPhaseWiring_20261112_R3/wiring.json`：16 系统完成，Normal03／Special／ExSpecial 为 7／2／8 单元；`final_readback.json` 确认运行后磁盘接线保持 |
 | 自然结束 | `AttackPhaseRuntime_Natural_R1/run.json`：Combo／Special／ExSpecial 均通过；51 张实拍，命中分别 2／3／4 次，原 GA 自然结束且 FX 全部清理 |
