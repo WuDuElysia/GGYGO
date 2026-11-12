@@ -9,6 +9,7 @@
 #include "NiagaraEmitterInstance.h"
 #include "NiagaraSystem.h"
 #include "NiagaraSystemInstance.h"
+#include "NiagaraSystemInstanceController.h"
 #include "Async/Async.h"
 #include "Engine/World.h"
 #include "Materials/Material.h"
@@ -27,9 +28,17 @@ struct FGGYGOProjectedDecalRenderer::FPayload
 	TWeakObjectPtr<UMaterialInterface> SourceMaterial;
 	TArray<TStrongObjectPtr<UMaterialInstanceDynamic>> Materials;
 	TArray<uint32> ParticleIndices;
+	const FNiagaraDataBuffer* DataBuffer = nullptr; // 只记录本次已提交数据的身份，不持有或解引用旧缓冲。
 	int32 TickCount = 0;
 	uint32 DataCount = 0;
 	float SimulationAge = 0;
+
+	bool Matches(const FNiagaraDataBuffer& Data, const FNiagaraSystemInstance& Instance,
+		const UMaterialInterface* Material) const
+	{
+		return DataBuffer == &Data && TickCount == Instance.GetTickCount() && SimulationAge == Instance.GetAge()
+			&& DataCount == Data.GetNumInstances() && Material && SourceMaterial.Get() == Material;
+	}
 };
 
 namespace
@@ -136,22 +145,33 @@ void FGGYGOProjectedDecalRenderer::ReportFailure(const FString& SourceReference,
 void FGGYGOProjectedDecalRenderer::PostSystemTick_GameThread(
 	const UNiagaraRendererProperties* InProperties, const FNiagaraEmitterInstance* Emitter)
 {
+	PreparePayload_GameThread(InProperties, Emitter);
+}
+
+bool FGGYGOProjectedDecalRenderer::PreparePayload_GameThread(
+	const UNiagaraRendererProperties* InProperties, const FNiagaraEmitterInstance* Emitter) const
+{
 	check(IsInGameThread());
-	if (bFailureReported.load()) return;
+	if (bFailureReported.load()) return false;
 	const auto* Properties = Cast<UGGYGOProjectedDecalRendererProperties>(InProperties);
 	FString Error;
 	if (!Properties || !IsValid(Properties->NativeDecal))
-	{ ReportFailure(GetPathNameSafe(Properties), TEXT("原payload属性类型或Native子对象无效")); return; }
+	{ ReportFailure(GetPathNameSafe(Properties), TEXT("原payload属性类型或Native子对象无效")); return false; }
 	const UNiagaraDecalRendererProperties* Native = Properties->NativeDecal.Get();
 	const FString Source = Properties->SourceReference;
 	const FNiagaraSystemInstance* Instance = Emitter ? Emitter->GetParentSystemInstance() : nullptr;
-	if (!Instance || !OriginalComponent.IsValid() || !OriginalSystem.IsValid()
-		|| !OriginalComponent->IsRegistered() || !OriginalComponent->GetWorld()
-		|| OriginalComponent->GetWorld()->bIsTearingDown || Instance->GetWorld() != OriginalComponent->GetWorld()
-		|| Instance->GetAttachComponent() != OriginalComponent.Get() || Instance->GetSystem() != OriginalSystem.Get()
+	const UNiagaraComponent* const OriginalNiagara = OriginalComponent.Get();
+	UWorld* const World = OriginalNiagara ? OriginalNiagara->GetWorld() : nullptr;
+	if (!Instance || !OriginalNiagara || !OriginalSystem.IsValid() || !OriginalNiagara->IsRegistered()
+		|| !World || World->bIsTearingDown || Instance->GetWorld() != World
+		|| Instance->GetAttachComponent() != OriginalNiagara || Instance->GetSystem() != OriginalSystem.Get()
 		|| static_cast<uint64>(Instance->GetId()) != OriginalInstanceId
-		|| (Instance->GetWorld()->IsGameWorld() && !Cast<IGGYGOFXRendererFailureReceiver>(OriginalComponent.Get())))
-	{ ReportFailure(Source, TEXT("原投影NS/World/System/实例或首错接收接口已失效")); return; }
+		|| (World->IsGameWorld() && !Cast<IGGYGOFXRendererFailureReceiver>(OriginalNiagara)))
+	{ ReportFailure(Source, TEXT("原投影NS/World/System/实例或首错接收接口已失效")); return false; }
+	const TWeakObjectPtr<UWorld> OriginalWorld(World);
+	const auto Controller = OriginalNiagara->GetSystemInstanceController();
+	if (!Controller.IsValid() || Controller->GetSystemInstance_Unsafe() != Instance)
+	{ ReportFailure(Source, TEXT("原投影Controller已失效")); return false; }
 	const FNiagaraDataSet& DataSet = Emitter->GetParticleData();
 	const FNiagaraDataBuffer* Data = DataSet.GetCurrentData();
 	if (!Data || Data->GetNumInstances() == 0
@@ -161,18 +181,18 @@ void FGGYGOProjectedDecalRenderer::PostSystemTick_GameThread(
 		// 与Native Decal相同的真实无绘制分支；不将坏绑定/坏数据也归为此分支。
 		ReleaseAllDecals();
 		RetirePayload();
-		return;
+		return false;
 	}
 	if (!Properties->ValidateCompiledPayloadLayout(Error))
-	{ ReportFailure(Source, Error); return; }
+	{ ReportFailure(Source, Error); return false; }
 	for (const auto& Accessor : Properties->VectorAccessors)
 		if (!Accessor.IsValid() || !Accessor.GetReader(Data).IsValid())
-		{ ReportFailure(Source, TEXT("原投影float4属性缺失或类型不符")); return; }
+		{ ReportFailure(Source, TEXT("原投影float4属性缺失或类型不符")); return false; }
 	const auto PositionReader = Native->PositionDataSetAccessor.GetReader(Data);
 	const auto RotationReader = Native->DecalOrientationDataSetAccessor.GetReader(Data);
 	const auto SizeReader = Native->DecalSizeDataSetAccessor.GetReader(Data);
 	if (!PositionReader.IsValid() || !RotationReader.IsValid() || !SizeReader.IsValid())
-	{ ReportFailure(Source, TEXT("原投影几何属性缺本次CPU数据，未采用Native默认几何")); return; }
+	{ ReportFailure(Source, TEXT("原投影几何属性缺本次CPU数据，未采用Native默认几何")); return false; }
 	// 必需帧无效不能经Visible=false变成成功；源零体积可用有限零尺寸正常不画。
 	for (uint32 Index = 0; Index < Data->GetNumInstances(); ++Index)
 	{
@@ -182,25 +202,25 @@ void FGGYGOProjectedDecalRenderer::PostSystemTick_GameThread(
 		const FVector3f Size = SizeReader.Get(ParticleIndex);
 		if (Position.ContainsNaN() || Rotation.ContainsNaN() || Size.ContainsNaN()
 			|| Rotation.SizeSquared() <= UE_SMALL_NUMBER)
-		{ ReportFailure(Source, TEXT("原投影几何包含非有限值或退化旋转")); return; }
+		{ ReportFailure(Source, TEXT("原投影几何包含非有限值或退化旋转")); return false; }
 		for (const auto& Accessor : Properties->VectorAccessors)
 			if (Accessor.GetReader(Data).Get(ParticleIndex).ContainsNaN())
-			{ ReportFailure(Source, TEXT("原投影payload含非有限值，不能经不可见过滤静默跳过")); return; }
+			{ ReportFailure(Source, TEXT("原投影payload含非有限值，不能经不可见过滤静默跳过")); return false; }
 	}
 	UMaterialInterface* Material = BaseMaterials_GT.Num() == 1 ? BaseMaterials_GT[0] : nullptr;
 	UMaterialInterface* Parent = ResolveParent(Material, Error);
-	if (!Parent) { ReportFailure(Source, Error); return; }
+	if (!Parent) { ReportFailure(Source, Error); return false; }
 	FLinearColor Vector;
 	for (const FName Parameter : Properties->MaterialVectorParameters)
 		if (!Material->GetVectorParameterValue(FHashedMaterialParameterInfo(Parameter), Vector))
-		{ ReportFailure(Source, FString::Printf(TEXT("原投影材质缺vector %s"), *Parameter.ToString())); return; }
+		{ ReportFailure(Source, FString::Printf(TEXT("原投影材质缺vector %s"), *Parameter.ToString())); return false; }
 	float Scalar;
 	if (!Properties->SimulationAgeParameter.IsNone()
 		&& !Material->GetScalarParameterValue(FHashedMaterialParameterInfo(Properties->SimulationAgeParameter), Scalar))
-	{ ReportFailure(Source, TEXT("原投影材质缺明确Age标量")); return; }
+	{ ReportFailure(Source, TEXT("原投影材质缺明确Age标量")); return false; }
 	const float Age = Instance->GetAge();
 	if (!FMath::IsFinite(Age) || Age < 0)
-	{ ReportFailure(Source, TEXT("原投影实例年龄无效")); return; }
+	{ ReportFailure(Source, TEXT("原投影实例年龄无效")); return false; }
 	const FNiagaraParameterStore& Parameters = Emitter->GetRendererBoundVariables();
 	const bool DefaultVisible = Parameters.GetParameterValueOrDefault(
 		Native->DecalVisibleBinding.GetParamMapBindableVariable(), UNiagaraDecalRendererProperties::GetDefaultDecalVisible()).GetValue();
@@ -209,13 +229,14 @@ void FGGYGOProjectedDecalRenderer::PostSystemTick_GameThread(
 	const auto VisibleReader = Native->DecalVisibleAccessor.GetReader(DataSet);
 	const auto TagReader = Native->RendererVisibilityTagAccessor.GetReader(DataSet);
 	if (!VisibleReader.IsValid() || !Native->DecalSortOrderDataSetAccessor.GetReader(DataSet).IsValid())
-	{ ReportFailure(Source, TEXT("原投影可见度/整数排序缺本次CPU数据，未用默认值替代")); return; }
+	{ ReportFailure(Source, TEXT("原投影可见度/整数排序缺本次CPU数据，未用默认值替代")); return false; }
 	TSharedPtr<FPayload, ESPMode::ThreadSafe> Next = MakeShareable(new FPayload(), [](FPayload* Value)
 	{
 		if (IsInGameThread()) delete Value;
 		else AsyncTask(ENamedThreads::GameThread, [Value]() { delete Value; });
 	});
 	Next->SourceMaterial = Material;
+	Next->DataBuffer = Data;
 	Next->TickCount = Instance->GetTickCount();
 	Next->SimulationAge = Age;
 	Next->DataCount = Data->GetNumInstances();
@@ -224,7 +245,7 @@ void FGGYGOProjectedDecalRenderer::PostSystemTick_GameThread(
 			&& TagReader.GetSafe(Index, DefaultTag) == Native->RendererVisibility)
 			Next->ParticleIndices.Add(Index);
 	if (Next->ParticleIndices.Num() > Properties->MaxMaterialInstances)
-	{ ReportFailure(Source, TEXT("实际可见投影超过明确MID容量，不截断粒子")); return; }
+	{ ReportFailure(Source, TEXT("实际可见投影超过明确MID容量，不截断粒子")); return false; }
 	// 全批先验证；复用MID仍可能被Scene中的上一帧代理持有，坏值不能写入半份参数。
 	TArray<TArray<FVector4f>> Values;
 	Values.SetNum(Next->ParticleIndices.Num());
@@ -247,14 +268,24 @@ void FGGYGOProjectedDecalRenderer::PostSystemTick_GameThread(
 		UMaterialInstanceDynamic* MID = Previous && Previous->SourceMaterial.Get() == Material
 			&& Previous->Materials.IsValidIndex(Slot) ? Previous->Materials[Slot].Get() : nullptr;
 		if (!MID) MID = UMaterialInstanceDynamic::Create(Parent, OriginalComponent.Get());
-		if (!MID) { ReportFailure(Source, TEXT("原投影私有MID创建失败")); return; }
+		if (!MID) { ReportFailure(Source, TEXT("原投影私有MID创建失败")); return false; }
 		MID->SetFlags(RF_Transient | RF_DuplicateTransient);
 		Next->Materials.Emplace(MID);
 	}
-	// 参数复制/创建后核原租用，原FX回调不得令此帧安装后继的资源。
-	if (!OriginalComponent.IsValid() || !OriginalComponent->IsRegistered()
-		|| Instance->GetSystem() != OriginalSystem.Get() || static_cast<uint64>(Instance->GetId()) != OriginalInstanceId)
-	{ ReportFailure(Source, TEXT("投影payload准备期间原实例已归还")); return; }
+	// 创建MID返栈后先核原Controller，再读原实例与缓冲，不把准备结果交给后继实例。
+	const auto IsOriginalSample = [&]()
+	{
+		return OriginalComponent.Get() == OriginalNiagara && OriginalWorld.IsValid()
+			&& OriginalNiagara->IsRegistered() && OriginalNiagara->GetWorld() == World
+			&& !World->bIsTearingDown && OriginalNiagara->GetSystemInstanceController() == Controller
+			&& Controller->GetSystemInstance_Unsafe() == Instance && Instance->GetWorld() == World
+			&& Instance->GetAttachComponent() == OriginalNiagara && Instance->GetSystem() == OriginalSystem.Get()
+			&& static_cast<uint64>(Instance->GetId()) == OriginalInstanceId
+			&& Emitter->GetParticleData().GetCurrentData() == Data && BaseMaterials_GT.Num() == 1
+			&& Next->Matches(*Data, *Instance, BaseMaterials_GT[0]);
+	};
+	if (!IsOriginalSample())
+	{ ReportFailure(Source, TEXT("投影payload准备期间原实例或本次采样已改变")); return false; }
 	for (int32 Slot = 0; Slot < Next->Materials.Num(); ++Slot)
 	{
 		UMaterialInstanceDynamic* MID = Next->Materials[Slot].Get();
@@ -267,10 +298,13 @@ void FGGYGOProjectedDecalRenderer::PostSystemTick_GameThread(
 		if (!Properties->SimulationAgeParameter.IsNone())
 			MID->SetScalarParameterValue(Properties->SimulationAgeParameter, Age);
 	}
+	if (!IsOriginalSample())
+	{ ReportFailure(Source, TEXT("投影payload提交前原实例或本次采样已改变")); return false; }
 	{
 		FScopeLock Guard(&PayloadLock);
 		Payload = MoveTemp(Next);
 	}
+	return true;
 }
 
 FNiagaraDynamicDataBase* FGGYGOProjectedDecalRenderer::GenerateDynamicData(const FNiagaraSceneProxy* Proxy,
@@ -281,8 +315,8 @@ FNiagaraDynamicDataBase* FGGYGOProjectedDecalRenderer::GenerateDynamicData(const
 	const FNiagaraSystemInstance* Instance = Emitter ? Emitter->GetParentSystemInstance() : nullptr;
 	const UNiagaraDecalRendererProperties* Native = Properties ? Properties->NativeDecal.Get() : nullptr;
 	if (!Native || !Instance) { ReportFailure(GetPathNameSafe(Properties), TEXT("原投影Renderer/实例缺失")); return nullptr; }
-	if (!Emitter->GetParticleData().GetCurrentData()
-		|| Emitter->GetParticleData().GetCurrentData()->GetNumInstances() == 0
+	const FNiagaraDataBuffer* const Data = Emitter->GetParticleData().GetCurrentData();
+	if (!Data || Data->GetNumInstances() == 0
 		|| !Properties->GetIsEnabled() || !Native->GetIsEnabled()
 		|| !IsRendererEnabled(Properties, Emitter) || !IsRendererEnabled(Native, Emitter))
 	{
@@ -290,17 +324,33 @@ FNiagaraDynamicDataBase* FGGYGOProjectedDecalRenderer::GenerateDynamicData(const
 		RetirePayload();
 		return nullptr;
 	}
-	TSharedPtr<FPayload, ESPMode::ThreadSafe> Frame;
+	const auto ReadPayload = [&]()
 	{
 		FScopeLock Guard(&PayloadLock);
-		Frame = Payload;
+		return Payload;
+	};
+	const auto MatchesCurrentData = [&](const TSharedPtr<FPayload, ESPMode::ThreadSafe>& Frame)
+	{
+		return Frame && static_cast<uint64>(Instance->GetId()) == OriginalInstanceId
+			&& Instance->GetSystem() == OriginalSystem.Get() && Emitter->GetParticleData().GetCurrentData() == Data
+			&& BaseMaterials_GT.Num() == 1 && Frame->Matches(*Data, *Instance, BaseMaterials_GT[0]);
+	};
+	auto Frame = ReadPayload();
+	bool bMatches = MatchesCurrentData(Frame);
+	if (!bMatches && IsInGameThread())
+	{
+		// UE重建代理后会在首次PostTick前提交当前粒子数据。沿原GT生产方法准备这次输入。
+		if (!PreparePayload_GameThread(InProperties, Emitter)) return nullptr;
+		Frame = ReadPayload();
+		bMatches = MatchesCurrentData(Frame);
 	}
-	if (!Frame || static_cast<uint64>(Instance->GetId()) != OriginalInstanceId
-		|| Instance->GetSystem() != OriginalSystem.Get() || Frame->TickCount != Instance->GetTickCount()
-		|| Frame->SimulationAge != Instance->GetAge()
-		|| Frame->DataCount != Emitter->GetParticleData().GetCurrentData()->GetNumInstances()
-		|| BaseMaterials_GT.Num() != 1 || Frame->SourceMaterial.Get() != BaseMaterials_GT[0])
-	{ ReportFailure(Properties->SourceReference, TEXT("本次Native投影缺同一原tick的真实payload，未沿用上一帧")); return nullptr; }
+	if (!bMatches)
+	{
+		ReportFailure(Properties->SourceReference, Frame
+			? TEXT("本次Native投影的实例/tick/Age/缓冲/数量/材质与已发布payload不匹配")
+			: TEXT("本次Native投影缺同一原tick的真实payload"));
+		return nullptr;
+	}
 	// 原生路径拥有代理创建/更新/裁剪/释放；返回nullptr是Native Decal的正常接口。
 	FNiagaraRendererDecals::GenerateDynamicData(Proxy, Native, Emitter);
 	if (ActiveDecalProxies.Num() != Frame->Materials.Num())

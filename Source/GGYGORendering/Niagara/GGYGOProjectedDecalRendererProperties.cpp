@@ -95,7 +95,7 @@ bool UGGYGOProjectedDecalRendererProperties::BindSourceUserMaterialForAuthoring(
 
 FNiagaraRenderer* UGGYGOProjectedDecalRendererProperties::CreateEmitterRenderer(
 	ERHIFeatureLevel::Type FeatureLevel, const FNiagaraEmitterInstance* Emitter,
-	const FNiagaraSystemInstanceController&)
+	const FNiagaraSystemInstanceController& InController)
 {
 	FString Error;
 	if (!ValidatePayloadConfiguration(Error))
@@ -103,7 +103,9 @@ FNiagaraRenderer* UGGYGOProjectedDecalRendererProperties::CreateEmitterRenderer(
 		FGGYGOProjectedDecalRenderer::ReportCreationFailure(Emitter, SourceReference, Error);
 		return nullptr;
 	}
-	return new FGGYGOProjectedDecalRenderer(FeatureLevel, this, Emitter);
+	FNiagaraRenderer* const Renderer = new FGGYGOProjectedDecalRenderer(FeatureLevel, this, Emitter);
+	Renderer->Initialize(NativeDecal.Get(), Emitter, InController);
+	return Renderer;
 }
 
 FNiagaraBoundsCalculator* UGGYGOProjectedDecalRendererProperties::CreateBoundsCalculator()

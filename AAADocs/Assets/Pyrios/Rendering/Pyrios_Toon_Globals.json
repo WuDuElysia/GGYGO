@@ -35,8 +35,24 @@
   "EntityParams": [1, 1, 0, 0],
   "//bleed": "HighlightBleed 为旧输入序列化兼容保留，主体输出已退役整色增白；发光颜色通过原材质各 Emission/Screen 参数配置。",
   "HighlightBleed": [0.1, 0, 0, 0],
+  "//textureBias": "ProjectConfigured：Root明确选择0以保留当前UE隐式mip bias行为，可按同镜头原图调节x。源全局运行值未知，不称原作等价；迁移入口拒绝SourceRuntime。yzw保留为0。",
+  "_CharacterSampleTextureBias": [0, 0, 0, 0],
   "//normal": "NormalYSign：Unity 法线贴图 G 通道沿 +V（向上），UE 副切线沿 +V_UE（向下），所以取 -1。",
   "NormalYSign": [-1, 0, 0, 0],
   "//display": "明确的项目初始合成值，保留旧边缘光合成比例和上限作为候选基线；最终值待同姿态原图验收。不是原游戏 runtime/RT 格式。曝光行为不在此处修改。",
-  "ProjectDisplay": {"RimCompositeGain": 1.0, "RimMaxIntensity": 25.0}
+  "ProjectDisplay": {"RimCompositeGain": 1.0, "RimMaxIntensity": 25.0},
+  "//additional": "ProjectConfigured首接：BP明确绑定主灯；局部灯初始显式空列表/global=1，可由BP填0..4个Point/Spot及校准，不称原运行无局部灯。",
+  "ProjectAdditionalLighting": {"configured": true, "sample": {
+    "positions_meters": [], "directions": [], "attenuations": [], "colors": [], "global_intensity": 1.0
+  }},
+  "//shadow": "已选UE移植：对象256加4张512 R32f无mip，输出4456448B/4.25MiB；含已知D32S8工作深度估算12.75MiB，实际峰值未测。参数可调；源t15/t0矩阵和原PCF不冒等价。",
+  "ProjectFXLighting": {
+    "Mode": "NapPointFromNativeRadius", "bConfigured": true, "MaxLights": 4, "IntensityScale": 0.05
+  },
+  "ProjectShadowSettings": {
+    "bConfigured": true, "ObjectResolution": 256, "CascadeResolution": 512,
+    "CascadeWidthsCm": [256, 1024, 4096, 16384], "DepthHalfExtentCm": 10000.0,
+    "ObjectMarginCm": 20.0, "DepthBiasCm": 0.5, "NormalBiasCm": 0.5,
+    "FilterRadiusTexels": 1.0, "Strength": 1.0, "MaxOutputBytes": 4456448
+  }
 }

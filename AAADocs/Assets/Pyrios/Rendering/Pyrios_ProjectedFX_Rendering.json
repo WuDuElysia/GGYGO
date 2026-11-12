@@ -1,0 +1,40 @@
+{
+ "schema": "projected_fx_configuration/v1",
+ "mode": "NativeDeferredDecalSourceSurface",
+ "color_mapping": "RawSerializedValues",
+ "decal_vertex_selection": "ProjectConfiguredDecalVertex",
+ "receiver_normal": "NativeDepthDerivativesFacingCamera",
+ "receiver_eligibility": "NativeReceivesDecals",
+ "projection": "SourceAffineRelativeToNativeProjectorOrigin",
+ "native_volume": "ConservativeSourceVolumeWithPadding",
+ "native_enclosure_scale": 1.5,
+ "native_fade": "SourceCoverageWithinNativeFlatFadeRegion",
+ "projector_geometry": "NativeUnitCubeProjector",
+ "projector_local_bounds": [-0.5, 0.5],
+ "source_builtin_mesh_recovered": false,
+ "time": "OriginalSystemAgeForBothSourceTimeGroups",
+ "framebuffer": "NativeDBufferAndEmissive",
+ "max_material_instances": 256,
+ "emissive_output_scale": 0.25,
+ "exposure_compensation_weight": 1.0,
+ "globals": {
+  "Global_NapEffectBrightnessParams4_R0": [1.0, 0.0, 0.0, 0.0],
+  "Global_NapEffectBrightnessExtraParams_R0": [0.0, 0.0, 0.0, 0.0],
+  "Global_SceneWeatherParamsPart1_R2": [0.0, 0.0, 1.0, 0.0]
+ },
+ "prop": {
+  "mode": "NativeDeferredSurfaceAndAdditiveForward",
+  "geometry": "NativeTRSOnly",
+  "flow_coordinates": "NativeMeshInstanceWorldToLocal",
+  "forward_pass": "MTP_BeforeDOF",
+  "geometry_flow_selection": "ProjectConfiguredGeometryWithoutForwardOnlyFlow",
+  "system_age_transport": {"slot": 0, "component": 0},
+  "motion": {
+   "5017413851355136532": {"source_mode": 1, "native": "Precise"},
+   "3080061245389246387": {"source_mode": 2, "native": "Disable"}
+  },
+  "globals": {"Global_SceneWeatherParamsPart1_R2": [0.0, 0.0, 1.0, 0.0]}
+ },
+ "source_runtime_certified": false,
+ "visual_calibrated": false
+}

@@ -1,0 +1,24 @@
+{
+ "mode": "ProjectConfiguredMaskedDoubleDraw",
+ "color_mapping": "RawSerializedValues",
+ "parameters": {
+  "KeyLightDirectionWS": [0.0, -0.7071067811865476, 0.7071067811865476, 0.0],
+  "KeyLightColor": [1.0, 1.0, 1.0, 1.0],
+  "SceneLightStrength": 0.25,
+  "KeyLightVisibility": 1.0,
+  "KeyLightProxyDistanceMeters": 1000.0,
+  "KeyLightProxyRadiusMeters": 10000.0,
+  "UE_OutputScale": 0.25,
+  "UE_RimGain": 0.25,
+  "UE_RimMaxIntensity": 2.0,
+  "UE_OutlineWidthCm": 0.2,
+  "UE_OutlineMaxOffsetCm": 2.0,
+  "ExposureCompensationWeight": 1.0,
+  "Global_PostOutlineTint_R0": [1.0, 1.0, 1.0, 1.0],
+  "Global_SceneWeatherParamsPart1_R2": [0.0, 0.0, 1.0, 0.0]
+ },
+ "lighting_transport": "ExplicitOwnerSnapshot",
+ "shadow_transport": "OwnerKeyLightVisibility",
+ "outline_geometry": "BoundedUEVertexNormalWorldOffset",
+ "source_runtime_certified": false
+}

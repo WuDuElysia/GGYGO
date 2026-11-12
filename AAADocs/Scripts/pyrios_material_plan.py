@@ -19,7 +19,7 @@ SLOT_INSTANCES = {"MAT_Pyrois_" + s: "MI_Pyrois_" + s for s in SUFFIXES}
 # scene light; the active component supplies the four inputs at runtime.
 PREVIEW_LIGHT = {"KeyLightDirectionWS": (0.35, 0.25, 0.9, 0.0), "KeyLightColor": (1.0, 1.0, 1.0, 1.0)}
 PREVIEW_SCALARS = {"SceneLightStrength": 1.0, "KeyLightVisibility": 1.0}
-# 显示适配属于材质输出，不加入原 Shader 的185个输入或组件的四个主光输入。
+# 显示适配属于材质输出，独立于源程序输入和组件的四个主光输入。
 EXPOSURE_PARAMETER = "ExposureCompensationWeight"
 EXPOSURE_INPUTS = ("LightValueInput", "AlphaInput")
 SURFACE_OUTPUTS = (("RimRaw", "CMOT_FLOAT3"), ("BloomWeight", "CMOT_FLOAT1"))
@@ -28,7 +28,18 @@ PREVIEW_DATA_NAMES = ("ScenePreviewValid", "ScenePreviewDirectionX", "ScenePrevi
                       "ScenePreviewColorB", "ScenePreviewStrength", "ScenePreviewVisibility")
 DISPLAY_PARAMETERS = ("RimCompositeGain", "RimMaxIntensity")
 COMPOSITE_CODE = "return MainColor + min(max(RimRaw, 0.0), RimMaxIntensity) * RimCompositeGain;"
-PREVIEW_CODE = "return PreviewValid > 0.5 ? PreviewValue : MaterialValue;"
+LEGACY_PREVIEW_CODE = "return PreviewValid > 0.5 ? PreviewValue : MaterialValue;"
+PREVIEW_TRANSPORT_PARAMETER = "UseScenePreviewCPD"
+PREVIEW_CODE = "return UseCPD > 0.5 && PreviewValid > 0.5 ? PreviewValue : MaterialValue;"
+ADDITIONAL_VECTORS = tuple("AdditionalLight%s%d" % (family, index)
+                           for index in range(4) for family in ("Position", "Direction", "Attenuation", "Color"))
+ADDITIONAL_SCALARS = ("AdditionalLightCount", "AdditionalLightGlobalIntensity")
+SHADOW_TEXTURES = tuple("ShadowDepth%d" % i for i in range(5))
+SHADOW_VECTORS = tuple("ShadowOrigin%d" % i for i in range(5)) + (
+    "ShadowForward", "ShadowRight", "ShadowUp", "ShadowCascadeWidths")
+SHADOW_SCALARS = ("UseCharacterShadowCaptures", "ShadowObjectWidth", "ShadowNear", "ShadowFar",
+                  "ShadowDepthBias", "ShadowNormalBias", "ShadowFilterRadius", "ShadowStrength")
+MATERIAL_FLOAT_MAX = 3.4028234663852886e38
 INPUTS_PATH = Path(__file__).resolve().with_name("nap_avatar_toon_inputs.json")
 SHADER_NAME = "miHoYo/Character/NapAvatarStandard"
 GROUP_SUFFIX = ("", "2", "3", "4", "5")  # 材质组 0..4 对应属性后缀
@@ -209,7 +220,8 @@ def load_globals(path, inputs):
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     expected = {i["name"] for i in inputs if i["kind"] == "global"} | \
                {i["name"] for i in inputs if i["kind"] == "extra" and not i["name"].startswith("MC_")}
-    values = {k: v for k, v in data.items() if not k.startswith("//") and k != "ProjectDisplay"}
+    values = {k: v for k, v in data.items() if not k.startswith("//") and k not in (
+        "ProjectDisplay", "ProjectAdditionalLighting", "ProjectShadowSettings", "ProjectFXLighting")}
     if set(values) != expected:
         raise ValueError("Globals keys differ: missing %s, unknown %s" % (
             sorted(expected - set(values)), sorted(set(values) - expected)))
@@ -230,6 +242,90 @@ def load_display(path):
     if any(v < 0 for v in values.values()):
         raise ValueError("ProjectDisplay 参数必须非负")
     return values
+
+
+def additional_material_values(sample):
+    """明确的原生采样→四灯材质参数；只为count以外未选槽填padding，不伪造活动灯。"""
+    keys = {"positions_meters", "directions", "attenuations", "colors", "global_intensity"}
+    if not isinstance(sample, dict) or set(sample) != keys:
+        raise ValueError("附加灯需要完整原生sample，不从缺失项推断选灯/global")
+    count = len(sample["positions_meters"])
+    if count > 4 or any(len(sample[name]) != count for name in keys - {"global_intensity"}):
+        raise ValueError("附加灯sample数组必须同长且0..4")
+    intensity = number(sample["global_intensity"], "additional global intensity")
+    if not 0 <= intensity <= MATERIAL_FLOAT_MAX:
+        raise ValueError("附加灯global必须为非负float32有限值")
+    vectors = {}
+    for index in range(4):
+        for family, field, components in (("Position", "positions_meters", 3), ("Direction", "directions", 3),
+                                           ("Attenuation", "attenuations", 4), ("Color", "colors", 4)):
+            value = sample[field][index] if index < count else [0] * components
+            if len(value) != components:
+                raise ValueError("附加灯分量数错误: " + field)
+            values = tuple(number(v, field) for v in value)
+            if any(abs(v) > MATERIAL_FLOAT_MAX for v in values):
+                raise ValueError("附加灯分量超出材质float32范围: " + field)
+            vectors["AdditionalLight%s%d" % (family, index)] = values + (0.0,) * (4 - components)
+    return dict(vectors=vectors, scalars=dict(zip(ADDITIONAL_SCALARS, (count, intensity))))
+
+
+def require_additional_values(plan, explicit=None):
+    """图制作须显式提供已确定的预览输入；Unconfigured保持需求缺失，不默认零灯。"""
+    if explicit is not None:
+        values = explicit
+    else:
+        configured = plan["additional_preview"]
+        if not isinstance(configured, dict) or configured.get("configured") is not True:
+            raise ValueError("ProjectAdditionalLighting尚未配置；选灯/global未明确，不制作或激活四灯图")
+        values = additional_material_values(configured["sample"])
+    if set(values) != {"vectors", "scalars"} or set(values["vectors"]) != set(ADDITIONAL_VECTORS) \
+            or set(values["scalars"]) != set(ADDITIONAL_SCALARS):
+        raise ValueError("必须给出完整16向量/2标量附加灯接口")
+    count = number(values["scalars"]["AdditionalLightCount"], "AdditionalLightCount")
+    gain = number(values["scalars"]["AdditionalLightGlobalIntensity"], "AdditionalLightGlobalIntensity")
+    if count != int(count) or not 0 <= count <= 4 or not 0 <= gain <= MATERIAL_FLOAT_MAX:
+        raise ValueError("附加灯count/global无效")
+    for name, value in values["vectors"].items():
+        if len(value) != 4 or any(abs(number(v, name)) > MATERIAL_FLOAT_MAX for v in value):
+            raise ValueError("附加灯向量必须为四个float32有限值: " + name)
+    return values
+
+
+def load_shadow_settings(path):
+    """完整的UE移植配置；生产者自行消费同一字段，图默认不伪造活动捕获。"""
+    value = json.loads(Path(path).read_text(encoding="utf-8"))["ProjectShadowSettings"]
+    expected = {"bConfigured", "ObjectResolution", "CascadeResolution", "CascadeWidthsCm", "DepthHalfExtentCm",
+                "ObjectMarginCm", "DepthBiasCm", "NormalBiasCm", "FilterRadiusTexels", "Strength", "MaxOutputBytes"}
+    if not isinstance(value, dict) or set(value) != expected or value["bConfigured"] is not True:
+        raise ValueError("ProjectShadowSettings缺明确完整配置")
+    for name in ("ObjectResolution", "CascadeResolution"):
+        n = value[name]
+        if type(n) is not int or not 0 < n <= 4096 or n & (n - 1):
+            raise ValueError("阴影分辨率须为已配置的正二次幂: " + name)
+    widths = value["CascadeWidthsCm"]
+    if not isinstance(widths, list) or len(widths) != 4 or not 0 < widths[0] < widths[1] < widths[2] < widths[3]:
+        raise ValueError("阴影四级联宽度必须递增")
+    for name in expected - {"bConfigured", "CascadeWidthsCm", "MaxOutputBytes"}:
+        if not 0 <= number(value[name], name) <= MATERIAL_FLOAT_MAX:
+            raise ValueError("阴影配置必须有限非负: " + name)
+    if not 1 < value["DepthHalfExtentCm"] <= MATERIAL_FLOAT_MAX * 0.5 or value["Strength"] > 1 or any(
+            number(v, "CascadeWidthsCm") > MATERIAL_FLOAT_MAX for v in widths):
+        raise ValueError("阴影空间/强度配置无效")
+    required = (value["ObjectResolution"] ** 2 + 4 * value["CascadeResolution"] ** 2) * 4
+    if type(value["MaxOutputBytes"]) is not int or required > value["MaxOutputBytes"]:
+        raise ValueError("阴影输出超过明确预算")
+    return value
+
+
+def load_fx_light_settings(path):
+    """原场景槽固定，FX只用余槽；此首接参数明确可调，非原作强度认证。"""
+    value = json.loads(Path(path).read_text(encoding="utf-8"))["ProjectFXLighting"]
+    if (set(value) != {"Mode", "bConfigured", "MaxLights", "IntensityScale"}
+            or value["Mode"] != "NapPointFromNativeRadius" or value["bConfigured"] is not True
+            or type(value["MaxLights"]) is not int or not 1 <= value["MaxLights"] <= 4
+            or not 0 <= number(value["IntensityScale"], "FX IntensityScale") <= MATERIAL_FLOAT_MAX):
+        raise ValueError("FX选灯缺明确模式/额度/强度配置")
+    return value
 
 
 def load_plan(json_dir, globals_path, inputs_path=INPUTS_PATH):
@@ -253,6 +349,9 @@ def load_plan(json_dir, globals_path, inputs_path=INPUTS_PATH):
             if name and slot_srgb.setdefault(slot, settings[name]["srgb"]) != settings[name]["srgb"]:
                 raise ValueError("贴图槽 %s 混用了 sRGB 与线性贴图" % slot)
     return {"inputs": inputs, "materials": materials, "params": params, "textures": textures,
+            "additional_preview": json.loads(Path(globals_path).read_text(encoding="utf-8")).get("ProjectAdditionalLighting"),
+            "shadow_settings": load_shadow_settings(globals_path),
+            "fx_light_selection": load_fx_light_settings(globals_path),
             "texture_names": names, "texture_srgb": {n: settings[n]["srgb"] for n in names},
             "slot_srgb": slot_srgb, "globals": load_globals(globals_path, inputs),
             "display": load_display(globals_path)}

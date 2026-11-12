@@ -28,13 +28,15 @@ public:
 		const UNiagaraRendererProperties* Properties, const FNiagaraEmitterInstance* Emitter) const override;
 private:
 	struct FPayload;
+	bool PreparePayload_GameThread(const UNiagaraRendererProperties* Properties,
+		const FNiagaraEmitterInstance* Emitter) const;
 	void RetirePayload() const;
 	void ReportFailure(const FString& SourceReference, const FString& Reason) const;
 	TWeakObjectPtr<UNiagaraComponent> OriginalComponent;
 	TWeakObjectPtr<UNiagaraSystem> OriginalSystem;
 	uint64 OriginalInstanceId = 0;
 	mutable FCriticalSection PayloadLock;
-	// 仅本次原模拟tick有效；后继tick必须由原GT钩子重新提供，不能沿用旧payload成功。
+	// 仅匹配原实例的当前模拟数据；由GT PostTick或本次GT提交准备。
 	mutable TSharedPtr<FPayload, ESPMode::ThreadSafe> Payload;
 	// Scene中最后提交的代理仍在使用这批MID；只作GPU资源租用，不能作为后继采样输入。
 	mutable TSharedPtr<FPayload, ESPMode::ThreadSafe> SubmittedPayload;

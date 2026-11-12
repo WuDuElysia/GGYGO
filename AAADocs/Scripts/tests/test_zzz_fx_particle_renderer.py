@@ -123,7 +123,8 @@ class RendererTests(unittest.TestCase):
                              "sort": 0, **R.mesh_contract(source, "Front02")}}
         original = copy.deepcopy(spec)
         builder = RecordingBuilder()
-        builder.build_emitter(spec)
+        # 本例只验证 Renderer 参数；Emitter 制作需要真实 AddEmitter 返回值和读回。
+        builder.build_renderer(spec["name"], spec["renderer"])
         props = builder.renderer_properties
         self.assertEqual(props["Meshes"][0]["PivotOffset"], {"x": 25, "y": 0, "z": 5})
         self.assertEqual(props["Meshes"][0]["PivotOffsetSpace"], "Mesh")

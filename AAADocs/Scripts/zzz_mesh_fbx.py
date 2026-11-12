@@ -32,12 +32,19 @@ def fmt(vals):
     return ",".join("%.17g" % v for v in vals)
 
 
-def build(mesh, *, reverse_winding=True):
+def build(mesh, *, reverse_winding=True, include_tangents=False, control_point_attributes=False,
+          preserve_sparse_uv_channels=False):
     """@param reverse_winding 调用者的目标格式契约，不根据文件名或法线猜测。
     @return 规范 FBX 文本；不读取、写出或导入资产。
     """
     if type(reverse_winding) is not bool:
         raise ValueError("FBX 绕序选择必须是明确布尔值")
+    if type(include_tangents) is not bool:
+        raise ValueError("FBX Tangent消费选择必须是明确布尔值")
+    if type(control_point_attributes) is not bool:
+        raise ValueError("FBX control point属性映射须明确选择")
+    if type(preserve_sparse_uv_channels) is not bool:
+        raise ValueError("稀疏 UV 通道保留策略须明确选择")
     n = mesh["m_VertexCount"]
     name = mesh["m_Name"]
     v = mesh["m_Vertices"]
@@ -63,6 +70,9 @@ def build(mesh, *, reverse_winding=True):
     if start != len(idx):
         raise ValueError("子网格索引数之和 %d 与索引总数 %d 不符" % (start, len(idx)))
     corners = [i if i >= 0 else -i - 1 for i in polys]
+    # FBX SDK 2020.2 fbxfiletokens.h 的序列化 token；语义为 eByControlPoint。
+    attribute_indices = range(n) if control_point_attributes else corners
+    mapping = "ByVertice" if control_point_attributes else "ByPolygonVertex"
 
     layers = []
     body = []
@@ -70,27 +80,52 @@ def build(mesh, *, reverse_winding=True):
     if nr:
         cn = comps_of(nr, n)
         out = []
-        for i in corners:
+        for i in attribute_indices:
             out += [-nr[i * cn], nr[i * cn + 1], nr[i * cn + 2]]
         body.append('\t\tLayerElementNormal: 0 {\n\t\t\tVersion: 101\n\t\t\tName: ""\n'
-                    '\t\t\tMappingInformationType: "ByPolygonVertex"\n\t\t\tReferenceInformationType: "Direct"\n'
-                    '\t\t\tNormals: *%d {\n\t\t\t\ta: %s\n\t\t\t}\n\t\t}\n' % (len(out), fmt(out)))
+                    '\t\t\tMappingInformationType: "%s"\n\t\t\tReferenceInformationType: "Direct"\n'
+                    '\t\t\tNormals: *%d {\n\t\t\t\ta: %s\n\t\t\t}\n\t\t}\n' % (mapping, len(out), fmt(out)))
         layers.append(("LayerElementNormal", 0))
+    if include_tangents:
+        tangent = mesh.get("m_Tangents")
+        if comps_of(nr, n) not in (3, 4) or comps_of(tangent, n) != 4:
+            raise ValueError("%s Tangent层需要真实XYZ Normal及XYZW Tangent" % name)
+        if cn == 4 and any(nr[i*cn+3] != 0.0 for i in range(n)):
+            raise ValueError("%s Normal.W不是已证零填充，需要对应shader消费合同" % name)
+        tangents, binormals = [], []
+        for i in attribute_indices:
+            nx, ny, nz = nr[i*cn:i*cn+3]
+            tx, ty, tz, tw = tangent[i*4:i*4+4]
+            tangents += [-tx, ty, tz]
+            # UE FbxFactory 会对 FBX Binormal 额外取负；导出 -R(cross(N,T)*W)，
+            # 使其 SourceModel 仍保留 C=(-X,Z,Y) 映射后的完整源基底。
+            bx, by, bz = ((ny*tz-nz*ty)*tw, (nz*tx-nx*tz)*tw, (nx*ty-ny*tx)*tw)
+            binormals += [bx, -by, -bz]
+        for kind, field, values in (("Tangent", "Tangents", tangents), ("Binormal", "Binormals", binormals)):
+            body.append('\t\tLayerElement%s: 0 {\n\t\t\tVersion: 101\n\t\t\tName: ""\n'
+                        '\t\t\tMappingInformationType: "%s"\n\t\t\tReferenceInformationType: "Direct"\n'
+                        '\t\t\t%s: *%d {\n\t\t\t\ta: %s\n\t\t\t}\n\t\t}\n' % (kind, mapping, field, len(values), fmt(values)))
+            layers.append(("LayerElement"+kind, 0))
     col = mesh.get("m_Colors")
     if col:
         if comps_of(col, n) != 4:
             raise ValueError("%s 顶点色不是 RGBA" % name)
-        out = [value for i in corners for value in col[i * 4:i * 4 + 4]]
+        out = [value for i in attribute_indices for value in col[i * 4:i * 4 + 4]]
         body.append('\t\tLayerElementColor: 0 {\n\t\t\tVersion: 101\n\t\t\tName: "Col"\n'
-                    '\t\t\tMappingInformationType: "ByPolygonVertex"\n\t\t\tReferenceInformationType: "Direct"\n'
+                    '\t\t\tMappingInformationType: "%s"\n\t\t\tReferenceInformationType: "Direct"\n'
                     '\t\t\tColors: *%d {\n\t\t\t\ta: %s\n\t\t\t}\n'
-                    '\t\t}\n' % (len(out), fmt(out)))
+                    '\t\t}\n' % (mapping, len(out), fmt(out)))
         layers.append(("LayerElementColor", 0))
     uv_layers = 0
+    last_uv = max((k for k in range(8) if mesh.get("m_UV%d" % k)), default=-1)
     for k in range(8):
         uv = mesh.get("m_UV%d" % k)
         if not uv:
-            continue
+            if not preserve_sparse_uv_channels or k > last_uv:
+                continue
+            # Unity 缺失 UV 分量为 0；UE FBX 导入器会压紧缺号的 UV 集。
+            # 显式保留空槽，避免把源 UV1 变成 UE UV0；不回写源 Mesh 数据。
+            uv = [0.0, 0.0] * n
         if k != uv_layers:
             raise ValueError("%s 的 UV%d 前面有缺失的 UV 层，FBX 层号会错位" % (name, k))
         cu = comps_of(uv, n)

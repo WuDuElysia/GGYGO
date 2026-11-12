@@ -43,6 +43,19 @@ class TranslationCase(unittest.TestCase):
 
 
 class AddressDependencyTests(TranslationCase):
+    def test_texture_load_keeps_integer_xy_mip_and_resource_swizzle(self):
+        result = self.translated("ftou r0.xy, v1.xyxx", "ftou r0.w, v1.w", "ftou r0.z, v2.x",
+                                 "ld o0.xy, r0.xyzw, t0.wzyx", outputs={0: "xy"})
+        self.assertEqual(set(result["live_inputs"]), {("v1", "x"), ("v1", "y"), ("v1", "w")})
+        self.assertIn("F.L(TestTexture, br0.xyw)", result["code"])
+        self.assertIn(").wz", result["code"])
+        self.assertEqual(result["textures"], ["TestTexture"])
+
+    def test_dead_texture_load_does_not_keep_texture_or_address(self):
+        result = self.translated("ld r0.xyzw, v1.xyzw, t0.xyzw", "mov o0.x, v3.x")
+        self.assertEqual(set(result["live_inputs"]), {("v3", "x")})
+        self.assertEqual(result["textures"], [])
+
     def test_back03_original_ftou_before_dynamic_destination(self):
         # Preserve the original address producer and write verbatim. Keep the
         # earlier front-face bit value live to reproduce the stale-index path.

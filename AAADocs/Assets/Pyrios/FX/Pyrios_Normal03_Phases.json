@@ -1,0 +1,38 @@
+{
+  "configuration_mode": "ProjectConfiguredFromVisualReference",
+  "montage": "/Game/Characters/Player/Pyrios/Animation/Attack/AM_Pyrios_Attack_Normal_03",
+  "main_seconds": 1.4,
+  "reference": {
+    "original_video_recorded_path": "F:/Nvidia/Zenless Zone Zero/Zenless Zone Zero 2026.10.10 - 18.33.02.02.mp4",
+    "original_video_currently_present": false,
+    "decoded_frames": "Saved/Codex/PyriosOriginalFXVideo_20261010_R1",
+    "onset_last_previous_frame": {"frame": 968, "pts_seconds": 8.516844},
+    "onset_first_changed_frame": {"frame": 969, "pts_seconds": 8.524911},
+    "estimated_action_zero_seconds": 8.52,
+    "mapping": "Montage Main time approximately equals video PTS minus 8.52 seconds at PlayRate 1; pose landmarks cross-checked against the 60 Hz source FBX. This is a project visual alignment, not recovered original Notify timing.",
+    "source_animation": "F:/AnimeStudio/Exports/ZZZ/Avatar_Male_Size03_Pyrois_Model/anim/Avatar_Male_Size03_Pyrois_Ani_Attack_Normal_03.fbx",
+    "prior_composition_policy": "Saved/Codex/FXRestoration_20261022_F1/project_actions.json",
+    "source_preparation": "Saved/Codex/FXProduction_20261026_R1/Preparation_20261028_R14/preparation.json.gz"
+  },
+  "phases": [
+    {"member": "11_Trail", "prefix": "M11_", "start_seconds": 0.4, "purpose": "残影连斩后的转身横扫；录屏约 8.92～9.02 秒"},
+    {"member": "12_Trail", "prefix": "M12_", "start_seconds": 0.5333333333333333, "purpose": "横扫后上挑起跳；源动画 0.53 秒开始明显抬升"},
+    {"member": "13_Dust", "prefix": "M13_", "start_seconds": 0.5333333333333333, "purpose": "起跳阶段伴随层；具体单层可见性待合成对比"},
+    {"member": "14_Trail", "prefix": "M14_", "start_seconds": 0.75, "purpose": "空中下劈；源动画顶点后快速下降，录屏约 9.28～9.35 秒"},
+    {"member": "15_Decal", "prefix": "M15_", "start_seconds": 0.8, "purpose": "落地地面层；不能在残影起始出现"},
+    {"member": "16_Boom", "prefix": "M16_", "start_seconds": 0.8, "purpose": "落地碎石、冲击、地面电光；录屏空场也可见，不按 Boom 名称改成目标命中事件"},
+    {"member": "17_Flash", "prefix": "M17_", "start_seconds": 0.5333333333333333, "purpose": "起跳刀尖闪光；原粒子内部 0.04～0.1 秒延迟另行保留"},
+    {"member": "18_Flash", "prefix": "M18_", "start_seconds": 0.8, "purpose": "落地闪光与烟；合成对比后确认单层归属"}
+  ],
+  "unchanged_prefixes": ["M00_", "M01_", "M02_", "M03_", "M04_", "M05_", "M06_", "M07_", "M08_", "M09_", "M10_"],
+  "remaining_unknowns": "残影各子层的精确先后、单层空间与原始宿主控制仍未还原；本配置只纠正已确认的后半段整包提前播放。",
+  "systems": [
+    "/Game/Characters/Player/Pyrios/FX/Skill/NS_Pyrios_Normal03_MainComposition_a66c4d372b54_Unit00_81970ba816a4",
+    "/Game/Characters/Player/Pyrios/FX/Skill/NS_Pyrios_Normal03_MainComposition_a66c4d372b54_Unit01_f5e7a3db901f",
+    "/Game/Characters/Player/Pyrios/FX/Skill/NS_Pyrios_Normal03_MainComposition_a66c4d372b54_Unit02_4b65a29593c0",
+    "/Game/Characters/Player/Pyrios/FX/Skill/NS_Pyrios_Normal03_MainComposition_a66c4d372b54_Unit03_b2b553178ab4",
+    "/Game/Characters/Player/Pyrios/FX/Skill/NS_Pyrios_Normal03_MainComposition_a66c4d372b54_Unit04_e65d18ad8b75",
+    "/Game/Characters/Player/Pyrios/FX/Skill/NS_Pyrios_Normal03_MainComposition_a66c4d372b54_Unit05_bca024fdd5a1",
+    "/Game/Characters/Player/Pyrios/FX/Skill/NS_Pyrios_Normal03_MainComposition_a66c4d372b54_Unit06_d77757383550"
+  ]
+}

@@ -1,0 +1,2218 @@
+{
+ "schema": "projected_fx_programs/v1",
+ "decal": {
+  "81e3c1be3b0f474a": {
+   "code": "// 原DXBC表面计算；原生投影提供真实receiver位置和深度导数法线。\nstruct ProjectedFunctions {\n float3 U(float3 v) { return float3(-v.x,v.z,v.y); }\n float4 S(Texture2D T, SamplerState Smp, float2 uv) {\n  return Texture2DSample(T,Smp,float2(uv.x,1.0-uv.y)); }\n float4 SL(Texture2D T, SamplerState Smp, float2 uv, float lod) {\n  return Texture2DSampleLevel(T,Smp,float2(uv.x,1.0-uv.y),lod); }\n float4 SB(Texture2D T, SamplerState Smp, float2 uv, float bias) {\n  return Texture2DSampleBias(T,Smp,float2(uv.x,1.0-uv.y),bias); }\n};\nProjectedFunctions F;\nfloat3 ReceiverU=F.U(ReceiverRelativeWS)*0.01;\nfloat3 CameraU=F.U(CameraRelativeWS)*0.01;\nfloat3 DerivedNormal=cross(ddy(ReceiverRelativeWS),ddx(ReceiverRelativeWS));\nfloat NormalLength=dot(DerivedNormal,DerivedNormal);\nif(NormalLength<=0.0) { clip(-1.0); }\nDerivedNormal*=rsqrt(max(NormalLength,1e-20));\nDerivedNormal*=dot(DerivedNormal,CameraRelativeWS-ReceiverRelativeWS)<0.0?-1.0:1.0;\nfloat4 ReceiverNormal=float4(F.U(DerivedNormal)*0.5+0.5,0);\nfloat4 RelativePoint=float4(ReceiverU,1);\nfloat3 SourceLocal=float3(dot(UEFX_ProjectionRow0,RelativePoint),\n dot(UEFX_ProjectionRow1,RelativePoint),dot(UEFX_ProjectionRow2,RelativePoint));\nuint4 v_v1=(uint4)0;\nuint4 v_v2=(uint4)0;\nuint4 v_v3=(uint4)0;\nuint4 v_v5=(uint4)0;\nuint4 v_v6=(uint4)0;\nuint4 v_v7=(uint4)0;\nv_v1.w=asuint(UEFX_SourceColor.w);\nv_v1.x=asuint(UEFX_SourceColor.x);\nv_v1.y=asuint(UEFX_SourceColor.y);\nv_v1.z=asuint(UEFX_SourceColor.z);\nv_v2.w=asuint(UEFX_SourceSize.x);\nv_v3.x=asuint(UEFX_SourceSize.y);\nv_v3.y=asuint(UEFX_SourceSize.z);\nv_v5.w=asuint(UEFX_SourceCustom1.z);\nv_v5.y=asuint(UEFX_SourceCustom1.x);\nv_v5.z=asuint(UEFX_SourceCustom1.y);\nv_v6.w=asuint(UEFX_SourceCustom2.z);\nv_v6.x=asuint(UEFX_SourceCustom1.w);\nv_v6.y=asuint(UEFX_SourceCustom2.x);\nv_v6.z=asuint(UEFX_SourceCustom2.y);\nv_v7.x=asuint(UEFX_SourceCustom2.w);\n    uint4 v_r0 = (uint4)0, v_r1 = (uint4)0, v_r2 = (uint4)0;\n    uint4 v_o0 = (uint4)0, v_o1 = (uint4)0, v_o2 = (uint4)0, v_o3 = (uint4)0, v_o4 = (uint4)0, v_o5 = (uint4)0, v_o6 = (uint4)0, v_o7 = (uint4)0;\n    v_r0.xy = select((float2(_CustomData1X, _CustomData1Y) < float2(1.5, 1.5)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    v_r1.xyz = select((float3(0.5, 1.5, 0.5) < float3(_CustomData1X, _CustomData1X, _CustomData1Y)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    v_r0.xy = (v_r0.xy & v_r1.xz);\n    v_r0.x = (v_r0.x | v_r1.y);\n    v_r1.xy = select(v_r0.xy != 0u, uint2(0u, 0u), v_v5.yz);\n    v_r0.x = ((_UsingNonPSR < 0.5) ? 0xFFFFFFFFu : 0u);\n    v_o3.xy = (v_r1.xy & v_r0.xx);\n    v_r0.yz = select((float2(_CustomData1Z, _CustomData1W) < float2(1.5, 1.5)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    v_r2.xyz = select((float3(0.5, 0.5, 1.5) < float3(_CustomData1Z, _CustomData1W, _CustomData1W)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    v_r0.yz = (v_r0.yz & v_r2.xy);\n    v_r0.z = (v_r0.z | v_r2.z);\n    v_r1.z = ((v_r0.y != 0u) ? 0u : v_v5.w);\n    v_r1.w = ((v_r0.z != 0u) ? 0u : v_v6.x);\n    v_o3.zw = select(v_r0.xx != 0u, v_r1.zw, asuint(float2(_DissolveProgress_NonPSR, _DissolveEmissionProgress_NonPSR)));\n    v_r0.yzw = asuint((_ZNetBakedVertexColor.xyz + float3(0.055, 0.055, 0.055)));\n    v_r0.yzw = asuint((asfloat(v_r0.yzw) * float3(0.947867, 0.947867, 0.947867)));\n    v_r0.yzw = asuint(log2(abs(asfloat(v_r0.yzw))));\n    v_r0.yzw = asuint((asfloat(v_r0.yzw) * float3(2.4, 2.4, 2.4)));\n    v_r0.yzw = asuint(exp2(asfloat(v_r0.yzw)));\n    v_r1.xyz = asuint((_ZNetBakedVertexColor.xyz * float3(0.077399, 0.077399, 0.077399)));\n    v_r2.xyz = select((float3(0.04045, 0.04045, 0.04045) >= _ZNetBakedVertexColor.xyz), (uint3)0xFFFFFFFFu, (uint3)0u);\n    v_r0.yzw = select(v_r2.xyz != 0u, v_r1.xyz, v_r0.yzw);\n    v_r0.yzw = select(v_r0.xxx != 0u, v_v1.xyz, v_r0.yzw);\n    v_o4.xyz = asuint((asfloat(v_r0.yzw) * _MultiplyParticleColor.xyz));\n    v_o4.w = ((v_r0.x != 0u) ? v_v1.w : asuint(_ZNetBakedVertexColor.w));\n    v_r1.xyz = v_v6.yzw;\n    v_r1.w = v_v7.x;\n    v_o5.xyzw = select(v_r0.xxxx != 0u, v_r1.xyzw, asuint(_CustomDataColorB.xyzw));\n    v_r1.x = v_v2.w;\n    v_r1.yz = v_v3.xy;\n    v_r0.yzw = asuint((_ParticleDecalScale.xyz / asfloat(v_r1.xyz)));\n    v_r1.x = ((0.5 < _ParticleDecalScale.w) ? 0xFFFFFFFFu : 0u);\n    v_r0.yzw = select(v_r1.xxx != 0u, v_r0.yzw, uint3(asuint(1.0), asuint(1.0), asuint(1.0)));\n    v_o7.xyz = select(v_r0.xxx != 0u, v_r0.yzw, uint3(asuint(1.0), asuint(1.0), asuint(1.0)));\nuint4 p_v3=v_o3;\nuint4 p_v4=v_o4;\nuint4 p_v5=v_o5;\nuint4 p_v7=v_o7;\n    uint4 p_r0 = (uint4)0, p_r1 = (uint4)0, p_r2 = (uint4)0, p_r3 = (uint4)0, p_r4 = (uint4)0, p_r5 = (uint4)0, p_r6 = (uint4)0, p_r7 = (uint4)0, p_r8 = (uint4)0, p_r9 = (uint4)0, p_r10 = (uint4)0, p_r11 = (uint4)0, p_r12 = (uint4)0, p_r13 = (uint4)0, p_r14 = (uint4)0;\n    const uint4 p_icb[4] = { uint4(asuint(1.0), 0u, 0u, 0u), uint4(0u, asuint(1.0), 0u, 0u), uint4(0u, 0u, asuint(1.0), 0u), uint4(0u, 0u, 0u, asuint(1.0)) };\n    uint4 p_o0 = (uint4)0, p_o1 = (uint4)0, p_o2 = (uint4)0, p_o3 = (uint4)0, p_o4 = (uint4)0;\n    p_r1.xyzw = asuint(float4((ReceiverNormal).x, (ReceiverNormal).y, (ReceiverNormal).z, (ReceiverNormal).w));\n    p_r0.z = asuint((UEFX_SystemAge.xxxx).x);\n    p_r0.z = asuint((asfloat(p_r0.z) + (-_TimeOffset)));\n    p_r3.xyz = asuint(float3((float4(SourceLocal,1)).x, (float4(SourceLocal,1)).y, (float4(SourceLocal,1)).z));\n    p_r3.xyz = asuint((asfloat(p_r3.xyz) * asfloat(p_v7.xyz)));\n    p_r4.xyz = asuint((asfloat(p_r3.xyz) * float3(1.0, -1.0, 1.0)));\n    p_r3.xyz = asuint((asfloat(p_r3.xyz) * float3(1.0, -1.0, 1.0) + float3(0.5, 0.5, 0.5)));\n    p_r1.w = ((0.5 < _DepthShrinkToCenterUV) ? 0xFFFFFFFFu : 0u);\n    p_r3.w = asuint((abs(asfloat(p_r4.y)) + abs(asfloat(p_r4.y))));\n    p_r3.w = asuint(((-asfloat(p_r3.w)) * asfloat(p_r3.w) + 1.0));\n    p_r3.w = asuint(max(asfloat(p_r3.w), 0.0));\n    p_r3.w = asuint(sqrt(asfloat(p_r3.w)));\n    p_r3.w = asuint(max(asfloat(p_r3.w), 0.001));\n    p_r4.xz = asuint((asfloat(p_r4.xz) / asfloat(p_r3.ww)));\n    p_r4.xz = asuint((asfloat(p_r4.xz) + float2(0.5, 0.5)));\n    p_r5.xy = select(p_r1.ww != 0u, p_r4.xz, p_r3.xz);\n    p_r1.w = asuint(dot(_ParticleDecalLocalToWorldMatrix_R1.xyz, _ParticleDecalLocalToWorldMatrix_R1.xyz));\n    p_r1.w = asuint(rsqrt(asfloat(p_r1.w)));\n    p_r4.xzw = asuint((asfloat(p_r1.www) * _ParticleDecalLocalToWorldMatrix_R1.xyz));\n    p_r5.zw = asuint(((-asfloat(p_r5.xy)) + float2(1.0, 1.0)));\n    p_r6.xyzw = asuint(((-asfloat(p_r5.xyzw)) + asfloat(p_r5.yzwx)));\n    p_r7.xyzw = asuint((float4(_MainTexRotation, _MainTexRotation, _MainTexRotation, _MainTexRotation) * asfloat(p_r6.xyzw) + asfloat(p_r5.xyzw)));\n    p_r8.xyzw = select((float4(_MainTexFlip, _MainTexFlip, _MainTexFlip, _MainTexFlip) < float4(0.5, 1.5, 2.5, 65504.0)), (uint4)0xFFFFFFFFu, (uint4)0u);\n    p_r9.xyzw = (p_r8.xyzw & uint4(1065353216u, 1065353216u, 1065353216u, 1065353216u));\n    p_r8.xyz = select(p_r8.xyz != 0u, uint3(asuint(-1.0), asuint(-1.0), asuint(-1.0)), uint3(asuint(-0.0), asuint(-0.0), asuint(-0.0)));\n    p_r8.xyz = asuint((asfloat(p_r8.xyz) + asfloat(p_r9.yzw)));\n    p_r8.xyz = asuint(max(asfloat(p_r8.xyz), float3(0.0, 0.0, 0.0)));\n    p_r10.xy = p_r7.zw;\n    p_r10.z = asuint(1.0);\n    p_r10.w = asuint(((-_MainTexRotation) + 1.0));\n    p_r11.xy = p_r7.xw;\n    p_r11.z = 0u;\n    p_r11.w = asuint(((-_MainTexRotation) + 1.0));\n    p_r12.xyzw = asuint((asfloat(p_r8.yyyy) * asfloat(p_r11.xyzw)));\n    p_r12.xyzw = asuint((asfloat(p_r10.xyzw) * asfloat(p_r8.zzzz) + asfloat(p_r12.xyzw)));\n    p_r7.xz = p_r10.xz;\n    p_r7.w = asuint(_MainTexRotation);\n    p_r8.xyzw = asuint((asfloat(p_r7.xyzw) * asfloat(p_r8.xxxx) + asfloat(p_r12.xyzw)));\n    p_r7.xz = p_r11.xz;\n    p_r7.xyzw = asuint((asfloat(p_r7.xyzw) * asfloat(p_r9.xxxx) + asfloat(p_r8.xyzw)));\n    p_r7.xy = asuint(((-asfloat(p_r7.zw)) + asfloat(p_r7.xy)));\n    p_r7.xy = asuint((asfloat(p_r7.xy) * _MainTex_ST.xy + _MainTex_ST.zw));\n    p_r7.xy = asuint((asfloat(p_r7.zw) + asfloat(p_r7.xy)));\n    p_r7.zw = select((float2(0.5, 0.5) < float2(_MainTexClampU, _MainTexClampV)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    p_r8.xy = asuint(max(asfloat(p_r7.xy), float2(0.0, 0.0)));\n    p_r8.xy = asuint(min(asfloat(p_r8.xy), float2(0.998, 0.998)));\n    p_r7.xy = select(p_r7.zw != 0u, p_r8.xy, p_r7.xy);\n    p_r7.zw = asuint((_UVSpeed.xy * asfloat(p_r0.zz) + asfloat(p_v3.xy)));\n    p_r7.xy = asuint((float2(_UVMove, _UVMove) * asfloat(p_r7.zw) + asfloat(p_r7.xy)));\n    p_r8.xyzw = asuint((F.SL(_MainTex, _MainTexSampler, asfloat(p_r7.xy), 0.0)).xyzw);\n    p_o1.xyz = p_r8.xyz;\n    p_r1.w = (uint)(_AlphaChannelMapping);\n    p_r1.w = min(p_r1.w, 3u);\n    p_r1.w = asuint(dot(asfloat(p_r8.xyzw), asfloat(p_icb[p_r1.w].xyzw)));\n    p_r3.w = ((asfloat(p_r1.w) < _MaskPassAlphaClip) ? 0xFFFFFFFFu : 0u);\n    if (p_r3.w != 0u) {\n        if (4294967295u != 0u) { clip(-1.0); }\n    }\n    p_r9.xyz = select((asfloat(p_r3.xyz) < float3(0.0, 0.0, 0.0)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    p_r3.w = (p_r9.y | p_r9.x);\n    p_r3.w = (p_r9.z | p_r3.w);\n    p_r3.xyz = select((float3(1.0, 1.0, 1.0) < asfloat(p_r3.xyz)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    p_r3.x = (p_r3.y | p_r3.x);\n    p_r3.x = (p_r3.z | p_r3.x);\n    p_r3.x = (p_r3.x | p_r3.w);\n    if (p_r3.x != 0u) {\n        if (4294967295u != 0u) { clip(-1.0); }\n    }\n    p_r3.xyz = asuint((asfloat(p_r1.xyz) * float3(2.0, 2.0, 2.0) + float3(-1.0, -1.0, -1.0)));\n    p_r3.x = asuint(dot(asfloat(p_r3.xyz), asfloat(p_r4.xzw)));\n    p_r3.x = asuint(saturate((asfloat(p_r3.x) * 0.5 + 0.5)));\n    p_r3.x = asuint((asfloat(p_r3.x) + (-_NormalClip)));\n    p_r3.x = ((asfloat(p_r3.x) < 0.0) ? 0xFFFFFFFFu : 0u);\n    if (p_r3.x != 0u) {\n        if (4294967295u != 0u) { clip(-1.0); }\n    }\n    p_r1.xyz = asuint((asfloat(p_r1.xyz) * float3(2.0, 2.0, 2.0) + float3(-1.0, -1.0, -1.0)));\n    p_r1.x = asuint(dot(asfloat(p_r1.xyz), asfloat(p_r4.xzw)));\n    p_r1.x = asuint(saturate((asfloat(p_r1.x) * 0.5 + 0.5)));\n    p_r10.xyz = asuint((F.S(_BumpMap, _BumpMapSampler, asfloat(p_r7.xy))).xyw);\n    p_r10.x = asuint((asfloat(p_r10.x) * asfloat(p_r10.z)));\n    p_r7.zw = asuint((asfloat(p_r10.xy) * float2(2.0, 2.0) + float2(-1.0, -1.0)));\n    p_r7.zw = asuint((asfloat(p_r7.zw) * float2(_BumpMapScale, _BumpMapScale)));\n    p_r3.w = asuint(dot(asfloat(p_r7.zw), asfloat(p_r7.zw)));\n    p_r3.w = asuint(min(asfloat(p_r3.w), 1.0));\n    p_r3.w = asuint(((-asfloat(p_r3.w)) + 1.0));\n    p_r3.w = asuint(sqrt(asfloat(p_r3.w)));\n    p_o3.xy = p_r7.zw;\n    p_o3.z = p_r3.w;\n    p_r10.xyz = asuint((F.SL(_MaskMap, _MaskMapSampler, asfloat(p_r7.xy), 0.0)).xyz);\n    p_r7.x = asuint((asfloat(p_r10.x) * _Metallic));\n    p_r7.y = asuint((asfloat(p_r10.y) * _Roughness));\n    p_o2.x = p_r7.x;\n    p_o2.y = p_r7.y;\n    p_r10.xy = asuint((asfloat(p_r0.zz) * _EmissionRampTexUVSpeed.xy));\n    p_r7.y = asuint((asfloat(p_r10.x) * _EmissionRampTexUVMove));\n    p_r12.x = asuint((asfloat(p_r10.z) * _EmissionRampMulti + asfloat(p_r7.y)));\n    p_r12.y = asuint((_EmissionRampTexUVMove * asfloat(p_r10.y) + _EmissionRampV));\n    p_r10.xyw = asuint((F.S(_EmissionRampTex, _EmissionRampTexSampler, asfloat(p_r12.xy))).xyz);\n    p_r12.xyz = asuint((asfloat(p_v4.xyz) * _EmissionColor.xyz));\n    p_r12.xyz = asuint((asfloat(p_r10.zzz) * asfloat(p_r12.xyz)));\n    p_r12.xyz = asuint((asfloat(p_r12.xyz) * asfloat(p_v4.www)));\n    p_r10.xyz = asuint((asfloat(p_r10.xyw) * asfloat(p_r12.xyz)));\n    p_r7.y = ((0.5 < _EmissionBlendBaseColor) ? 0xFFFFFFFFu : 0u);\n    p_r12.xyz = asuint((asfloat(p_r8.xyz) * asfloat(p_r10.xyz)));\n    p_r10.xyz = select(p_r7.yyy != 0u, p_r12.xyz, p_r10.xyz);\n    p_r5.xyzw = asuint((float4(_DissolveTexRotation, _DissolveTexRotation, _DissolveTexRotation, _DissolveTexRotation) * asfloat(p_r6.xyzw) + asfloat(p_r5.xyzw)));\n    p_r6.xyzw = select((float4(_DissolveTexFlip, _DissolveTexFlip, _DissolveTexFlip, _DissolveTexFlip) < float4(0.5, 1.5, 2.5, 65504.0)), (uint4)0xFFFFFFFFu, (uint4)0u);\n    p_r11.xyzw = (p_r6.xyzw & uint4(1065353216u, 1065353216u, 1065353216u, 1065353216u));\n    p_r6.xyz = select(p_r6.xyz != 0u, uint3(asuint(-1.0), asuint(-1.0), asuint(-1.0)), uint3(asuint(-0.0), asuint(-0.0), asuint(-0.0)));\n    p_r6.xyz = asuint((asfloat(p_r6.xyz) + asfloat(p_r11.yzw)));\n    p_r6.xyz = asuint(max(asfloat(p_r6.xyz), float3(0.0, 0.0, 0.0)));\n    p_r12.xy = p_r5.zw;\n    p_r12.z = asuint(1.0);\n    p_r12.w = asuint(((-_DissolveTexRotation) + 1.0));\n    p_r13.xy = p_r5.xw;\n    p_r13.z = 0u;\n    p_r13.w = asuint(((-_DissolveTexRotation) + 1.0));\n    p_r14.xyzw = asuint((asfloat(p_r6.yyyy) * asfloat(p_r13.xyzw)));\n    p_r14.xyzw = asuint((asfloat(p_r12.xyzw) * asfloat(p_r6.zzzz) + asfloat(p_r14.xyzw)));\n    p_r5.xz = p_r12.xz;\n    p_r5.w = asuint(_DissolveTexRotation);\n    p_r6.xyzw = asuint((asfloat(p_r5.xyzw) * asfloat(p_r6.xxxx) + asfloat(p_r14.xyzw)));\n    p_r5.xz = p_r13.xz;\n    p_r5.xyzw = asuint((asfloat(p_r5.xyzw) * asfloat(p_r11.xxxx) + asfloat(p_r6.xyzw)));\n    p_r5.xy = asuint(((-asfloat(p_r5.zw)) + asfloat(p_r5.xy)));\n    p_r5.xy = asuint((asfloat(p_r5.xy) * _DissolveTex_ST.xy + _DissolveTex_ST.zw));\n    p_r5.xy = asuint((asfloat(p_r5.zw) + asfloat(p_r5.xy)));\n    p_r5.zw = select((float2(0.5, 0.5) < float2(_DissolveTexClampU, _DissolveTexClampV)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    p_r6.xy = asuint(max(asfloat(p_r5.xy), float2(0.0, 0.0)));\n    p_r6.xy = asuint(min(asfloat(p_r6.xy), float2(0.998, 0.998)));\n    p_r5.xy = select(p_r5.zw != 0u, p_r6.xy, p_r5.xy);\n    p_r5.xy = asuint((_DissolveUVSpeed.xy * asfloat(p_r0.zz) + asfloat(p_r5.xy)));\n    p_r5.xyzw = asuint((F.S(_DissolveTex, _DissolveTexSampler, asfloat(p_r5.xy))).xyzw);\n    p_r0.z = (uint)(_DissolveChannel);\n    p_r0.z = min(p_r0.z, 3u);\n    p_r0.z = asuint(dot(asfloat(p_r5.xyzw), asfloat(p_icb[p_r0.z].xyzw)));\n    p_r1.y = asuint(max(_DissolveEdgeRange, 0.001));\n    p_r5.xy = asuint(((-asfloat(p_v3.zw)) + float2(1.0, 1.0)));\n    p_r5.z = asuint((asfloat(p_r1.y) + 1.0));\n    p_r6.xy = asuint((asfloat(p_r5.xy) * asfloat(p_r5.zz) + (-asfloat(p_r1.yy))));\n    p_r5.xy = asuint((asfloat(p_r5.xy) * asfloat(p_r5.zz) + (-asfloat(p_r6.xy))));\n    p_r5.zw = asuint((asfloat(p_r0.zz) * asfloat(p_r1.ww) + (-asfloat(p_r6.xy))));\n    p_r5.xy = asuint((float2(1.0, 1.0) / asfloat(p_r5.xy)));\n    p_r5.xy = asuint(saturate((asfloat(p_r5.xy) * asfloat(p_r5.zw))));\n    p_r5.zw = asuint((asfloat(p_r5.xy) * float2(-2.0, -2.0) + float2(3.0, 3.0)));\n    p_r5.xy = asuint((asfloat(p_r5.xy) * asfloat(p_r5.xy)));\n    p_r5.xy = asuint((asfloat(p_r5.xy) * asfloat(p_r5.zw)));\n    p_r5.xy = asuint(min(asfloat(p_r5.xy), float2(1.0, 1.0)));\n    p_r0.z = asuint((asfloat(p_r1.w) * asfloat(p_r5.x)));\n    p_r0.z = asuint((asfloat(p_r0.z) * asfloat(p_v5.w)));\n    p_r1.y = asuint(max(_SoftClip, 0.000488));\n    p_r1.x = asuint((asfloat(p_r1.x) + (-_NormalClip)));\n    p_r1.y = asuint((1.0 / asfloat(p_r1.y)));\n    p_r1.x = asuint(saturate((asfloat(p_r1.y) * asfloat(p_r1.x))));\n    p_r1.y = asuint((asfloat(p_r1.x) * -2.0 + 3.0));\n    p_r1.x = asuint((asfloat(p_r1.x) * asfloat(p_r1.x)));\n    p_r1.x = asuint((asfloat(p_r1.x) * asfloat(p_r1.y)));\n    p_r0.z = asuint((asfloat(p_r0.z) * asfloat(p_r1.x)));\n    p_r0.z = asuint((asfloat(p_r0.z) * _OpaquenessFadeByScript));\n    p_o4.xyz = asuint((asfloat(p_r10.xyz) * asfloat(p_r5.yyy)));\n    p_r0.z = asuint(saturate((asfloat(p_r0.z) * _AlphaFade)));\n    p_r1.x = ((0.5 < _VerticalAlphaFade) ? 0xFFFFFFFFu : 0u);\n    p_r1.y = asuint(((-abs(asfloat(p_r4.y))) * 2.0 + 1.0));\n    p_r1.y = asuint((asfloat(p_r0.z) * asfloat(p_r1.y)));\n    p_r0.z = ((p_r1.x != 0u) ? p_r1.y : p_r0.z);\n    p_o0.w = p_r0.z;\nBaseColorOut=asfloat(p_o1.xyz);\nMetallicOut=asfloat(p_o2.x);\nRoughnessOut=asfloat(p_o2.y);\nfloat3 TN=asfloat(p_o3.xyz);\nfloat3 NX=normalize(_ParticleDecalLocalToWorldMatrix_R0.xyz);\nfloat3 NY=normalize(_ParticleDecalLocalToWorldMatrix_R1.xyz);\nfloat3 NZ=normalize(_ParticleDecalLocalToWorldMatrix_R2.xyz);\nNormalOut=normalize(F.U(NX*TN.x+NZ*TN.y+NY*TN.z));\nOpacityOut=asfloat(p_o0.w);\nreturn asfloat(p_o4.xyz);\n",
+   "parameters": {
+    "UEFX_SourceColor": 4,
+    "UEFX_SourceSize": 4,
+    "UEFX_SourceCustom1": 4,
+    "UEFX_SourceCustom2": 4,
+    "UEFX_SystemAge": 1,
+    "UEFX_ProjectionRow0": 4,
+    "UEFX_ProjectionRow1": 4,
+    "UEFX_ProjectionRow2": 4
+   },
+   "material_params": {
+    "_CustomData1X": 1,
+    "_CustomData1Y": 1,
+    "_UsingNonPSR": 1,
+    "_CustomData1Z": 1,
+    "_CustomData1W": 1,
+    "_DissolveProgress_NonPSR": 1,
+    "_DissolveEmissionProgress_NonPSR": 1,
+    "_ZNetBakedVertexColor": 4,
+    "_MultiplyParticleColor": 4,
+    "_CustomDataColorB": 4,
+    "_ParticleDecalScale": 4,
+    "_TimeOffset": 1,
+    "_DepthShrinkToCenterUV": 1,
+    "_ParticleDecalLocalToWorldMatrix_R1": 4,
+    "_MainTexRotation": 1,
+    "_MainTexFlip": 1,
+    "_MainTex_ST": 4,
+    "_MainTexClampU": 1,
+    "_MainTexClampV": 1,
+    "_UVSpeed": 2,
+    "_UVMove": 1,
+    "_AlphaChannelMapping": 1,
+    "_MaskPassAlphaClip": 1,
+    "_NormalClip": 1,
+    "_BumpMapScale": 1,
+    "_Metallic": 1,
+    "_Roughness": 1,
+    "_EmissionRampTexUVSpeed": 4,
+    "_EmissionRampTexUVMove": 1,
+    "_EmissionRampMulti": 1,
+    "_EmissionRampV": 1,
+    "_EmissionColor": 3,
+    "_EmissionBlendBaseColor": 1,
+    "_DissolveTexRotation": 1,
+    "_DissolveTexFlip": 1,
+    "_DissolveTex_ST": 4,
+    "_DissolveTexClampU": 1,
+    "_DissolveTexClampV": 1,
+    "_DissolveUVSpeed": 2,
+    "_DissolveChannel": 1,
+    "_DissolveEdgeRange": 1,
+    "_SoftClip": 1,
+    "_OpaquenessFadeByScript": 1,
+    "_AlphaFade": 1,
+    "_VerticalAlphaFade": 1,
+    "_ParticleDecalLocalToWorldMatrix_R0": 4,
+    "_ParticleDecalLocalToWorldMatrix_R2": 4
+   },
+   "globals": {},
+   "textures": [
+    "_MainTex",
+    "_BumpMap",
+    "_MaskMap",
+    "_EmissionRampTex",
+    "_DissolveTex"
+   ],
+   "builtins": [
+    "CameraRelativeWS",
+    "ReceiverRelativeWS"
+   ],
+   "outputs": {
+    "BaseColorOut": 3,
+    "MetallicOut": 1,
+    "RoughnessOut": 1,
+    "NormalOut": 3,
+    "OpacityOut": 1
+   },
+   "surface": "native_pbr",
+   "source_lighting_replaced": true,
+   "source_framebuffer_encoding_replaced": true,
+   "source_shader": {
+    "path": "F:\\AnimeStudio\\Exports\\ZZZ\\Pyrois_SkillFX_Evidence\\Assets\\132714511\\CAB-91fe6c8dbdab2dbcc8fe53cb669f78b3\\Shader\\3236134733678291145.shader",
+    "size": 127237022,
+    "sha256": "b8c1003fbb5a4beba7fc2691ad8de7739cdf73cff6fb5fedc4a7aae40c8b3a84"
+   },
+   "source_fragment": {
+    "sourceByteRange": {
+     "offset": 872140,
+     "bytes": 28725
+    },
+    "sourceLine": 23183,
+    "fileBytesSha256": "3eef9a73f3809a5fa90b134b88aa4f8e6c898e1db4bfe5c515fddf352c3e78d3",
+    "hash64": "81e3c1be3b0f474a",
+    "profile": "ps_5_0",
+    "valid": true,
+    "globalKeywords": [
+     "_MODE_PBR_LIGHTING",
+     "_SOFT_EDGE_ON",
+     "_USEDISSOLVETEX_ON",
+     "_USE_EMISSIONRAMPTEX"
+    ],
+    "localKeywords": [],
+    "outputSignatures": [
+     {
+      "name": "SV_Target",
+      "index": 0,
+      "mask": "xyzw",
+      "reg": 0,
+      "sys": "TARGET",
+      "used": "xyzw"
+     }
+    ],
+    "textures": [
+     "_BumpMap",
+     "_CameraDepthTexture",
+     "_CameraNormalTexture",
+     "_ScreenSpaceShadowTexture",
+     "_EnvCubemapTextures",
+     "_PreIntegratedFGD_GGXDisneyDiffuse",
+     "_SceneUserLut",
+     "_GBuffer1",
+     "_GBuffer2",
+     "_GBuffer0",
+     "_EmissionRampTex",
+     "_MainTex",
+     "_MaskMap",
+     "_DissolveTex"
+    ]
+   },
+   "source_vertex_candidate": {
+    "sourceByteRange": {
+     "offset": 12363,
+     "bytes": 4731
+    },
+    "sourceLine": 154,
+    "fileBytesSha256": "5eec0e93bec0d2e88b9ad938c4cbaf5e8af732ab8652dbeaf060e44a79dc0304",
+    "hash64": "a40afa16a4c322",
+    "profile": "vs_5_0",
+    "valid": true,
+    "globalKeywords": [],
+    "localKeywords": [],
+    "outputSignatures": [
+     {
+      "name": "SV_POSITION",
+      "index": 0,
+      "mask": "xyzw",
+      "reg": 0,
+      "sys": "POS",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 0,
+      "mask": "xyz",
+      "reg": 1,
+      "sys": "NONE",
+      "used": "xyz"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 1,
+      "mask": "xyzw",
+      "reg": 2,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 2,
+      "mask": "xyzw",
+      "reg": 3,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 3,
+      "mask": "xyzw",
+      "reg": 4,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 4,
+      "mask": "xyzw",
+      "reg": 5,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 5,
+      "mask": "xyzw",
+      "reg": 6,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 6,
+      "mask": "xyzw",
+      "reg": 7,
+      "sys": "NONE",
+      "used": "xyzw"
+     }
+    ],
+    "textures": []
+   },
+   "material_defaults": {
+    "_CustomData1X": 0.0,
+    "_CustomData1Y": 0.0,
+    "_UsingNonPSR": 0.0,
+    "_CustomData1Z": 0.0,
+    "_CustomData1W": 0.0,
+    "_DissolveProgress_NonPSR": 1.0,
+    "_DissolveEmissionProgress_NonPSR": 1.0,
+    "_ZNetBakedVertexColor": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_MultiplyParticleColor": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_CustomDataColorB": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_ParticleDecalScale": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_TimeOffset": 0.0,
+    "_DepthShrinkToCenterUV": 0.0,
+    "_MainTexRotation": 0.0,
+    "_MainTexFlip": 0.0,
+    "_MainTexClampU": 0.0,
+    "_MainTexClampV": 0.0,
+    "_UVSpeed": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_UVMove": 0.0,
+    "_AlphaChannelMapping": 0.0,
+    "_MaskPassAlphaClip": 0.01,
+    "_NormalClip": 0.5,
+    "_BumpMapScale": 1.0,
+    "_Metallic": 1.0,
+    "_Roughness": 1.0,
+    "_EmissionRampTexUVSpeed": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_EmissionRampTexUVMove": 0.0,
+    "_EmissionRampMulti": 1.0,
+    "_EmissionRampV": 0.0,
+    "_EmissionColor": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_EmissionBlendBaseColor": 1.0,
+    "_DissolveTexRotation": 0.0,
+    "_DissolveTexFlip": 0.0,
+    "_DissolveTexClampU": 0.0,
+    "_DissolveTexClampV": 0.0,
+    "_DissolveUVSpeed": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_DissolveChannel": 0.0,
+    "_DissolveEdgeRange": 0.1,
+    "_SoftClip": 1.0,
+    "_OpaquenessFadeByScript": 1.0,
+    "_AlphaFade": 1.0,
+    "_VerticalAlphaFade": 0.0
+   },
+   "source_stage_pair_certified": false,
+   "stage_pair_requirement": "准确Resource stage映射；共享候选不代原VP/FP配对"
+  },
+  "6390ece1999f1286": {
+   "code": "// 原DXBC表面计算；原生投影提供真实receiver位置和深度导数法线。\nstruct ProjectedFunctions {\n float3 U(float3 v) { return float3(-v.x,v.z,v.y); }\n float4 S(Texture2D T, SamplerState Smp, float2 uv) {\n  return Texture2DSample(T,Smp,float2(uv.x,1.0-uv.y)); }\n float4 SL(Texture2D T, SamplerState Smp, float2 uv, float lod) {\n  return Texture2DSampleLevel(T,Smp,float2(uv.x,1.0-uv.y),lod); }\n float4 SB(Texture2D T, SamplerState Smp, float2 uv, float bias) {\n  return Texture2DSampleBias(T,Smp,float2(uv.x,1.0-uv.y),bias); }\n};\nProjectedFunctions F;\nfloat3 ReceiverU=F.U(ReceiverRelativeWS)*0.01;\nfloat3 CameraU=F.U(CameraRelativeWS)*0.01;\nfloat3 DerivedNormal=cross(ddy(ReceiverRelativeWS),ddx(ReceiverRelativeWS));\nfloat NormalLength=dot(DerivedNormal,DerivedNormal);\nif(NormalLength<=0.0) { clip(-1.0); }\nDerivedNormal*=rsqrt(max(NormalLength,1e-20));\nDerivedNormal*=dot(DerivedNormal,CameraRelativeWS-ReceiverRelativeWS)<0.0?-1.0:1.0;\nfloat4 ReceiverNormal=float4(F.U(DerivedNormal)*0.5+0.5,0);\nfloat4 RelativePoint=float4(ReceiverU,1);\nfloat3 SourceLocal=float3(dot(UEFX_ProjectionRow0,RelativePoint),\n dot(UEFX_ProjectionRow1,RelativePoint),dot(UEFX_ProjectionRow2,RelativePoint));\nuint4 v_v1=(uint4)0;\nuint4 v_v2=(uint4)0;\nuint4 v_v3=(uint4)0;\nuint4 v_v5=(uint4)0;\nuint4 v_v6=(uint4)0;\nuint4 v_v7=(uint4)0;\nv_v1.w=asuint(UEFX_SourceColor.w);\nv_v1.x=asuint(UEFX_SourceColor.x);\nv_v1.y=asuint(UEFX_SourceColor.y);\nv_v1.z=asuint(UEFX_SourceColor.z);\nv_v2.w=asuint(UEFX_SourceSize.x);\nv_v3.x=asuint(UEFX_SourceSize.y);\nv_v3.y=asuint(UEFX_SourceSize.z);\nv_v5.w=asuint(UEFX_SourceCustom1.z);\nv_v5.y=asuint(UEFX_SourceCustom1.x);\nv_v5.z=asuint(UEFX_SourceCustom1.y);\nv_v6.w=asuint(UEFX_SourceCustom2.z);\nv_v6.x=asuint(UEFX_SourceCustom1.w);\nv_v6.y=asuint(UEFX_SourceCustom2.x);\nv_v6.z=asuint(UEFX_SourceCustom2.y);\nv_v7.x=asuint(UEFX_SourceCustom2.w);\n    uint4 v_r0 = (uint4)0, v_r1 = (uint4)0, v_r2 = (uint4)0;\n    uint4 v_o0 = (uint4)0, v_o1 = (uint4)0, v_o2 = (uint4)0, v_o3 = (uint4)0, v_o4 = (uint4)0, v_o5 = (uint4)0, v_o6 = (uint4)0, v_o7 = (uint4)0;\n    v_r0.xy = select((float2(_CustomData1X, _CustomData1Y) < float2(1.5, 1.5)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    v_r1.xyz = select((float3(0.5, 1.5, 0.5) < float3(_CustomData1X, _CustomData1X, _CustomData1Y)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    v_r0.xy = (v_r0.xy & v_r1.xz);\n    v_r0.x = (v_r0.x | v_r1.y);\n    v_r1.xy = select(v_r0.xy != 0u, uint2(0u, 0u), v_v5.yz);\n    v_r0.x = ((_UsingNonPSR < 0.5) ? 0xFFFFFFFFu : 0u);\n    v_o3.xy = (v_r1.xy & v_r0.xx);\n    v_r0.yz = select((float2(_CustomData1Z, _CustomData1W) < float2(1.5, 1.5)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    v_r2.xyz = select((float3(0.5, 0.5, 1.5) < float3(_CustomData1Z, _CustomData1W, _CustomData1W)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    v_r0.yz = (v_r0.yz & v_r2.xy);\n    v_r0.z = (v_r0.z | v_r2.z);\n    v_r1.z = ((v_r0.y != 0u) ? 0u : v_v5.w);\n    v_r1.w = ((v_r0.z != 0u) ? 0u : v_v6.x);\n    v_o3.zw = select(v_r0.xx != 0u, v_r1.zw, asuint(float2(_DissolveProgress_NonPSR, _DissolveEmissionProgress_NonPSR)));\n    v_r0.yzw = asuint((_ZNetBakedVertexColor.xyz + float3(0.055, 0.055, 0.055)));\n    v_r0.yzw = asuint((asfloat(v_r0.yzw) * float3(0.947867, 0.947867, 0.947867)));\n    v_r0.yzw = asuint(log2(abs(asfloat(v_r0.yzw))));\n    v_r0.yzw = asuint((asfloat(v_r0.yzw) * float3(2.4, 2.4, 2.4)));\n    v_r0.yzw = asuint(exp2(asfloat(v_r0.yzw)));\n    v_r1.xyz = asuint((_ZNetBakedVertexColor.xyz * float3(0.077399, 0.077399, 0.077399)));\n    v_r2.xyz = select((float3(0.04045, 0.04045, 0.04045) >= _ZNetBakedVertexColor.xyz), (uint3)0xFFFFFFFFu, (uint3)0u);\n    v_r0.yzw = select(v_r2.xyz != 0u, v_r1.xyz, v_r0.yzw);\n    v_r0.yzw = select(v_r0.xxx != 0u, v_v1.xyz, v_r0.yzw);\n    v_o4.xyz = asuint((asfloat(v_r0.yzw) * _MultiplyParticleColor.xyz));\n    v_o4.w = ((v_r0.x != 0u) ? v_v1.w : asuint(_ZNetBakedVertexColor.w));\n    v_r1.xyz = v_v6.yzw;\n    v_r1.w = v_v7.x;\n    v_o5.xyzw = select(v_r0.xxxx != 0u, v_r1.xyzw, asuint(_CustomDataColorB.xyzw));\n    v_r1.x = v_v2.w;\n    v_r1.yz = v_v3.xy;\n    v_r0.yzw = asuint((_ParticleDecalScale.xyz / asfloat(v_r1.xyz)));\n    v_r1.x = ((0.5 < _ParticleDecalScale.w) ? 0xFFFFFFFFu : 0u);\n    v_r0.yzw = select(v_r1.xxx != 0u, v_r0.yzw, uint3(asuint(1.0), asuint(1.0), asuint(1.0)));\n    v_o7.xyz = select(v_r0.xxx != 0u, v_r0.yzw, uint3(asuint(1.0), asuint(1.0), asuint(1.0)));\nuint4 p_v3=v_o3;\nuint4 p_v4=v_o4;\nuint4 p_v5=v_o5;\nuint4 p_v7=v_o7;\n    uint4 p_r0 = (uint4)0, p_r1 = (uint4)0, p_r2 = (uint4)0, p_r3 = (uint4)0, p_r4 = (uint4)0, p_r5 = (uint4)0, p_r6 = (uint4)0, p_r7 = (uint4)0, p_r8 = (uint4)0, p_r9 = (uint4)0, p_r10 = (uint4)0, p_r11 = (uint4)0, p_r12 = (uint4)0, p_r13 = (uint4)0, p_r14 = (uint4)0, p_r15 = (uint4)0;\n    const uint4 p_icb[4] = { uint4(asuint(1.0), 0u, 0u, 0u), uint4(0u, asuint(1.0), 0u, 0u), uint4(0u, 0u, asuint(1.0), 0u), uint4(0u, 0u, 0u, asuint(1.0)) };\n    uint4 p_o0 = (uint4)0, p_o1 = (uint4)0, p_o2 = (uint4)0, p_o3 = (uint4)0, p_o4 = (uint4)0;\n    p_r1.xyzw = asuint(float4((ReceiverNormal).x, (ReceiverNormal).y, (ReceiverNormal).z, (ReceiverNormal).w));\n    p_r0.z = asuint((UEFX_SystemAge.xxxx).x);\n    p_r0.z = asuint((asfloat(p_r0.z) + (-_TimeOffset)));\n    p_r2.xyz = asuint(float3((float4(ReceiverU,1)).x, (float4(ReceiverU,1)).y, (float4(ReceiverU,1)).z));\n    p_r3.xyz = asuint(float3((float4(SourceLocal,1)).x, (float4(SourceLocal,1)).y, (float4(SourceLocal,1)).z));\n    p_r3.xyz = asuint((asfloat(p_r3.xyz) * asfloat(p_v7.xyz)));\n    p_r4.xyz = asuint((asfloat(p_r3.xyz) * float3(1.0, -1.0, 1.0)));\n    p_r3.xyz = asuint((asfloat(p_r3.xyz) * float3(1.0, -1.0, 1.0) + float3(0.5, 0.5, 0.5)));\n    p_r1.w = ((0.5 < _DepthShrinkToCenterUV) ? 0xFFFFFFFFu : 0u);\n    p_r3.w = asuint((abs(asfloat(p_r4.y)) + abs(asfloat(p_r4.y))));\n    p_r3.w = asuint(((-asfloat(p_r3.w)) * asfloat(p_r3.w) + 1.0));\n    p_r3.w = asuint(max(asfloat(p_r3.w), 0.0));\n    p_r3.w = asuint(sqrt(asfloat(p_r3.w)));\n    p_r3.w = asuint(max(asfloat(p_r3.w), 0.001));\n    p_r4.xz = asuint((asfloat(p_r4.xz) / asfloat(p_r3.ww)));\n    p_r4.xz = asuint((asfloat(p_r4.xz) + float2(0.5, 0.5)));\n    p_r4.xz = select(p_r1.ww != 0u, p_r4.xz, p_r3.xz);\n    p_r1.w = asuint(dot(_ParticleDecalLocalToWorldMatrix_R1.xyz, _ParticleDecalLocalToWorldMatrix_R1.xyz));\n    p_r1.w = asuint(rsqrt(asfloat(p_r1.w)));\n    p_r5.xyz = asuint((asfloat(p_r1.www) * _ParticleDecalLocalToWorldMatrix_R1.xyz));\n    p_r1.w = asuint(dot(_ParticleDecalLocalToWorldMatrix_R2.xyz, _ParticleDecalLocalToWorldMatrix_R2.xyz));\n    p_r1.w = asuint(rsqrt(asfloat(p_r1.w)));\n    p_r6.xyz = asuint((asfloat(p_r1.www) * _ParticleDecalLocalToWorldMatrix_R2.xyz));\n    p_r1.w = asuint(dot(_ParticleDecalLocalToWorldMatrix_R0.xyz, _ParticleDecalLocalToWorldMatrix_R0.xyz));\n    p_r1.w = asuint(rsqrt(asfloat(p_r1.w)));\n    p_r7.xyz = asuint((asfloat(p_r1.www) * _ParticleDecalLocalToWorldMatrix_R0.xyz));\n    p_r8.xyz = asuint(((-asfloat(p_r2.xyz)) + float3((float4(CameraU,1)).x, (float4(CameraU,1)).y, (float4(CameraU,1)).z)));\n    p_r9.x = asuint(dot(asfloat(p_r7.xyz), asfloat(p_r8.xyz)));\n    p_r9.y = asuint(dot(asfloat(p_r6.xyz), asfloat(p_r8.xyz)));\n    p_r1.w = asuint(dot(asfloat(p_r5.xyz), asfloat(p_r8.xyz)));\n    p_r3.w = asuint(saturate((_Parallax * 50.0)));\n    p_r3.w = asuint((asfloat(p_r3.w) * 100.0 + 10.0));\n    p_r10.z = (uint)(asfloat(p_r3.w));\n    p_r3.w = asuint(dot(asfloat(p_r9.xy), asfloat(p_r9.xy)));\n    p_r4.w = asuint(sqrt(asfloat(p_r3.w)));\n    p_r1.w = asuint(((-asfloat(p_r4.w)) / asfloat(p_r1.w)));\n    p_r1.w = asuint((asfloat(p_r1.w) * _Parallax));\n    p_r3.w = asuint(rsqrt(asfloat(p_r3.w)));\n    p_r9.xy = asuint((asfloat(p_r3.ww) * asfloat(p_r9.xy)));\n    p_r9.xy = asuint((asfloat(p_r1.ww) * asfloat(p_r9.xy)));\n    p_r1.w = asuint((float)(p_r10.z));\n    p_r1.w = asuint((1.0 / asfloat(p_r1.w)));\n    p_r9.zw = uint2(0u, 0u);\n    p_r11.xy = uint2(0u, 0u);\n    p_r12.xy = uint2(asuint(1.0), asuint(1.0));\n    p_r13.z = 0u;\n    [loop] while (true) {\n        p_r3.w = ((p_r13.z >= p_r10.z) ? 0xFFFFFFFFu : 0u);\n        if (p_r3.w != 0u) { break; }\n        p_r11.zw = asuint((asfloat(p_r4.xz) + asfloat(p_r9.zw)));\n        p_r13.y = asuint((F.S(_ParallaxMap, _ParallaxMapSampler, asfloat(p_r11.zw))).x);\n        p_r3.w = ((asfloat(p_r13.y) >= asfloat(p_r12.x)) ? 0xFFFFFFFFu : 0u);\n        p_r4.w = asuint(((-asfloat(p_r12.x)) + asfloat(p_r13.y)));\n        p_r5.w = asuint((asfloat(p_r1.w) + asfloat(p_r12.x)));\n        p_r5.w = asuint(((-asfloat(p_r12.y)) + asfloat(p_r5.w)));\n        p_r5.w = asuint((asfloat(p_r4.w) + asfloat(p_r5.w)));\n        p_r4.w = asuint((asfloat(p_r4.w) / asfloat(p_r5.w)));\n        p_r5.w = asuint(((-asfloat(p_r4.w)) + 1.0));\n        p_r11.zw = asuint((asfloat(p_r9.zw) * asfloat(p_r5.ww)));\n        p_r11.zw = asuint((asfloat(p_r4.ww) * asfloat(p_r11.xy) + asfloat(p_r11.zw)));\n        p_r13.x = asuint(((-asfloat(p_r1.w)) + asfloat(p_r12.x)));\n        p_r14.xy = asuint((asfloat(p_r1.ww) * asfloat(p_r9.xy) + asfloat(p_r9.zw)));\n        p_r11.zw = select(p_r3.ww != 0u, p_r11.zw, p_r14.xy);\n        p_r11.xy = select(p_r3.ww != 0u, p_r11.xy, p_r9.zw);\n        p_r10.xy = p_r12.xy;\n        p_r12.xyz = select(p_r3.www != 0u, p_r10.xyz, p_r13.xyz);\n        p_r13.z = asuint((asint(p_r12.z) + 1));\n        p_r9.zw = p_r11.zw;\n    }\n    p_r9.xy = asuint((asfloat(p_r4.xz) + asfloat(p_r9.zw)));\n    p_r9.zw = asuint(((-asfloat(p_r9.xy)) + float2(1.0, 1.0)));\n    p_r10.xyzw = asuint(((-asfloat(p_r9.xyzw)) + asfloat(p_r9.yzwx)));\n    p_r11.xyzw = asuint((float4(_MainTexRotation, _MainTexRotation, _MainTexRotation, _MainTexRotation) * asfloat(p_r10.xyzw) + asfloat(p_r9.xyzw)));\n    p_r12.xyzw = select((float4(_MainTexFlip, _MainTexFlip, _MainTexFlip, _MainTexFlip) < float4(0.5, 1.5, 2.5, 65504.0)), (uint4)0xFFFFFFFFu, (uint4)0u);\n    p_r13.xyzw = (p_r12.xyzw & uint4(1065353216u, 1065353216u, 1065353216u, 1065353216u));\n    p_r4.xzw = select(p_r12.xyz != 0u, uint3(asuint(-1.0), asuint(-1.0), asuint(-1.0)), uint3(asuint(-0.0), asuint(-0.0), asuint(-0.0)));\n    p_r4.xzw = asuint((asfloat(p_r4.xzw) + asfloat(p_r13.yzw)));\n    p_r4.xzw = asuint(max(asfloat(p_r4.xzw), float3(0.0, 0.0, 0.0)));\n    p_r12.xy = p_r11.zw;\n    p_r12.z = asuint(1.0);\n    p_r12.w = asuint(((-_MainTexRotation) + 1.0));\n    p_r14.xy = p_r11.xw;\n    p_r14.z = 0u;\n    p_r14.w = asuint(((-_MainTexRotation) + 1.0));\n    p_r15.xyzw = asuint((asfloat(p_r4.zzzz) * asfloat(p_r14.xyzw)));\n    p_r15.xyzw = asuint((asfloat(p_r12.xyzw) * asfloat(p_r4.wwww) + asfloat(p_r15.xyzw)));\n    p_r11.xz = p_r12.xz;\n    p_r11.w = asuint(_MainTexRotation);\n    p_r12.xyzw = asuint((asfloat(p_r11.xyzw) * asfloat(p_r4.xxxx) + asfloat(p_r15.xyzw)));\n    p_r11.xz = p_r14.xz;\n    p_r11.xyzw = asuint((asfloat(p_r11.xyzw) * asfloat(p_r13.xxxx) + asfloat(p_r12.xyzw)));\n    p_r4.xz = asuint(((-asfloat(p_r11.zw)) + asfloat(p_r11.xy)));\n    p_r4.xz = asuint((asfloat(p_r4.xz) * _MainTex_ST.xy + _MainTex_ST.zw));\n    p_r4.xz = asuint((asfloat(p_r11.zw) + asfloat(p_r4.xz)));\n    p_r11.xy = select((float2(0.5, 0.5) < float2(_MainTexClampU, _MainTexClampV)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    p_r11.zw = asuint(max(asfloat(p_r4.xz), float2(0.0, 0.0)));\n    p_r11.zw = asuint(min(asfloat(p_r11.zw), float2(0.998, 0.998)));\n    p_r4.xz = select(p_r11.xy != 0u, p_r11.zw, p_r4.xz);\n    p_r11.xy = asuint((_UVSpeed.xy * asfloat(p_r0.zz) + asfloat(p_v3.xy)));\n    p_r4.xz = asuint((float2(_UVMove, _UVMove) * asfloat(p_r11.xy) + asfloat(p_r4.xz)));\n    p_r11.xyzw = asuint((F.SL(_MainTex, _MainTexSampler, asfloat(p_r4.xz), 0.0)).xyzw);\n    p_o1.xyz = p_r11.xyz;\n    p_r1.w = (uint)(_AlphaChannelMapping);\n    p_r1.w = min(p_r1.w, 3u);\n    p_r1.w = asuint(dot(asfloat(p_r11.xyzw), asfloat(p_icb[p_r1.w].xyzw)));\n    p_r3.w = ((asfloat(p_r1.w) < _MaskPassAlphaClip) ? 0xFFFFFFFFu : 0u);\n    if (p_r3.w != 0u) {\n        if (4294967295u != 0u) { clip(-1.0); }\n    }\n    p_r12.xyz = select((asfloat(p_r3.xyz) < float3(0.0, 0.0, 0.0)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    p_r3.w = (p_r12.y | p_r12.x);\n    p_r3.w = (p_r12.z | p_r3.w);\n    p_r3.xyz = select((float3(1.0, 1.0, 1.0) < asfloat(p_r3.xyz)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    p_r3.x = (p_r3.y | p_r3.x);\n    p_r3.x = (p_r3.z | p_r3.x);\n    p_r3.x = (p_r3.x | p_r3.w);\n    if (p_r3.x != 0u) {\n        if (4294967295u != 0u) { clip(-1.0); }\n    }\n    p_r3.xyz = asuint((asfloat(p_r1.xyz) * float3(2.0, 2.0, 2.0) + float3(-1.0, -1.0, -1.0)));\n    p_r3.x = asuint(dot(asfloat(p_r3.xyz), asfloat(p_r5.xyz)));\n    p_r3.x = asuint(saturate((asfloat(p_r3.x) * 0.5 + 0.5)));\n    p_r3.x = asuint((asfloat(p_r3.x) + (-_NormalClip)));\n    p_r3.x = ((asfloat(p_r3.x) < 0.0) ? 0xFFFFFFFFu : 0u);\n    if (p_r3.x != 0u) {\n        if (4294967295u != 0u) { clip(-1.0); }\n    }\n    p_r1.xyz = asuint((asfloat(p_r1.xyz) * float3(2.0, 2.0, 2.0) + float3(-1.0, -1.0, -1.0)));\n    p_r1.x = asuint(dot(asfloat(p_r1.xyz), asfloat(p_r5.xyz)));\n    p_r1.x = asuint(saturate((asfloat(p_r1.x) * 0.5 + 0.5)));\n    p_r3.xyz = asuint((F.S(_BumpMap, _BumpMapSampler, asfloat(p_r4.xz))).xyw);\n    p_r3.x = asuint((asfloat(p_r3.x) * asfloat(p_r3.z)));\n    p_r3.xy = asuint((asfloat(p_r3.xy) * float2(2.0, 2.0) + float2(-1.0, -1.0)));\n    p_r3.xy = asuint((asfloat(p_r3.xy) * float2(_BumpMapScale, _BumpMapScale)));\n    p_r3.z = asuint(dot(asfloat(p_r3.xy), asfloat(p_r3.xy)));\n    p_r3.z = asuint(min(asfloat(p_r3.z), 1.0));\n    p_r3.z = asuint(((-asfloat(p_r3.z)) + 1.0));\n    p_r3.z = asuint(sqrt(asfloat(p_r3.z)));\n    p_o3.xy = p_r3.xy;\n    p_o3.z = p_r3.z;\n    p_r4.xzw = asuint((F.SL(_MaskMap, _MaskMapSampler, asfloat(p_r4.xz), 0.0)).xyz);\n    p_r3.w = asuint((asfloat(p_r4.x) * _Metallic));\n    p_r4.x = asuint((asfloat(p_r4.z) * _Roughness));\n    p_o2.x = p_r3.w;\n    p_o2.y = p_r4.x;\n    p_r13.xyz = asuint((asfloat(p_v4.xyz) * _EmissionColor.xyz));\n    p_r4.xzw = asuint((asfloat(p_r4.www) * asfloat(p_r13.xyz)));\n    p_r4.xzw = asuint((asfloat(p_r4.xzw) * asfloat(p_v4.www)));\n    p_r5.w = ((0.5 < _EmissionBlendBaseColor) ? 0xFFFFFFFFu : 0u);\n    p_r13.xyz = asuint((asfloat(p_r11.xyz) * asfloat(p_r4.xzw)));\n    p_r4.xzw = select(p_r5.www != 0u, p_r13.xyz, p_r4.xzw);\n    p_r9.xyzw = asuint((float4(_DissolveTexRotation, _DissolveTexRotation, _DissolveTexRotation, _DissolveTexRotation) * asfloat(p_r10.xyzw) + asfloat(p_r9.xyzw)));\n    p_r10.xyzw = select((float4(_DissolveTexFlip, _DissolveTexFlip, _DissolveTexFlip, _DissolveTexFlip) < float4(0.5, 1.5, 2.5, 65504.0)), (uint4)0xFFFFFFFFu, (uint4)0u);\n    p_r12.xyzw = (p_r10.xyzw & uint4(1065353216u, 1065353216u, 1065353216u, 1065353216u));\n    p_r10.xyz = select(p_r10.xyz != 0u, uint3(asuint(-1.0), asuint(-1.0), asuint(-1.0)), uint3(asuint(-0.0), asuint(-0.0), asuint(-0.0)));\n    p_r10.xyz = asuint((asfloat(p_r10.xyz) + asfloat(p_r12.yzw)));\n    p_r10.xyz = asuint(max(asfloat(p_r10.xyz), float3(0.0, 0.0, 0.0)));\n    p_r13.xy = p_r9.zw;\n    p_r13.z = asuint(1.0);\n    p_r13.w = asuint(((-_DissolveTexRotation) + 1.0));\n    p_r14.xy = p_r9.xw;\n    p_r14.z = 0u;\n    p_r14.w = asuint(((-_DissolveTexRotation) + 1.0));\n    p_r15.xyzw = asuint((asfloat(p_r10.yyyy) * asfloat(p_r14.xyzw)));\n    p_r15.xyzw = asuint((asfloat(p_r13.xyzw) * asfloat(p_r10.zzzz) + asfloat(p_r15.xyzw)));\n    p_r9.xz = p_r13.xz;\n    p_r9.w = asuint(_DissolveTexRotation);\n    p_r10.xyzw = asuint((asfloat(p_r9.xyzw) * asfloat(p_r10.xxxx) + asfloat(p_r15.xyzw)));\n    p_r9.xz = p_r14.xz;\n    p_r9.xyzw = asuint((asfloat(p_r9.xyzw) * asfloat(p_r12.xxxx) + asfloat(p_r10.xyzw)));\n    p_r9.xy = asuint(((-asfloat(p_r9.zw)) + asfloat(p_r9.xy)));\n    p_r9.xy = asuint((asfloat(p_r9.xy) * _DissolveTex_ST.xy + _DissolveTex_ST.zw));\n    p_r9.xy = asuint((asfloat(p_r9.zw) + asfloat(p_r9.xy)));\n    p_r9.zw = select((float2(0.5, 0.5) < float2(_DissolveTexClampU, _DissolveTexClampV)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    p_r10.xy = asuint(max(asfloat(p_r9.xy), float2(0.0, 0.0)));\n    p_r10.xy = asuint(min(asfloat(p_r10.xy), float2(0.998, 0.998)));\n    p_r9.xy = select(p_r9.zw != 0u, p_r10.xy, p_r9.xy);\n    p_r9.xy = asuint((_DissolveUVSpeed.xy * asfloat(p_r0.zz) + asfloat(p_r9.xy)));\n    p_r9.xyzw = asuint((F.S(_DissolveTex, _DissolveTexSampler, asfloat(p_r9.xy))).xyzw);\n    p_r0.z = (uint)(_DissolveChannel);\n    p_r0.z = min(p_r0.z, 3u);\n    p_r0.z = asuint(dot(asfloat(p_r9.xyzw), asfloat(p_icb[p_r0.z].xyzw)));\n    p_r1.y = asuint(max(_DissolveEdgeRange, 0.001));\n    p_r9.xy = asuint(((-asfloat(p_v3.zw)) + float2(1.0, 1.0)));\n    p_r5.w = asuint((asfloat(p_r1.y) + 1.0));\n    p_r9.zw = asuint((asfloat(p_r9.xy) * asfloat(p_r5.ww) + (-asfloat(p_r1.yy))));\n    p_r9.xy = asuint((asfloat(p_r9.xy) * asfloat(p_r5.ww) + (-asfloat(p_r9.zw))));\n    p_r9.zw = asuint((asfloat(p_r0.zz) * asfloat(p_r1.ww) + (-asfloat(p_r9.zw))));\n    p_r9.xy = asuint((float2(1.0, 1.0) / asfloat(p_r9.xy)));\n    p_r9.xy = asuint(saturate((asfloat(p_r9.xy) * asfloat(p_r9.zw))));\n    p_r9.zw = asuint((asfloat(p_r9.xy) * float2(-2.0, -2.0) + float2(3.0, 3.0)));\n    p_r9.xy = asuint((asfloat(p_r9.xy) * asfloat(p_r9.xy)));\n    p_r9.xy = asuint((asfloat(p_r9.xy) * asfloat(p_r9.zw)));\n    p_r9.xy = asuint(min(asfloat(p_r9.xy), float2(1.0, 1.0)));\n    p_r0.z = asuint((asfloat(p_r1.w) * asfloat(p_r9.x)));\n    p_r0.z = asuint((asfloat(p_r0.z) * asfloat(p_v5.w)));\n    p_r1.y = asuint(max(_SoftClip, 0.000488));\n    p_r1.x = asuint((asfloat(p_r1.x) + (-_NormalClip)));\n    p_r1.y = asuint((1.0 / asfloat(p_r1.y)));\n    p_r1.x = asuint(saturate((asfloat(p_r1.y) * asfloat(p_r1.x))));\n    p_r1.y = asuint((asfloat(p_r1.x) * -2.0 + 3.0));\n    p_r1.x = asuint((asfloat(p_r1.x) * asfloat(p_r1.x)));\n    p_r1.x = asuint((asfloat(p_r1.x) * asfloat(p_r1.y)));\n    p_r0.z = asuint((asfloat(p_r0.z) * asfloat(p_r1.x)));\n    p_r0.z = asuint((asfloat(p_r0.z) * _OpaquenessFadeByScript));\n    p_o4.xyz = asuint((asfloat(p_r4.xzw) * asfloat(p_r9.yyy)));\n    p_r0.z = asuint(saturate((asfloat(p_r0.z) * _AlphaFade)));\n    p_r1.x = ((0.5 < _VerticalAlphaFade) ? 0xFFFFFFFFu : 0u);\n    p_r1.y = asuint(((-abs(asfloat(p_r4.y))) * 2.0 + 1.0));\n    p_r1.y = asuint((asfloat(p_r0.z) * asfloat(p_r1.y)));\n    p_r0.z = ((p_r1.x != 0u) ? p_r1.y : p_r0.z);\n    p_o0.w = p_r0.z;\nBaseColorOut=asfloat(p_o1.xyz);\nMetallicOut=asfloat(p_o2.x);\nRoughnessOut=asfloat(p_o2.y);\nfloat3 TN=asfloat(p_o3.xyz);\nfloat3 NX=normalize(_ParticleDecalLocalToWorldMatrix_R0.xyz);\nfloat3 NY=normalize(_ParticleDecalLocalToWorldMatrix_R1.xyz);\nfloat3 NZ=normalize(_ParticleDecalLocalToWorldMatrix_R2.xyz);\nNormalOut=normalize(F.U(NX*TN.x+NZ*TN.y+NY*TN.z));\nOpacityOut=asfloat(p_o0.w);\nreturn asfloat(p_o4.xyz);\n",
+   "parameters": {
+    "UEFX_SourceColor": 4,
+    "UEFX_SourceSize": 4,
+    "UEFX_SourceCustom1": 4,
+    "UEFX_SourceCustom2": 4,
+    "UEFX_SystemAge": 1,
+    "UEFX_ProjectionRow0": 4,
+    "UEFX_ProjectionRow1": 4,
+    "UEFX_ProjectionRow2": 4
+   },
+   "material_params": {
+    "_CustomData1X": 1,
+    "_CustomData1Y": 1,
+    "_UsingNonPSR": 1,
+    "_CustomData1Z": 1,
+    "_CustomData1W": 1,
+    "_DissolveProgress_NonPSR": 1,
+    "_DissolveEmissionProgress_NonPSR": 1,
+    "_ZNetBakedVertexColor": 4,
+    "_MultiplyParticleColor": 4,
+    "_CustomDataColorB": 4,
+    "_ParticleDecalScale": 4,
+    "_TimeOffset": 1,
+    "_DepthShrinkToCenterUV": 1,
+    "_ParticleDecalLocalToWorldMatrix_R1": 4,
+    "_ParticleDecalLocalToWorldMatrix_R2": 4,
+    "_ParticleDecalLocalToWorldMatrix_R0": 4,
+    "_Parallax": 1,
+    "_MainTexRotation": 1,
+    "_MainTexFlip": 1,
+    "_MainTex_ST": 4,
+    "_MainTexClampU": 1,
+    "_MainTexClampV": 1,
+    "_UVSpeed": 2,
+    "_UVMove": 1,
+    "_AlphaChannelMapping": 1,
+    "_MaskPassAlphaClip": 1,
+    "_NormalClip": 1,
+    "_BumpMapScale": 1,
+    "_Metallic": 1,
+    "_Roughness": 1,
+    "_EmissionColor": 3,
+    "_EmissionBlendBaseColor": 1,
+    "_DissolveTexRotation": 1,
+    "_DissolveTexFlip": 1,
+    "_DissolveTex_ST": 4,
+    "_DissolveTexClampU": 1,
+    "_DissolveTexClampV": 1,
+    "_DissolveUVSpeed": 2,
+    "_DissolveChannel": 1,
+    "_DissolveEdgeRange": 1,
+    "_SoftClip": 1,
+    "_OpaquenessFadeByScript": 1,
+    "_AlphaFade": 1,
+    "_VerticalAlphaFade": 1
+   },
+   "globals": {},
+   "textures": [
+    "_ParallaxMap",
+    "_MainTex",
+    "_BumpMap",
+    "_MaskMap",
+    "_DissolveTex"
+   ],
+   "builtins": [
+    "CameraRelativeWS",
+    "ReceiverRelativeWS"
+   ],
+   "outputs": {
+    "BaseColorOut": 3,
+    "MetallicOut": 1,
+    "RoughnessOut": 1,
+    "NormalOut": 3,
+    "OpacityOut": 1
+   },
+   "surface": "native_pbr",
+   "source_lighting_replaced": true,
+   "source_framebuffer_encoding_replaced": true,
+   "source_shader": {
+    "path": "F:\\AnimeStudio\\Exports\\ZZZ\\Pyrois_SkillFX_Evidence\\Assets\\132714511\\CAB-91fe6c8dbdab2dbcc8fe53cb669f78b3\\Shader\\3236134733678291145.shader",
+    "size": 127237022,
+    "sha256": "b8c1003fbb5a4beba7fc2691ad8de7739cdf73cff6fb5fedc4a7aae40c8b3a84"
+   },
+   "source_fragment": {
+    "sourceByteRange": {
+     "offset": 396778,
+     "bytes": 29563
+    },
+    "sourceLine": 10398,
+    "fileBytesSha256": "a05b4215bb73e3e4d874c2b5bf5e8794c443fdf4a46982350d0ad4e48263524d",
+    "hash64": "6390ece1999f1286",
+    "profile": "ps_5_0",
+    "valid": true,
+    "globalKeywords": [
+     "_MODE_PBR_LIGHTING",
+     "_PARALLAXMAP",
+     "_SOFT_EDGE_ON",
+     "_USEDISSOLVETEX_ON"
+    ],
+    "localKeywords": [],
+    "outputSignatures": [
+     {
+      "name": "SV_Target",
+      "index": 0,
+      "mask": "xyzw",
+      "reg": 0,
+      "sys": "TARGET",
+      "used": "xyzw"
+     }
+    ],
+    "textures": [
+     "_BumpMap",
+     "_CameraDepthTexture",
+     "_CameraNormalTexture",
+     "_ScreenSpaceShadowTexture",
+     "_EnvCubemapTextures",
+     "_PreIntegratedFGD_GGXDisneyDiffuse",
+     "_SceneUserLut",
+     "_ParallaxMap",
+     "_GBuffer1",
+     "_GBuffer2",
+     "_GBuffer0",
+     "_MainTex",
+     "_MaskMap",
+     "_DissolveTex"
+    ]
+   },
+   "source_vertex_candidate": {
+    "sourceByteRange": {
+     "offset": 12363,
+     "bytes": 4731
+    },
+    "sourceLine": 154,
+    "fileBytesSha256": "5eec0e93bec0d2e88b9ad938c4cbaf5e8af732ab8652dbeaf060e44a79dc0304",
+    "hash64": "a40afa16a4c322",
+    "profile": "vs_5_0",
+    "valid": true,
+    "globalKeywords": [],
+    "localKeywords": [],
+    "outputSignatures": [
+     {
+      "name": "SV_POSITION",
+      "index": 0,
+      "mask": "xyzw",
+      "reg": 0,
+      "sys": "POS",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 0,
+      "mask": "xyz",
+      "reg": 1,
+      "sys": "NONE",
+      "used": "xyz"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 1,
+      "mask": "xyzw",
+      "reg": 2,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 2,
+      "mask": "xyzw",
+      "reg": 3,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 3,
+      "mask": "xyzw",
+      "reg": 4,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 4,
+      "mask": "xyzw",
+      "reg": 5,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 5,
+      "mask": "xyzw",
+      "reg": 6,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 6,
+      "mask": "xyzw",
+      "reg": 7,
+      "sys": "NONE",
+      "used": "xyzw"
+     }
+    ],
+    "textures": []
+   },
+   "material_defaults": {
+    "_CustomData1X": 0.0,
+    "_CustomData1Y": 0.0,
+    "_UsingNonPSR": 0.0,
+    "_CustomData1Z": 0.0,
+    "_CustomData1W": 0.0,
+    "_DissolveProgress_NonPSR": 1.0,
+    "_DissolveEmissionProgress_NonPSR": 1.0,
+    "_ZNetBakedVertexColor": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_MultiplyParticleColor": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_CustomDataColorB": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_ParticleDecalScale": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_TimeOffset": 0.0,
+    "_DepthShrinkToCenterUV": 0.0,
+    "_Parallax": 0.005,
+    "_MainTexRotation": 0.0,
+    "_MainTexFlip": 0.0,
+    "_MainTexClampU": 0.0,
+    "_MainTexClampV": 0.0,
+    "_UVSpeed": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_UVMove": 0.0,
+    "_AlphaChannelMapping": 0.0,
+    "_MaskPassAlphaClip": 0.01,
+    "_NormalClip": 0.5,
+    "_BumpMapScale": 1.0,
+    "_Metallic": 1.0,
+    "_Roughness": 1.0,
+    "_EmissionColor": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_EmissionBlendBaseColor": 1.0,
+    "_DissolveTexRotation": 0.0,
+    "_DissolveTexFlip": 0.0,
+    "_DissolveTexClampU": 0.0,
+    "_DissolveTexClampV": 0.0,
+    "_DissolveUVSpeed": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_DissolveChannel": 0.0,
+    "_DissolveEdgeRange": 0.1,
+    "_SoftClip": 1.0,
+    "_OpaquenessFadeByScript": 1.0,
+    "_AlphaFade": 1.0,
+    "_VerticalAlphaFade": 0.0
+   },
+   "source_stage_pair_certified": false,
+   "stage_pair_requirement": "准确Resource stage映射；共享候选不代原VP/FP配对"
+  },
+  "d7fdbec172180b22": {
+   "code": "// 原DXBC表面计算；原生投影提供真实receiver位置和深度导数法线。\nstruct ProjectedFunctions {\n float3 U(float3 v) { return float3(-v.x,v.z,v.y); }\n float4 S(Texture2D T, SamplerState Smp, float2 uv) {\n  return Texture2DSample(T,Smp,float2(uv.x,1.0-uv.y)); }\n float4 SL(Texture2D T, SamplerState Smp, float2 uv, float lod) {\n  return Texture2DSampleLevel(T,Smp,float2(uv.x,1.0-uv.y),lod); }\n float4 SB(Texture2D T, SamplerState Smp, float2 uv, float bias) {\n  return Texture2DSampleBias(T,Smp,float2(uv.x,1.0-uv.y),bias); }\n};\nProjectedFunctions F;\nfloat3 ReceiverU=F.U(ReceiverRelativeWS)*0.01;\nfloat3 CameraU=F.U(CameraRelativeWS)*0.01;\nfloat3 DerivedNormal=cross(ddy(ReceiverRelativeWS),ddx(ReceiverRelativeWS));\nfloat NormalLength=dot(DerivedNormal,DerivedNormal);\nif(NormalLength<=0.0) { clip(-1.0); }\nDerivedNormal*=rsqrt(max(NormalLength,1e-20));\nDerivedNormal*=dot(DerivedNormal,CameraRelativeWS-ReceiverRelativeWS)<0.0?-1.0:1.0;\nfloat4 ReceiverNormal=float4(F.U(DerivedNormal)*0.5+0.5,0);\nfloat4 RelativePoint=float4(ReceiverU,1);\nfloat3 SourceLocal=float3(dot(UEFX_ProjectionRow0,RelativePoint),\n dot(UEFX_ProjectionRow1,RelativePoint),dot(UEFX_ProjectionRow2,RelativePoint));\nuint4 v_v1=(uint4)0;\nuint4 v_v2=(uint4)0;\nuint4 v_v3=(uint4)0;\nuint4 v_v5=(uint4)0;\nuint4 v_v6=(uint4)0;\nuint4 v_v7=(uint4)0;\nv_v1.w=asuint(UEFX_SourceColor.w);\nv_v1.x=asuint(UEFX_SourceColor.x);\nv_v1.y=asuint(UEFX_SourceColor.y);\nv_v1.z=asuint(UEFX_SourceColor.z);\nv_v2.w=asuint(UEFX_SourceSize.x);\nv_v3.x=asuint(UEFX_SourceSize.y);\nv_v3.y=asuint(UEFX_SourceSize.z);\nv_v5.w=asuint(UEFX_SourceCustom1.z);\nv_v5.y=asuint(UEFX_SourceCustom1.x);\nv_v5.z=asuint(UEFX_SourceCustom1.y);\nv_v6.w=asuint(UEFX_SourceCustom2.z);\nv_v6.x=asuint(UEFX_SourceCustom1.w);\nv_v6.y=asuint(UEFX_SourceCustom2.x);\nv_v6.z=asuint(UEFX_SourceCustom2.y);\nv_v7.x=asuint(UEFX_SourceCustom2.w);\n    uint4 v_r0 = (uint4)0, v_r1 = (uint4)0, v_r2 = (uint4)0;\n    uint4 v_o0 = (uint4)0, v_o1 = (uint4)0, v_o2 = (uint4)0, v_o3 = (uint4)0, v_o4 = (uint4)0, v_o5 = (uint4)0, v_o6 = (uint4)0, v_o7 = (uint4)0;\n    v_r0.xy = select((float2(_CustomData1X, _CustomData1Y) < float2(1.5, 1.5)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    v_r1.xyz = select((float3(0.5, 1.5, 0.5) < float3(_CustomData1X, _CustomData1X, _CustomData1Y)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    v_r0.xy = (v_r0.xy & v_r1.xz);\n    v_r0.x = (v_r0.x | v_r1.y);\n    v_r1.xy = select(v_r0.xy != 0u, uint2(0u, 0u), v_v5.yz);\n    v_r0.x = ((_UsingNonPSR < 0.5) ? 0xFFFFFFFFu : 0u);\n    v_o3.xy = (v_r1.xy & v_r0.xx);\n    v_r0.yz = select((float2(_CustomData1Z, _CustomData1W) < float2(1.5, 1.5)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    v_r2.xyz = select((float3(0.5, 0.5, 1.5) < float3(_CustomData1Z, _CustomData1W, _CustomData1W)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    v_r0.yz = (v_r0.yz & v_r2.xy);\n    v_r0.z = (v_r0.z | v_r2.z);\n    v_r1.z = ((v_r0.y != 0u) ? 0u : v_v5.w);\n    v_r1.w = ((v_r0.z != 0u) ? 0u : v_v6.x);\n    v_o3.zw = select(v_r0.xx != 0u, v_r1.zw, asuint(float2(_DissolveProgress_NonPSR, _DissolveEmissionProgress_NonPSR)));\n    v_r0.yzw = asuint((_ZNetBakedVertexColor.xyz + float3(0.055, 0.055, 0.055)));\n    v_r0.yzw = asuint((asfloat(v_r0.yzw) * float3(0.947867, 0.947867, 0.947867)));\n    v_r0.yzw = asuint(log2(abs(asfloat(v_r0.yzw))));\n    v_r0.yzw = asuint((asfloat(v_r0.yzw) * float3(2.4, 2.4, 2.4)));\n    v_r0.yzw = asuint(exp2(asfloat(v_r0.yzw)));\n    v_r1.xyz = asuint((_ZNetBakedVertexColor.xyz * float3(0.077399, 0.077399, 0.077399)));\n    v_r2.xyz = select((float3(0.04045, 0.04045, 0.04045) >= _ZNetBakedVertexColor.xyz), (uint3)0xFFFFFFFFu, (uint3)0u);\n    v_r0.yzw = select(v_r2.xyz != 0u, v_r1.xyz, v_r0.yzw);\n    v_r0.yzw = select(v_r0.xxx != 0u, v_v1.xyz, v_r0.yzw);\n    v_o4.xyz = asuint((asfloat(v_r0.yzw) * _MultiplyParticleColor.xyz));\n    v_o4.w = ((v_r0.x != 0u) ? v_v1.w : asuint(_ZNetBakedVertexColor.w));\n    v_r1.xyz = v_v6.yzw;\n    v_r1.w = v_v7.x;\n    v_o5.xyzw = select(v_r0.xxxx != 0u, v_r1.xyzw, asuint(_CustomDataColorB.xyzw));\n    v_r1.x = v_v2.w;\n    v_r1.yz = v_v3.xy;\n    v_r0.yzw = asuint((_ParticleDecalScale.xyz / asfloat(v_r1.xyz)));\n    v_r1.x = ((0.5 < _ParticleDecalScale.w) ? 0xFFFFFFFFu : 0u);\n    v_r0.yzw = select(v_r1.xxx != 0u, v_r0.yzw, uint3(asuint(1.0), asuint(1.0), asuint(1.0)));\n    v_o7.xyz = select(v_r0.xxx != 0u, v_r0.yzw, uint3(asuint(1.0), asuint(1.0), asuint(1.0)));\nuint4 p_v3=v_o3;\nuint4 p_v4=v_o4;\nuint4 p_v5=v_o5;\nuint4 p_v7=v_o7;\n    uint4 p_r0 = (uint4)0, p_r1 = (uint4)0, p_r2 = (uint4)0, p_r3 = (uint4)0, p_r4 = (uint4)0, p_r5 = (uint4)0, p_r6 = (uint4)0, p_r7 = (uint4)0, p_r8 = (uint4)0, p_r9 = (uint4)0, p_r10 = (uint4)0, p_r11 = (uint4)0, p_r12 = (uint4)0, p_r13 = (uint4)0, p_r14 = (uint4)0;\n    const uint4 p_icb[4] = { uint4(asuint(1.0), 0u, 0u, 0u), uint4(0u, asuint(1.0), 0u, 0u), uint4(0u, 0u, asuint(1.0), 0u), uint4(0u, 0u, 0u, asuint(1.0)) };\n    uint4 p_o0 = (uint4)0, p_o1 = (uint4)0, p_o2 = (uint4)0, p_o3 = (uint4)0, p_o4 = (uint4)0;\n    p_r1.xyzw = asuint(float4((ReceiverNormal).x, (ReceiverNormal).y, (ReceiverNormal).z, (ReceiverNormal).w));\n    p_r0.z = asuint((UEFX_SystemAge.xxxx).x);\n    p_r0.z = asuint((asfloat(p_r0.z) + (-_TimeOffset)));\n    p_r3.xyz = asuint(float3((float4(SourceLocal,1)).x, (float4(SourceLocal,1)).y, (float4(SourceLocal,1)).z));\n    p_r3.xyz = asuint((asfloat(p_r3.xyz) * asfloat(p_v7.xyz)));\n    p_r4.xyz = asuint((asfloat(p_r3.xyz) * float3(1.0, -1.0, 1.0)));\n    p_r3.xyz = asuint((asfloat(p_r3.xyz) * float3(1.0, -1.0, 1.0) + float3(0.5, 0.5, 0.5)));\n    p_r1.w = ((0.5 < _DepthShrinkToCenterUV) ? 0xFFFFFFFFu : 0u);\n    p_r3.w = asuint((abs(asfloat(p_r4.y)) + abs(asfloat(p_r4.y))));\n    p_r3.w = asuint(((-asfloat(p_r3.w)) * asfloat(p_r3.w) + 1.0));\n    p_r3.w = asuint(max(asfloat(p_r3.w), 0.0));\n    p_r3.w = asuint(sqrt(asfloat(p_r3.w)));\n    p_r3.w = asuint(max(asfloat(p_r3.w), 0.001));\n    p_r4.xz = asuint((asfloat(p_r4.xz) / asfloat(p_r3.ww)));\n    p_r4.xz = asuint((asfloat(p_r4.xz) + float2(0.5, 0.5)));\n    p_r5.xy = select(p_r1.ww != 0u, p_r4.xz, p_r3.xz);\n    p_r1.w = asuint(dot(_ParticleDecalLocalToWorldMatrix_R1.xyz, _ParticleDecalLocalToWorldMatrix_R1.xyz));\n    p_r1.w = asuint(rsqrt(asfloat(p_r1.w)));\n    p_r4.xzw = asuint((asfloat(p_r1.www) * _ParticleDecalLocalToWorldMatrix_R1.xyz));\n    p_r5.zw = asuint(((-asfloat(p_r5.xy)) + float2(1.0, 1.0)));\n    p_r6.xyzw = asuint(((-asfloat(p_r5.xyzw)) + asfloat(p_r5.yzwx)));\n    p_r7.xyzw = asuint((float4(_MainTexRotation, _MainTexRotation, _MainTexRotation, _MainTexRotation) * asfloat(p_r6.xyzw) + asfloat(p_r5.xyzw)));\n    p_r8.xyzw = select((float4(_MainTexFlip, _MainTexFlip, _MainTexFlip, _MainTexFlip) < float4(0.5, 1.5, 2.5, 65504.0)), (uint4)0xFFFFFFFFu, (uint4)0u);\n    p_r9.xyzw = (p_r8.xyzw & uint4(1065353216u, 1065353216u, 1065353216u, 1065353216u));\n    p_r8.xyz = select(p_r8.xyz != 0u, uint3(asuint(-1.0), asuint(-1.0), asuint(-1.0)), uint3(asuint(-0.0), asuint(-0.0), asuint(-0.0)));\n    p_r8.xyz = asuint((asfloat(p_r8.xyz) + asfloat(p_r9.yzw)));\n    p_r8.xyz = asuint(max(asfloat(p_r8.xyz), float3(0.0, 0.0, 0.0)));\n    p_r10.xy = p_r7.zw;\n    p_r10.z = asuint(1.0);\n    p_r10.w = asuint(((-_MainTexRotation) + 1.0));\n    p_r11.xy = p_r7.xw;\n    p_r11.z = 0u;\n    p_r11.w = asuint(((-_MainTexRotation) + 1.0));\n    p_r12.xyzw = asuint((asfloat(p_r8.yyyy) * asfloat(p_r11.xyzw)));\n    p_r12.xyzw = asuint((asfloat(p_r10.xyzw) * asfloat(p_r8.zzzz) + asfloat(p_r12.xyzw)));\n    p_r7.xz = p_r10.xz;\n    p_r7.w = asuint(_MainTexRotation);\n    p_r8.xyzw = asuint((asfloat(p_r7.xyzw) * asfloat(p_r8.xxxx) + asfloat(p_r12.xyzw)));\n    p_r7.xz = p_r11.xz;\n    p_r7.xyzw = asuint((asfloat(p_r7.xyzw) * asfloat(p_r9.xxxx) + asfloat(p_r8.xyzw)));\n    p_r7.xy = asuint(((-asfloat(p_r7.zw)) + asfloat(p_r7.xy)));\n    p_r7.xy = asuint((asfloat(p_r7.xy) * _MainTex_ST.xy + _MainTex_ST.zw));\n    p_r7.xy = asuint((asfloat(p_r7.zw) + asfloat(p_r7.xy)));\n    p_r7.zw = select((float2(0.5, 0.5) < float2(_MainTexClampU, _MainTexClampV)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    p_r8.xy = asuint(max(asfloat(p_r7.xy), float2(0.0, 0.0)));\n    p_r8.xy = asuint(min(asfloat(p_r8.xy), float2(0.998, 0.998)));\n    p_r7.xy = select(p_r7.zw != 0u, p_r8.xy, p_r7.xy);\n    p_r7.zw = asuint((_UVSpeed.xy * asfloat(p_r0.zz) + asfloat(p_v3.xy)));\n    p_r7.xy = asuint((float2(_UVMove, _UVMove) * asfloat(p_r7.zw) + asfloat(p_r7.xy)));\n    p_r8.xyzw = asuint((F.SL(_MainTex, _MainTexSampler, asfloat(p_r7.xy), 0.0)).xyzw);\n    p_o1.xyz = p_r8.xyz;\n    p_r1.w = (uint)(_AlphaChannelMapping);\n    p_r1.w = min(p_r1.w, 3u);\n    p_r1.w = asuint(dot(asfloat(p_r8.xyzw), asfloat(p_icb[p_r1.w].xyzw)));\n    p_r3.w = ((asfloat(p_r1.w) < _MaskPassAlphaClip) ? 0xFFFFFFFFu : 0u);\n    if (p_r3.w != 0u) {\n        if (4294967295u != 0u) { clip(-1.0); }\n    }\n    p_r9.xyz = select((asfloat(p_r3.xyz) < float3(0.0, 0.0, 0.0)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    p_r3.w = (p_r9.y | p_r9.x);\n    p_r3.w = (p_r9.z | p_r3.w);\n    p_r3.xyz = select((float3(1.0, 1.0, 1.0) < asfloat(p_r3.xyz)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    p_r3.x = (p_r3.y | p_r3.x);\n    p_r3.x = (p_r3.z | p_r3.x);\n    p_r3.x = (p_r3.x | p_r3.w);\n    if (p_r3.x != 0u) {\n        if (4294967295u != 0u) { clip(-1.0); }\n    }\n    p_r3.xyz = asuint((asfloat(p_r1.xyz) * float3(2.0, 2.0, 2.0) + float3(-1.0, -1.0, -1.0)));\n    p_r3.x = asuint(dot(asfloat(p_r3.xyz), asfloat(p_r4.xzw)));\n    p_r3.x = asuint(saturate((asfloat(p_r3.x) * 0.5 + 0.5)));\n    p_r3.x = asuint((asfloat(p_r3.x) + (-_NormalClip)));\n    p_r3.x = ((asfloat(p_r3.x) < 0.0) ? 0xFFFFFFFFu : 0u);\n    if (p_r3.x != 0u) {\n        if (4294967295u != 0u) { clip(-1.0); }\n    }\n    p_r1.xyz = asuint((asfloat(p_r1.xyz) * float3(2.0, 2.0, 2.0) + float3(-1.0, -1.0, -1.0)));\n    p_r1.x = asuint(dot(asfloat(p_r1.xyz), asfloat(p_r4.xzw)));\n    p_r1.x = asuint(saturate((asfloat(p_r1.x) * 0.5 + 0.5)));\n    p_r10.xyz = asuint((F.S(_BumpMap, _BumpMapSampler, asfloat(p_r7.xy))).xyw);\n    p_r10.x = asuint((asfloat(p_r10.x) * asfloat(p_r10.z)));\n    p_r7.zw = asuint((asfloat(p_r10.xy) * float2(2.0, 2.0) + float2(-1.0, -1.0)));\n    p_r7.zw = asuint((asfloat(p_r7.zw) * float2(_BumpMapScale, _BumpMapScale)));\n    p_r3.w = asuint(dot(asfloat(p_r7.zw), asfloat(p_r7.zw)));\n    p_r3.w = asuint(min(asfloat(p_r3.w), 1.0));\n    p_r3.w = asuint(((-asfloat(p_r3.w)) + 1.0));\n    p_r3.w = asuint(sqrt(asfloat(p_r3.w)));\n    p_o3.xy = p_r7.zw;\n    p_o3.z = p_r3.w;\n    p_r10.xyz = asuint((F.SL(_MaskMap, _MaskMapSampler, asfloat(p_r7.xy), 0.0)).xyz);\n    p_r7.x = asuint((asfloat(p_r10.x) * _Metallic));\n    p_r7.y = asuint((asfloat(p_r10.y) * _Roughness));\n    p_o2.x = p_r7.x;\n    p_o2.y = p_r7.y;\n    p_r10.xyw = asuint((asfloat(p_v4.xyz) * _EmissionColor.xyz));\n    p_r10.xyz = asuint((asfloat(p_r10.zzz) * asfloat(p_r10.xyw)));\n    p_r10.xyz = asuint((asfloat(p_r10.xyz) * asfloat(p_v4.www)));\n    p_r7.y = ((0.5 < _EmissionBlendBaseColor) ? 0xFFFFFFFFu : 0u);\n    p_r12.xyz = asuint((asfloat(p_r8.xyz) * asfloat(p_r10.xyz)));\n    p_r10.xyz = select(p_r7.yyy != 0u, p_r12.xyz, p_r10.xyz);\n    p_r5.xyzw = asuint((float4(_DissolveTexRotation, _DissolveTexRotation, _DissolveTexRotation, _DissolveTexRotation) * asfloat(p_r6.xyzw) + asfloat(p_r5.xyzw)));\n    p_r6.xyzw = select((float4(_DissolveTexFlip, _DissolveTexFlip, _DissolveTexFlip, _DissolveTexFlip) < float4(0.5, 1.5, 2.5, 65504.0)), (uint4)0xFFFFFFFFu, (uint4)0u);\n    p_r11.xyzw = (p_r6.xyzw & uint4(1065353216u, 1065353216u, 1065353216u, 1065353216u));\n    p_r6.xyz = select(p_r6.xyz != 0u, uint3(asuint(-1.0), asuint(-1.0), asuint(-1.0)), uint3(asuint(-0.0), asuint(-0.0), asuint(-0.0)));\n    p_r6.xyz = asuint((asfloat(p_r6.xyz) + asfloat(p_r11.yzw)));\n    p_r6.xyz = asuint(max(asfloat(p_r6.xyz), float3(0.0, 0.0, 0.0)));\n    p_r12.xy = p_r5.zw;\n    p_r12.z = asuint(1.0);\n    p_r12.w = asuint(((-_DissolveTexRotation) + 1.0));\n    p_r13.xy = p_r5.xw;\n    p_r13.z = 0u;\n    p_r13.w = asuint(((-_DissolveTexRotation) + 1.0));\n    p_r14.xyzw = asuint((asfloat(p_r6.yyyy) * asfloat(p_r13.xyzw)));\n    p_r14.xyzw = asuint((asfloat(p_r12.xyzw) * asfloat(p_r6.zzzz) + asfloat(p_r14.xyzw)));\n    p_r5.xz = p_r12.xz;\n    p_r5.w = asuint(_DissolveTexRotation);\n    p_r6.xyzw = asuint((asfloat(p_r5.xyzw) * asfloat(p_r6.xxxx) + asfloat(p_r14.xyzw)));\n    p_r5.xz = p_r13.xz;\n    p_r5.xyzw = asuint((asfloat(p_r5.xyzw) * asfloat(p_r11.xxxx) + asfloat(p_r6.xyzw)));\n    p_r5.xy = asuint(((-asfloat(p_r5.zw)) + asfloat(p_r5.xy)));\n    p_r5.xy = asuint((asfloat(p_r5.xy) * _DissolveTex_ST.xy + _DissolveTex_ST.zw));\n    p_r5.xy = asuint((asfloat(p_r5.zw) + asfloat(p_r5.xy)));\n    p_r5.zw = select((float2(0.5, 0.5) < float2(_DissolveTexClampU, _DissolveTexClampV)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    p_r6.xy = asuint(max(asfloat(p_r5.xy), float2(0.0, 0.0)));\n    p_r6.xy = asuint(min(asfloat(p_r6.xy), float2(0.998, 0.998)));\n    p_r5.xy = select(p_r5.zw != 0u, p_r6.xy, p_r5.xy);\n    p_r5.xy = asuint((_DissolveUVSpeed.xy * asfloat(p_r0.zz) + asfloat(p_r5.xy)));\n    p_r5.xyzw = asuint((F.S(_DissolveTex, _DissolveTexSampler, asfloat(p_r5.xy))).xyzw);\n    p_r0.z = (uint)(_DissolveChannel);\n    p_r0.z = min(p_r0.z, 3u);\n    p_r0.z = asuint(dot(asfloat(p_r5.xyzw), asfloat(p_icb[p_r0.z].xyzw)));\n    p_r1.y = asuint(max(_DissolveEdgeRange, 0.001));\n    p_r5.xy = asuint(((-asfloat(p_v3.zw)) + float2(1.0, 1.0)));\n    p_r5.z = asuint((asfloat(p_r1.y) + 1.0));\n    p_r6.xy = asuint((asfloat(p_r5.xy) * asfloat(p_r5.zz) + (-asfloat(p_r1.yy))));\n    p_r5.xy = asuint((asfloat(p_r5.xy) * asfloat(p_r5.zz) + (-asfloat(p_r6.xy))));\n    p_r5.zw = asuint((asfloat(p_r0.zz) * asfloat(p_r1.ww) + (-asfloat(p_r6.xy))));\n    p_r5.xy = asuint((float2(1.0, 1.0) / asfloat(p_r5.xy)));\n    p_r5.xy = asuint(saturate((asfloat(p_r5.xy) * asfloat(p_r5.zw))));\n    p_r5.zw = asuint((asfloat(p_r5.xy) * float2(-2.0, -2.0) + float2(3.0, 3.0)));\n    p_r5.xy = asuint((asfloat(p_r5.xy) * asfloat(p_r5.xy)));\n    p_r5.xy = asuint((asfloat(p_r5.xy) * asfloat(p_r5.zw)));\n    p_r5.xy = asuint(min(asfloat(p_r5.xy), float2(1.0, 1.0)));\n    p_r0.z = asuint((asfloat(p_r1.w) * asfloat(p_r5.x)));\n    p_r0.z = asuint((asfloat(p_r0.z) * asfloat(p_v5.w)));\n    p_r1.y = asuint(max(_SoftClip, 0.000488));\n    p_r1.x = asuint((asfloat(p_r1.x) + (-_NormalClip)));\n    p_r1.y = asuint((1.0 / asfloat(p_r1.y)));\n    p_r1.x = asuint(saturate((asfloat(p_r1.y) * asfloat(p_r1.x))));\n    p_r1.y = asuint((asfloat(p_r1.x) * -2.0 + 3.0));\n    p_r1.x = asuint((asfloat(p_r1.x) * asfloat(p_r1.x)));\n    p_r1.x = asuint((asfloat(p_r1.x) * asfloat(p_r1.y)));\n    p_r0.z = asuint((asfloat(p_r0.z) * asfloat(p_r1.x)));\n    p_r0.z = asuint((asfloat(p_r0.z) * _OpaquenessFadeByScript));\n    p_o4.xyz = asuint((asfloat(p_r10.xyz) * asfloat(p_r5.yyy)));\n    p_r0.z = asuint(saturate((asfloat(p_r0.z) * _AlphaFade)));\n    p_r1.x = ((0.5 < _VerticalAlphaFade) ? 0xFFFFFFFFu : 0u);\n    p_r1.y = asuint(((-abs(asfloat(p_r4.y))) * 2.0 + 1.0));\n    p_r1.y = asuint((asfloat(p_r0.z) * asfloat(p_r1.y)));\n    p_r0.z = ((p_r1.x != 0u) ? p_r1.y : p_r0.z);\n    p_o0.w = p_r0.z;\nBaseColorOut=asfloat(p_o1.xyz);\nMetallicOut=asfloat(p_o2.x);\nRoughnessOut=asfloat(p_o2.y);\nfloat3 TN=asfloat(p_o3.xyz);\nfloat3 NX=normalize(_ParticleDecalLocalToWorldMatrix_R0.xyz);\nfloat3 NY=normalize(_ParticleDecalLocalToWorldMatrix_R1.xyz);\nfloat3 NZ=normalize(_ParticleDecalLocalToWorldMatrix_R2.xyz);\nNormalOut=normalize(F.U(NX*TN.x+NZ*TN.y+NY*TN.z));\nOpacityOut=asfloat(p_o0.w);\nreturn asfloat(p_o4.xyz);\n",
+   "parameters": {
+    "UEFX_SourceColor": 4,
+    "UEFX_SourceSize": 4,
+    "UEFX_SourceCustom1": 4,
+    "UEFX_SourceCustom2": 4,
+    "UEFX_SystemAge": 1,
+    "UEFX_ProjectionRow0": 4,
+    "UEFX_ProjectionRow1": 4,
+    "UEFX_ProjectionRow2": 4
+   },
+   "material_params": {
+    "_CustomData1X": 1,
+    "_CustomData1Y": 1,
+    "_UsingNonPSR": 1,
+    "_CustomData1Z": 1,
+    "_CustomData1W": 1,
+    "_DissolveProgress_NonPSR": 1,
+    "_DissolveEmissionProgress_NonPSR": 1,
+    "_ZNetBakedVertexColor": 4,
+    "_MultiplyParticleColor": 4,
+    "_CustomDataColorB": 4,
+    "_ParticleDecalScale": 4,
+    "_TimeOffset": 1,
+    "_DepthShrinkToCenterUV": 1,
+    "_ParticleDecalLocalToWorldMatrix_R1": 4,
+    "_MainTexRotation": 1,
+    "_MainTexFlip": 1,
+    "_MainTex_ST": 4,
+    "_MainTexClampU": 1,
+    "_MainTexClampV": 1,
+    "_UVSpeed": 2,
+    "_UVMove": 1,
+    "_AlphaChannelMapping": 1,
+    "_MaskPassAlphaClip": 1,
+    "_NormalClip": 1,
+    "_BumpMapScale": 1,
+    "_Metallic": 1,
+    "_Roughness": 1,
+    "_EmissionColor": 3,
+    "_EmissionBlendBaseColor": 1,
+    "_DissolveTexRotation": 1,
+    "_DissolveTexFlip": 1,
+    "_DissolveTex_ST": 4,
+    "_DissolveTexClampU": 1,
+    "_DissolveTexClampV": 1,
+    "_DissolveUVSpeed": 2,
+    "_DissolveChannel": 1,
+    "_DissolveEdgeRange": 1,
+    "_SoftClip": 1,
+    "_OpaquenessFadeByScript": 1,
+    "_AlphaFade": 1,
+    "_VerticalAlphaFade": 1,
+    "_ParticleDecalLocalToWorldMatrix_R0": 4,
+    "_ParticleDecalLocalToWorldMatrix_R2": 4
+   },
+   "globals": {},
+   "textures": [
+    "_MainTex",
+    "_BumpMap",
+    "_MaskMap",
+    "_DissolveTex"
+   ],
+   "builtins": [
+    "CameraRelativeWS",
+    "ReceiverRelativeWS"
+   ],
+   "outputs": {
+    "BaseColorOut": 3,
+    "MetallicOut": 1,
+    "RoughnessOut": 1,
+    "NormalOut": 3,
+    "OpacityOut": 1
+   },
+   "surface": "native_pbr",
+   "source_lighting_replaced": true,
+   "source_framebuffer_encoding_replaced": true,
+   "source_shader": {
+    "path": "F:\\AnimeStudio\\Exports\\ZZZ\\Pyrois_SkillFX_Evidence\\Assets\\132714511\\CAB-91fe6c8dbdab2dbcc8fe53cb669f78b3\\Shader\\3236134733678291145.shader",
+    "size": 127237022,
+    "sha256": "b8c1003fbb5a4beba7fc2691ad8de7739cdf73cff6fb5fedc4a7aae40c8b3a84"
+   },
+   "source_fragment": {
+    "sourceByteRange": {
+     "offset": 364138,
+     "bytes": 28124
+    },
+    "sourceLine": 9507,
+    "fileBytesSha256": "8280a4c0c8cb99558e93c073f3514fbdc24428b2f40beff182165e0a9641fea4",
+    "hash64": "d7fdbec172180b22",
+    "profile": "ps_5_0",
+    "valid": true,
+    "globalKeywords": [
+     "_MODE_PBR_LIGHTING",
+     "_SOFT_EDGE_ON",
+     "_USEDISSOLVETEX_ON"
+    ],
+    "localKeywords": [],
+    "outputSignatures": [
+     {
+      "name": "SV_Target",
+      "index": 0,
+      "mask": "xyzw",
+      "reg": 0,
+      "sys": "TARGET",
+      "used": "xyzw"
+     }
+    ],
+    "textures": [
+     "_BumpMap",
+     "_CameraDepthTexture",
+     "_CameraNormalTexture",
+     "_ScreenSpaceShadowTexture",
+     "_EnvCubemapTextures",
+     "_PreIntegratedFGD_GGXDisneyDiffuse",
+     "_SceneUserLut",
+     "_GBuffer1",
+     "_GBuffer2",
+     "_GBuffer0",
+     "_MainTex",
+     "_MaskMap",
+     "_DissolveTex"
+    ]
+   },
+   "source_vertex_candidate": {
+    "sourceByteRange": {
+     "offset": 12363,
+     "bytes": 4731
+    },
+    "sourceLine": 154,
+    "fileBytesSha256": "5eec0e93bec0d2e88b9ad938c4cbaf5e8af732ab8652dbeaf060e44a79dc0304",
+    "hash64": "a40afa16a4c322",
+    "profile": "vs_5_0",
+    "valid": true,
+    "globalKeywords": [],
+    "localKeywords": [],
+    "outputSignatures": [
+     {
+      "name": "SV_POSITION",
+      "index": 0,
+      "mask": "xyzw",
+      "reg": 0,
+      "sys": "POS",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 0,
+      "mask": "xyz",
+      "reg": 1,
+      "sys": "NONE",
+      "used": "xyz"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 1,
+      "mask": "xyzw",
+      "reg": 2,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 2,
+      "mask": "xyzw",
+      "reg": 3,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 3,
+      "mask": "xyzw",
+      "reg": 4,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 4,
+      "mask": "xyzw",
+      "reg": 5,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 5,
+      "mask": "xyzw",
+      "reg": 6,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 6,
+      "mask": "xyzw",
+      "reg": 7,
+      "sys": "NONE",
+      "used": "xyzw"
+     }
+    ],
+    "textures": []
+   },
+   "material_defaults": {
+    "_CustomData1X": 0.0,
+    "_CustomData1Y": 0.0,
+    "_UsingNonPSR": 0.0,
+    "_CustomData1Z": 0.0,
+    "_CustomData1W": 0.0,
+    "_DissolveProgress_NonPSR": 1.0,
+    "_DissolveEmissionProgress_NonPSR": 1.0,
+    "_ZNetBakedVertexColor": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_MultiplyParticleColor": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_CustomDataColorB": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_ParticleDecalScale": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_TimeOffset": 0.0,
+    "_DepthShrinkToCenterUV": 0.0,
+    "_MainTexRotation": 0.0,
+    "_MainTexFlip": 0.0,
+    "_MainTexClampU": 0.0,
+    "_MainTexClampV": 0.0,
+    "_UVSpeed": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_UVMove": 0.0,
+    "_AlphaChannelMapping": 0.0,
+    "_MaskPassAlphaClip": 0.01,
+    "_NormalClip": 0.5,
+    "_BumpMapScale": 1.0,
+    "_Metallic": 1.0,
+    "_Roughness": 1.0,
+    "_EmissionColor": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_EmissionBlendBaseColor": 1.0,
+    "_DissolveTexRotation": 0.0,
+    "_DissolveTexFlip": 0.0,
+    "_DissolveTexClampU": 0.0,
+    "_DissolveTexClampV": 0.0,
+    "_DissolveUVSpeed": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_DissolveChannel": 0.0,
+    "_DissolveEdgeRange": 0.1,
+    "_SoftClip": 1.0,
+    "_OpaquenessFadeByScript": 1.0,
+    "_AlphaFade": 1.0,
+    "_VerticalAlphaFade": 0.0
+   },
+   "source_stage_pair_certified": false,
+   "stage_pair_requirement": "准确Resource stage映射；共享候选不代原VP/FP配对"
+  },
+  "b8a5ab84ac38afc": {
+   "code": "// 原DXBC表面计算；原生投影提供真实receiver位置和深度导数法线。\nstruct ProjectedFunctions {\n float3 U(float3 v) { return float3(-v.x,v.z,v.y); }\n float4 S(Texture2D T, SamplerState Smp, float2 uv) {\n  return Texture2DSample(T,Smp,float2(uv.x,1.0-uv.y)); }\n float4 SL(Texture2D T, SamplerState Smp, float2 uv, float lod) {\n  return Texture2DSampleLevel(T,Smp,float2(uv.x,1.0-uv.y),lod); }\n float4 SB(Texture2D T, SamplerState Smp, float2 uv, float bias) {\n  return Texture2DSampleBias(T,Smp,float2(uv.x,1.0-uv.y),bias); }\n};\nProjectedFunctions F;\nfloat3 ReceiverU=F.U(ReceiverRelativeWS)*0.01;\nfloat3 CameraU=F.U(CameraRelativeWS)*0.01;\nfloat3 DerivedNormal=cross(ddy(ReceiverRelativeWS),ddx(ReceiverRelativeWS));\nfloat NormalLength=dot(DerivedNormal,DerivedNormal);\nif(NormalLength<=0.0) { clip(-1.0); }\nDerivedNormal*=rsqrt(max(NormalLength,1e-20));\nDerivedNormal*=dot(DerivedNormal,CameraRelativeWS-ReceiverRelativeWS)<0.0?-1.0:1.0;\nfloat4 ReceiverNormal=float4(F.U(DerivedNormal)*0.5+0.5,0);\nfloat4 RelativePoint=float4(ReceiverU,1);\nfloat3 SourceLocal=float3(dot(UEFX_ProjectionRow0,RelativePoint),\n dot(UEFX_ProjectionRow1,RelativePoint),dot(UEFX_ProjectionRow2,RelativePoint));\nuint4 v_v1=(uint4)0;\nuint4 v_v2=(uint4)0;\nuint4 v_v3=(uint4)0;\nuint4 v_v5=(uint4)0;\nuint4 v_v6=(uint4)0;\nuint4 v_v7=(uint4)0;\nv_v1.x=asuint(UEFX_SourceColor.x);\nv_v1.y=asuint(UEFX_SourceColor.y);\nv_v1.z=asuint(UEFX_SourceColor.z);\nv_v2.w=asuint(UEFX_SourceSize.x);\nv_v3.x=asuint(UEFX_SourceSize.y);\nv_v3.y=asuint(UEFX_SourceSize.z);\nv_v5.w=asuint(UEFX_SourceCustom1.z);\nv_v5.y=asuint(UEFX_SourceCustom1.x);\nv_v5.z=asuint(UEFX_SourceCustom1.y);\nv_v6.w=asuint(UEFX_SourceCustom2.z);\nv_v6.x=asuint(UEFX_SourceCustom1.w);\nv_v6.y=asuint(UEFX_SourceCustom2.x);\nv_v6.z=asuint(UEFX_SourceCustom2.y);\nv_v7.x=asuint(UEFX_SourceCustom2.w);\n    uint4 v_r0 = (uint4)0, v_r1 = (uint4)0, v_r2 = (uint4)0;\n    uint4 v_o0 = (uint4)0, v_o1 = (uint4)0, v_o2 = (uint4)0, v_o3 = (uint4)0, v_o4 = (uint4)0, v_o5 = (uint4)0, v_o6 = (uint4)0, v_o7 = (uint4)0;\n    v_r0.xy = select((float2(_CustomData1X, _CustomData1Y) < float2(1.5, 1.5)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    v_r1.xyz = select((float3(0.5, 1.5, 0.5) < float3(_CustomData1X, _CustomData1X, _CustomData1Y)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    v_r0.xy = (v_r0.xy & v_r1.xz);\n    v_r0.x = (v_r0.x | v_r1.y);\n    v_r1.xy = select(v_r0.xy != 0u, uint2(0u, 0u), v_v5.yz);\n    v_r0.x = ((_UsingNonPSR < 0.5) ? 0xFFFFFFFFu : 0u);\n    v_o3.xy = (v_r1.xy & v_r0.xx);\n    v_r0.yz = select((float2(_CustomData1Z, _CustomData1W) < float2(1.5, 1.5)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    v_r2.xyz = select((float3(0.5, 0.5, 1.5) < float3(_CustomData1Z, _CustomData1W, _CustomData1W)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    v_r0.yz = (v_r0.yz & v_r2.xy);\n    v_r0.z = (v_r0.z | v_r2.z);\n    v_r1.z = ((v_r0.y != 0u) ? 0u : v_v5.w);\n    v_r1.w = ((v_r0.z != 0u) ? 0u : v_v6.x);\n    v_o3.zw = select(v_r0.xx != 0u, v_r1.zw, asuint(float2(_DissolveProgress_NonPSR, _DissolveEmissionProgress_NonPSR)));\n    v_r0.yzw = asuint((_ZNetBakedVertexColor.xyz + float3(0.055, 0.055, 0.055)));\n    v_r0.yzw = asuint((asfloat(v_r0.yzw) * float3(0.947867, 0.947867, 0.947867)));\n    v_r0.yzw = asuint(log2(abs(asfloat(v_r0.yzw))));\n    v_r0.yzw = asuint((asfloat(v_r0.yzw) * float3(2.4, 2.4, 2.4)));\n    v_r0.yzw = asuint(exp2(asfloat(v_r0.yzw)));\n    v_r1.xyz = asuint((_ZNetBakedVertexColor.xyz * float3(0.077399, 0.077399, 0.077399)));\n    v_r2.xyz = select((float3(0.04045, 0.04045, 0.04045) >= _ZNetBakedVertexColor.xyz), (uint3)0xFFFFFFFFu, (uint3)0u);\n    v_r0.yzw = select(v_r2.xyz != 0u, v_r1.xyz, v_r0.yzw);\n    v_r0.yzw = select(v_r0.xxx != 0u, v_v1.xyz, v_r0.yzw);\n    v_o4.xyz = asuint((asfloat(v_r0.yzw) * _MultiplyParticleColor.xyz));\n    v_r1.xyz = v_v6.yzw;\n    v_r1.w = v_v7.x;\n    v_o5.xyzw = select(v_r0.xxxx != 0u, v_r1.xyzw, asuint(_CustomDataColorB.xyzw));\n    v_r1.x = v_v2.w;\n    v_r1.yz = v_v3.xy;\n    v_r0.yzw = asuint((_ParticleDecalScale.xyz / asfloat(v_r1.xyz)));\n    v_r1.x = ((0.5 < _ParticleDecalScale.w) ? 0xFFFFFFFFu : 0u);\n    v_r0.yzw = select(v_r1.xxx != 0u, v_r0.yzw, uint3(asuint(1.0), asuint(1.0), asuint(1.0)));\n    v_o7.xyz = select(v_r0.xxx != 0u, v_r0.yzw, uint3(asuint(1.0), asuint(1.0), asuint(1.0)));\nuint4 p_v3=v_o3;\nuint4 p_v4=v_o4;\nuint4 p_v5=v_o5;\nuint4 p_v7=v_o7;\n    uint4 p_r0 = (uint4)0, p_r1 = (uint4)0, p_r2 = (uint4)0, p_r3 = (uint4)0, p_r4 = (uint4)0, p_r5 = (uint4)0, p_r6 = (uint4)0, p_r7 = (uint4)0, p_r8 = (uint4)0, p_r9 = (uint4)0, p_r10 = (uint4)0;\n    const uint4 p_icb[4] = { uint4(asuint(1.0), 0u, 0u, 0u), uint4(0u, asuint(1.0), 0u, 0u), uint4(0u, 0u, asuint(1.0), 0u), uint4(0u, 0u, 0u, asuint(1.0)) };\n    uint4 p_o0 = (uint4)0;\n    p_r1.xyzw = asuint(float4((ReceiverNormal).x, (ReceiverNormal).y, (ReceiverNormal).z, (ReceiverNormal).w));\n    p_r0.z = asuint((UEFX_SystemAge.xxxx).x);\n    p_r0.z = asuint((asfloat(p_r0.z) + (-_TimeOffset)));\n    p_r0.xyw = asuint(float3((float4(SourceLocal,1)).x, (float4(SourceLocal,1)).y, (float4(SourceLocal,1)).z));\n    p_r0.xyw = asuint((asfloat(p_r0.xyx) * asfloat(p_v7.xyz)));\n    p_r2.xyz = asuint((asfloat(p_r0.xyw) * float3(1.0, -1.0, 1.0)));\n    p_r0.xyw = asuint((asfloat(p_r0.xyw) * float3(1.0, -1.0, 1.0) + float3(0.5, 0.5, 0.5)));\n    p_r1.w = ((0.5 < _DepthShrinkToCenterUV) ? 0xFFFFFFFFu : 0u);\n    p_r2.w = asuint((abs(asfloat(p_r2.y)) + abs(asfloat(p_r2.y))));\n    p_r2.w = asuint(((-asfloat(p_r2.w)) * asfloat(p_r2.w) + 1.0));\n    p_r2.w = asuint(max(asfloat(p_r2.w), 0.0));\n    p_r2.w = asuint(sqrt(asfloat(p_r2.w)));\n    p_r2.w = asuint(max(asfloat(p_r2.w), 0.001));\n    p_r2.xz = asuint((asfloat(p_r2.xz) / asfloat(p_r2.ww)));\n    p_r2.xz = asuint((asfloat(p_r2.xz) + float2(0.5, 0.5)));\n    p_r3.xy = select(p_r1.ww != 0u, p_r2.xz, p_r0.xw);\n    p_r1.w = asuint(dot(_ParticleDecalLocalToWorldMatrix_R1.xyz, _ParticleDecalLocalToWorldMatrix_R1.xyz));\n    p_r1.w = asuint(rsqrt(asfloat(p_r1.w)));\n    p_r2.xzw = asuint((asfloat(p_r1.www) * _ParticleDecalLocalToWorldMatrix_R1.xyz));\n    p_r3.zw = asuint(((-asfloat(p_r3.xy)) + float2(1.0, 1.0)));\n    p_r4.xyzw = asuint(((-asfloat(p_r3.xyzw)) + asfloat(p_r3.yzwx)));\n    p_r5.xyzw = asuint((float4(_MainTexRotation, _MainTexRotation, _MainTexRotation, _MainTexRotation) * asfloat(p_r4.xyzw) + asfloat(p_r3.xyzw)));\n    p_r6.xyzw = select((float4(_MainTexFlip, _MainTexFlip, _MainTexFlip, _MainTexFlip) < float4(0.5, 1.5, 2.5, 65504.0)), (uint4)0xFFFFFFFFu, (uint4)0u);\n    p_r7.xyzw = (p_r6.xyzw & uint4(1065353216u, 1065353216u, 1065353216u, 1065353216u));\n    p_r6.xyz = select(p_r6.xyz != 0u, uint3(asuint(-1.0), asuint(-1.0), asuint(-1.0)), uint3(asuint(-0.0), asuint(-0.0), asuint(-0.0)));\n    p_r6.xyz = asuint((asfloat(p_r6.xyz) + asfloat(p_r7.yzw)));\n    p_r6.xyz = asuint(max(asfloat(p_r6.xyz), float3(0.0, 0.0, 0.0)));\n    p_r8.xy = p_r5.zw;\n    p_r8.z = asuint(1.0);\n    p_r8.w = asuint(((-_MainTexRotation) + 1.0));\n    p_r9.xy = p_r5.xw;\n    p_r9.z = 0u;\n    p_r9.w = asuint(((-_MainTexRotation) + 1.0));\n    p_r10.xyzw = asuint((asfloat(p_r6.yyyy) * asfloat(p_r9.xyzw)));\n    p_r10.xyzw = asuint((asfloat(p_r8.xyzw) * asfloat(p_r6.zzzz) + asfloat(p_r10.xyzw)));\n    p_r5.xz = p_r8.xz;\n    p_r5.w = asuint(_MainTexRotation);\n    p_r6.xyzw = asuint((asfloat(p_r5.xyzw) * asfloat(p_r6.xxxx) + asfloat(p_r10.xyzw)));\n    p_r5.xz = p_r9.xz;\n    p_r5.xyzw = asuint((asfloat(p_r5.xyzw) * asfloat(p_r7.xxxx) + asfloat(p_r6.xyzw)));\n    p_r5.xy = asuint(((-asfloat(p_r5.zw)) + asfloat(p_r5.xy)));\n    p_r5.xy = asuint((asfloat(p_r5.xy) * _MainTex_ST.xy + _MainTex_ST.zw));\n    p_r5.xy = asuint((asfloat(p_r5.zw) + asfloat(p_r5.xy)));\n    p_r5.zw = select((float2(0.5, 0.5) < float2(_MainTexClampU, _MainTexClampV)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    p_r6.xy = asuint(max(asfloat(p_r5.xy), float2(0.0, 0.0)));\n    p_r6.xy = asuint(min(asfloat(p_r6.xy), float2(0.998, 0.998)));\n    p_r5.xy = select(p_r5.zw != 0u, p_r6.xy, p_r5.xy);\n    p_r5.zw = asuint((_UVSpeed.xy * asfloat(p_r0.zz) + asfloat(p_v3.xy)));\n    p_r5.xy = asuint((float2(_UVMove, _UVMove) * asfloat(p_r5.zw) + asfloat(p_r5.xy)));\n    p_r5.xyzw = asuint((F.SL(_MainTex, _MainTexSampler, asfloat(p_r5.xy), 0.0)).xyzw);\n    p_r1.w = (uint)(_AlphaChannelMapping);\n    p_r1.w = min(p_r1.w, 3u);\n    p_r1.w = asuint(dot(asfloat(p_r5.xyzw), asfloat(p_icb[p_r1.w].xyzw)));\n    p_r6.x = ((asfloat(p_r1.w) < _MaskPassAlphaClip) ? 0xFFFFFFFFu : 0u);\n    if (p_r6.x != 0u) {\n        if (4294967295u != 0u) { clip(-1.0); }\n    }\n    p_r6.xyz = select((asfloat(p_r0.xyw) < float3(0.0, 0.0, 0.0)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    p_r6.x = (p_r6.y | p_r6.x);\n    p_r6.x = (p_r6.z | p_r6.x);\n    p_r0.xyw = select((float3(1.0, 1.0, 1.0) < asfloat(p_r0.xyw)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    p_r0.x = (p_r0.y | p_r0.x);\n    p_r0.x = (p_r0.w | p_r0.x);\n    p_r0.x = (p_r0.x | p_r6.x);\n    if (p_r0.x != 0u) {\n        if (4294967295u != 0u) { clip(-1.0); }\n    }\n    p_r0.xyw = asuint((asfloat(p_r1.xyz) * float3(2.0, 2.0, 2.0) + float3(-1.0, -1.0, -1.0)));\n    p_r0.x = asuint(dot(asfloat(p_r0.xyw), asfloat(p_r2.xzw)));\n    p_r0.x = asuint(saturate((asfloat(p_r0.x) * 0.5 + 0.5)));\n    p_r0.x = asuint((asfloat(p_r0.x) + (-_NormalClip)));\n    p_r0.x = ((asfloat(p_r0.x) < 0.0) ? 0xFFFFFFFFu : 0u);\n    if (p_r0.x != 0u) {\n        if (4294967295u != 0u) { clip(-1.0); }\n    }\n    p_r0.xyw = asuint((asfloat(p_r1.xyz) * float3(2.0, 2.0, 2.0) + float3(-1.0, -1.0, -1.0)));\n    p_r0.x = asuint(dot(asfloat(p_r0.xyw), asfloat(p_r2.xzw)));\n    p_r0.x = asuint(saturate((asfloat(p_r0.x) * 0.5 + 0.5)));\n    p_r0.y = ((3.5 < _ColorChannelMapping) ? 0xFFFFFFFFu : 0u);\n    p_r0.w = (uint)(_ColorChannelMapping);\n    p_r0.w = min(p_r0.w, 3u);\n    p_r0.w = asuint(dot(asfloat(p_r5.xyzw), asfloat(p_icb[p_r0.w].xyzw)));\n    p_r0.y = ((p_r0.y != 0u) ? asuint(1.0) : p_r0.w);\n    p_r3.xyzw = asuint((float4(_DissolveTexRotation, _DissolveTexRotation, _DissolveTexRotation, _DissolveTexRotation) * asfloat(p_r4.xyzw) + asfloat(p_r3.xyzw)));\n    p_r4.xyzw = select((float4(_DissolveTexFlip, _DissolveTexFlip, _DissolveTexFlip, _DissolveTexFlip) < float4(0.5, 1.5, 2.5, 65504.0)), (uint4)0xFFFFFFFFu, (uint4)0u);\n    p_r6.xyzw = (p_r4.xyzw & uint4(1065353216u, 1065353216u, 1065353216u, 1065353216u));\n    p_r1.xyz = select(p_r4.xyz != 0u, uint3(asuint(-1.0), asuint(-1.0), asuint(-1.0)), uint3(asuint(-0.0), asuint(-0.0), asuint(-0.0)));\n    p_r1.xyz = asuint((asfloat(p_r1.xyz) + asfloat(p_r6.yzw)));\n    p_r1.xyz = asuint(max(asfloat(p_r1.xyz), float3(0.0, 0.0, 0.0)));\n    p_r4.xy = p_r3.zw;\n    p_r4.z = asuint(1.0);\n    p_r4.w = asuint(((-_DissolveTexRotation) + 1.0));\n    p_r7.xy = p_r3.xw;\n    p_r7.z = 0u;\n    p_r7.w = asuint(((-_DissolveTexRotation) + 1.0));\n    p_r8.xyzw = asuint((asfloat(p_r1.yyyy) * asfloat(p_r7.xyzw)));\n    p_r8.xyzw = asuint((asfloat(p_r4.xyzw) * asfloat(p_r1.zzzz) + asfloat(p_r8.xyzw)));\n    p_r3.xz = p_r4.xz;\n    p_r3.w = asuint(_DissolveTexRotation);\n    p_r4.xyzw = asuint((asfloat(p_r3.xyzw) * asfloat(p_r1.xxxx) + asfloat(p_r8.xyzw)));\n    p_r3.xz = p_r7.xz;\n    p_r3.xyzw = asuint((asfloat(p_r3.xyzw) * asfloat(p_r6.xxxx) + asfloat(p_r4.xyzw)));\n    p_r1.xy = asuint(((-asfloat(p_r3.zw)) + asfloat(p_r3.xy)));\n    p_r1.xy = asuint((asfloat(p_r1.xy) * _DissolveTex_ST.xy + _DissolveTex_ST.zw));\n    p_r1.xy = asuint((asfloat(p_r3.zw) + asfloat(p_r1.xy)));\n    p_r2.xz = select((float2(0.5, 0.5) < float2(_DissolveTexClampU, _DissolveTexClampV)), (uint2)0xFFFFFFFFu, (uint2)0u);\n    p_r3.xy = asuint(max(asfloat(p_r1.xy), float2(0.0, 0.0)));\n    p_r3.xy = asuint(min(asfloat(p_r3.xy), float2(0.998, 0.998)));\n    p_r1.xy = select(p_r2.xz != 0u, p_r3.xy, p_r1.xy);\n    p_r0.zw = asuint((_DissolveUVSpeed.xy * asfloat(p_r0.zz) + asfloat(p_r1.xy)));\n    p_r3.xyzw = asuint((F.S(_DissolveTex, _DissolveTexSampler, asfloat(p_r0.zw))).xyzw);\n    p_r0.z = (uint)(_DissolveChannel);\n    p_r0.z = min(p_r0.z, 3u);\n    p_r0.z = asuint(dot(asfloat(p_r3.xyzw), asfloat(p_icb[p_r0.z].xyzw)));\n    p_r0.w = asuint(max(_DissolveEdgeRange, 0.001));\n    p_r1.x = asuint(((-asfloat(p_v3.z)) + 1.0));\n    p_r1.y = asuint((asfloat(p_r0.w) + 1.0));\n    p_r0.w = asuint((asfloat(p_r1.x) * asfloat(p_r1.y) + (-asfloat(p_r0.w))));\n    p_r1.x = asuint((asfloat(p_r1.x) * asfloat(p_r1.y) + (-asfloat(p_r0.w))));\n    p_r0.z = asuint((asfloat(p_r0.z) * asfloat(p_r1.w) + (-asfloat(p_r0.w))));\n    p_r0.w = asuint((1.0 / asfloat(p_r1.x)));\n    p_r0.z = asuint(saturate((asfloat(p_r0.w) * asfloat(p_r0.z))));\n    p_r0.w = asuint((asfloat(p_r0.z) * -2.0 + 3.0));\n    p_r0.z = asuint((asfloat(p_r0.z) * asfloat(p_r0.z)));\n    p_r0.z = asuint((asfloat(p_r0.z) * asfloat(p_r0.w)));\n    p_r0.w = asuint(min(asfloat(p_r0.z), 1.0));\n    p_r1.x = asuint((asfloat(p_r0.w) * asfloat(p_r1.w)));\n    p_r1.x = asuint((asfloat(p_r1.x) * asfloat(p_v5.w)));\n    p_r0.x = asuint((asfloat(p_r0.x) * asfloat(p_r1.x)));\n    p_r0.x = asuint((asfloat(p_r0.x) * _OpaquenessFadeByScript));\n    p_r0.y = asuint((asfloat(p_r0.y) * _LerpBrightness));\n    p_r0.y = asuint(saturate((asfloat(p_r0.z) * asfloat(p_r0.y))));\n    p_r0.z = ((_ColorChannelMapping < 3.5) ? 0xFFFFFFFFu : 0u);\n    if (p_r0.z != 0u) {\n        p_r1.xyz = asuint((asfloat(p_v4.xyz) + (-asfloat(p_v5.xyz))));\n        p_r1.xyz = asuint((asfloat(p_r0.yyy) * asfloat(p_r1.xyz) + asfloat(p_v5.xyz)));\n    } else {\n        p_r2.xzw = asuint(((-asfloat(p_v5.xyz)) + _EdgeColorOverride.xyz));\n        p_r2.xzw = asuint((_EdgeColorOverride.www * asfloat(p_r2.xzw) + asfloat(p_v5.xyz)));\n        p_r0.z = asuint((asfloat(p_r0.w) + -1.0));\n        p_r0.z = asuint((_DissolveAffects2Tone * asfloat(p_r0.z) + 1.0));\n        p_r3.xyz = asuint(((-asfloat(p_r2.xzw)) + asfloat(p_r5.xyz)));\n        p_r2.xzw = asuint((asfloat(p_r0.zzz) * asfloat(p_r3.xyz) + asfloat(p_r2.xzw)));\n        p_r3.xyz = asuint((asfloat(p_v4.xyz) + (-asfloat(p_v5.xyz))));\n        p_r0.yzw = asuint((asfloat(p_r0.yyy) * asfloat(p_r3.xyz) + asfloat(p_v5.xyz)));\n        p_r1.xyz = asuint((asfloat(p_r0.yzw) * asfloat(p_r2.xzw)));\n    }\n    p_r0.y = ((_BlendMode < 0.5) ? 0xFFFFFFFFu : 0u);\n    p_r2.xzw = asuint(max(asfloat(p_r1.xyz), float3(0.0, 0.0, 0.0)));\n    p_r0.z = asuint(((-_OpaquenessFadeByScript) + 1.0));\n    p_r0.z = asuint((asfloat(p_r0.z) * 0.3 + 1.0));\n    p_r2.xzw = asuint(log2(asfloat(p_r2.xzw)));\n    p_r2.xzw = asuint((asfloat(p_r0.zzz) * asfloat(p_r2.xzw)));\n    p_r2.xzw = asuint(exp2(asfloat(p_r2.xzw)));\n    p_r0.yzw = select(p_r0.yyy != 0u, p_r2.xzw, p_r1.xyz);\n    p_r1.xyz = asuint((asfloat(p_r0.xxx) * asfloat(p_r0.yzw)));\n    p_r1.w = asuint(max(asfloat(p_r0.x), 0.001));\n    p_r1.w = asuint((1.0 / asfloat(p_r1.w)));\n    p_r2.xzw = asuint((asfloat(p_r1.xyz) * float3((Global_NapEffectBrightnessParams4_R0).x, (Global_NapEffectBrightnessParams4_R0).x, (Global_NapEffectBrightnessParams4_R0).x) + float3((Global_NapEffectBrightnessParams4_R0).y, (Global_NapEffectBrightnessParams4_R0).y, (Global_NapEffectBrightnessParams4_R0).y)));\n    p_r3.xyz = select((asfloat(p_r1.xyz) >= float3((Global_NapEffectBrightnessParams4_R0).w, (Global_NapEffectBrightnessParams4_R0).w, (Global_NapEffectBrightnessParams4_R0).w)), (uint3)0xFFFFFFFFu, (uint3)0u);\n    p_r3.xyz = (p_r3.xyz & uint3(1065353216u, 1065353216u, 1065353216u));\n    p_r2.xzw = asuint((asfloat(p_r2.xzw) * asfloat(p_r1.www) + (-asfloat(p_r0.yzw))));\n    p_r2.xzw = asuint((asfloat(p_r3.xyz) * asfloat(p_r2.xzw) + asfloat(p_r0.yzw)));\n    p_r1.x = asuint(max(asfloat(p_r1.y), asfloat(p_r1.x)));\n    p_r1.x = asuint(max(asfloat(p_r1.z), asfloat(p_r1.x)));\n    p_r1.x = asuint((asfloat(p_r1.x) + (-(Global_NapEffectBrightnessExtraParams_R0).x)));\n    p_r1.x = asuint(saturate((asfloat(p_r1.x) * (Global_NapEffectBrightnessExtraParams_R0).y)));\n    p_r1.yzw = asuint((asfloat(p_r2.xzw) * float3((Global_NapEffectBrightnessParams4_R0).z, (Global_NapEffectBrightnessParams4_R0).z, (Global_NapEffectBrightnessParams4_R0).z) + (-asfloat(p_r0.yzw))));\n    p_r0.yzw = asuint((asfloat(p_r1.xxx) * asfloat(p_r1.yzw) + asfloat(p_r0.yzw)));\n    p_r0.x = asuint(saturate((asfloat(p_r0.x) * _AlphaFade)));\n    p_r1.x = ((0.5 < _VerticalAlphaFade) ? 0xFFFFFFFFu : 0u);\n    p_r1.y = asuint(((-abs(asfloat(p_r2.y))) * 2.0 + 1.0));\n    p_r1.y = asuint((asfloat(p_r0.x) * asfloat(p_r1.y)));\n    p_r0.x = ((p_r1.x != 0u) ? p_r1.y : p_r0.x);\n    p_r1.x = asuint(((Global_SceneWeatherParamsPart1_R2).z + -1.0));\n    p_r1.x = ((0.001 < abs(asfloat(p_r1.x))) ? 0xFFFFFFFFu : 0u);\n    p_r1.y = asuint(dot(asfloat(p_r0.yzw), float3(0.212673, 0.715152, 0.072175)));\n    p_r2.xyz = asuint((asfloat(p_r0.yzw) + (-asfloat(p_r1.yyy))));\n    p_r1.yzw = asuint((float3((Global_SceneWeatherParamsPart1_R2).z, (Global_SceneWeatherParamsPart1_R2).z, (Global_SceneWeatherParamsPart1_R2).z) * asfloat(p_r2.xyz) + asfloat(p_r1.yyy)));\n    p_r0.yzw = select(p_r1.xxx != 0u, p_r1.yzw, p_r0.yzw);\n    p_o0.xyz = asuint((asfloat(p_r0.xxx) * asfloat(p_r0.yzw)));\n    p_r0.y = asuint((_BlendMode + -1.0));\n    p_o0.w = asuint((asfloat(p_r0.x) * asfloat(p_r0.y) + 1.0));\nOpacityOut=asfloat(p_r0.x);\nreturn OpacityOut>0.0?asfloat(p_o0.xyz)/OpacityOut:float3(0,0,0);\n",
+   "parameters": {
+    "UEFX_SourceColor": 4,
+    "UEFX_SourceSize": 4,
+    "UEFX_SourceCustom1": 4,
+    "UEFX_SourceCustom2": 4,
+    "UEFX_SystemAge": 1,
+    "UEFX_ProjectionRow0": 4,
+    "UEFX_ProjectionRow1": 4,
+    "UEFX_ProjectionRow2": 4,
+    "Global_NapEffectBrightnessParams4_R0": 4,
+    "Global_NapEffectBrightnessExtraParams_R0": 4,
+    "Global_SceneWeatherParamsPart1_R2": 4
+   },
+   "material_params": {
+    "_CustomData1X": 1,
+    "_CustomData1Y": 1,
+    "_UsingNonPSR": 1,
+    "_CustomData1Z": 1,
+    "_CustomData1W": 1,
+    "_DissolveProgress_NonPSR": 1,
+    "_DissolveEmissionProgress_NonPSR": 1,
+    "_ZNetBakedVertexColor": 4,
+    "_MultiplyParticleColor": 4,
+    "_CustomDataColorB": 4,
+    "_ParticleDecalScale": 4,
+    "_TimeOffset": 1,
+    "_DepthShrinkToCenterUV": 1,
+    "_ParticleDecalLocalToWorldMatrix_R1": 4,
+    "_MainTexRotation": 1,
+    "_MainTexFlip": 1,
+    "_MainTex_ST": 4,
+    "_MainTexClampU": 1,
+    "_MainTexClampV": 1,
+    "_UVSpeed": 2,
+    "_UVMove": 1,
+    "_AlphaChannelMapping": 1,
+    "_MaskPassAlphaClip": 1,
+    "_NormalClip": 1,
+    "_ColorChannelMapping": 1,
+    "_DissolveTexRotation": 1,
+    "_DissolveTexFlip": 1,
+    "_DissolveTex_ST": 4,
+    "_DissolveTexClampU": 1,
+    "_DissolveTexClampV": 1,
+    "_DissolveUVSpeed": 2,
+    "_DissolveChannel": 1,
+    "_DissolveEdgeRange": 1,
+    "_OpaquenessFadeByScript": 1,
+    "_LerpBrightness": 1,
+    "_EdgeColorOverride": 4,
+    "_DissolveAffects2Tone": 1,
+    "_BlendMode": 1,
+    "_AlphaFade": 1,
+    "_VerticalAlphaFade": 1
+   },
+   "globals": {
+    "_NapEffectBrightnessParams4": [
+     0
+    ],
+    "_NapEffectBrightnessExtraParams": [
+     0
+    ],
+    "_SceneWeatherParamsPart1": [
+     2
+    ]
+   },
+   "textures": [
+    "_MainTex",
+    "_DissolveTex"
+   ],
+   "builtins": [
+    "CameraRelativeWS",
+    "ReceiverRelativeWS"
+   ],
+   "outputs": {
+    "OpacityOut": 1
+   },
+   "surface": "source_unlit",
+   "source_lighting_replaced": false,
+   "source_framebuffer_encoding_replaced": true,
+   "source_shader": {
+    "path": "F:\\AnimeStudio\\Exports\\ZZZ\\Pyrois_SkillFX_Evidence\\Assets\\132714511\\CAB-91fe6c8dbdab2dbcc8fe53cb669f78b3\\Shader\\3236134733678291145.shader",
+    "size": 127237022,
+    "sha256": "b8c1003fbb5a4beba7fc2691ad8de7739cdf73cff6fb5fedc4a7aae40c8b3a84"
+   },
+   "source_fragment": {
+    "sourceByteRange": {
+     "offset": 212364,
+     "bytes": 12159
+    },
+    "sourceLine": 5515,
+    "fileBytesSha256": "a68d9ab5082a3d4ec954748dc1cd7913c6a534890a89dcae76b01b9eca212a3d",
+    "hash64": "b8a5ab84ac38afc",
+    "profile": "ps_5_0",
+    "valid": true,
+    "globalKeywords": [
+     "_SOFT_EDGE_ON",
+     "_USEDISSOLVETEX_ON"
+    ],
+    "localKeywords": [],
+    "outputSignatures": [
+     {
+      "name": "SV_Target",
+      "index": 0,
+      "mask": "xyzw",
+      "reg": 0,
+      "sys": "TARGET",
+      "used": "xyzw"
+     }
+    ],
+    "textures": [
+     "_CameraDepthTexture",
+     "_CameraNormalTexture",
+     "_MainTex",
+     "_DissolveTex"
+    ]
+   },
+   "source_vertex_candidate": {
+    "sourceByteRange": {
+     "offset": 12363,
+     "bytes": 4731
+    },
+    "sourceLine": 154,
+    "fileBytesSha256": "5eec0e93bec0d2e88b9ad938c4cbaf5e8af732ab8652dbeaf060e44a79dc0304",
+    "hash64": "a40afa16a4c322",
+    "profile": "vs_5_0",
+    "valid": true,
+    "globalKeywords": [],
+    "localKeywords": [],
+    "outputSignatures": [
+     {
+      "name": "SV_POSITION",
+      "index": 0,
+      "mask": "xyzw",
+      "reg": 0,
+      "sys": "POS",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 0,
+      "mask": "xyz",
+      "reg": 1,
+      "sys": "NONE",
+      "used": "xyz"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 1,
+      "mask": "xyzw",
+      "reg": 2,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 2,
+      "mask": "xyzw",
+      "reg": 3,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 3,
+      "mask": "xyzw",
+      "reg": 4,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 4,
+      "mask": "xyzw",
+      "reg": 5,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 5,
+      "mask": "xyzw",
+      "reg": 6,
+      "sys": "NONE",
+      "used": "xyzw"
+     },
+     {
+      "name": "TEXCOORD",
+      "index": 6,
+      "mask": "xyzw",
+      "reg": 7,
+      "sys": "NONE",
+      "used": "xyzw"
+     }
+    ],
+    "textures": []
+   },
+   "material_defaults": {
+    "_CustomData1X": 0.0,
+    "_CustomData1Y": 0.0,
+    "_UsingNonPSR": 0.0,
+    "_CustomData1Z": 0.0,
+    "_CustomData1W": 0.0,
+    "_DissolveProgress_NonPSR": 1.0,
+    "_DissolveEmissionProgress_NonPSR": 1.0,
+    "_ZNetBakedVertexColor": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_MultiplyParticleColor": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_CustomDataColorB": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_ParticleDecalScale": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "_TimeOffset": 0.0,
+    "_DepthShrinkToCenterUV": 0.0,
+    "_MainTexRotation": 0.0,
+    "_MainTexFlip": 0.0,
+    "_MainTexClampU": 0.0,
+    "_MainTexClampV": 0.0,
+    "_UVSpeed": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_UVMove": 0.0,
+    "_AlphaChannelMapping": 0.0,
+    "_MaskPassAlphaClip": 0.01,
+    "_NormalClip": 0.5,
+    "_ColorChannelMapping": 0.0,
+    "_DissolveTexRotation": 0.0,
+    "_DissolveTexFlip": 0.0,
+    "_DissolveTexClampU": 0.0,
+    "_DissolveTexClampV": 0.0,
+    "_DissolveUVSpeed": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_DissolveChannel": 0.0,
+    "_DissolveEdgeRange": 0.1,
+    "_OpaquenessFadeByScript": 1.0,
+    "_LerpBrightness": 1.0,
+    "_EdgeColorOverride": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "_DissolveAffects2Tone": 1.0,
+    "_BlendMode": 0.0,
+    "_AlphaFade": 1.0,
+    "_VerticalAlphaFade": 0.0
+   },
+   "source_stage_pair_certified": false,
+   "stage_pair_requirement": "准确Resource stage映射；共享候选不代原VP/FP配对"
+  }
+ },
+ "prop": {
+  "3080061245389246387": {
+   "geometry": {
+    "code": "// 原DXBC表面计算；原生投影提供真实receiver位置和深度导数法线。\nstruct ProjectedFunctions {\n float3 U(float3 v) { return float3(-v.x,v.z,v.y); }\n float4 S(Texture2D T, SamplerState Smp, float2 uv) {\n  return Texture2DSample(T,Smp,float2(uv.x,1.0-uv.y)); }\n float4 SL(Texture2D T, SamplerState Smp, float2 uv, float lod) {\n  return Texture2DSampleLevel(T,Smp,float2(uv.x,1.0-uv.y),lod); }\n float4 SB(Texture2D T, SamplerState Smp, float2 uv, float bias) {\n  return Texture2DSampleBias(T,Smp,float2(uv.x,1.0-uv.y),bias); }\n};\nProjectedFunctions F;\n\nfloat3 PosU=float3(0,0,0);\nfloat3 CameraU=F.U(CameraVectorWS)*0.01;\nuint4 p_v0=asuint(float4(UV0.x,1.0-UV0.y,0,0));\nuint4 p_v2=asuint(float4(F.U(normalize(UEFX_NormalWS)),PosU.x));\nuint4 p_v3=asuint(float4(F.U(normalize(UEFX_TangentWS)),PosU.y));\nuint4 p_v4=asuint(float4(F.U(normalize(UEFX_BitangentWS)),PosU.z));\nuint4 p_v5=asuint(VCol);\nuint4 p_v8=asuint(float4(PixelPosition.xy,0,0));\nuint4 p_v9=uint4(FaceSign>0.0?1u:0u,0,0,0);\n    uint4 p_r0 = (uint4)0, p_r1 = (uint4)0, p_r2 = (uint4)0, p_r3 = (uint4)0, p_r4 = (uint4)0, p_r5 = (uint4)0;\n    const uint4 p_icb[16] = { uint4(asuint(0.058824), 0u, 0u, 0u), uint4(asuint(0.529412), 0u, 0u, 0u), uint4(asuint(0.176471), 0u, 0u, 0u), uint4(asuint(0.647059), 0u, 0u, 0u), uint4(asuint(0.764706), 0u, 0u, 0u), uint4(asuint(0.294118), 0u, 0u, 0u), uint4(asuint(0.882353), 0u, 0u, 0u), uint4(asuint(0.411765), 0u, 0u, 0u), uint4(asuint(0.235294), 0u, 0u, 0u), uint4(asuint(0.705882), 0u, 0u, 0u), uint4(asuint(0.117647), 0u, 0u, 0u), uint4(asuint(0.588235), 0u, 0u, 0u), uint4(asuint(0.941176), 0u, 0u, 0u), uint4(asuint(0.470588), 0u, 0u, 0u), uint4(asuint(0.823529), 0u, 0u, 0u), uint4(asuint(0.352941), 0u, 0u, 0u) };\n    uint4 p_o0 = (uint4)0, p_o1 = (uint4)0, p_o2 = (uint4)0, p_o3 = (uint4)0;\n    p_r0.xy = (uint2)(asfloat(p_v8.xy));\n    p_r0.x = (((p_r0.x << (2u & 31u)) & (((1u << (2u & 31u)) - 1u) << (2u & 31u))) | (0u & ~(((1u << (2u & 31u)) - 1u) << (2u & 31u))));\n    p_r0.x = (((p_r0.y << (0u & 31u)) & (((1u << (2u & 31u)) - 1u) << (0u & 31u))) | (p_r0.x & ~(((1u << (2u & 31u)) - 1u) << (0u & 31u))));\n    p_r0.x = asuint((_DitherAlpha * _DitherAlpha2 + (-asfloat(p_icb[p_r0.x].x))));\n    p_r0.x = ((asfloat(p_r0.x) < 0.0) ? 0xFFFFFFFFu : 0u);\n    if (p_r0.x != 0u) { clip(-1.0); }\n    p_r0.yz = asuint((asfloat(p_v0.xy) * _BaseMap_ST.xy + _BaseMap_ST.zw));\n    p_r1.xyz = asuint((F.S(_MaskTex, _MaskTexSampler, asfloat(p_r0.yz))).xyz);\n    p_r0.w = asuint(((-asfloat(p_r1.y)) + 1.0));\n    p_r0.w = asuint(((-asfloat(p_r0.w)) * _Glossiness + 1.0));\n    p_r1.x = asuint((asfloat(p_r1.x) * _Metallic));\n    p_r2.xyz = asuint((F.S(_BaseMap, _BaseMapSampler, asfloat(p_r0.yz))).xyz);\n    p_r2.xyz = asuint((asfloat(p_r2.xyz) * _Color.xyz));\n    p_r1.yw = asuint((asfloat(p_r2.xy) * asfloat(p_v5.xy)));\n    p_r3.xyz = asuint((F.S(_BumpMap, _BumpMapSampler, asfloat(p_r0.yz))).xyw);\n    p_r3.x = asuint((asfloat(p_r3.x) * asfloat(p_r3.z)));\n    p_r0.yz = asuint((asfloat(p_r3.xy) * float2(2.0, 2.0) + float2(-1.0, -1.0)));\n    p_r2.w = asuint(dot(asfloat(p_r0.yz), asfloat(p_r0.yz)));\n    p_r2.w = asuint(min(asfloat(p_r2.w), 1.0));\n    p_r2.w = asuint(((-asfloat(p_r2.w)) + 1.0));\n    p_r2.w = asuint(sqrt(asfloat(p_r2.w)));\n    p_r2.w = asuint(((p_v9.x != 0u) ? asfloat(p_r2.w) : (-asfloat(p_r2.w))));\n    p_r3.xyz = asuint((asfloat(p_r0.zzz) * asfloat(p_v4.xyz)));\n    p_r3.xyz = asuint((asfloat(p_r0.yyy) * asfloat(p_v3.xyz) + asfloat(p_r3.xyz)));\n    p_r3.xyz = asuint((asfloat(p_r2.www) * asfloat(p_v2.xyz) + asfloat(p_r3.xyz)));\n    p_r0.y = asuint(dot(asfloat(p_r3.xyz), asfloat(p_r3.xyz)));\n    p_r0.y = asuint(rsqrt(asfloat(p_r0.y)));\n    p_r3.xyz = asuint((asfloat(p_r0.yyy) * asfloat(p_r3.xyz)));\n    p_r0.y = asuint((asfloat(p_r1.w) + asfloat(p_r1.y)));\n    p_r0.y = asuint((asfloat(p_r2.z) * asfloat(p_v5.z) + asfloat(p_r0.y)));\n    p_r0.y = asuint((asfloat(p_r0.y) * 0.333333));\n    p_r2.xyz = asuint((asfloat(p_r2.xyz) * asfloat(p_v5.xyz) + (-asfloat(p_r0.yyy))));\n    p_r2.xyz = asuint((asfloat(p_r2.xyz) * float3(_Saturation, _Saturation, _Saturation) + asfloat(p_r0.yyy)));\n    p_r0.y = asuint(((-asfloat(p_r1.z)) * _Emission + 1.0));\n    p_r0.z = asuint(((-asfloat(p_r0.y)) + 1.0));\n    p_r0.y = asuint((_EmissionOverAlbedo * asfloat(p_r0.z) + asfloat(p_r0.y)));\n    p_o1.xyz = asuint((asfloat(p_r0.yyy) * asfloat(p_r2.xyz)));\n    p_o2.y = p_r0.w;\n    p_o3.xyz = p_r3.xyz;\n    p_o2.z = p_r1.x;\nMetallicOut=asfloat(p_o2.z);\nRoughnessOut=asfloat(p_o2.y);\nNormalOut=F.U(asfloat(p_o3.xyz));\nCoverageOut=1.0;\nreturn asfloat(p_o1.xyz);\n",
+    "outputs": {
+     "MetallicOut": 1,
+     "RoughnessOut": 1,
+     "NormalOut": 3,
+     "CoverageOut": 1
+    },
+    "parameters": {},
+    "material_params": {
+     "_DitherAlpha": 1,
+     "_DitherAlpha2": 1,
+     "_BaseMap_ST": 4,
+     "_Glossiness": 1,
+     "_Metallic": 1,
+     "_Color": 4,
+     "_Saturation": 1,
+     "_Emission": 1,
+     "_EmissionOverAlbedo": 1
+    },
+    "textures": [
+     "_MaskTex",
+     "_BaseMap",
+     "_BumpMap"
+    ],
+    "builtins": [
+     "CameraVectorWS",
+     "UV0",
+     "PixelPosition",
+     "VCol",
+     "FaceSign",
+     "UEFX_NormalWS",
+     "UEFX_TangentWS",
+     "UEFX_BitangentWS"
+    ],
+    "globals": {},
+    "surface": "native_prop_pbr",
+    "material_defaults": {
+     "_DitherAlpha": 1.0,
+     "_DitherAlpha2": 1.0,
+     "_Glossiness": 0.1,
+     "_Metallic": 0.0,
+     "_Color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "_Saturation": 1.0,
+     "_Emission": 0.0,
+     "_EmissionOverAlbedo": 0.0
+    }
+   },
+   "forward": {
+    "code": "// 原DXBC表面计算；原生投影提供真实receiver位置和深度导数法线。\nstruct ProjectedFunctions {\n float3 U(float3 v) { return float3(-v.x,v.z,v.y); }\n float4 S(Texture2D T, SamplerState Smp, float2 uv) {\n  return Texture2DSample(T,Smp,float2(uv.x,1.0-uv.y)); }\n float4 SL(Texture2D T, SamplerState Smp, float2 uv, float lod) {\n  return Texture2DSampleLevel(T,Smp,float2(uv.x,1.0-uv.y),lod); }\n float4 SB(Texture2D T, SamplerState Smp, float2 uv, float bias) {\n  return Texture2DSampleBias(T,Smp,float2(uv.x,1.0-uv.y),bias); }\n};\nProjectedFunctions F;\n\nfloat3 PosU=float3(0,0,0);\nfloat3 CameraU=F.U(CameraVectorWS)*0.01;\nuint4 p_v0=asuint(float4(UV0.x,1.0-UV0.y,0,0));\nuint4 p_v2=asuint(float4(F.U(normalize(UEFX_NormalWS)),PosU.x));\nuint4 p_v3=asuint(float4(F.U(normalize(UEFX_TangentWS)),PosU.y));\nuint4 p_v4=asuint(float4(F.U(normalize(UEFX_BitangentWS)),PosU.z));\nuint4 p_v5=asuint(VCol);\nuint4 p_v8=asuint(float4(PixelPosition.xy,0,0));\nuint4 p_v9=uint4(FaceSign>0.0?1u:0u,0,0,0);\n    uint4 p_r0 = (uint4)0, p_r1 = (uint4)0, p_r2 = (uint4)0, p_r3 = (uint4)0, p_r4 = (uint4)0, p_r5 = (uint4)0;\n    const uint4 p_icb[16] = { uint4(asuint(0.058824), 0u, 0u, 0u), uint4(asuint(0.529412), 0u, 0u, 0u), uint4(asuint(0.176471), 0u, 0u, 0u), uint4(asuint(0.647059), 0u, 0u, 0u), uint4(asuint(0.764706), 0u, 0u, 0u), uint4(asuint(0.294118), 0u, 0u, 0u), uint4(asuint(0.882353), 0u, 0u, 0u), uint4(asuint(0.411765), 0u, 0u, 0u), uint4(asuint(0.235294), 0u, 0u, 0u), uint4(asuint(0.705882), 0u, 0u, 0u), uint4(asuint(0.117647), 0u, 0u, 0u), uint4(asuint(0.588235), 0u, 0u, 0u), uint4(asuint(0.941176), 0u, 0u, 0u), uint4(asuint(0.470588), 0u, 0u, 0u), uint4(asuint(0.823529), 0u, 0u, 0u), uint4(asuint(0.352941), 0u, 0u, 0u) };\n    uint4 p_o0 = (uint4)0, p_o1 = (uint4)0;\n    p_r0.xy = (uint2)(asfloat(p_v8.xy));\n    p_r0.x = (((p_r0.x << (2u & 31u)) & (((1u << (2u & 31u)) - 1u) << (2u & 31u))) | (0u & ~(((1u << (2u & 31u)) - 1u) << (2u & 31u))));\n    p_r0.x = (((p_r0.y << (0u & 31u)) & (((1u << (2u & 31u)) - 1u) << (0u & 31u))) | (p_r0.x & ~(((1u << (2u & 31u)) - 1u) << (0u & 31u))));\n    p_r0.x = asuint((_DitherAlpha * _DitherAlpha2 + (-asfloat(p_icb[p_r0.x].x))));\n    p_r0.x = ((asfloat(p_r0.x) < 0.0) ? 0xFFFFFFFFu : 0u);\n    if (p_r0.x != 0u) { clip(-1.0); }\n    p_r0.xy = asuint((asfloat(p_v0.xy) * _BaseMap_ST.xy + _BaseMap_ST.zw));\n    p_r1.xyz = asuint((F.S(_BumpMap, _BumpMapSampler, asfloat(p_r0.xy))).xyw);\n    p_r1.x = asuint((asfloat(p_r1.x) * asfloat(p_r1.z)));\n    p_r0.zw = asuint((asfloat(p_r1.xy) * float2(2.0, 2.0) + float2(-1.0, -1.0)));\n    p_r1.x = asuint(dot(asfloat(p_r0.zw), asfloat(p_r0.zw)));\n    p_r1.x = asuint(min(asfloat(p_r1.x), 1.0));\n    p_r1.x = asuint(((-asfloat(p_r1.x)) + 1.0));\n    p_r1.x = asuint(sqrt(asfloat(p_r1.x)));\n    p_r1.x = asuint(((p_v9.x != 0u) ? asfloat(p_r1.x) : (-asfloat(p_r1.x))));\n    p_r1.yzw = asuint((asfloat(p_r0.www) * asfloat(p_v4.xyz)));\n    p_r1.yzw = asuint((asfloat(p_r0.zzz) * asfloat(p_v3.xyz) + asfloat(p_r1.yzw)));\n    p_r1.xyz = asuint((asfloat(p_r1.xxx) * asfloat(p_v2.xyz) + asfloat(p_r1.yzw)));\n    p_r0.z = asuint(dot(asfloat(p_r1.xyz), asfloat(p_r1.xyz)));\n    p_r0.z = asuint(rsqrt(asfloat(p_r0.z)));\n    p_r1.xyz = asuint((asfloat(p_r0.zzz) * asfloat(p_r1.xyz)));\n    p_r2.xyz = asuint((asfloat(p_r1.yyy) * float3((float4(UEFX_WorldToObjectColumn1,0)).x, (float4(UEFX_WorldToObjectColumn1,0)).y, (float4(UEFX_WorldToObjectColumn1,0)).z)));\n    p_r2.xyz = asuint((float3((float4(UEFX_WorldToObjectColumn0,0)).x, (float4(UEFX_WorldToObjectColumn0,0)).y, (float4(UEFX_WorldToObjectColumn0,0)).z) * asfloat(p_r1.xxx) + asfloat(p_r2.xyz)));\n    p_r2.xyz = asuint((float3((float4(UEFX_WorldToObjectColumn2,0)).x, (float4(UEFX_WorldToObjectColumn2,0)).y, (float4(UEFX_WorldToObjectColumn2,0)).z) * asfloat(p_r1.zzz) + asfloat(p_r2.xyz)));\n    p_r0.z = asuint(dot(asfloat(p_r2.xyz), asfloat(p_r2.xyz)));\n    p_r0.z = asuint(rsqrt(asfloat(p_r0.z)));\n    p_r0.zw = asuint((asfloat(p_r0.zz) * asfloat(p_r2.xz)));\n    p_r1.w = asuint((_FlowTexTransition * 2.0 + 1.0));\n    p_r0.zw = asuint(saturate((abs(asfloat(p_r0.zw)) * asfloat(p_r1.ww) + (-float2(_FlowTexTransition, _FlowTexTransition)))));\n    p_r2.xyz = asuint(float3((float4(UEFX_MeshLocalPosition,1)).x, (float4(UEFX_MeshLocalPosition,1)).y, (float4(UEFX_MeshLocalPosition,1)).z));\n    p_r2.xyz = asuint((_FlowTexSpeed.xyz * float3((UEFX_SystemAge.xxxx).x, (UEFX_SystemAge.xxxx).x, (UEFX_SystemAge.xxxx).x) + asfloat(p_r2.xyz)));\n    p_r2.xyz = asuint((asfloat(p_r2.xyz) / (-abs(float3(_FlowTexSize, _FlowTexSize, _FlowTexSize)))));\n    p_r3.xyz = asuint((F.S(_FlowTex, _FlowTexSampler, asfloat(p_r2.yz))).xyz);\n    p_r4.xyz = asuint((F.S(_FlowTex, _FlowTexSampler, asfloat(p_r2.xz))).xyz);\n    p_r2.xyz = asuint((F.S(_FlowTex, _FlowTexSampler, asfloat(p_r2.xy))).xyz);\n    p_r3.xyz = asuint((asfloat(p_r3.xyz) + (-asfloat(p_r4.xyz))));\n    p_r3.xyz = asuint((asfloat(p_r0.zzz) * asfloat(p_r3.xyz) + asfloat(p_r4.xyz)));\n    p_r2.xyz = asuint((asfloat(p_r2.xyz) + (-asfloat(p_r3.xyz))));\n    p_r2.xyz = asuint((asfloat(p_r0.www) * asfloat(p_r2.xyz) + asfloat(p_r3.xyz)));\n    p_r3.x = p_v2.w;\n    p_r3.y = p_v3.w;\n    p_r3.z = p_v4.w;\n    p_r3.xyz = asuint(((-asfloat(p_r3.xyz)) + float3((float4(CameraU,1)).x, (float4(CameraU,1)).y, (float4(CameraU,1)).z)));\n    p_r0.z = asuint(dot(asfloat(p_r3.xyz), asfloat(p_r3.xyz)));\n    p_r0.z = asuint(rsqrt(asfloat(p_r0.z)));\n    p_r3.xyz = asuint((asfloat(p_r0.zzz) * asfloat(p_r3.xyz)));\n    p_r0.z = asuint(saturate(dot(asfloat(p_r1.xyz), asfloat(p_r3.xyz))));\n    p_r0.z = asuint(((-asfloat(p_r0.z)) + 1.0));\n    p_r0.w = asuint(saturate((asfloat(p_r0.z) + _FresnelOffset)));\n    p_r0.z = asuint(saturate((asfloat(p_r0.z) + _FlowTexFresnelOffset)));\n    p_r0.z = asuint(log2(asfloat(p_r0.z)));\n    p_r0.z = asuint((asfloat(p_r0.z) * _FlowTexFresnelPower));\n    p_r0.z = asuint(exp2(asfloat(p_r0.z)));\n    p_r0.z = asuint((asfloat(p_r0.z) * _FlowTexFresnelScale));\n    p_r1.xyz = asuint((asfloat(p_r0.zzz) * _FlowTexFresnelColor.xyz));\n    p_r1.xyz = asuint((asfloat(p_r1.xyz) * _FlowTexFresnelColor.www));\n    p_r1.xyz = asuint((asfloat(p_r1.xyz) * float3(_FlowTexWithFresnel, _FlowTexWithFresnel, _FlowTexWithFresnel)));\n    p_r0.z = asuint(log2(asfloat(p_r0.w)));\n    p_r0.z = asuint((asfloat(p_r0.z) * _FresnelPower));\n    p_r0.z = asuint(exp2(asfloat(p_r0.z)));\n    p_r0.z = asuint((asfloat(p_r0.z) * _FresnelScale));\n    p_r3.xyz = asuint((asfloat(p_r0.zzz) * _FresnelColor.xyz));\n    p_r3.xyz = asuint((asfloat(p_r3.xyz) * _FresnelColor.www));\n    p_r3.xyz = asuint((asfloat(p_r3.xyz) * float3(_Fresnel, _Fresnel, _Fresnel)));\n    p_r4.xyz = asuint((F.S(_BaseMap, _BaseMapSampler, asfloat(p_r0.xy))).xyz);\n    p_r0.x = asuint((F.S(_MaskTex, _MaskTexSampler, asfloat(p_r0.xy))).z);\n    p_r0.x = asuint((asfloat(p_r0.x) * _Emission));\n    p_r0.xyz = asuint((asfloat(p_r0.xxx) * _EmissionColor.xyz));\n    p_r4.xyz = asuint((asfloat(p_r4.xyz) * _Color.xyz));\n    p_r5.xy = asuint((asfloat(p_r4.xy) * asfloat(p_v5.xy)));\n    p_r0.w = asuint((asfloat(p_r5.y) + asfloat(p_r5.x)));\n    p_r0.w = asuint((asfloat(p_r4.z) * asfloat(p_v5.z) + asfloat(p_r0.w)));\n    p_r0.w = asuint((asfloat(p_r0.w) * 0.333333));\n    p_r4.xyz = asuint((asfloat(p_r4.xyz) * asfloat(p_v5.xyz) + (-asfloat(p_r0.www))));\n    p_r4.xyz = asuint((asfloat(p_r4.xyz) * float3(_Saturation, _Saturation, _Saturation) + asfloat(p_r0.www)));\n    p_r0.xyz = asuint((asfloat(p_r0.xyz) * asfloat(p_r4.xyz) + asfloat(p_r3.xyz)));\n    p_r0.xyz = asuint((asfloat(p_r1.xyz) * asfloat(p_r2.xyz) + asfloat(p_r0.xyz)));\n    p_r0.w = asuint(dot(asfloat(p_r0.xyz), float3(0.212673, 0.715152, 0.072175)));\n    p_r1.xyz = asuint(((-asfloat(p_r0.www)) + asfloat(p_r0.xyz)));\n    p_r1.xyz = asuint((float3((Global_SceneWeatherParamsPart1_R2).z, (Global_SceneWeatherParamsPart1_R2).z, (Global_SceneWeatherParamsPart1_R2).z) * asfloat(p_r1.xyz) + asfloat(p_r0.www)));\n    p_r0.w = asuint(((Global_SceneWeatherParamsPart1_R2).z + -1.0));\n    p_r0.w = ((0.001 < abs(asfloat(p_r0.w))) ? 0xFFFFFFFFu : 0u);\n    p_o0.xyz = select(p_r0.www != 0u, p_r1.xyz, p_r0.xyz);\nreturn asfloat(p_o0.xyz);\n",
+    "outputs": {},
+    "parameters": {
+     "Global_SceneWeatherParamsPart1_R2": 4
+    },
+    "material_params": {
+     "_DitherAlpha": 1,
+     "_DitherAlpha2": 1,
+     "_BaseMap_ST": 4,
+     "_FlowTexTransition": 1,
+     "_FlowTexSpeed": 3,
+     "_FlowTexSize": 1,
+     "_FresnelOffset": 1,
+     "_FlowTexFresnelOffset": 1,
+     "_FlowTexFresnelPower": 1,
+     "_FlowTexFresnelScale": 1,
+     "_FlowTexFresnelColor": 4,
+     "_FlowTexWithFresnel": 1,
+     "_FresnelPower": 1,
+     "_FresnelScale": 1,
+     "_FresnelColor": 4,
+     "_Fresnel": 1,
+     "_Emission": 1,
+     "_EmissionColor": 4,
+     "_Color": 4,
+     "_Saturation": 1
+    },
+    "textures": [
+     "_BumpMap",
+     "_FlowTex",
+     "_BaseMap",
+     "_MaskTex"
+    ],
+    "builtins": [
+     "CameraVectorWS",
+     "UV0",
+     "PixelPosition",
+     "VCol",
+     "FaceSign",
+     "UEFX_SystemAge",
+     "UEFX_NormalWS",
+     "UEFX_TangentWS",
+     "UEFX_BitangentWS",
+     "UEFX_MeshLocalPosition",
+     "UEFX_WorldToObjectColumn0",
+     "UEFX_WorldToObjectColumn1",
+     "UEFX_WorldToObjectColumn2"
+    ],
+    "globals": {
+     "_SceneWeatherParamsPart1": [
+      2
+     ]
+    },
+    "surface": "source_prop_additive",
+    "material_defaults": {
+     "_DitherAlpha": 1.0,
+     "_DitherAlpha2": 1.0,
+     "_FlowTexTransition": 1.0,
+     "_FlowTexSpeed": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "_FlowTexSize": 5.0,
+     "_FresnelOffset": 0.0,
+     "_FlowTexFresnelOffset": 0.0,
+     "_FlowTexFresnelPower": 5.0,
+     "_FlowTexFresnelScale": 1.0,
+     "_FlowTexFresnelColor": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "_FlowTexWithFresnel": 0.0,
+     "_FresnelPower": 5.0,
+     "_FresnelScale": 1.0,
+     "_FresnelColor": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "_Fresnel": 0.0,
+     "_Emission": 0.0,
+     "_EmissionColor": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "_Color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "_Saturation": 1.0
+    }
+   },
+   "source_shader": {
+    "path": "F:\\AnimeStudio\\Exports\\ZZZ\\Pyrois_SkillFX_Evidence\\Assets\\649188441\\CAB-e9de77f22d6a002c2e4f106dedaacfad\\Shader\\108369129736756662.shader",
+    "size": 1414826,
+    "sha256": "f2ec8f5715d771232a6980689442d30940244f2fa11fc414844d81a29020a532"
+   },
+   "source_geometry": {
+    "vp": {
+     "sourceByteRange": {
+      "offset": 952672,
+      "bytes": 4924
+     },
+     "sourceLine": 24991,
+     "fileBytesSha256": "9e1c22694b1fdef7edf9f3b2478ecbc7e32b7fe03ef43f3d2c689b6e0d8000df",
+     "hash64": "4edda51e4d7612cc",
+     "globalKeywords": [
+      "_DITHER_SWITCH"
+     ],
+     "localKeywords": []
+    },
+    "fp": {
+     "sourceByteRange": {
+      "offset": 1147938,
+      "bytes": 6421
+     },
+     "sourceLine": 30241,
+     "fileBytesSha256": "2417ed4dd1675ded12fa7c9e3145c007fc1f4441de0083f3e583381df52e542c",
+     "hash64": "79504799574199bb",
+     "globalKeywords": [
+      "_DITHER_SWITCH"
+     ],
+     "localKeywords": []
+    }
+   },
+   "source_forward": {
+    "vp": {
+     "sourceByteRange": {
+      "offset": 292209,
+      "bytes": 4958
+     },
+     "sourceLine": 7613,
+     "fileBytesSha256": "183767cb2dacd2638c4d9ccb87c253aff86ebb9c67595a3e9dc8e0953b2e208f",
+     "hash64": "4edda51e4d7612cc",
+     "profile": "vs_5_0",
+     "valid": true,
+     "globalKeywords": [
+      "_DITHER_SWITCH"
+     ],
+     "localKeywords": [
+      "_USE_FLOWTEX"
+     ],
+     "outputSignatures": [
+      {
+       "name": "TEXCOORD",
+       "index": 0,
+       "mask": "xyzw",
+       "reg": 0,
+       "sys": "NONE",
+       "used": "xyzw"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 1,
+       "mask": "xyzw",
+       "reg": 1,
+       "sys": "NONE",
+       "used": "xyzw"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 2,
+       "mask": "xyzw",
+       "reg": 2,
+       "sys": "NONE",
+       "used": "xyzw"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 3,
+       "mask": "xyzw",
+       "reg": 3,
+       "sys": "NONE",
+       "used": "xyzw"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 4,
+       "mask": "xyzw",
+       "reg": 4,
+       "sys": "NONE",
+       "used": "xyzw"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 5,
+       "mask": "xyzw",
+       "reg": 5,
+       "sys": "NONE",
+       "used": "xyzw"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 6,
+       "mask": "xyz",
+       "reg": 6,
+       "sys": "NONE",
+       "used": "xyz"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 8,
+       "mask": "xy",
+       "reg": 7,
+       "sys": "NONE",
+       "used": "xy"
+      },
+      {
+       "name": "SV_POSITION",
+       "index": 0,
+       "mask": "xyzw",
+       "reg": 8,
+       "sys": "POS",
+       "used": "xyzw"
+      }
+     ],
+     "textures": []
+    },
+    "fp": {
+     "sourceByteRange": {
+      "offset": 663605,
+      "bytes": 8132
+     },
+     "sourceLine": 17430,
+     "fileBytesSha256": "f440b61e861e50ca5b5a766c9382f8d4fef8b579ac6741a33e656d3a5a84033e",
+     "hash64": "b36c16bf2f100a5f",
+     "profile": "ps_5_0",
+     "valid": true,
+     "globalKeywords": [
+      "_DITHER_SWITCH"
+     ],
+     "localKeywords": [
+      "_USE_FLOWTEX"
+     ],
+     "outputSignatures": [
+      {
+       "name": "SV_Target",
+       "index": 0,
+       "mask": "xyzw",
+       "reg": 0,
+       "sys": "TARGET",
+       "used": "xyzw"
+      },
+      {
+       "name": "SV_Target",
+       "index": 1,
+       "mask": "xyzw",
+       "reg": 1,
+       "sys": "TARGET",
+       "used": "xyzw"
+      }
+     ],
+     "textures": [
+      "_BaseMap",
+      "_BumpMap",
+      "_MaskTex",
+      "_FlowTex"
+     ]
+    }
+   },
+   "source_stage_pair_certified": false,
+   "source_geometry_selection": "ProjectConfiguredGeometryWithoutForwardOnlyFlow",
+   "source_velocity": {
+    "role": "NativePreciseVelocity",
+    "original_fragment_asm": [
+     "ps_5_0",
+     "dcl_globalFlags refactoringAllowed",
+     "dcl_immediateConstantBuffer { { 0.058824, 0, 0, 0},",
+     "{ 0.529412, 0, 0, 0},",
+     "{ 0.176471, 0, 0, 0},",
+     "{ 0.647059, 0, 0, 0},",
+     "{ 0.764706, 0, 0, 0},",
+     "{ 0.294118, 0, 0, 0},",
+     "{ 0.882353, 0, 0, 0},",
+     "{ 0.411765, 0, 0, 0},",
+     "{ 0.235294, 0, 0, 0},",
+     "{ 0.705882, 0, 0, 0},",
+     "{ 0.117647, 0, 0, 0},",
+     "{ 0.588235, 0, 0, 0},",
+     "{ 0.941176, 0, 0, 0},",
+     "{ 0.470588, 0, 0, 0},",
+     "{ 0.823529, 0, 0, 0},",
+     "{ 0.352941, 0, 0, 0} }",
+     "dcl_constantbuffer CB0[34], immediateIndexed",
+     "dcl_constantbuffer CB1[29], immediateIndexed",
+     "dcl_constantbuffer CB2[21], immediateIndexed",
+     "dcl_sampler s0, mode_default",
+     "dcl_sampler s1, mode_default",
+     "dcl_sampler s2, mode_default",
+     "dcl_sampler s3, mode_default",
+     "dcl_resource_texture2d (float,float,float,float) t0",
+     "dcl_resource_texture2d (float,float,float,float) t1",
+     "dcl_resource_texture2d (float,float,float,float) t2",
+     "dcl_resource_texture2d (float,float,float,float) t3",
+     "dcl_input_ps linear v0.xyzw",
+     "dcl_input_ps linear v1.xyzw",
+     "dcl_input_ps linear v2.xyzw",
+     "dcl_input_ps linear v3.xyzw",
+     "dcl_input_ps linear v4.xyzw",
+     "dcl_input_ps linear v5.xyz",
+     "dcl_input_ps_siv linear noperspective v8.xy, position",
+     "dcl_input_ps_sgv constant v9.x, is_front_face",
+     "dcl_output o0.xyzw",
+     "dcl_output o1.xyzw",
+     "dcl_temps 6",
+     "ftou r0.xy, v8.xyxx",
+     "bfi r0.x, l(2), l(2), r0.x, l(0)",
+     "bfi r0.x, l(2), l(0), r0.y, r0.x",
+     "mad r0.x, cb2[10].x, cb2[10].y, -icb[r0.x + 0].x",
+     "lt r0.x, r0.x, l(0.000000)",
+     "discard_nz r0.x",
+     "mad r0.xy, v0.xyxx, cb2[1].xyxx, cb2[1].zwzz",
+     "sample_indexable(texture2d)(float,float,float,float) r1.xyz, r0.xyxx, t1.xywz, s1",
+     "mul r1.x, r1.x, r1.z",
+     "mad r0.zw, r1.xxxy, l(0.000000, 0.000000, 2.000000, 2.000000), l(0.000000, 0.000000, -1.000000, -1.000000)",
+     "dp2 r1.x, r0.zwzz, r0.zwzz",
+     "min r1.x, r1.x, l(1.000000)",
+     "add r1.x, -r1.x, l(1.000000)",
+     "sqrt r1.x, r1.x",
+     "movc r1.x, v9.x, r1.x, -r1.x",
+     "mul r1.yzw, r0.wwww, v4.xxyz",
+     "mad r1.yzw, r0.zzzz, v3.xxyz, r1.yyzw",
+     "mad r1.xyz, r1.xxxx, v2.xyzx, r1.yzwy",
+     "dp3 r0.z, r1.xyzx, r1.xyzx",
+     "rsq r0.z, r0.z",
+     "mul r1.xyz, r0.zzzz, r1.xyzx",
+     "mul r2.xyz, r1.yyyy, cb1[5].xyzx",
+     "mad r2.xyz, cb1[4].xyzx, r1.xxxx, r2.xyzx",
+     "mad r2.xyz, cb1[6].xyzx, r1.zzzz, r2.xyzx",
+     "dp3 r0.z, r2.xyzx, r2.xyzx",
+     "rsq r0.z, r0.z",
+     "mul r0.zw, r0.zzzz, r2.xxxz",
+     "mad r1.w, cb2[17].z, l(2.000000), l(1.000000)",
+     "mad_sat r0.zw, |r0.zzzw|, r1.wwww, -cb2[17].zzzz",
+     "mul r2.xyz, v3.wwww, cb1[5].xyzx",
+     "mad r2.xyz, cb1[4].xyzx, v2.wwww, r2.xyzx",
+     "mad r2.xyz, cb1[6].xyzx, v4.wwww, r2.xyzx",
+     "add r2.xyz, r2.xyzx, cb1[7].xyzx",
+     "mad r2.xyz, cb2[18].xyzx, cb0[14].xxxx, r2.xyzx",
+     "div r2.xyz, r2.xyzx, -|cb2[17].yyyy|",
+     "sample_indexable(texture2d)(float,float,float,float) r3.xyz, r2.yzyy, t3.xyzw, s3",
+     "sample_indexable(texture2d)(float,float,float,float) r4.xyz, r2.xzxx, t3.xyzw, s3",
+     "sample_indexable(texture2d)(float,float,float,float) r2.xyz, r2.xyxx, t3.xyzw, s3",
+     "add r3.xyz, r3.xyzx, -r4.xyzx",
+     "mad r3.xyz, r0.zzzz, r3.xyzx, r4.xyzx",
+     "add r2.xyz, r2.xyzx, -r3.xyzx",
+     "mad r2.xyz, r0.wwww, r2.xyzx, r3.xyzx",
+     "mov r3.x, v2.w",
+     "mov r3.y, v3.w",
+     "mov r3.z, v4.w",
+     "add r3.xyz, -r3.xyzx, cb0[30].xyzx",
+     "dp3 r0.z, r3.xyzx, r3.xyzx",
+     "rsq r0.z, r0.z",
+     "mul r3.xyz, r0.zzzz, r3.xyzx",
+     "dp3_sat r0.z, r1.xyzx, r3.xyzx",
+     "add r0.z, -r0.z, l(1.000000)",
+     "add_sat r0.w, r0.z, cb2[8].x",
+     "add_sat r0.z, r0.z, cb2[20].z",
+     "log r0.z, r0.z",
+     "mul r0.z, r0.z, cb2[20].x",
+     "exp r0.z, r0.z",
+     "mul r0.z, r0.z, cb2[20].y",
+     "mul r1.xyz, r0.zzzz, cb2[19].xyzx",
+     "mul r1.xyz, r1.xyzx, cb2[19].wwww",
+     "mul r1.xyz, r1.xyzx, cb2[17].xxxx",
+     "log r0.z, r0.w",
+     "mul r0.z, r0.z, cb2[7].z",
+     "exp r0.z, r0.z",
+     "mul r0.z, r0.z, cb2[7].w",
+     "mul r3.xyz, r0.zzzz, cb2[5].xyzx",
+     "mul r3.xyz, r3.xyzx, cb2[5].wwww",
+     "mul r3.xyz, r3.xyzx, cb2[7].yyyy",
+     "sample_indexable(texture2d)(float,float,float,float) r4.xyz, r0.xyxx, t0.xyzw, s0",
+     "sample_indexable(texture2d)(float,float,float,float) r0.x, r0.xyxx, t2.zxyw, s2",
+     "mul r0.x, r0.x, cb2[6].w",
+     "mul r0.xyz, r0.xxxx, cb2[4].xyzx",
+     "mul r4.xyz, r4.xyzx, cb2[3].xyzx",
+     "mul r5.xy, r4.xyxx, v5.xyxx",
+     "add r0.w, r5.y, r5.x",
+     "mad r0.w, r4.z, v5.z, r0.w",
+     "mul r0.w, r0.w, l(0.333333)",
+     "mad r4.xyz, r4.xyzx, v5.xyzx, -r0.wwww",
+     "mad r4.xyz, r4.xyzx, cb2[6].xxxx, r0.wwww",
+     "mad r0.xyz, r0.xyzx, r4.xyzx, r3.xyzx",
+     "mad r0.xyz, r1.xyzx, r2.xyzx, r0.xyzx",
+     "dp3 r0.w, r0.xyzx, l(0.212673, 0.715152, 0.072175, 0.000000)",
+     "add r1.xyz, -r0.wwww, r0.xyzx",
+     "mad r1.xyz, cb0[33].zzzz, r1.xyzx, r0.wwww",
+     "add r0.w, cb0[33].z, l(-1.000000)",
+     "lt r0.w, l(0.001000), |r0.w|",
+     "movc o0.xyz, r0.wwww, r1.xyzx, r0.xyzx",
+     "mov o0.w, l(1.000000)",
+     "div r0.xy, v1.xyxx, v1.wwww",
+     "div r0.zw, v0.zzzw, v1.zzzz",
+     "add r0.xy, -r0.zwzz, r0.xyxx",
+     "mov r0.z, -r0.y",
+     "lt r1.xy, l(0.000000, 0.000000, 0.000000, 0.000000), r0.xzxx",
+     "lt r0.zw, r0.xxxz, l(0.000000, 0.000000, 0.000000, 0.000000)",
+     "mul r0.xy, r0.xyxx, l(0.500000, -0.500000, 0.000000, 0.000000)",
+     "sqrt r0.xy, |r0.xyxx|",
+     "iadd r0.zw, -r1.xxxy, r0.zzzw",
+     "itof r0.zw, r0.zzzw",
+     "mul r0.xy, r0.zwzz, r0.xyxx",
+     "mad r0.xy, r0.xyxx, l(0.500000, 0.500000, 0.000000, 0.000000), l(0.498039, 0.498039, 0.000000, 0.000000)",
+     "lt r1.x, l(0.500000), cb1[28].y",
+     "mov r0.zw, l(0,0,0,0)",
+     "movc o1.xyzw, r1.xxxx, r0.xyzw, l(0,0,0,1.000000)",
+     "ret"
+    ],
+    "original_vertex_asm": [
+     "vs_5_0",
+     "dcl_globalFlags refactoringAllowed",
+     "dcl_constantbuffer CB0[122], immediateIndexed",
+     "dcl_constantbuffer CB1[24], immediateIndexed",
+     "dcl_input v0.xyz",
+     "dcl_input v1.xyz",
+     "dcl_input v2.xyzw",
+     "dcl_input v3.xyzw",
+     "dcl_input v4.xy",
+     "dcl_input v5.xy",
+     "dcl_output o0.xyzw",
+     "dcl_output o1.xyzw",
+     "dcl_output o2.xyzw",
+     "dcl_output o3.xyzw",
+     "dcl_output o4.xyzw",
+     "dcl_output o5.xyzw",
+     "dcl_output o6.xyz",
+     "dcl_output o7.xy",
+     "dcl_output_siv o8.xyzw, position",
+     "dcl_temps 4",
+     "mul r0.xyzw, v0.yyyy, cb1[21].xyzw",
+     "mad r0.xyzw, cb1[20].xyzw, v0.xxxx, r0.xyzw",
+     "mad r0.xyzw, cb1[22].xyzw, v0.zzzz, r0.xyzw",
+     "add r0.xyzw, r0.xyzw, cb1[23].xyzw",
+     "mul r1.xyz, r0.yyyy, cb0[111].xywx",
+     "mad r1.xyz, cb0[110].xywx, r0.xxxx, r1.xyzx",
+     "mad r0.xyz, cb0[112].xywx, r0.zzzz, r1.xyzx",
+     "mad r0.xyz, cb0[113].xywx, r0.wwww, r0.xyzx",
+     "mov o0.zw, r0.xxxy",
+     "mov o1.z, r0.z",
+     "mov o0.xy, v4.xyxx",
+     "mul [precise(xyz)] r0.xyz, v0.xxxx, cb1[0].xyzx",
+     "mul [precise(xyz)] r1.xyz, v0.yyyy, cb1[1].xyzx",
+     "add [precise(xyz)] r0.xyz, r0.xyzx, r1.xyzx",
+     "mul [precise(xyz)] r1.xyz, v0.zzzz, cb1[2].xyzx",
+     "add [precise(xyz)] r0.xyz, r0.xyzx, r1.xyzx",
+     "add [precise(xyz)] r0.xyz, r0.xyzx, cb1[3].xyzx",
+     "mul r1.xyz, r0.yyyy, cb0[119].xywx",
+     "mad r1.xyz, cb0[118].xywx, r0.xxxx, r1.xyzx",
+     "mad r1.xyz, cb0[120].xywx, r0.zzzz, r1.xyzx",
+     "add o1.xyw, r1.xyxz, cb0[121].xyxw",
+     "mov [precise(w)] o2.w, r0.x",
+     "dp3 r1.x, v1.xyzx, cb1[4].xyzx",
+     "dp3 r1.y, v1.xyzx, cb1[5].xyzx",
+     "dp3 r1.z, v1.xyzx, cb1[6].xyzx",
+     "dp3 r0.w, r1.xyzx, r1.xyzx",
+     "max r0.w, r0.w, l(0.000000)",
+     "rsq r0.w, r0.w",
+     "mul r1.xyz, r0.wwww, r1.xyzx",
+     "mov o2.xyz, r1.xyzx",
+     "mul r2.xyz, v2.yyyy, cb1[1].xyzx",
+     "mad r2.xyz, cb1[0].xyzx, v2.xxxx, r2.xyzx",
+     "mad r2.xyz, cb1[2].xyzx, v2.zzzz, r2.xyzx",
+     "dp3 r0.w, r2.xyzx, r2.xyzx",
+     "max r0.w, r0.w, l(0.000000)",
+     "rsq r0.w, r0.w",
+     "mul r2.xyz, r0.wwww, r2.xyzx",
+     "mov o3.xyz, r2.xyzx",
+     "mov [precise(w)] o3.w, r0.y",
+     "mul r3.xyz, r1.zxyz, r2.yzxy",
+     "mad r2.xyz, r1.yzxy, r2.zxyz, -r3.xyzx",
+     "mul r0.w, v2.w, cb1[9].w",
+     "mul o4.xyz, r0.wwww, r2.xyzx",
+     "mov [precise(w)] o4.w, r0.z",
+     "mov o5.xyzw, v3.xyzw",
+     "mul r0.w, r1.y, r1.y",
+     "mad r0.w, r1.x, r1.x, -r0.w",
+     "mul r2.xyzw, r1.yzzx, r1.xyzz",
+     "dp4 r3.x, cb1[16].xyzw, r2.xyzw",
+     "dp4 r3.y, cb1[17].xyzw, r2.xyzw",
+     "dp4 r3.z, cb1[18].xyzw, r2.xyzw",
+     "mad r2.xyz, cb1[19].xyzx, r0.wwww, r3.xyzx",
+     "mov r1.w, l(1.000000)",
+     "dp4 r3.x, cb1[13].xyzw, r1.xyzw",
+     "dp4 r3.y, cb1[14].xyzw, r1.xyzw",
+     "dp4 r3.z, cb1[15].xyzw, r1.xyzw",
+     "add r1.xyz, r2.xyzx, r3.xyzx",
+     "max o6.xyz, r1.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)",
+     "mov o7.xy, v5.xyxx",
+     "mul [precise] r1.xyzw, r0.xxxx, cb0[102].xyzw",
+     "mul [precise] r2.xyzw, r0.yyyy, cb0[103].xyzw",
+     "mul [precise] r0.xyzw, r0.zzzz, cb0[104].xyzw",
+     "add [precise] r1.xyzw, r1.xyzw, r2.xyzw",
+     "add [precise] r0.xyzw, r0.xyzw, r1.xyzw",
+     "add [precise] o8.xyzw, r0.xyzw, cb0[105].xyzw",
+     "ret"
+    ],
+    "original_switch": "unity_MotionVectorsParams.y",
+    "native_switch": "Configured MeshRenderer.MotionVectorSetting Precise/Disable",
+    "required": "Actual previous source pose and native previous TRS, current/previous WPO use separate real snapshots",
+    "encoding": "NativeVelocityShader replaces source sign*sqrt+bias MRT encoding"
+   }
+  },
+  "5017413851355136532": {
+   "geometry": {
+    "code": "// 原DXBC表面计算；原生投影提供真实receiver位置和深度导数法线。\nstruct ProjectedFunctions {\n float3 U(float3 v) { return float3(-v.x,v.z,v.y); }\n float4 S(Texture2D T, SamplerState Smp, float2 uv) {\n  return Texture2DSample(T,Smp,float2(uv.x,1.0-uv.y)); }\n float4 SL(Texture2D T, SamplerState Smp, float2 uv, float lod) {\n  return Texture2DSampleLevel(T,Smp,float2(uv.x,1.0-uv.y),lod); }\n float4 SB(Texture2D T, SamplerState Smp, float2 uv, float bias) {\n  return Texture2DSampleBias(T,Smp,float2(uv.x,1.0-uv.y),bias); }\n};\nProjectedFunctions F;\n\nfloat3 PosU=float3(0,0,0);\nfloat3 CameraU=F.U(CameraVectorWS)*0.01;\nuint4 p_v0=asuint(float4(UV0.x,1.0-UV0.y,0,0));\nuint4 p_v2=asuint(float4(F.U(normalize(UEFX_NormalWS)),PosU.x));\nuint4 p_v3=asuint(float4(F.U(normalize(UEFX_TangentWS)),PosU.y));\nuint4 p_v4=asuint(float4(F.U(normalize(UEFX_BitangentWS)),PosU.z));\nuint4 p_v5=asuint(VCol);\nuint4 p_v8=asuint(float4(PixelPosition.xy,0,0));\nuint4 p_v9=uint4(FaceSign>0.0?1u:0u,0,0,0);\n    uint4 p_r0 = (uint4)0, p_r1 = (uint4)0, p_r2 = (uint4)0, p_r3 = (uint4)0, p_r4 = (uint4)0, p_r5 = (uint4)0;\n    const uint4 p_icb[16] = { uint4(asuint(0.058824), 0u, 0u, 0u), uint4(asuint(0.529412), 0u, 0u, 0u), uint4(asuint(0.176471), 0u, 0u, 0u), uint4(asuint(0.647059), 0u, 0u, 0u), uint4(asuint(0.764706), 0u, 0u, 0u), uint4(asuint(0.294118), 0u, 0u, 0u), uint4(asuint(0.882353), 0u, 0u, 0u), uint4(asuint(0.411765), 0u, 0u, 0u), uint4(asuint(0.235294), 0u, 0u, 0u), uint4(asuint(0.705882), 0u, 0u, 0u), uint4(asuint(0.117647), 0u, 0u, 0u), uint4(asuint(0.588235), 0u, 0u, 0u), uint4(asuint(0.941176), 0u, 0u, 0u), uint4(asuint(0.470588), 0u, 0u, 0u), uint4(asuint(0.823529), 0u, 0u, 0u), uint4(asuint(0.352941), 0u, 0u, 0u) };\n    uint4 p_o0 = (uint4)0, p_o1 = (uint4)0, p_o2 = (uint4)0, p_o3 = (uint4)0;\n    p_r0.xy = (uint2)(asfloat(p_v8.xy));\n    p_r0.x = (((p_r0.x << (2u & 31u)) & (((1u << (2u & 31u)) - 1u) << (2u & 31u))) | (0u & ~(((1u << (2u & 31u)) - 1u) << (2u & 31u))));\n    p_r0.x = (((p_r0.y << (0u & 31u)) & (((1u << (2u & 31u)) - 1u) << (0u & 31u))) | (p_r0.x & ~(((1u << (2u & 31u)) - 1u) << (0u & 31u))));\n    p_r0.x = asuint((_DitherAlpha * _DitherAlpha2 + (-asfloat(p_icb[p_r0.x].x))));\n    p_r0.x = ((asfloat(p_r0.x) < 0.0) ? 0xFFFFFFFFu : 0u);\n    if (p_r0.x != 0u) { clip(-1.0); }\n    p_r0.yz = asuint((asfloat(p_v0.xy) * _BaseMap_ST.xy + _BaseMap_ST.zw));\n    p_r1.xyz = asuint((F.S(_MaskTex, _MaskTexSampler, asfloat(p_r0.yz))).xyz);\n    p_r0.w = asuint(((-asfloat(p_r1.y)) + 1.0));\n    p_r0.w = asuint(((-asfloat(p_r0.w)) * _Glossiness + 1.0));\n    p_r1.x = asuint((asfloat(p_r1.x) * _Metallic));\n    p_r2.xyz = asuint((F.S(_BaseMap, _BaseMapSampler, asfloat(p_r0.yz))).xyz);\n    p_r2.xyz = asuint((asfloat(p_r2.xyz) * _Color.xyz));\n    p_r1.yw = asuint((asfloat(p_r2.xy) * asfloat(p_v5.xy)));\n    p_r3.xyz = asuint((F.S(_BumpMap, _BumpMapSampler, asfloat(p_r0.yz))).xyw);\n    p_r3.x = asuint((asfloat(p_r3.x) * asfloat(p_r3.z)));\n    p_r0.yz = asuint((asfloat(p_r3.xy) * float2(2.0, 2.0) + float2(-1.0, -1.0)));\n    p_r2.w = asuint(dot(asfloat(p_r0.yz), asfloat(p_r0.yz)));\n    p_r2.w = asuint(min(asfloat(p_r2.w), 1.0));\n    p_r2.w = asuint(((-asfloat(p_r2.w)) + 1.0));\n    p_r2.w = asuint(sqrt(asfloat(p_r2.w)));\n    p_r2.w = asuint(((p_v9.x != 0u) ? asfloat(p_r2.w) : (-asfloat(p_r2.w))));\n    p_r3.xyz = asuint((asfloat(p_r0.zzz) * asfloat(p_v4.xyz)));\n    p_r3.xyz = asuint((asfloat(p_r0.yyy) * asfloat(p_v3.xyz) + asfloat(p_r3.xyz)));\n    p_r3.xyz = asuint((asfloat(p_r2.www) * asfloat(p_v2.xyz) + asfloat(p_r3.xyz)));\n    p_r0.y = asuint(dot(asfloat(p_r3.xyz), asfloat(p_r3.xyz)));\n    p_r0.y = asuint(rsqrt(asfloat(p_r0.y)));\n    p_r3.xyz = asuint((asfloat(p_r0.yyy) * asfloat(p_r3.xyz)));\n    p_r0.y = asuint((asfloat(p_r1.w) + asfloat(p_r1.y)));\n    p_r0.y = asuint((asfloat(p_r2.z) * asfloat(p_v5.z) + asfloat(p_r0.y)));\n    p_r0.y = asuint((asfloat(p_r0.y) * 0.333333));\n    p_r2.xyz = asuint((asfloat(p_r2.xyz) * asfloat(p_v5.xyz) + (-asfloat(p_r0.yyy))));\n    p_r2.xyz = asuint((asfloat(p_r2.xyz) * float3(_Saturation, _Saturation, _Saturation) + asfloat(p_r0.yyy)));\n    p_r0.y = asuint(((-asfloat(p_r1.z)) * _Emission + 1.0));\n    p_r0.z = asuint(((-asfloat(p_r0.y)) + 1.0));\n    p_r0.y = asuint((_EmissionOverAlbedo * asfloat(p_r0.z) + asfloat(p_r0.y)));\n    p_o1.xyz = asuint((asfloat(p_r0.yyy) * asfloat(p_r2.xyz)));\n    p_o2.y = p_r0.w;\n    p_o3.xyz = p_r3.xyz;\n    p_o2.z = p_r1.x;\nMetallicOut=asfloat(p_o2.z);\nRoughnessOut=asfloat(p_o2.y);\nNormalOut=F.U(asfloat(p_o3.xyz));\nCoverageOut=1.0;\nreturn asfloat(p_o1.xyz);\n",
+    "outputs": {
+     "MetallicOut": 1,
+     "RoughnessOut": 1,
+     "NormalOut": 3,
+     "CoverageOut": 1
+    },
+    "parameters": {},
+    "material_params": {
+     "_DitherAlpha": 1,
+     "_DitherAlpha2": 1,
+     "_BaseMap_ST": 4,
+     "_Glossiness": 1,
+     "_Metallic": 1,
+     "_Color": 4,
+     "_Saturation": 1,
+     "_Emission": 1,
+     "_EmissionOverAlbedo": 1
+    },
+    "textures": [
+     "_MaskTex",
+     "_BaseMap",
+     "_BumpMap"
+    ],
+    "builtins": [
+     "CameraVectorWS",
+     "UV0",
+     "PixelPosition",
+     "VCol",
+     "FaceSign",
+     "UEFX_NormalWS",
+     "UEFX_TangentWS",
+     "UEFX_BitangentWS"
+    ],
+    "globals": {},
+    "surface": "native_prop_pbr",
+    "material_defaults": {
+     "_DitherAlpha": 1.0,
+     "_DitherAlpha2": 1.0,
+     "_Glossiness": 0.1,
+     "_Metallic": 0.0,
+     "_Color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "_Saturation": 1.0,
+     "_Emission": 0.0,
+     "_EmissionOverAlbedo": 0.0
+    }
+   },
+   "forward": {
+    "code": "// 原DXBC表面计算；原生投影提供真实receiver位置和深度导数法线。\nstruct ProjectedFunctions {\n float3 U(float3 v) { return float3(-v.x,v.z,v.y); }\n float4 S(Texture2D T, SamplerState Smp, float2 uv) {\n  return Texture2DSample(T,Smp,float2(uv.x,1.0-uv.y)); }\n float4 SL(Texture2D T, SamplerState Smp, float2 uv, float lod) {\n  return Texture2DSampleLevel(T,Smp,float2(uv.x,1.0-uv.y),lod); }\n float4 SB(Texture2D T, SamplerState Smp, float2 uv, float bias) {\n  return Texture2DSampleBias(T,Smp,float2(uv.x,1.0-uv.y),bias); }\n};\nProjectedFunctions F;\n\nfloat3 PosU=float3(0,0,0);\nfloat3 CameraU=F.U(CameraVectorWS)*0.01;\nuint4 p_v0=asuint(float4(UV0.x,1.0-UV0.y,0,0));\nuint4 p_v2=asuint(float4(F.U(normalize(UEFX_NormalWS)),PosU.x));\nuint4 p_v3=asuint(float4(F.U(normalize(UEFX_TangentWS)),PosU.y));\nuint4 p_v4=asuint(float4(F.U(normalize(UEFX_BitangentWS)),PosU.z));\nuint4 p_v5=asuint(VCol);\nuint4 p_v8=asuint(float4(PixelPosition.xy,0,0));\nuint4 p_v9=uint4(FaceSign>0.0?1u:0u,0,0,0);\n    uint4 p_r0 = (uint4)0, p_r1 = (uint4)0, p_r2 = (uint4)0, p_r3 = (uint4)0;\n    const uint4 p_icb[16] = { uint4(asuint(0.058824), 0u, 0u, 0u), uint4(asuint(0.529412), 0u, 0u, 0u), uint4(asuint(0.176471), 0u, 0u, 0u), uint4(asuint(0.647059), 0u, 0u, 0u), uint4(asuint(0.764706), 0u, 0u, 0u), uint4(asuint(0.294118), 0u, 0u, 0u), uint4(asuint(0.882353), 0u, 0u, 0u), uint4(asuint(0.411765), 0u, 0u, 0u), uint4(asuint(0.235294), 0u, 0u, 0u), uint4(asuint(0.705882), 0u, 0u, 0u), uint4(asuint(0.117647), 0u, 0u, 0u), uint4(asuint(0.588235), 0u, 0u, 0u), uint4(asuint(0.941176), 0u, 0u, 0u), uint4(asuint(0.470588), 0u, 0u, 0u), uint4(asuint(0.823529), 0u, 0u, 0u), uint4(asuint(0.352941), 0u, 0u, 0u) };\n    uint4 p_o0 = (uint4)0, p_o1 = (uint4)0;\n    p_r0.xy = (uint2)(asfloat(p_v8.xy));\n    p_r0.x = (((p_r0.x << (2u & 31u)) & (((1u << (2u & 31u)) - 1u) << (2u & 31u))) | (0u & ~(((1u << (2u & 31u)) - 1u) << (2u & 31u))));\n    p_r0.x = (((p_r0.y << (0u & 31u)) & (((1u << (2u & 31u)) - 1u) << (0u & 31u))) | (p_r0.x & ~(((1u << (2u & 31u)) - 1u) << (0u & 31u))));\n    p_r0.x = asuint((_DitherAlpha * _DitherAlpha2 + (-asfloat(p_icb[p_r0.x].x))));\n    p_r0.x = ((asfloat(p_r0.x) < 0.0) ? 0xFFFFFFFFu : 0u);\n    if (p_r0.x != 0u) { clip(-1.0); }\n    p_r0.x = p_v2.w;\n    p_r0.y = p_v3.w;\n    p_r0.z = p_v4.w;\n    p_r0.xyz = asuint(((-asfloat(p_r0.xyz)) + float3((float4(CameraU,1)).x, (float4(CameraU,1)).y, (float4(CameraU,1)).z)));\n    p_r0.w = asuint(dot(asfloat(p_r0.xyz), asfloat(p_r0.xyz)));\n    p_r0.w = asuint(rsqrt(asfloat(p_r0.w)));\n    p_r0.xyz = asuint((asfloat(p_r0.www) * asfloat(p_r0.xyz)));\n    p_r1.xy = asuint((asfloat(p_v0.xy) * _BaseMap_ST.xy + _BaseMap_ST.zw));\n    p_r2.xyz = asuint((F.S(_BumpMap, _BumpMapSampler, asfloat(p_r1.xy))).xyw);\n    p_r2.x = asuint((asfloat(p_r2.x) * asfloat(p_r2.z)));\n    p_r1.zw = asuint((asfloat(p_r2.xy) * float2(2.0, 2.0) + float2(-1.0, -1.0)));\n    p_r0.w = asuint(dot(asfloat(p_r1.zw), asfloat(p_r1.zw)));\n    p_r0.w = asuint(min(asfloat(p_r0.w), 1.0));\n    p_r0.w = asuint(((-asfloat(p_r0.w)) + 1.0));\n    p_r0.w = asuint(sqrt(asfloat(p_r0.w)));\n    p_r0.w = asuint(((p_v9.x != 0u) ? asfloat(p_r0.w) : (-asfloat(p_r0.w))));\n    p_r2.xyz = asuint((asfloat(p_r1.www) * asfloat(p_v4.xyz)));\n    p_r2.xyz = asuint((asfloat(p_r1.zzz) * asfloat(p_v3.xyz) + asfloat(p_r2.xyz)));\n    p_r2.xyz = asuint((asfloat(p_r0.www) * asfloat(p_v2.xyz) + asfloat(p_r2.xyz)));\n    p_r0.w = asuint(dot(asfloat(p_r2.xyz), asfloat(p_r2.xyz)));\n    p_r0.w = asuint(rsqrt(asfloat(p_r0.w)));\n    p_r2.xyz = asuint((asfloat(p_r0.www) * asfloat(p_r2.xyz)));\n    p_r0.x = asuint(saturate(dot(asfloat(p_r2.xyz), asfloat(p_r0.xyz))));\n    p_r0.x = asuint(((-asfloat(p_r0.x)) + _FresnelOffset));\n    p_r0.x = asuint(saturate((asfloat(p_r0.x) + 1.0)));\n    p_r0.x = asuint(log2(asfloat(p_r0.x)));\n    p_r0.x = asuint((asfloat(p_r0.x) * _FresnelPower));\n    p_r0.x = asuint(exp2(asfloat(p_r0.x)));\n    p_r0.x = asuint((asfloat(p_r0.x) * _FresnelScale));\n    p_r0.xyz = asuint((asfloat(p_r0.xxx) * _FresnelColor.xyz));\n    p_r0.xyz = asuint((asfloat(p_r0.xyz) * _FresnelColor.www));\n    p_r0.xyz = asuint((asfloat(p_r0.xyz) * float3(_Fresnel, _Fresnel, _Fresnel)));\n    p_r2.xyz = asuint((F.S(_BaseMap, _BaseMapSampler, asfloat(p_r1.xy))).xyz);\n    p_r0.w = asuint((F.S(_MaskTex, _MaskTexSampler, asfloat(p_r1.xy))).z);\n    p_r0.w = asuint((asfloat(p_r0.w) * _Emission));\n    p_r1.xyz = asuint((asfloat(p_r0.www) * _EmissionColor.xyz));\n    p_r2.xyz = asuint((asfloat(p_r2.xyz) * _Color.xyz));\n    p_r3.xy = asuint((asfloat(p_r2.xy) * asfloat(p_v5.xy)));\n    p_r0.w = asuint((asfloat(p_r3.y) + asfloat(p_r3.x)));\n    p_r0.w = asuint((asfloat(p_r2.z) * asfloat(p_v5.z) + asfloat(p_r0.w)));\n    p_r0.w = asuint((asfloat(p_r0.w) * 0.333333));\n    p_r2.xyz = asuint((asfloat(p_r2.xyz) * asfloat(p_v5.xyz) + (-asfloat(p_r0.www))));\n    p_r2.xyz = asuint((asfloat(p_r2.xyz) * float3(_Saturation, _Saturation, _Saturation) + asfloat(p_r0.www)));\n    p_r0.xyz = asuint((asfloat(p_r1.xyz) * asfloat(p_r2.xyz) + asfloat(p_r0.xyz)));\n    p_r0.w = asuint(dot(asfloat(p_r0.xyz), float3(0.212673, 0.715152, 0.072175)));\n    p_r1.xyz = asuint(((-asfloat(p_r0.www)) + asfloat(p_r0.xyz)));\n    p_r1.xyz = asuint((float3((Global_SceneWeatherParamsPart1_R2).z, (Global_SceneWeatherParamsPart1_R2).z, (Global_SceneWeatherParamsPart1_R2).z) * asfloat(p_r1.xyz) + asfloat(p_r0.www)));\n    p_r0.w = asuint(((Global_SceneWeatherParamsPart1_R2).z + -1.0));\n    p_r0.w = ((0.001 < abs(asfloat(p_r0.w))) ? 0xFFFFFFFFu : 0u);\n    p_o0.xyz = select(p_r0.www != 0u, p_r1.xyz, p_r0.xyz);\nreturn asfloat(p_o0.xyz);\n",
+    "outputs": {},
+    "parameters": {
+     "Global_SceneWeatherParamsPart1_R2": 4
+    },
+    "material_params": {
+     "_DitherAlpha": 1,
+     "_DitherAlpha2": 1,
+     "_BaseMap_ST": 4,
+     "_FresnelOffset": 1,
+     "_FresnelPower": 1,
+     "_FresnelScale": 1,
+     "_FresnelColor": 4,
+     "_Fresnel": 1,
+     "_Emission": 1,
+     "_EmissionColor": 4,
+     "_Color": 4,
+     "_Saturation": 1
+    },
+    "textures": [
+     "_BumpMap",
+     "_BaseMap",
+     "_MaskTex"
+    ],
+    "builtins": [
+     "CameraVectorWS",
+     "UV0",
+     "PixelPosition",
+     "VCol",
+     "FaceSign",
+     "UEFX_NormalWS",
+     "UEFX_TangentWS",
+     "UEFX_BitangentWS"
+    ],
+    "globals": {
+     "_SceneWeatherParamsPart1": [
+      2
+     ]
+    },
+    "surface": "source_prop_additive",
+    "material_defaults": {
+     "_DitherAlpha": 1.0,
+     "_DitherAlpha2": 1.0,
+     "_FresnelOffset": 0.0,
+     "_FresnelPower": 5.0,
+     "_FresnelScale": 1.0,
+     "_FresnelColor": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "_Fresnel": 0.0,
+     "_Emission": 0.0,
+     "_EmissionColor": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "_Color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "_Saturation": 1.0
+    }
+   },
+   "source_shader": {
+    "path": "F:\\AnimeStudio\\Exports\\ZZZ\\Pyrois_SkillFX_Evidence\\Assets\\649188441\\CAB-e9de77f22d6a002c2e4f106dedaacfad\\Shader\\108369129736756662.shader",
+    "size": 1414826,
+    "sha256": "f2ec8f5715d771232a6980689442d30940244f2fa11fc414844d81a29020a532"
+   },
+   "source_geometry": {
+    "vp": {
+     "sourceByteRange": {
+      "offset": 952672,
+      "bytes": 4924
+     },
+     "sourceLine": 24991,
+     "fileBytesSha256": "9e1c22694b1fdef7edf9f3b2478ecbc7e32b7fe03ef43f3d2c689b6e0d8000df",
+     "hash64": "4edda51e4d7612cc",
+     "globalKeywords": [
+      "_DITHER_SWITCH"
+     ],
+     "localKeywords": []
+    },
+    "fp": {
+     "sourceByteRange": {
+      "offset": 1147938,
+      "bytes": 6421
+     },
+     "sourceLine": 30241,
+     "fileBytesSha256": "2417ed4dd1675ded12fa7c9e3145c007fc1f4441de0083f3e583381df52e542c",
+     "hash64": "79504799574199bb",
+     "globalKeywords": [
+      "_DITHER_SWITCH"
+     ],
+     "localKeywords": []
+    }
+   },
+   "source_forward": {
+    "vp": {
+     "sourceByteRange": {
+      "offset": 233038,
+      "bytes": 4924
+     },
+     "sourceLine": 6053,
+     "fileBytesSha256": "824189a2ee8970eecc94529809c9351274b0c84b4bf37986123c911fe1b7ba9c",
+     "hash64": "4edda51e4d7612cc",
+     "profile": "vs_5_0",
+     "valid": true,
+     "globalKeywords": [
+      "_DITHER_SWITCH"
+     ],
+     "localKeywords": [],
+     "outputSignatures": [
+      {
+       "name": "TEXCOORD",
+       "index": 0,
+       "mask": "xyzw",
+       "reg": 0,
+       "sys": "NONE",
+       "used": "xyzw"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 1,
+       "mask": "xyzw",
+       "reg": 1,
+       "sys": "NONE",
+       "used": "xyzw"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 2,
+       "mask": "xyzw",
+       "reg": 2,
+       "sys": "NONE",
+       "used": "xyzw"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 3,
+       "mask": "xyzw",
+       "reg": 3,
+       "sys": "NONE",
+       "used": "xyzw"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 4,
+       "mask": "xyzw",
+       "reg": 4,
+       "sys": "NONE",
+       "used": "xyzw"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 5,
+       "mask": "xyzw",
+       "reg": 5,
+       "sys": "NONE",
+       "used": "xyzw"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 6,
+       "mask": "xyz",
+       "reg": 6,
+       "sys": "NONE",
+       "used": "xyz"
+      },
+      {
+       "name": "TEXCOORD",
+       "index": 8,
+       "mask": "xy",
+       "reg": 7,
+       "sys": "NONE",
+       "used": "xy"
+      },
+      {
+       "name": "SV_POSITION",
+       "index": 0,
+       "mask": "xyzw",
+       "reg": 8,
+       "sys": "POS",
+       "used": "xyzw"
+      }
+     ],
+     "textures": []
+    },
+    "fp": {
+     "sourceByteRange": {
+      "offset": 627648,
+      "bytes": 6336
+     },
+     "sourceLine": 16513,
+     "fileBytesSha256": "8b332a4c2d64d34bd302cbc439c39270e57f3926b003e52e076be9bea00af0b1",
+     "hash64": "80ac2f9c8be50315",
+     "profile": "ps_5_0",
+     "valid": true,
+     "globalKeywords": [
+      "_DITHER_SWITCH"
+     ],
+     "localKeywords": [],
+     "outputSignatures": [
+      {
+       "name": "SV_Target",
+       "index": 0,
+       "mask": "xyzw",
+       "reg": 0,
+       "sys": "TARGET",
+       "used": "xyzw"
+      },
+      {
+       "name": "SV_Target",
+       "index": 1,
+       "mask": "xyzw",
+       "reg": 1,
+       "sys": "TARGET",
+       "used": "xyzw"
+      }
+     ],
+     "textures": [
+      "_BaseMap",
+      "_BumpMap",
+      "_MaskTex"
+     ]
+    }
+   },
+   "source_stage_pair_certified": true,
+   "source_geometry_selection": "ExactSourceKeywords",
+   "source_velocity": {
+    "role": "NativePreciseVelocity",
+    "original_fragment_asm": [
+     "ps_5_0",
+     "dcl_globalFlags refactoringAllowed",
+     "dcl_immediateConstantBuffer { { 0.058824, 0, 0, 0},",
+     "{ 0.529412, 0, 0, 0},",
+     "{ 0.176471, 0, 0, 0},",
+     "{ 0.647059, 0, 0, 0},",
+     "{ 0.764706, 0, 0, 0},",
+     "{ 0.294118, 0, 0, 0},",
+     "{ 0.882353, 0, 0, 0},",
+     "{ 0.411765, 0, 0, 0},",
+     "{ 0.235294, 0, 0, 0},",
+     "{ 0.705882, 0, 0, 0},",
+     "{ 0.117647, 0, 0, 0},",
+     "{ 0.588235, 0, 0, 0},",
+     "{ 0.941176, 0, 0, 0},",
+     "{ 0.470588, 0, 0, 0},",
+     "{ 0.823529, 0, 0, 0},",
+     "{ 0.352941, 0, 0, 0} }",
+     "dcl_constantbuffer CB0[34], immediateIndexed",
+     "dcl_constantbuffer CB1[29], immediateIndexed",
+     "dcl_constantbuffer CB2[11], immediateIndexed",
+     "dcl_sampler s0, mode_default",
+     "dcl_sampler s1, mode_default",
+     "dcl_sampler s2, mode_default",
+     "dcl_resource_texture2d (float,float,float,float) t0",
+     "dcl_resource_texture2d (float,float,float,float) t1",
+     "dcl_resource_texture2d (float,float,float,float) t2",
+     "dcl_input_ps linear v0.xyzw",
+     "dcl_input_ps linear v1.xyzw",
+     "dcl_input_ps linear v2.xyzw",
+     "dcl_input_ps linear v3.xyzw",
+     "dcl_input_ps linear v4.xyzw",
+     "dcl_input_ps linear v5.xyz",
+     "dcl_input_ps_siv linear noperspective v8.xy, position",
+     "dcl_input_ps_sgv constant v9.x, is_front_face",
+     "dcl_output o0.xyzw",
+     "dcl_output o1.xyzw",
+     "dcl_temps 4",
+     "ftou r0.xy, v8.xyxx",
+     "bfi r0.x, l(2), l(2), r0.x, l(0)",
+     "bfi r0.x, l(2), l(0), r0.y, r0.x",
+     "mad r0.x, cb2[10].x, cb2[10].y, -icb[r0.x + 0].x",
+     "lt r0.x, r0.x, l(0.000000)",
+     "discard_nz r0.x",
+     "mov r0.x, v2.w",
+     "mov r0.y, v3.w",
+     "mov r0.z, v4.w",
+     "add r0.xyz, -r0.xyzx, cb0[30].xyzx",
+     "dp3 r0.w, r0.xyzx, r0.xyzx",
+     "rsq r0.w, r0.w",
+     "mul r0.xyz, r0.wwww, r0.xyzx",
+     "mad r1.xy, v0.xyxx, cb2[1].xyxx, cb2[1].zwzz",
+     "sample_indexable(texture2d)(float,float,float,float) r2.xyz, r1.xyxx, t1.xywz, s1",
+     "mul r2.x, r2.x, r2.z",
+     "mad r1.zw, r2.xxxy, l(0.000000, 0.000000, 2.000000, 2.000000), l(0.000000, 0.000000, -1.000000, -1.000000)",
+     "dp2 r0.w, r1.zwzz, r1.zwzz",
+     "min r0.w, r0.w, l(1.000000)",
+     "add r0.w, -r0.w, l(1.000000)",
+     "sqrt r0.w, r0.w",
+     "movc r0.w, v9.x, r0.w, -r0.w",
+     "mul r2.xyz, r1.wwww, v4.xyzx",
+     "mad r2.xyz, r1.zzzz, v3.xyzx, r2.xyzx",
+     "mad r2.xyz, r0.wwww, v2.xyzx, r2.xyzx",
+     "dp3 r0.w, r2.xyzx, r2.xyzx",
+     "rsq r0.w, r0.w",
+     "mul r2.xyz, r0.wwww, r2.xyzx",
+     "dp3_sat r0.x, r2.xyzx, r0.xyzx",
+     "add r0.x, -r0.x, cb2[8].x",
+     "add_sat r0.x, r0.x, l(1.000000)",
+     "log r0.x, r0.x",
+     "mul r0.x, r0.x, cb2[7].z",
+     "exp r0.x, r0.x",
+     "mul r0.x, r0.x, cb2[7].w",
+     "mul r0.xyz, r0.xxxx, cb2[5].xyzx",
+     "mul r0.xyz, r0.xyzx, cb2[5].wwww",
+     "mul r0.xyz, r0.xyzx, cb2[7].yyyy",
+     "sample_indexable(texture2d)(float,float,float,float) r2.xyz, r1.xyxx, t0.xyzw, s0",
+     "sample_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t2.xywz, s2",
+     "mul r0.w, r0.w, cb2[6].w",
+     "mul r1.xyz, r0.wwww, cb2[4].xyzx",
+     "mul r2.xyz, r2.xyzx, cb2[3].xyzx",
+     "mul r3.xy, r2.xyxx, v5.xyxx",
+     "add r0.w, r3.y, r3.x",
+     "mad r0.w, r2.z, v5.z, r0.w",
+     "mul r0.w, r0.w, l(0.333333)",
+     "mad r2.xyz, r2.xyzx, v5.xyzx, -r0.wwww",
+     "mad r2.xyz, r2.xyzx, cb2[6].xxxx, r0.wwww",
+     "mad r0.xyz, r1.xyzx, r2.xyzx, r0.xyzx",
+     "dp3 r0.w, r0.xyzx, l(0.212673, 0.715152, 0.072175, 0.000000)",
+     "add r1.xyz, -r0.wwww, r0.xyzx",
+     "mad r1.xyz, cb0[33].zzzz, r1.xyzx, r0.wwww",
+     "add r0.w, cb0[33].z, l(-1.000000)",
+     "lt r0.w, l(0.001000), |r0.w|",
+     "movc o0.xyz, r0.wwww, r1.xyzx, r0.xyzx",
+     "mov o0.w, l(1.000000)",
+     "div r0.xy, v1.xyxx, v1.wwww",
+     "div r0.zw, v0.zzzw, v1.zzzz",
+     "add r0.xy, -r0.zwzz, r0.xyxx",
+     "mov r0.z, -r0.y",
+     "lt r1.xy, l(0.000000, 0.000000, 0.000000, 0.000000), r0.xzxx",
+     "lt r0.zw, r0.xxxz, l(0.000000, 0.000000, 0.000000, 0.000000)",
+     "mul r0.xy, r0.xyxx, l(0.500000, -0.500000, 0.000000, 0.000000)",
+     "sqrt r0.xy, |r0.xyxx|",
+     "iadd r0.zw, -r1.xxxy, r0.zzzw",
+     "itof r0.zw, r0.zzzw",
+     "mul r0.xy, r0.zwzz, r0.xyxx",
+     "mad r0.xy, r0.xyxx, l(0.500000, 0.500000, 0.000000, 0.000000), l(0.498039, 0.498039, 0.000000, 0.000000)",
+     "lt r1.x, l(0.500000), cb1[28].y",
+     "mov r0.zw, l(0,0,0,0)",
+     "movc o1.xyzw, r1.xxxx, r0.xyzw, l(0,0,0,1.000000)",
+     "ret"
+    ],
+    "original_vertex_asm": [
+     "vs_5_0",
+     "dcl_globalFlags refactoringAllowed",
+     "dcl_constantbuffer CB0[122], immediateIndexed",
+     "dcl_constantbuffer CB1[24], immediateIndexed",
+     "dcl_input v0.xyz",
+     "dcl_input v1.xyz",
+     "dcl_input v2.xyzw",
+     "dcl_input v3.xyzw",
+     "dcl_input v4.xy",
+     "dcl_input v5.xy",
+     "dcl_output o0.xyzw",
+     "dcl_output o1.xyzw",
+     "dcl_output o2.xyzw",
+     "dcl_output o3.xyzw",
+     "dcl_output o4.xyzw",
+     "dcl_output o5.xyzw",
+     "dcl_output o6.xyz",
+     "dcl_output o7.xy",
+     "dcl_output_siv o8.xyzw, position",
+     "dcl_temps 4",
+     "mul r0.xyzw, v0.yyyy, cb1[21].xyzw",
+     "mad r0.xyzw, cb1[20].xyzw, v0.xxxx, r0.xyzw",
+     "mad r0.xyzw, cb1[22].xyzw, v0.zzzz, r0.xyzw",
+     "add r0.xyzw, r0.xyzw, cb1[23].xyzw",
+     "mul r1.xyz, r0.yyyy, cb0[111].xywx",
+     "mad r1.xyz, cb0[110].xywx, r0.xxxx, r1.xyzx",
+     "mad r0.xyz, cb0[112].xywx, r0.zzzz, r1.xyzx",
+     "mad r0.xyz, cb0[113].xywx, r0.wwww, r0.xyzx",
+     "mov o0.zw, r0.xxxy",
+     "mov o1.z, r0.z",
+     "mov o0.xy, v4.xyxx",
+     "mul [precise(xyz)] r0.xyz, v0.xxxx, cb1[0].xyzx",
+     "mul [precise(xyz)] r1.xyz, v0.yyyy, cb1[1].xyzx",
+     "add [precise(xyz)] r0.xyz, r0.xyzx, r1.xyzx",
+     "mul [precise(xyz)] r1.xyz, v0.zzzz, cb1[2].xyzx",
+     "add [precise(xyz)] r0.xyz, r0.xyzx, r1.xyzx",
+     "add [precise(xyz)] r0.xyz, r0.xyzx, cb1[3].xyzx",
+     "mul r1.xyz, r0.yyyy, cb0[119].xywx",
+     "mad r1.xyz, cb0[118].xywx, r0.xxxx, r1.xyzx",
+     "mad r1.xyz, cb0[120].xywx, r0.zzzz, r1.xyzx",
+     "add o1.xyw, r1.xyxz, cb0[121].xyxw",
+     "mov [precise(w)] o2.w, r0.x",
+     "dp3 r1.x, v1.xyzx, cb1[4].xyzx",
+     "dp3 r1.y, v1.xyzx, cb1[5].xyzx",
+     "dp3 r1.z, v1.xyzx, cb1[6].xyzx",
+     "dp3 r0.w, r1.xyzx, r1.xyzx",
+     "max r0.w, r0.w, l(0.000000)",
+     "rsq r0.w, r0.w",
+     "mul r1.xyz, r0.wwww, r1.xyzx",
+     "mov o2.xyz, r1.xyzx",
+     "mul r2.xyz, v2.yyyy, cb1[1].xyzx",
+     "mad r2.xyz, cb1[0].xyzx, v2.xxxx, r2.xyzx",
+     "mad r2.xyz, cb1[2].xyzx, v2.zzzz, r2.xyzx",
+     "dp3 r0.w, r2.xyzx, r2.xyzx",
+     "max r0.w, r0.w, l(0.000000)",
+     "rsq r0.w, r0.w",
+     "mul r2.xyz, r0.wwww, r2.xyzx",
+     "mov o3.xyz, r2.xyzx",
+     "mov [precise(w)] o3.w, r0.y",
+     "mul r3.xyz, r1.zxyz, r2.yzxy",
+     "mad r2.xyz, r1.yzxy, r2.zxyz, -r3.xyzx",
+     "mul r0.w, v2.w, cb1[9].w",
+     "mul o4.xyz, r0.wwww, r2.xyzx",
+     "mov [precise(w)] o4.w, r0.z",
+     "mov o5.xyzw, v3.xyzw",
+     "mul r0.w, r1.y, r1.y",
+     "mad r0.w, r1.x, r1.x, -r0.w",
+     "mul r2.xyzw, r1.yzzx, r1.xyzz",
+     "dp4 r3.x, cb1[16].xyzw, r2.xyzw",
+     "dp4 r3.y, cb1[17].xyzw, r2.xyzw",
+     "dp4 r3.z, cb1[18].xyzw, r2.xyzw",
+     "mad r2.xyz, cb1[19].xyzx, r0.wwww, r3.xyzx",
+     "mov r1.w, l(1.000000)",
+     "dp4 r3.x, cb1[13].xyzw, r1.xyzw",
+     "dp4 r3.y, cb1[14].xyzw, r1.xyzw",
+     "dp4 r3.z, cb1[15].xyzw, r1.xyzw",
+     "add r1.xyz, r2.xyzx, r3.xyzx",
+     "max o6.xyz, r1.xyzx, l(0.000000, 0.000000, 0.000000, 0.000000)",
+     "mov o7.xy, v5.xyxx",
+     "mul [precise] r1.xyzw, r0.xxxx, cb0[102].xyzw",
+     "mul [precise] r2.xyzw, r0.yyyy, cb0[103].xyzw",
+     "mul [precise] r0.xyzw, r0.zzzz, cb0[104].xyzw",
+     "add [precise] r1.xyzw, r1.xyzw, r2.xyzw",
+     "add [precise] r0.xyzw, r0.xyzw, r1.xyzw",
+     "add [precise] o8.xyzw, r0.xyzw, cb0[105].xyzw",
+     "ret"
+    ],
+    "original_switch": "unity_MotionVectorsParams.y",
+    "native_switch": "Configured MeshRenderer.MotionVectorSetting Precise/Disable",
+    "required": "Actual previous source pose and native previous TRS, current/previous WPO use separate real snapshots",
+    "encoding": "NativeVelocityShader replaces source sign*sqrt+bias MRT encoding"
+   }
+  }
+ }
+}

@@ -608,6 +608,25 @@ def translate_ins(ctx, op, sat, ops):
             destinations.append(d)
         return assignment(" ".join(lines), destinations, uses)
 
+    if op == "ld":
+        if len(ops) != 3 or sat:
+            raise TranslateError("ld 需要目标、整数坐标和资源，不支持饱和修饰")
+        d, coord, tex = ops
+        _, pos = ctx.dest(d)
+        tinfo = ctx.sub["bind"]["tex"].get(tex.idx)
+        if tex.kind != "t" or tinfo is None or tinfo["dim"] != 2:
+            raise TranslateError("ld 当前只消费准确绑定的 Texture2D")
+        tname = tinfo["name"]
+        if tname in ctx.provider.get("__textures__", {}):
+            raise TranslateError("ld 不可套用归一化采样的常量纹理 provider")
+        ctx.textures[tname] = True
+        # DXBC ld 的 xy 是整数 texel，w 是 mip；z 对 Texture2D 不参与寻址。
+        # https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/ld--sm4---asm-
+        address = ctx.read(coord, [0, 1, 3], "u")[0]
+        uses = src_uses(ctx, coord, [0, 1, 3])
+        rsw = "".join((tex.swz or "xyzw")[p] for p in pos)
+        return assignment(wr(d, expr_f="(F.L(%s, %s)).%s" % (tname, address, rsw)), [d], uses)
+
     if op in SAMPLE:
         base = op.replace("_indexable", "")
         d, coord, tex, smp = ops[:4]

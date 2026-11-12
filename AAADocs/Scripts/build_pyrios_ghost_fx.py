@@ -42,6 +42,7 @@ class NativeToolsets:
 
     只消费本批同步工具；不启动宿主、注册工具、泵帧或等待异步工具。
     非同步结果保留到 pending，调用者须交回实际在途状态，禁止重试叠写。
+    工具标识只接受位置实参，Native 字段完整保留在 arguments 中。
     """
     PREFIXES = ("NiagaraToolsets.NiagaraToolset_System.",
                 "GGYGOEditor.GGYGONiagaraCompileLibrary.",
@@ -54,22 +55,22 @@ class NativeToolsets:
             raise ValueError("残影原生构建需要标准 Editor 的公开 ToolsetRegistry")
         self.native, self.pending = unreal, None
 
-    def tool(self, name, **arguments):
+    def tool(self, tool_identifier, /, **arguments):
         if self.pending is not None:
             raise RuntimeError("残影上一次原生工具仍由本 session 持有；不重试或叠加调用")
-        if not name.startswith(self.PREFIXES) and name != "EditorToolset.EditorAppToolset.IsPIERunning":
-            raise ValueError("残影批次未支持的原生工具: " + name)
-        toolset, method = name.rsplit(".", 1)
+        if not tool_identifier.startswith(self.PREFIXES) and tool_identifier != "EditorToolset.EditorAppToolset.IsPIERunning":
+            raise ValueError("残影批次未支持的原生工具: " + tool_identifier)
+        toolset, method = tool_identifier.rsplit(".", 1)
         result = self.native.ToolsetRegistry.execute_tool(
             toolset, method, json.dumps(arguments, ensure_ascii=False, allow_nan=False))
         if not result.is_complete:
             self.pending = result
-            raise RuntimeError("残影原生工具尚未同步完成，保留在途结果，不重试: " + name)
+            raise RuntimeError("残影原生工具尚未同步完成，保留在途结果，不重试: " + tool_identifier)
         if result.error:
-            raise RuntimeError("残影原生工具失败: " + name + " " + result.error)
+            raise RuntimeError("残影原生工具失败: " + tool_identifier + " " + result.error)
         value = json.loads(result.value)
         if not isinstance(value, dict) or "returnValue" not in value:
-            raise RuntimeError("残影原生工具未返回准确结果对象: " + name)
+            raise RuntimeError("残影原生工具未返回准确结果对象: " + tool_identifier)
         return value
 
 
@@ -86,10 +87,10 @@ class ReadOnlyToolsets:
             raise ValueError("残影只读验证需要显式工具接口")
         self.client = client
 
-    def tool(self, name, **arguments):
-        if name not in self.TOOLS:
-            raise ValueError("残影只读验证拒绝修改或未支持的工具: " + name)
-        return self.client.tool(name, **arguments)
+    def tool(self, tool_identifier, /, **arguments):
+        if tool_identifier not in self.TOOLS:
+            raise ValueError("残影只读验证拒绝修改或未支持的工具: " + tool_identifier)
+        return self.client.tool(tool_identifier, **arguments)
 
 
 def sha(path):
@@ -106,11 +107,20 @@ def ue_vector(values, scale=1):
     return [-x * scale, z * scale, y * scale]
 
 
-def geometry_corners(data):
+def geometry_corners(data, *, vertex_color_mode="SourceRGBA", include_tangents=False):
     """@return 按源三角形绕序保留的完整角点；不焊接或重建几何。"""
     channels = [i for i in range(8) if data.get("m_UV%d" % i)]
     count = data["m_VertexCount"]
+    colors = data["m_Colors"]
+    if vertex_color_mode == "SourceAbsentNativeWhite":
+        if colors is not None:
+            raise ValueError("NativeWhite模式只允许源明确无颜色流，不能覆盖实际RGBA")
+    elif vertex_color_mode != "SourceRGBA" or not isinstance(colors, list) or len(colors) != count*4:
+        raise ValueError("SourceRGBA模式需要完整原顶点色")
     normal_width = len(data["m_Normals"]) // count
+    tangents = data.get("m_Tangents")
+    if include_tangents and (not isinstance(tangents, list) or len(tangents) != count * 4):
+        raise ValueError("源TBN核对需要完整XYZW Tangent流")
     vertices = []
     for i in range(count):
         n = ue_vector(data["m_Normals"][i * normal_width:i * normal_width + 3])
@@ -119,9 +129,25 @@ def geometry_corners(data):
             raise ValueError("残影源法线无效: " + str(i))
         vertices.append({"position": ue_vector(data["m_Vertices"][i * 3:i * 3 + 3], 100),
                          "normal": [v / length for v in n],
-                         "color": data["m_Colors"][i * 4:i * 4 + 4],
+                         "color": [1.0]*4 if vertex_color_mode == "SourceAbsentNativeWhite" else colors[i * 4:i * 4 + 4],
                          "uv": [[data["m_UV%d" % c][i * 2], 1 - data["m_UV%d" % c][i * 2 + 1]]
                                 for c in channels]})
+        if include_tangents:
+            tangent = ue_vector(tangents[i*4:i*4+3])
+            tangent_length = math.sqrt(sum(v*v for v in tangent))
+            sign = tangents[i*4+3]
+            if not math.isfinite(tangent_length) or tangent_length <= 1e-12 or sign not in (-1.0, 1.0):
+                raise ValueError("源Tangent长度或手性无效: " + str(i))
+            tangent = [v/tangent_length for v in tangent]
+            normal = vertices[-1]["normal"]
+            # C=(-X,Z,Y)的det=+1；源cross(N,T)*W完整转换为UE副切线。
+            binormal = [(normal[1]*tangent[2]-normal[2]*tangent[1])*sign,
+                        (normal[2]*tangent[0]-normal[0]*tangent[2])*sign,
+                        (normal[0]*tangent[1]-normal[1]*tangent[0])*sign]
+            binormal_length = math.sqrt(sum(v*v for v in binormal))
+            if not math.isfinite(binormal_length) or binormal_length <= 1e-12:
+                raise ValueError("源Normal/Tangent退化，不能生成真实副切线: " + str(i))
+            vertices[-1].update(tangent=tangent, binormal=[v/binormal_length for v in binormal])
     base = data["m_SubMeshes"][0]["baseVertex"]
     indices = data["m_Indices"]
     return channels, [[vertices[indices[k + j] + base] for j in range(3)]
@@ -192,30 +218,40 @@ def make_plan(prefab_source, dependency_source, *, revision, ue_parameters=None,
                                  mesh_sources=mesh_override)
     textures = IA.plan_imports([dependency_source], revision=revision, selected_pids=TEXTURE_PIDS)
     material_pids = {m["pid"] for m in contract["materials"]}
-    if material_pids != {MP.MATERIAL_PID}:
+    if material_pids != {MP.GHOST}:
         raise ValueError("源材质槽未由本次 NapAvatarSimple 消费者准确覆盖")
-    material_file = deps[MP.MATERIAL_PID]["nativeJson"]
+    material_file = deps[MP.GHOST]["nativeJson"]
+    configuration = MP.project_configuration()
+    if ue_parameters is not None and ue_parameters != configuration["parameters"]:
+        raise ValueError("旧Ghost单值覆盖已退役；必须消费当前完整Nap配置，不能沿旧近似参数制作")
     material_plan = MP.make_plan(material_file, dependency_source, texture_targets=textures["assets"],
-                                 revision=revision, ue_parameters=ue_parameters)
-    material_bindings = material_plan["bindings"][MP.MATERIAL_PID]
+                                 revision=revision, configuration=configuration)
+    material_bindings = material_plan["bindings"][MP.GHOST]
+    if material_plan["runtime_inputs"]["effect_age"] != EmitterMeshBuilder.AGE_TRANSPORT:
+        raise ValueError("当前Simple材质年龄接口与原Emitter传输不同")
     transform = contract["transform"]
     spec = {"name": "GhostMesh", "source_mode": "Emitter", "local_space": True,
             "lifecycle": "owner_destroy_only", "emitter_spawn": [
                 ["Emitter.GhostPosition", "Position", FN.ue_pos_h(transform["position_hlsl"])],
                 ["Emitter.GhostOrientation", "Quat", FN.ue_quat_h(transform["rotation_hlsl"])],
                 ["Emitter.GhostScale", "Vector", FN.ue_scale_h(FN.f3(transform["scale"]))],
-                ["Emitter.GhostVelocity", "Vector", "float3(0.0, 0.0, 0.0)"]], "renderers": []}
+                ["Emitter.GhostVelocity", "Vector", "float3(0.0, 0.0, 0.0)"],
+                list(EmitterMeshBuilder.AGE_ENTRY)],
+            "material_age_transport": dict(EmitterMeshBuilder.AGE_TRANSPORT),
+            "emitter_update": [list(EmitterMeshBuilder.AGE_ENTRY)], "renderers": []}
     for source_slot in contract["materials"]:
         for role in ("outline", "surface"):
             spec["renderers"].append({"source_slot": source_slot["slot"], "source_submesh": source_slot["submesh"],
                 "source_material_pid": source_slot["pid"], "role": role, "sort": len(spec["renderers"]),
-                "mesh": mesh_import["assets"][MESH_PID], "material": material_bindings[role]})
+                "mesh": mesh_import["assets"][MESH_PID], "material": material_bindings[role],
+                "material_age_transport": dict(EmitterMeshBuilder.AGE_TRANSPORT)})
     EmitterMeshBuilder.validate_specs([spec])
     data = read(contract["mesh"]["source_json"])
-    params = {n: material_plan["materials"][0]["params"][n]["value"] for n in MP.UE_DEFAULTS}
+    params = dict(configuration["parameters"])
     source_params = material_plan["materials"][0]["params"]
-    outline_width = abs(source_params["_Outline"]["value"] * source_params["_OutlineWidth"]["value"]
-                        * params["UE_OutlineWidthCm"])
+    outline_width = min(max(source_params["_Outline"]["value"], 0.0)
+                        * max(source_params["_OutlineWidth"]["value"], 0.0)
+                        * params["UE_OutlineWidthCm"], params["UE_OutlineMaxOffsetCm"])
     bounds = resource_bounds(contract, data, outline_width)
     EmitterMeshBuilder.validate_bounds(bounds)
     imported = {"entries": {**mesh_import["entries"], **textures["entries"]},
@@ -224,6 +260,7 @@ def make_plan(prefab_source, dependency_source, *, revision, ue_parameters=None,
     files = [prefab_source, dependency_source, clip_file, contract["mesh"]["source_json"], material_file]
     files += [i["source"] for i in imported["entries"].values()]
     files += [i["native"] for i in material_plan["textures"].values()]
+    files += [entry["path"] for entry in configuration["inputs"]]
     source_files = {str(Path(p).resolve()): sha(p) for p in files}
     identity = {"schema": SCHEMA, "revision": revision, "specs": [spec], "bounds": bounds,
                 "source_files": source_files, "material_plan": material_plan}
@@ -301,9 +338,10 @@ def verify_mesh_fbx(plan):
 
 
 def compare_geometry(source_triangles, native_triangles):
-    """逐三角匹配绕序、位置、法线、全部 UV 和 RGBA；保留重复三角数量。"""
+    """逐三角匹配源角点；可选真T/B沿同一匹配消费，保重复三角数量及原阈值。"""
     if len(native_triangles) != len(source_triangles):
-        raise RuntimeError("残影原生三角形数量与源不同")
+        raise RuntimeError("残影原生三角形数量与源不同: expected=%d actual=%d" %
+                           (len(source_triangles), len(native_triangles)))
     cells = defaultdict(set)
     def cell(p):
         return tuple(math.floor(v / (POSITION_TOLERANCE_CM * 2)) for v in p)
@@ -311,7 +349,13 @@ def compare_geometry(source_triangles, native_triangles):
         for vertex in triangle:
             cells[cell(vertex["position"])].add(i)
     remaining = set(range(len(source_triangles)))
-    errors = [0., 0., 0., 0.]
+    include_tangents = bool(source_triangles and "tangent" in source_triangles[0][0])
+    errors = [0.] * (6 if include_tangents else 4)
+    metric_names = ("position_cm", "normal_degrees", "uv", "color")
+    limits = (POSITION_TOLERANCE_CM, NORMAL_TOLERANCE_DEGREES, UV_TOLERANCE, COLOR_TOLERANCE)
+    if include_tangents:
+        metric_names += ("tangent_degrees", "binormal_degrees")
+        limits += (NORMAL_TOLERANCE_DEGREES, NORMAL_TOLERANCE_DEGREES)
     for tid, triangle in enumerate(native_triangles):
         if len(triangle) != 3:
             raise RuntimeError("残影原生角点不完整")
@@ -319,17 +363,22 @@ def compare_geometry(source_triangles, native_triangles):
         candidates = set().union(*(cells.get(tuple(a + b for a, b in zip(c, delta)), set())
                                   for delta in itertools.product((-1, 0, 1), repeat=3))) & remaining
         matched = False
+        closest = None
         for index in sorted(candidates):
             for offset in range(3):
-                metrics = [0., 0., 0., 0.]
+                metrics = [0.] * len(errors)
                 for j, actual in enumerate(triangle):
                     original = source_triangles[index][(j + offset) % 3]
                     streams = [("position", 3), ("normal", 3), ("color", 4)]
+                    if include_tangents:
+                        streams += [("tangent", 3), ("binormal", 3)]
                     if any(len(actual[k]) != width for k, width in streams) or len(actual["uv"]) != len(original["uv"]):
                         raise RuntimeError("残影原生顶点流不完整")
                     if any(len(uv) != 2 for uv in actual["uv"]):
                         raise RuntimeError("残影原生 UV 流不完整")
                     flat = actual["position"] + actual["normal"] + actual["color"] + sum(actual["uv"], [])
+                    if include_tangents:
+                        flat += actual["tangent"] + actual["binormal"]
                     if any(not math.isfinite(v) for v in flat):
                         raise RuntimeError("残影原生顶点流非有限数值")
                     normal_length = math.sqrt(sum(v * v for v in actual["normal"]))
@@ -340,8 +389,18 @@ def compare_geometry(source_triangles, native_triangles):
                     metrics[1] = max(metrics[1], math.degrees(math.acos(max(-1., min(1., dot)))))
                     metrics[2] = max(metrics[2], *(abs(a - b) for u, v in zip(actual["uv"], original["uv"]) for a, b in zip(u, v)))
                     metrics[3] = max(metrics[3], *(abs(a - b) for a, b in zip(actual["color"], original["color"])))
-                if all(e <= limit for e, limit in zip(metrics, (POSITION_TOLERANCE_CM, NORMAL_TOLERANCE_DEGREES,
-                                                              UV_TOLERANCE, COLOR_TOLERANCE))):
+                    if include_tangents:
+                        for basis, metric in (("tangent", 4), ("binormal", 5)):
+                            length = math.sqrt(sum(value*value for value in actual[basis]))
+                            if length <= 1e-12:
+                                raise RuntimeError("原生TBN含退化向量: " + basis)
+                            dot = sum(a*b for a,b in zip(actual[basis], original[basis]))/length
+                            metrics[metric] = max(metrics[metric], math.degrees(math.acos(max(-1., min(1., dot)))))
+                # 仅为真实失败保留同一原匹配循环的最近候选，不参与准入或修改误差。
+                rank = tuple(error / limit for error, limit in zip(metrics, limits))
+                if closest is None or rank < closest[0]:
+                    closest = (rank, index, offset, list(metrics))
+                if all(e <= limit for e, limit in zip(metrics, limits)):
                     remaining.remove(index)
                     errors = [max(a, b) for a, b in zip(errors, metrics)]
                     matched = True
@@ -349,26 +408,43 @@ def compare_geometry(source_triangles, native_triangles):
             if matched:
                 break
         if not matched:
-            raise RuntimeError("残影原生三角形/绕序/属性未准确匹配源: " + str(tid))
+            detail = {"native_triangle": tid, "source_triangles": len(source_triangles),
+                      "candidate_count": len(candidates), "native": triangle,
+                      "limits": dict(zip(metric_names, limits)), "expected": None}
+            if closest is not None:
+                _, index, offset, metrics = closest
+                detail.update(source_triangle=index, source_corner_offset=offset,
+                              expected=[source_triangles[index][(j + offset) % 3] for j in range(3)],
+                              max_errors=dict(zip(metric_names, metrics)),
+                              within_limits={name: error <= limit
+                                             for name, error, limit in zip(metric_names, metrics, limits)})
+            raise RuntimeError("残影原生三角形/绕序/属性未准确匹配源: " +
+                               json.dumps(detail, ensure_ascii=False, sort_keys=True, allow_nan=False))
     return {"triangles": len(source_triangles), "corners": len(source_triangles) * 3,
             "max_position_error_cm": errors[0], "max_normal_angle_degrees": errors[1],
-            "max_uv_error": errors[2], "max_color_error": errors[3]}
+            "max_uv_error": errors[2], "max_color_error": errors[3],
+            **({"max_tangent_angle_degrees": errors[4], "max_binormal_angle_degrees": errors[5],
+                "source_model_tangent_basis_verified": True} if include_tangents else {})}
 
 
-def read_geometry(unreal, item, contract):
+def read_geometry(unreal, item, contract, *, vertex_color_mode="SourceRGBA", verify_tangents=False):
     """显式标准宿主只读 SourceModel；失败不改 settings 或改成近似成功。"""
+    if not verify_tangents and vertex_color_mode == "SourceAbsentNativeWhite" and (contract["mesh"]["pid"] != "2638020260690986751"
+            or contract["mesh"]["vertex_count"] != 1097):
+        raise ValueError("SourceAbsentNativeWhite只限已证1097顶点的Weapon2638")
     mesh = unreal.load_asset(item["path"])
     if not isinstance(mesh, unreal.StaticMesh) or mesh.get_path_name() != item["path"] + "." + item["name"]:
         raise RuntimeError("残影原生网格身份不同")
     dynamic = unreal.DynamicMesh()
     options = unreal.GeometryScriptCopyMeshFromAssetOptions(
-        apply_build_settings=False, request_tangents=False, use_build_scale=False)
+        apply_build_settings=False, request_tangents=verify_tangents, use_build_scale=False)
     lod = unreal.GeometryScriptMeshReadLOD(lod_type=unreal.GeometryScriptLODType.SOURCE_MODEL, lod_index=0)
     result = unreal.GeometryScript_AssetUtils.copy_mesh_from_static_mesh(mesh, dynamic, options, lod)
     if result != (dynamic, unreal.GeometryScriptOutcomePins.SUCCESS):
         raise RuntimeError("残影原生 SourceModel 复制失败")
     query = unreal.GeometryScript_MeshQueries
-    channels, expected = geometry_corners(read(contract["mesh"]["source_json"]))
+    channels, expected = geometry_corners(read(contract["mesh"]["source_json"]),
+                                          vertex_color_mode=vertex_color_mode, include_tangents=verify_tangents)
     if (query.get_has_triangle_id_gaps(dynamic) or not query.get_has_triangle_normals(dynamic)
             or not query.get_has_vertex_colors(dynamic) or query.get_num_uv_sets(dynamic) != len(channels)):
         raise RuntimeError("残影原生 SourceModel 缺少完整拓扑/法线/颜色/UV")
@@ -388,11 +464,32 @@ def read_geometry(unreal, item, contract):
             if not valid_uv:
                 raise RuntimeError("残影原生 UV 不完整: " + str((tid, channel)))
             uvs.append([[v.x, v.y] for v in (u1, u2, u3)])
-        triangles.append([{"position": vec(ps[i]), "normal": vec(ns[i]),
-            "color": [cs[i].r, cs[i].g, cs[i].b, cs[i].a], "uv": [u[i] for u in uvs]} for i in range(3)])
+        corners = [{"position": vec(ps[i]), "normal": vec(ns[i]),
+            "color": [cs[i].r, cs[i].g, cs[i].b, cs[i].a], "uv": [u[i] for u in uvs]} for i in range(3)]
+        if verify_tangents:
+            basis = query.get_triangle_normal_tangents(dynamic, tid)
+            if not isinstance(basis, tuple) or len(basis) != 5 or basis[0] != dynamic or basis[1] is not True:
+                raise RuntimeError("原生SourceModel真TBN缺失或实际反射ABI不同: " + str(tid))
+            for index, corner in enumerate(corners):
+                field = "vector%d" % index
+                corner.update(normal=vec(getattr(basis[2], field)), tangent=vec(getattr(basis[3], field)),
+                              binormal=vec(getattr(basis[4], field)))
+        triangles.append(corners)
+    try:
+        comparison = compare_geometry(expected, triangles)
+    except RuntimeError as error:
+        context = {"mesh": item["path"], "pid": contract["mesh"]["pid"], "source_fbx": item["source"],
+                   "source_fbx_sha256": item["identity"]["source_sha256"],
+                   "source_json": contract["mesh"]["source_json"],
+                   "source_json_sha256": sha(contract["mesh"]["source_json"]),
+                   "vertex_color_mode": vertex_color_mode, "verify_tangents": verify_tangents}
+        raise RuntimeError("FX.NativeGeometry " + json.dumps(context, ensure_ascii=False, sort_keys=True) +
+                           ": " + str(error)) from error
     return {"mesh": item["path"], "source_fbx_sha256": item["identity"]["source_sha256"],
             "source_json_sha256": sha(contract["mesh"]["source_json"]), "source_model": True,
-            "uv_channels": channels, "verified": True, **compare_geometry(expected, triangles)}
+            "uv_channels": channels, "verified": True, "vertex_color_mode": vertex_color_mode,
+            "source_model_color_values_verified": True,
+            "original_unity_absent_color_default_proven": False, **comparison}
 
 
 def build(plan, session, *, unreal):

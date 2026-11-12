@@ -1,0 +1,52 @@
+{
+  "configuration_mode": "ProjectConfiguredFromWeaponMotionAndSourceCurves",
+  "original_runtime_cue_verified": false,
+  "reference": "Saved/Codex/PyriosActionFX_20261111/SkillPoses/poses.json",
+  "source_preparation": "Saved/Codex/FXProduction_20261026_R1/Preparation_20261028_R14/preparation.json.gz",
+  "front_preparation": "Saved/Codex/PyriosActionFX_20261111/VisualSourceAudit_R1/ExSpecialFrontTyped/Preparation",
+  "meaning": "基于实际角色姿态和源曲线制作，时点不是原版调用表。原粒子内部 Delay、Lifetime 与变换曲线保留，各层使用阶段局部 System.Age。",
+  "actions": {
+    "Normal03": {
+      "main_seconds": 1.4,
+      "existing_late_phases": "AAADocs/Assets/Pyrios/FX/Pyrios_Normal03_Phases.json",
+      "phases": [
+        {"prefix": "M00_", "member": "03_MeleeTrail", "start_seconds": 0.0, "purpose": "保持首个刀弧起点；参考画面约动作0.03秒出现。"},
+        {"prefix": "M01_", "member": "01_weapon", "start_seconds": 0.0, "end_seconds": 0.08333333333333333, "purpose": "开招短暂武器拉伸层，参考长刀光后转入残影。"},
+        {"prefix": "M02_", "member": "02_Hit", "start_seconds": 0.06666666666666667, "end_seconds": 0.13333333333333333, "purpose": "第一段静态人物残影，参考约0.072秒出现；不以Hit名称作为命中事件。"},
+        {"prefix": "M03_", "member": "04_Aura", "start_seconds": 0.06666666666666667, "end_seconds": 0.3, "purpose": "残影阶段光晕与点光，角色恢复后关闭。"},
+        {"prefix": "M04_", "member": "05_MeleeTrail", "start_seconds": 0.08333333333333333, "purpose": "第二次斜斩，参考约0.088秒。"},
+        {"prefix": "M05_", "member": "06_AuraSmoke", "start_seconds": 0.08333333333333333, "purpose": "第二斩伴随烟，保持原粒子有限寿命。"},
+        {"prefix": "M06_", "member": "07_Hit", "start_seconds": 0.11666666666666667, "end_seconds": 0.21666666666666667, "purpose": "第二段残影，项目分配到斜斩与上挑之间。"},
+        {"prefix": "M07_", "member": "08_Hit", "start_seconds": 0.18333333333333332, "end_seconds": 0.3, "purpose": "上挑残影，参考0.19～0.23秒上挑及0.28～0.33秒角色回归。"},
+        {"prefix": "M08_", "member": "08_MeleeTrailAura", "start_seconds": 0.18333333333333332, "purpose": "上挑残影配套刀光。"},
+        {"prefix": "M09_", "member": "09_MeleeTrail", "start_seconds": 0.2, "purpose": "上挑刀弧，与前两斩分开。"},
+        {"prefix": "M10_", "member": "10_Dust", "start_seconds": 0.2, "purpose": "上挑接地尘土，保留源内部延迟与消退。"}
+      ]
+    },
+    "Special": {
+      "main_seconds": 1.5,
+      "phases": [
+        {"prefix": "M00_", "member": "01_Trail", "start_seconds": 0.15, "purpose": "第一段斜向挥刀；刀尖速度峰约0.167秒，源旋转峰在局部0.008秒。"},
+        {"prefix": "M01_", "member": "02_Trail", "start_seconds": 0.43333333333333335, "purpose": "反向第二刀；刀尖速度峰约0.5秒，源旋转峰在局部0.058秒。"},
+        {"prefix": "M02_", "member": "03_Trail", "start_seconds": 0.8, "purpose": "第三刀向前释放；源曲线是0.4秒前行5.28米的刃波，与旋转刀光分开。"},
+        {"prefix": "M03_", "member": "04_X-Weapon", "start_seconds": 0.7666666666666667, "purpose": "第三刀武器扫掠伴随层，沿用项目拖尾几何与有限寿命。"},
+        {"prefix": "M04_", "member": "05_Decal", "start_seconds": 0.15, "purpose": "第一刀接地伴随烟尘；项目对应关系，待集中画面对比。"},
+        {"prefix": "M05_", "member": "06_Decal", "start_seconds": 0.43333333333333335, "purpose": "第二刀接地伴随烟尘；项目对应关系，待集中画面对比。"}
+      ]
+    },
+    "ExSpecial": {
+      "main_seconds": 2.0,
+      "phases": [
+        {"prefix": "M00_", "member": "06_Trail", "start_seconds": 1.2666666666666666, "purpose": "末段两侧残影伴随层之一；源结构位于角色侧前约3米，避免开招时整屏先出。"},
+        {"prefix": "M01_", "member": "07_Trail", "start_seconds": 1.2666666666666666, "purpose": "末段另一侧残影伴随层，与06同阶段；原宿主及缺失蒙皮内容仍未知。"}
+      ],
+      "front_phases": [
+        {"member": "01_Trail", "start_seconds": 0.2, "purpose": "第一主挥刀；源旋转峰局部0.025秒对齐刀尖约0.233秒。"},
+        {"member": "02_Trail", "start_seconds": 0.4, "purpose": "第二主挥刀；源旋转峰局部0.058秒对齐刀尖约0.467秒。"},
+        {"member": "03_Trail", "start_seconds": 0.55, "purpose": "抬升段旋转斩；源旋转峰局部0.042秒对齐刀尖约0.583秒。"},
+        {"member": "04_Trail", "start_seconds": 0.8833333333333333, "purpose": "下落段近竖直挥刀；源近竖直刀弧与局部0.008秒旋转峰对齐约0.9秒。"},
+        {"member": "05_Trail", "start_seconds": 1.2666666666666666, "purpose": "末段前冲刃波；源位置曲线前行4.84米，静态层局部17/60秒开始消退、26/60秒结束。"}
+      ]
+    }
+  }
+}

@@ -10,7 +10,7 @@
 
 替换规则（其余代码逐行保留）：
 - 运动矢量与 GBuffer 标记位输出删除；
-- 逐对象阴影与级联阴影采样替换为组件提供的 KeyLightVisibility；
+- 逐对象/级联阴影改用明确的UE项目深度比较输入，与角色级KeyLightVisibility合并；
 - 角色实体缓冲 t1 替换为材质参数：主光颜色/方向来自组件，其余字段来自 Entity* 参数；
 - t3/t4/t5/t6 换成 MainTex/LightTex/OtherDataTex/OtherDataTex2，t7 MatCap 数组换成五张独立贴图；
 - 主色、编码前边缘光和 Bloom 亮度权重分别输出到 Custom 引脚，由材质图配置合成；不是 UE MRT。
@@ -29,6 +29,7 @@ DAT_PATH = SHADER_DIR / "PyriosRaw/miHoYo_Character_NapAvatarStandard.dat"
 PASS_NAME = "CharacterToonDeferred"
 # 原始 DXBC 的 hash；该片元的 and r5.w, r3.w, l(0x00000001) 用作布尔分组标志。
 SKIN_FLAG_FRAGMENT_HASH = "9225f290963128b1"
+ADDITIONAL_LIGHT_VERTEX_HASH = "26214fb5eedfcbdd"
 # 两个 _FX_UNCLIP_* 变体打开屏幕贴图（_ScreenImage）、二次自发光与特殊武器自发光分支；
 # Pyrios 胸口和右臂的蓝光就来自 Body_1 的 _ScreenImage / _SpecialWeaponEmission。
 KEYWORDS = {"_NAP_SHADER_QUALITY_HIGH", "_MATCAP_ON",
@@ -76,12 +77,86 @@ EXTRA_VECTORS = ("EntityParams", "EntityAmbient", "EntitySkinAmbient", "NormalYS
                  "MC_A1", "MC_A2", "MC_A3", "MC_A4", "MC_A5",
                  "MC_B1", "MC_B2", "MC_B3", "MC_B4", "MC_B5")
 TEXTURES = tuple(TEXTURE_REGISTERS.values()) + ("MatCapTex1", "MatCapTex2", "MatCapTex3", "MatCapTex4", "MatCapTex5")
-BUILTINS = ("UV", "UV2", "Time", "WorldPos", "CameraPos", "VCol", "FaceSign")
+BUILTINS = ("UV", "UV2", "Time", "WorldPos", "CameraPos", "VCol", "FaceSign", "VertexAdditionalLight", "PixelShadowVisibility")
+
+# 源VP的四局部灯计算，不加入NdotL或阴影；材质图仅将最终RGB插值到片元。
+ADDITIONAL_LIGHT_CODE = r"""float3 positions[4] = { AdditionalLightPosition0.xyz, AdditionalLightPosition1.xyz, AdditionalLightPosition2.xyz, AdditionalLightPosition3.xyz };
+float3 directions[4] = { AdditionalLightDirection0.xyz, AdditionalLightDirection1.xyz, AdditionalLightDirection2.xyz, AdditionalLightDirection3.xyz };
+float4 attenuations[4] = { AdditionalLightAttenuation0, AdditionalLightAttenuation1, AdditionalLightAttenuation2, AdditionalLightAttenuation3 };
+float3 colors[4] = { AdditionalLightColor0.xyz, AdditionalLightColor1.xyz, AdditionalLightColor2.xyz, AdditionalLightColor3.xyz };
+float3 result = 0;
+[unroll] for (int i = 0; i < 4; ++i)
+{
+    if (i < (int)AdditionalLightCount)
+    {
+        float3 delta = positions[i] - WorldPos * 0.01;
+        float distanceSquared = max(dot(delta, delta), 1.17549435e-38);
+        float3 toLight = delta * rsqrt(distanceSquared);
+        float4 a = attenuations[i];
+        float rangeTerm = a.x * distanceSquared;
+        float inverseDistance = 1;
+        if (-0.5 < a.y) { inverseDistance = 1.0 / distanceSquared; rangeTerm *= rangeTerm; }
+        if (a.y < -1.5) rangeTerm = rangeTerm >= 1 ? 1 : 0;
+        float distanceAttenuation = saturate(1 - rangeTerm);
+        distanceAttenuation = distanceAttenuation * distanceAttenuation * inverseDistance;
+        float angleAttenuation = saturate(dot(directions[i], toLight) * a.z + a.w);
+        result += colors[i] * (angleAttenuation * angleAttenuation * distanceAttenuation * AdditionalLightGlobalIntensity);
+    }
+}
+return result;"""
+
+SHADOW_CAPTURE_CODE = r"""if (UseCharacterShadowCaptures < 0.5) return 1;
+struct FCharacterDepthShadow
+{
+    float Evaluate(Texture2D T, float3 P, float3 O, float3 F, float3 R, float3 U,
+        float Width, float Near, float Far, float Bias, float Radius, out float Covered)
+    {
+        float3 D = P - O;
+        float2 UV = float2(dot(D, R), -dot(D, U)) / Width + 0.5;
+        float Z = dot(D, F);
+        Covered = all(UV >= 0) && all(UV <= 1) && Z >= Near && Z <= Far;
+        if (Covered < 0.5) return 1;
+        uint W, H;
+        T.GetDimensions(W, H);
+        float2 Texel = 1.0 / float2(W, H);
+        float Visibility = 0;
+        [unroll] for (int Y = -1; Y <= 1; ++Y)
+            [unroll] for (int X = -1; X <= 1; ++X)
+            {
+                float2 Q = UV + float2(X, Y) * Texel * Radius;
+                // 明确读取mip0最近texel；不额外占五路Sampler或受RT地址模式影响。
+                uint2 Pixel = min(uint2(saturate(Q) * float2(W, H)), uint2(W - 1, H - 1));
+                float Depth = T.Load(int3(Pixel, 0)).r;
+                Visibility += all(Q >= 0) && all(Q <= 1) ? step(Z - Bias, Depth) : 1;
+            }
+        return Visibility / 9.0;
+    }
+};
+FCharacterDepthShadow F;
+float3 P = WorldPos + normalize(WorldNormal) * ShadowNormalBias;
+float Covered;
+float Object = F.Evaluate(ShadowDepth0, P, ShadowOrigin0.xyz,
+    ShadowForward.xyz, ShadowRight.xyz, ShadowUp.xyz, ShadowObjectWidth, ShadowNear, ShadowFar,
+    ShadowDepthBias, ShadowFilterRadius, Covered);
+float Cascade = F.Evaluate(ShadowDepth1, P, ShadowOrigin1.xyz,
+    ShadowForward.xyz, ShadowRight.xyz, ShadowUp.xyz, ShadowCascadeWidths.x, ShadowNear, ShadowFar,
+    ShadowDepthBias, ShadowFilterRadius, Covered);
+if (Covered < 0.5) Cascade = F.Evaluate(ShadowDepth2, P, ShadowOrigin2.xyz,
+    ShadowForward.xyz, ShadowRight.xyz, ShadowUp.xyz, ShadowCascadeWidths.y, ShadowNear, ShadowFar,
+    ShadowDepthBias, ShadowFilterRadius, Covered);
+if (Covered < 0.5) Cascade = F.Evaluate(ShadowDepth3, P, ShadowOrigin3.xyz,
+    ShadowForward.xyz, ShadowRight.xyz, ShadowUp.xyz, ShadowCascadeWidths.z, ShadowNear, ShadowFar,
+    ShadowDepthBias, ShadowFilterRadius, Covered);
+if (Covered < 0.5) Cascade = F.Evaluate(ShadowDepth4, P, ShadowOrigin4.xyz,
+    ShadowForward.xyz, ShadowRight.xyz, ShadowUp.xyz, ShadowCascadeWidths.w, ShadowNear, ShadowFar,
+    ShadowDepthBias, ShadowFilterRadius, Covered);
+return lerp(1.0, min(Object, Cascade), ShadowStrength);"""
 
 
 def find_variant():
     """返回 (片元程序文本, Properties 块文本)。"""
     props, in_pass, prog, cur, found = [], False, None, None, None
+    vertex_found = False
     with TEXT_PATH.open(encoding="utf-8", errors="replace") as fh:
         in_props = False
         for line in fh:
@@ -103,6 +178,8 @@ def find_variant():
                     break
                 cur = {"prog": prog, "api": s.split('"')[1].strip(), "kw": set(), "lines": [line]}
             elif cur is not None:
+                if cur["prog"] == "vp" and s == '"// hash: ' + ADDITIONAL_LIGHT_VERTEX_HASH:
+                    vertex_found = True
                 if s.startswith("Keywords {") or s.startswith("Local Keywords {"):
                     cur["kw"] |= set(re.findall(r'"([^"]+)"', s))
                 cur["lines"].append(line)
@@ -110,6 +187,8 @@ def find_variant():
                     found = cur
     if found is None:
         raise RuntimeError("未找到 %s 的片元变体 %s" % (PASS_NAME, sorted(KEYWORDS)))
+    if not vertex_found:
+        raise RuntimeError("缺少已核原VP四灯程序: " + ADDITIONAL_LIGHT_VERTEX_HASH)
     return "".join(found["lines"]), props
 
 
@@ -239,8 +318,8 @@ def replace_main_light_shadows(lines):
     # 原程序有两路阴影结果：r11.w 直接混合 ReceiveShadows；r10.w 还受实体主光权重影响。
     # r12.y 此时仍是实体主光权重，后续 PackedParams 分支会按原程序消费 r10.w。
     lines[start:end + 1] = [
-        "  r11.w = lerp(1.0, KeyLightVisibility, _ReceiveShadows.x);",
-        "  r10.w = lerp(1.0, KeyLightVisibility, _ReceiveShadows.x * _AvatarMainLightColor.w * saturate(r12.y * 2.0 - 1.0));",
+        "  r11.w = lerp(1.0, min(KeyLightVisibility, PixelShadowVisibility), _ReceiveShadows.x);",
+        "  r10.w = lerp(1.0, min(KeyLightVisibility, PixelShadowVisibility), _ReceiveShadows.x * _AvatarMainLightColor.w * saturate(r12.y * 2.0 - 1.0));",
     ]
 
 
@@ -267,7 +346,7 @@ def transform(program):
     b = next(i for i, l in enumerate(lines) if "o2.z = " in l)
     del lines[a:b + 1]
 
-    # 2. 阴影：组件提供角色级可见度，保留原程序输出与其它活跃寄存器。
+    # 2. 阴影：显式项目深度比较与原粗遮挡合并，保原实体权重/输出；不冒原t15/t0数据等价。
     replace_main_light_shadows(lines)
 
     # 3'. 运行时 FX 覆盖分支（覆盖边缘光、覆盖双色调）。Pyrios 材质都关着，pyrios_material_plan 要求其为 0；
@@ -288,10 +367,16 @@ def transform(program):
         return ENTITY_FIELDS[off]
     text = must_sub(r"t1\[r\d+\.\w\]\.val\[(\d+)/4(?:\+(\d))?\]", entity, text, "entity")
 
-    # 4. 贴图。UV 都在 Unity 约定（V 向上）下计算，F.S 采样时翻成 UE 的 V。
+    # 4. 保留源采样方式和显式 mip bias；只转换 Unity/UE 的 V 方向。
     for reg, name in TEXTURE_REGISTERS.items():
-        text = must_sub(reg + r"\.Sample(?:Bias)?\(s\d_s, ([^,()]+)(?:, _CharacterSampleTextureBias\.x)?\)",
-                        r"F.S(%s, %sSampler, \1)" % (name, name), text, reg)
+        def sample(match):
+            biased, uv, bias = match.groups()
+            if bool(biased) != bool(bias):
+                raise RuntimeError("源采样参数不匹配: " + reg)
+            return ("F.SB(%s, %sSampler, %s, %s)" % (name, name, uv, bias)
+                    if biased else "F.S(%s, %sSampler, %s)" % (name, name, uv))
+        text = must_sub(reg + r"\.Sample(Bias)?\(s\d_s, ([^,()]+)(?:, (_CharacterSampleTextureBias\.x))?\)",
+                        sample, text, reg)
     text = must_sub(r"t2\.SampleBias\(s0_s, [^,]+, _CharacterSampleTextureBias\.x\)\.xyz",
                     "float3(0.0, 0.0, 0.0)", text, "overlay", 1)
     text = must_sub(r"t7\.Sample\(s2_s, (r\d+\.xyz)\)",
@@ -348,6 +433,7 @@ struct NAPF
     float3 U(float3 v) { return float3(v.x, v.z, v.y); }
     // Unity UV（V 向上）采样 UE 导入的贴图（V 向下）。
     float4 S(Texture2D T, SamplerState Smp, float2 uv) { return Texture2DSample(T, Smp, float2(uv.x, 1.0 - uv.y)); }
+    float4 SB(Texture2D T, SamplerState Smp, float2 uv, float bias) { return Texture2DSampleBias(T, Smp, float2(uv.x, 1.0 - uv.y), bias); }
     // MatCap UV 在 Unity 贴图空间（V 向上），采样前翻成 UE 空间。slice 为材质组索引，>=5 时不会被调用。
     float4 MatCap(Texture2D T1, SamplerState S, Texture2D T2, Texture2D T3, Texture2D T4, Texture2D T5, float3 uvs)
     {
@@ -381,7 +467,7 @@ float4 v4 = float4(F.U(bitW), posU.z);
 float4 vcol = float4(VCol, Parameters.VertexColor.a);
 bool vcFlag = ((((int)(vcol.b * 255.0 + 0.5)) >> 5) & 1) != 0;
 float4 v7 = float4(1.0 - EntityParams.z * vcol.a, vcFlag ? 0.0 : vcol.a, vcFlag ? 1.0 : 0.0, 0.0);
-float3 v8 = float3(0.0, 0.0, 0.0);
+float3 v8 = VertexAdditionalLight;
 
 float4 _WorldSpaceCameraPos = float4(F.U(CameraPos) * 0.01, 1.0);
 float4 _AvatarMainLightColor = float4(KeyLightColor.rgb * SceneLightStrength, 1.0);
@@ -416,7 +502,7 @@ def main():
               [{"name": n, "kind": "extra"} for n in EXTRA_VECTORS] +
               [{"name": n, "kind": "material"} for n in material] +
               [{"name": n, "kind": "global"} for n in globals_])
-    # 输出分离不改变原185输入或色彩属性身份；契约变化必须另行迁移，不能顺手重写。
+    # 输入表须先显式迁移；生成器不自动接受未知接口或色彩属性变化。
     if json.loads(OUT_INPUTS.read_text(encoding="utf-8")) != {"inputs": inputs, "color_properties": color_props}:
         raise RuntimeError("原 Toon 输入契约变化，拒绝生成")
     OUT_HLSL.write_text(PRELUDE + "\n" + code, encoding="utf-8")

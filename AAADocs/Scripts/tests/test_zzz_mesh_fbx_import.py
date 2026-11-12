@@ -62,6 +62,22 @@ class MeshCorners(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "缺失"):
             FBX.build(mesh)
 
+    def test_sparse_uv_keeps_source_channel_and_corner_addresses(self):
+        mesh = self.mesh()
+        mesh.pop("m_UV0")
+        original_uv = list(mesh["m_UV1"])
+        text = FBX.build(mesh, preserve_sparse_uv_channels=True)
+        layers = re.findall(r"LayerElementUV:\s*\d+\s*\{(.*?)\n\t\t\}", text, re.S)
+        self.assertEqual(len(layers), 2)
+        self.assertEqual(set(array(layers[0], "UV")), {0.0})
+        polygons = array(text, "PolygonVertexIndex", int)
+        values, indices = array(layers[1], "UV"), array(layers[1], "UVIndex", int)
+        for corner, encoded in enumerate(polygons):
+            point = encoded if encoded >= 0 else -encoded - 1
+            self.assertEqual(values[indices[corner]*2:indices[corner]*2+2], original_uv[point*2:point*2+2])
+        self.assertNotIn("m_UV0", mesh)
+        self.assertEqual(mesh["m_UV1"], original_uv)
+
     def test_preserved_winding_keeps_every_attribute_on_its_control_point(self):
         source = self.mesh()
         text = FBX.build(source, reverse_winding=False)

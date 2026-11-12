@@ -1,200 +1,227 @@
 """@file nap_avatar_simple_material_plan.py
-@brief 首个 Ghost 资源专项的纯离线材质计划；不读取 Shader/Raw，不操作 UE。
-
-保留已审计源材质和裁剪算法，明确采用 UE 对应的受光、深度和运动矢量。
-返回数据供 FX 的完整 create-only 批次消费；不决定实例时序或动态 Fade。
+@brief 两个准确Simple MID的源程序、材质参数与显式UE移植配置；供FX原create-only批次消费。
 """
 import hashlib
 import json
 import math
-import re
 from pathlib import Path
 
 from zzz_fx_asset_session import version_name
 from zzz_fx_import_assets import plan_imports
+from gen_nap_avatar_simple_hlsl import WEAPON, GHOST, GHOST_KEYWORDS, BASE
+from pyrios_material_plan import additional_material_values
 
-SCHEMA = "nap_avatar_simple_ue_ghost/v1"
-MATERIAL_PID = "1604852325208651105"
+HERE = Path(__file__).resolve().parent
+SCHEMA = "nap_avatar_simple_project/v2"
 SHADER_PID = "7393264008099488228"
-MATERIAL_SHA = "49c51577019ded756decc34b03786f90342eef36ed0c42a4bb77c743d7b0b3f6"
-DEPENDENCY_SHA = "2043160ab98e68e66db323b32f48dd10d74b59db1ae9be95da17d11bfda81222"
-KEYWORDS = ("_EXTRA_DITHER_EFFECT", "_FX_CLIP", "_FX_UNCLIP_SCREEN_IMAGE_OVERRIDE_2_TONE", "_OVERRIDE_OUTLINE")
-TEXTURE_PIDS = ("8348973968083319186", "-2525522941621002874", "-7386911108408904686")
 SHARED = "/Game/Characters/Shared/FX/ZZZ"
-SCALARS = ("_DitherAlpha", "_DitherAlpha2", "_DitherEffectAlpha", "_ScreenImage", "_ScreenScale",
-           "_OverrideOutline", "_OverrideOutlineUseUV2", "_Outline", "_OutlineWidth", "_Metallic",
-           "_SpecIntensity", "_Glossiness", "_RimGlow", "_OverrideRimGlow")
-VECTORS = ("_Color", "_ScreenColor", "_OutlineColor", "_OverrideOutlineColor",
-           "_OverrideOutlineSpeed", "_ScreenImageUvMove")
-# 对应效果的初始配置，尚未经过 UE 画面校准；与原 HDR 值分别保存。
-UE_DEFAULTS = {"UE_SurfaceLitScale": 0.25, "UE_SurfaceEmissionScale": 0.1,
-               "UE_OutlineEmissionScale": 0.5, "UE_OutlineWidthCm": 0.2}
-UE_RANGES = {"UE_SurfaceLitScale": (0, 1), "UE_SurfaceEmissionScale": (0, 8),
-             "UE_OutlineEmissionScale": (0, 8), "UE_OutlineWidthCm": (0, 2)}
-THRESHOLDS = (0.058824, 0.529412, 0.176471, 0.647059, 0.764706, 0.294118, 0.882353, 0.411765,
-              0.235294, 0.705882, 0.117647, 0.588235, 0.941176, 0.470588, 0.823529, 0.352941)
-# 来自既有 fp104/fp920 缓存反汇编；不认证 GPU binary 或实际游戏 pass 选择。
-DITHER_CODE = """const float thresholds[16] = {0.058824,0.529412,0.176471,0.647059,
-0.764706,0.294118,0.882353,0.411765,0.235294,0.705882,0.117647,0.588235,
-0.941176,0.470588,0.823529,0.352941};
-uint2 p = uint2(PixelPosition.xy);
-float threshold = thresholds[((p.x & 3u) << 2u) | (p.y & 3u)];
-float alpha = _DitherAlpha * _DitherAlpha2;
-float coverage = 1.0;
-if (_DitherEffectAlpha < 0.941176 && _DitherEffectAlpha < threshold) coverage = 0.0;
-if (alpha < 0.941176 && alpha < threshold) coverage = 0.0;
-return coverage;"""
-SURFACE_CODE = """float3 base = _Color.rgb;
-float2 screenUV = NormalView.xy * float2(0.5,-0.5) + 0.5;
-screenUV = screenUV * _ScreenTex_ST.xy + _ScreenTex_ST.zw;
-screenUV += _ScreenImageUvMove.xy * Time + _ScreenImageUvMove.zw;
-float4 screen = Texture2DSample(_ScreenTex, _ScreenTexSampler, screenUV) * _ScreenColor;
-float2 maskUV = UV2 * _ScreenMask_ST.xy + _ScreenMask_ST.zw;
-float mask = Texture2DSample(_ScreenMask, _ScreenMaskSampler, maskUV).r;
-float3 image = lerp(base, screen.rgb, screen.a);
-return (_ScreenImage > 0.5) ? lerp(base, image, mask) : base;"""
-OUTLINE_CODE = """float2 uv = (_OverrideOutlineUseUV2 > 0.5) ? UV2 : UV0;
-uv = uv * _OverrideOutlineTex_ST.xy + _OverrideOutlineTex_ST.zw;
-uv += _OverrideOutlineSpeed.xy * Time;
-float4 noise = Texture2DSample(_OverrideOutlineTex, _OverrideOutlineTexSampler, uv);
-float3 base = _Color.rgb * _OutlineColor.rgb;
-float3 overrideColor = noise.rgb * _OverrideOutlineColor.rgb;
-return (_OverrideOutline > 0.5) ? lerp(base, overrideColor, noise.a * _OverrideOutlineColor.a) : base;"""
-WPO_CODE = "return normalize(VertexNormalWS) * (_Outline * _OutlineWidth * UE_OutlineWidthCm);"
+PROGRAM_FILE = HERE / "nap_avatar_simple_programs.json"
+CONFIG_FILE = HERE.parent / "Assets/Pyrios/Rendering/Pyrios_Simple_Rendering.json"
+GLOBALS_FILE = HERE.parent / "Assets/Pyrios/Rendering/Pyrios_Toon_Globals.json"
+TEXTURE_PIDS = ("8348973968083319186", "-2525522941621002874", "-7386911108408904686")
+LIGHT_INPUTS = {"KeyLightDirectionWS": 4, "KeyLightColor": 4,
+                "SceneLightStrength": 1, "KeyLightVisibility": 1}
+PART_CODE = """uint id=min((uint)(VCol.a*255.0+_PartIDOffset+0.5),63u);
+uint4 masks=(uint4)round(_ShowPartIDs);
+return ((masks[id>>4u] & (1u<<(id&15u)))!=0u)?1.0:0.0;"""
+STYLE_CODE = """uint flag=((uint)(VCol.b*255.0+0.5)>>5u)&1u;
+return float2(flag!=0u?0.0:VCol.a,(float)flag);"""
+WPO_CODE = """float width=min(max(_Outline,0.0)*max(_OutlineWidth,0.0)*UE_OutlineWidthCm,
+UE_OutlineMaxOffsetCm);
+return normalize(VertexNormalWS)*width;"""
+DISPLAY_CODE = """return (BaseRGB + clamp(RimRaw*UE_RimGain,0.0,UE_RimMaxIntensity))*UE_OutputScale;"""
 
 
 def _read(path):
-    path = Path(path)
-    data = path.read_bytes()
+    data = Path(path).read_bytes()
     return json.loads(data.decode("utf-8-sig")), hashlib.sha256(data).hexdigest()
 
 
 def _number(value, name):
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
-        raise ValueError("非有限数值参数: " + name)
+    if type(value) not in (int, float) or not math.isfinite(value) or abs(value) > 3.4028234663852886e38:
+        raise ValueError("Simple材质值必须有限且可表示为float32：" + name)
     return float(value)
 
 
-def _package(path, directory):
-    if not isinstance(path, str) or not re.fullmatch(re.escape(directory) + r"/[A-Za-z0-9_]+", path):
-        raise ValueError("无效或越界的资源目标: " + repr(path))
-    return path
+def _value(value, dim, name):
+    if dim == 1:
+        return _number(value, name)
+    if not isinstance(value, (list, tuple)) or len(value) != dim:
+        raise ValueError("Simple参数维度不同：" + name)
+    return [_number(v, name) for v in value]
 
 
-def dither_coverage(x, y, effect_alpha, alpha, alpha2):
-    """源 16-cell 双裁剪判断的 CPU 参考；只检验静态覆盖率，不生成 Fade。"""
-    t = THRESHOLDS[((int(x) & 3) << 2) | (int(y) & 3)]
-    a = alpha * alpha2
-    return int(not (effect_alpha < 0.941176 and effect_alpha < t)
-               and not (a < 0.941176 and a < t))
+def project_configuration(config_path=CONFIG_FILE, globals_path=GLOBALS_FILE):
+    """显式UE初值与共享Toon配置；预览初值不证明运行已接实际灯或System.Age。"""
+    config, config_sha = _read(config_path)
+    shared, shared_sha = _read(globals_path)
+    if (config["mode"] != "ProjectConfiguredMaskedDoubleDraw"
+            or config["color_mapping"] != "RawSerializedValues"
+            or config["lighting_transport"] != "ExplicitOwnerSnapshot"
+            or config["shadow_transport"] != "OwnerKeyLightVisibility"
+            or config["outline_geometry"] != "BoundedUEVertexNormalWorldOffset"
+            or config["source_runtime_certified"] is not False):
+        raise ValueError("未支持的Simple工程配置")
+    parameters = dict(config["parameters"])
+    parameters.update({name: shared[name] for name in ("EntityParams", "EntityAmbient", "NormalYSign")})
+    programs, program_sha = _read(PROGRAM_FILE)
+    for program in programs.values():
+        for name in program["parameters"]:
+            if not name.startswith("Global_") or name in parameters:
+                continue
+            source_name, row = name[len("Global_"):].rsplit("_R", 1)
+            if row != "0" or "_" + source_name not in shared:
+                raise ValueError("Simple缺明确全局配置：" + name)
+            parameters[name] = shared["_" + source_name]
+    additional = shared["ProjectAdditionalLighting"]
+    if additional["configured"] is not True:
+        raise ValueError("Simple缺明确的局部灯配置")
+    values = additional_material_values(additional["sample"])
+    if values["scalars"]["AdditionalLightCount"] != 0:
+        raise ValueError("Simple材质初值要求明确零局部灯；活动灯由真实宿主快照绑定")
+    parameters.update(values["scalars"])
+    parameters.update({name: list(value) for name, value in values["vectors"].items()})
+    for name in ("UE_OutputScale", "UE_RimGain", "UE_RimMaxIntensity", "UE_OutlineWidthCm", "UE_OutlineMaxOffsetCm"):
+        if _number(parameters[name], name) < 0:
+            raise ValueError("Simple表现配置必须非负：" + name)
+    if (not 0 < parameters["KeyLightProxyDistanceMeters"] < parameters["KeyLightProxyRadiusMeters"]
+            or not 0 < parameters["UE_OutlineMaxOffsetCm"]
+            or not 0 <= parameters["ExposureCompensationWeight"] <= 1
+            or not 0 <= parameters["KeyLightVisibility"] <= 1
+            or parameters["SceneLightStrength"] < 0):
+        raise ValueError("Simple灯代理／阴影／轮廓／曝光配置无效")
+    return dict(mode=config["mode"], parameters=parameters,
+                inputs=[dict(path=str(Path(p).resolve()), sha256=s)
+                        for p, s in ((config_path, config_sha), (globals_path, shared_sha), (PROGRAM_FILE, program_sha))])
 
 
-def shader_contract(role):
-    """材质图使用的既有审计算法及明确 UE 对应投影/背面轮廓策略。"""
-    if role not in ("surface", "outline"):
-        raise ValueError("未知材质角色: " + repr(role))
-    return {"coverage": DITHER_CODE, "color": SURFACE_CODE if role == "surface" else OUTLINE_CODE,
-            "wpo": None if role == "surface" else WPO_CODE,
-            "face_mask": "both" if role == "surface" else "back_faces_only"}
+def _material_value(saved, name, dim):
+    if name.endswith("_ST") and name[:-3] in saved["m_TexEnvs"]:
+        env = saved["m_TexEnvs"][name[:-3]]
+        value = [env["m_Scale"]["X"], env["m_Scale"]["Y"], env["m_Offset"]["X"], env["m_Offset"]["Y"]]
+    elif dim == 1:
+        value = saved["m_Floats"][name]
+    else:
+        value = [saved["m_Colors"][name][channel] for channel in "rgba"]
+    return _value(value, dim, name)
 
 
-def make_plan(material_source, dependency_source, *, texture_targets, revision, ue_parameters=None):
-    """@return 固定源身份、纹理导入项、两材质及 MIC、绑定和未闭合来源。
-    @param texture_targets 同 revision 的 plan_imports 返回的三个准确纹理包。
-    @param ue_parameters 仅允许公开 UE 对应参数；不接收 entity/cue/Fade 值。
+def make_plan(material_source, dependency_source, *, texture_targets, revision, configuration):
+    """两MID沿准确dependency建立两role，不接收未知材质或替换已有MI。
+    configuration必须显式传project_configuration结果；FX负责同NS绑定实际灯/年龄及重复槽绘制。
     """
-    if not isinstance(revision, str) or not revision.strip():
-        raise ValueError("资源 revision 必须明确且非空")
-    material, sha = _read(material_source)
+    if not isinstance(revision, str) or not revision.strip() or configuration != project_configuration():
+        raise ValueError("Simple需要明确revision和当前完整工程配置")
+    material, material_sha = _read(material_source)
     deps, deps_sha = _read(dependency_source)
-    entry = deps.get(MATERIAL_PID)
-    if sha != MATERIAL_SHA or deps_sha != DEPENDENCY_SHA or not entry or entry["type"] != "Material":
-        raise ValueError("本资源专项只接受已冻结的 Ghost 材质身份")
-    if Path(entry["nativeJson"]).resolve() != Path(material_source).resolve():
-        raise ValueError("材质来源与 dependency 的 nativeJson 不一致")
-    if str(material["m_Shader"]["m_PathID"]) != SHADER_PID or deps[SHADER_PID]["name"] != "miHoYo/Character/NapAvatarSimple":
-        raise ValueError("未支持的 Shader family/身份")
-    if set(material["m_ShaderKeywords"].split()) != set(KEYWORDS):
-        raise ValueError("材质关键字与已审计模式不一致")
-    imported = plan_imports([dependency_source], revision=revision, selected_pids=TEXTURE_PIDS)
-    if texture_targets != imported["assets"]:
-        raise ValueError("三个纹理目标必须等于同 revision 的准确 create-only 导入计划")
-    textures = {}
-    for pid, item in imported["entries"].items():
-        native, native_sha = _read(deps[pid]["nativeJson"])
-        if native["m_Name"] != deps[pid]["name"]:
-            raise ValueError("纹理 native 身份不一致: " + pid)
-        textures[pid] = {**item, "pid": pid, "native": deps[pid]["nativeJson"], "native_sha256": native_sha,
-                         "png_sha256": item["identity"]["source_sha256"]}
-        _package(item["path"], SHARED + "/Textures")
+    matches = [(pid, row) for pid, row in deps.items() if isinstance(row, dict) and row.get("type") == "Material"
+               and Path(row["nativeJson"]).resolve() == Path(material_source).resolve()]
+    if len(matches) != 1 or matches[0][0] not in (WEAPON, GHOST):
+        raise ValueError("Simple只接受准确Normal03 Weapon／Ghost源MID")
+    pid, entry = matches[0]
+    cab = "CAB-aaae0e8930cadde29956f3036cb74bc6" if pid == WEAPON else "CAB-503295c6de2682dd5d07068d8f5f5d41"
+    if Path(material_source).resolve() != (BASE / "Assets/3077361824" / cab / "Material" / (pid + ".native.json")).resolve():
+        raise ValueError("Simple MID不在原准确CAB")
+    if (str(material["m_Shader"]["m_PathID"]) != SHADER_PID
+            or deps[SHADER_PID]["name"] != "miHoYo/Character/NapAvatarSimple"
+            or set(material["m_ShaderKeywords"].split()) != (set(GHOST_KEYWORDS) if pid == GHOST else set())):
+        raise ValueError("Simple shader／关键字身份不符")
     saved = material["m_SavedProperties"]
-    params = {n: {"dim": 1, "value": _number(saved["m_Floats"][n], n), "origin": "source_material"} for n in SCALARS}
-    for n in VECTORS:
-        params[n] = {"dim": 4, "value": [_number(saved["m_Colors"][n][k], n) for k in "rgba"], "origin": "source_material"}
-    texture_params = {}
-    for n in ("_ScreenTex", "_ScreenMask", "_OverrideOutlineTex", "_OverrideRimGlowTexFX"):
-        env = saved["m_TexEnvs"][n]
-        pid = str(env["m_Texture"]["m_PathID"])
-        if pid not in textures or env["m_Texture"]["IsNull"]:
-            raise ValueError("实际绑定纹理缺失: " + n)
-        texture_params[n] = texture_targets[pid]
-        params[n + "_ST"] = {"dim": 4, "value": [env["m_Scale"]["X"], env["m_Scale"]["Y"],
-                                                 env["m_Offset"]["X"], env["m_Offset"]["Y"]], "origin": "source_material"}
-    overrides = {} if ue_parameters is None else ue_parameters
-    if not isinstance(overrides, dict) or set(overrides) - set(UE_DEFAULTS):
-        raise ValueError("只允许公开 UE 调色/受光/描边参数，禁止填入源 runtime 伪值")
-    for n, default in UE_DEFAULTS.items():
-        v = _number(overrides.get(n, default), n)
-        lo, hi = UE_RANGES[n]
-        if not lo <= v <= hi:
-            raise ValueError("UE 参数越界: " + n)
-        params[n] = {"dim": 1, "value": v, "origin": "ue_equivalent_uncalibrated"}
-    source = {"material_pid": MATERIAL_PID, "material": str(Path(material_source)), "material_sha256": sha,
-              "dependency": str(Path(dependency_source)), "dependency_sha256": deps_sha, "shader_pid": SHADER_PID,
-              "shader_family": "miHoYo/Character/NapAvatarSimple", "keywords": list(KEYWORDS),
-              "disabled_passes": material["m_DisabledShaderPasses"], "enabled_pass_mask": material["m_EnabledPassMask"]}
-    materials, binding = [], {}
+    # 当前两个源MID四张基础图均使用Shader默认；不能把运行时猜测的角色图放进来。
+    for name in ("_MainTex", "_LightTex", "_OtherDataTex", "_OtherDataTex2"):
+        env = saved["m_TexEnvs"][name]
+        if not env["m_Texture"]["IsNull"] or env["m_Texture"]["m_PathID"] != 0:
+            raise ValueError("Simple基础图出现未支持的实际PPtr：" + name)
+    imported = (plan_imports([dependency_source], revision=revision, selected_pids=TEXTURE_PIDS)
+                if pid == GHOST else dict(assets={}, entries={}, targets=[]))
+    if texture_targets != imported["assets"]:
+        raise ValueError("Simple纹理目标须等于同revision准确导入计划")
+    textures = {}
+    for texture_pid, item in imported["entries"].items():
+        native, native_sha = _read(deps[texture_pid]["nativeJson"])
+        if native["m_Name"] != deps[texture_pid]["name"]:
+            raise ValueError("Simple纹理源名与dependency不同")
+        textures[texture_pid] = {**item, "pid": texture_pid, "native": deps[texture_pid]["nativeJson"],
+                                 "native_sha256": native_sha, "png_sha256": item["identity"]["source_sha256"]}
+    programs, program_sha = _read(PROGRAM_FILE)
+    source = dict(material=str(Path(material_source).resolve()), material_sha256=material_sha,
+                  dependency=str(Path(dependency_source).resolve()), dependency_sha256=deps_sha,
+                  shader_pid=SHADER_PID, material_pid=pid, serialized_keywords=material["m_ShaderKeywords"].split(),
+                  disabled_passes=material["m_DisabledShaderPasses"], enabled_pass_mask=material["m_EnabledPassMask"],
+                  configuration=configuration, programs_sha256=program_sha)
+    materials, bindings = [], {}
     for role in ("surface", "outline"):
-        properties = {"BlendMode": "BLEND_Masked", "ShadingModel": "MSM_DefaultLit" if role == "surface" else "MSM_Unlit",
-                      "TwoSided": True, "OpacityMaskClipValue": 0.5, "bDisableDepthTest": False,
-                      "bUsedWithNiagaraMeshParticles": True, "bUsedWithNiagaraSprites": False,
-                      "bAutomaticallySetUsageInEditor": False, "bHasPixelAnimation": True}
-        spec = {"role": role, "properties": properties, "params": params, "textures": texture_params,
-                "shader": shader_contract(role)}
-        identity = {"source": source, "revision": revision, "spec": spec, "schema": SCHEMA}
-        spec["master"] = SHARED + "/Materials/" + version_name("M_NapAvatarSimple_Ghost_" + role, identity)
-        spec["instance"] = SHARED + "/MaterialInstances/" + version_name("MI_Pyrois_Ghost_" + role, identity)
+        key = ("ghost_" if pid == GHOST else "weapon_") + role
+        program = programs[key]
+        params = {name: dict(dim=dim, value=_material_value(saved, name, dim), origin="source_material")
+                  for name, dim in program["material_params"].items()}
+        for name, dim in program["parameters"].items():
+            if name == "_MainTex_ST":
+                params[name] = dict(dim=4, value=_material_value(saved, name, 4), origin="source_material")
+            else:
+                params[name] = dict(dim=dim, value=_value(configuration["parameters"][name], dim, name),
+                                    origin="project_configuration")
+        for name in ("_Outline", "_OutlineWidth", "_PartIDOffset", "_ShowPartIDs"):
+            dim = 4 if name == "_ShowPartIDs" else 1
+            params[name] = dict(dim=dim, value=_material_value(saved, name, dim), origin="source_material")
+        masks = params["_ShowPartIDs"]["value"]
+        offset = params["_PartIDOffset"]["value"]
+        if any(v != int(v) or not 0 <= v <= 65535 for v in masks) or offset != int(offset) or not 0 <= offset <= 63:
+            raise ValueError("Simple源PartID位集或偏移无效")
+        for name, value in configuration["parameters"].items():
+            if name.startswith(("UE_", "Additional")) or name == "ExposureCompensationWeight":
+                dim = 4 if isinstance(value, list) else 1
+                params[name] = dict(dim=dim, value=_value(value, dim, name), origin="project_configuration")
+        bound_textures = {}
+        for name in program["textures"]:
+            env = saved["m_TexEnvs"][name]
+            texture_pid = str(env["m_Texture"]["m_PathID"])
+            if texture_pid not in textures or env["m_Texture"]["IsNull"]:
+                raise ValueError("Simple缺真实纹理：" + name)
+            bound_textures[name] = texture_targets[texture_pid]
+        # 保留原未启用Rim覆盖图与完整SavedProperties来源；它不冒充本变体活跃采样。
+        properties = dict(BlendMode="BLEND_Masked", ShadingModel="MSM_Unlit", TwoSided=True,
+                          OpacityMaskClipValue=0.5, bDisableDepthTest=False,
+                          bUsedWithNiagaraMeshParticles=True, bUsedWithNiagaraSprites=False,
+                          bAutomaticallySetUsageInEditor=False, bHasPixelAnimation=True)
+        spec = dict(role=role, properties=properties, params=params, textures=bound_textures,
+                    shader=program, part_code=PART_CODE, style_code=STYLE_CODE,
+                    wpo=WPO_CODE if role == "outline" else None,
+                    display=DISPLAY_CODE, face_mask="back" if role == "outline" else ("front" if pid == WEAPON else "both"),
+                    source_render_state={n: saved["m_Floats"][n] for n in ("_ZTestPreZ", "_ZWritePreZ", "_Cull")})
+        identity = dict(schema=SCHEMA, source=source, revision=revision, spec=spec)
+        spec["master"] = SHARED + "/Materials/" + version_name("M_NapAvatarSimple_" + key, identity)
+        spec["instance"] = SHARED + "/MaterialInstances/" + version_name("MI_Pyrois_Simple_" + key, identity)
         materials.append(spec)
-        binding[role] = spec["instance"]
-    targets = imported["targets"] + [p for m in materials for p in (m["master"], m["instance"])]
-    return {"schema": SCHEMA, "revision": revision, "source_identity": source, "textures": textures,
-            "materials": materials, "bindings": {MATERIAL_PID: binding}, "targets": sorted(targets),
-            "equivalence": {"mode": "ue_native_lit_masked_mesh", "source_runtime_certified": False,
-                "visual_calibrated": False, "source_outputs": ["SV_Target0", "SV_Target1", "SV_Target2", "SV_Target3"],
-                "default_textures": {"white": ["_MainTex", "_OtherDataTex", "_OtherDataTex2", "_CharacterRampTex"], "linearGray": ["_LightTex"]},
-                "differences": ["UE DefaultLit 替代源 toon/主灯/附加灯及影图响应；自发光独立",
-                    "当前材质不采样 normal map/anisotropy；使用 UE normal/TBN，源 tangent4 的执行未验证",
-                    "UE Masked 深度替代原 Outline/PreZ/Equal/Stencil/四 RT 合成，不保证原 pass 顺序",
-                    "UE view-normal 投影屏幕图案；原 ScreenScale/相机矩阵投影未复刻",
-                    "UE 世界厘米轮廓外扩和背面 OpacityMask；不复刻原屏幕轮廓宽度/阴影染色",
-                    "UE 原生 velocity/TSR；不输入 Unity TEXCOORD4.xyz previous position",
-                    "UE Time 仅驱动已知 UV scroll；不提供源 Fade/cue/Stop；halo 依 UE 后处理",
-                    "源 OverrideRimGlow=0；其绑定纹理保留但当前模式不启用该分支；源运行时 rim 全局量未复刻"]},
-            "required_inputs": {"static": ["准确三个纹理与材质参数", "POSITION/NORMAL/UV0/UV2，源其它流由 FX 保留"],
-                "ue_managed": ["scene lighting/shadows", "masked depth/occlusion", "instance previous transform/velocity"],
-                "runtime_entity_mode": "UE vertex factory，未模拟源 NapEntityGPUData 或声称源 zero-entity"},
-            "unresolved_source_runtime": ["actual pass/keyword selection", "entity/MPB/composite", "cue/anchor/TRS/Follow",
-                "Legacy Age consumer", "dynamic Dither/Fade", "source Stop/tail ownership"]}
+        bindings[role] = spec["instance"]
+    targets = imported["targets"] + [value for spec in materials for value in (spec["master"], spec["instance"])]
+    return dict(schema=SCHEMA, revision=revision, source_identity=source, textures=textures,
+                materials=materials, bindings={pid: bindings}, targets=sorted(targets),
+                runtime_inputs=dict(main_light=LIGHT_INPUTS, effect_age={"DP0.x": "System.Age"},
+                    additional_lights="AdditionalLightCount/AdditionalLightGlobalIntensity＋四槽Position/Direction/Attenuation/Color float4",
+                    source_clip="原_DitherAlpha/_DitherAlpha2/_DitherEffectAlpha；未证明的MPB/cue不自动补",
+                    dynamic_parameter_mask=0x0001, transport="灯沿私有MID登记；Age沿原Emitter动态材质参数，不另建模拟"),
+                bounds=dict(mode="WorldCentimeterClampedOffset", max_outline_offset_cm=configuration["parameters"]["UE_OutlineMaxOffsetCm"],
+                    source_geometry_required=True, emitter_must_transform_world_margin_to_local=True),
+                equivalence=dict(mode=configuration["mode"], source_runtime_certified=False, visual_calibrated=False,
+                    differences=["原PS位模式数学保留，entity/主灯代理与粗阴影由真实Owner输入",
+                        "Color先按明确RawSerializedValues配置；原游戏GPU颜色上传/运行MPB值未证，仍需原图校准",
+                        "原CSM采样改OwnerKeyLightVisibility，不宣称逐像素或原影图等价",
+                        "原MRT边缘光编码前输出由可调UE Emissive合成，源Deferred消费者未证",
+                        "UE Masked深度/背面双draw替代源PreZ/Equal/Stencil调度，原状态另存",
+                        "轮廓用有界UE世界法线外扩，原屏幕宽度/深度偏移未冒称复刻",
+                        "原VP PartID遮蔽改顶点可见度插值Mask，UE原生Velocity代源前帧流"]),
+                unresolved_source_runtime=["实际游戏pass/global选择", "entity/MPB运行覆盖", "宿主/年龄/fade/cue/stop绑定"])
 
 
 def validate_plan(plan):
-    """完整重新生成离线计划以拒绝路径、算法、参数或来源被改写；不调用 UE。"""
+    """按准确源与当前生成程序重建同一计划，不运行UE或保存资产。"""
     if not isinstance(plan, dict) or plan.get("schema") != SCHEMA:
-        raise ValueError("未知 Ghost 材质计划")
-    s = plan["source_identity"]
-    ue = {n: plan["materials"][0]["params"][n]["value"] for n in UE_DEFAULTS}
-    targets = {pid: item["path"] for pid, item in plan["textures"].items()}
-    expected = make_plan(s["material"], s["dependency"], texture_targets=targets, revision=plan["revision"], ue_parameters=ue)
+        raise ValueError("不是当前Simple源程序移植合同")
+    source = plan["source_identity"]
+    expected = make_plan(source["material"], source["dependency"],
+                         texture_targets={pid: item["path"] for pid, item in plan["textures"].items()},
+                         revision=plan["revision"], configuration=source["configuration"])
     if plan != expected:
-        raise ValueError("Ghost 材质计划与源身份/完整静态契约不一致")
+        raise ValueError("Simple计划与源程序／参数／渲染配置不一致")
     return plan

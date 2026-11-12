@@ -60,7 +60,7 @@ def halfres_fixture(directory):
             {"m_State": copy.deepcopy(native_state)}, {"m_State": native_state}]}]}}), encoding="utf-8")
     keywords = ["_DITHER_FROM_CAMERA", "_RAMPTEX_ON", "_USEDISTORTIONTEXTURE2_ON",
                 "_USEDISTORTIONTEXTURE_ON", "_USEMASK_ON"]
-    material = {"m_Name": "UnitTestMaterial", "m_Shader": {"m_PathID": 2},
+    material = {"m_Name": "UnitTestMaterial", "m_Shader": {"m_FileID": 0, "m_PathID": 2},
         "m_ShaderKeywords": " ".join(keywords), "m_DisabledShaderPasses": [], "m_EnabledPassMask": 1,
         "m_SavedProperties": {"m_Floats": halfres_floats(), "m_Colors": {}, "m_TexEnvs": {}}}
     material_file = directory / "1.native.json"
@@ -131,6 +131,37 @@ def mixed_keyword_fixture(directory):
 
 
 class NativeSourceTests(unittest.TestCase):
+    def test_explicit_stage_selection_retains_source_keywords_and_rejects_wrong_stage(self):
+        with WorkspaceTemporaryDirectory() as directory:
+            entry, material, _, config, audit, _ = halfres_fixture(Path(directory))
+            original = material['m_ShaderKeywords']
+            roles = {}
+            for row in audit['matches']:
+                names = row['localKeywords'][2 if row['stage'] == 'vp' else 1:]
+                path = Path(row['file'])
+                lines = path.read_text(encoding='utf-8').splitlines()
+                lines[1] = 'Local Keywords { ' + ' '.join('"' + k + '"' for k in names) + ' }'
+                raw = ('\n'.join(lines) + '\n').encode()
+                path.write_bytes(raw)
+                row.update(localKeywords=names, sha256=hashlib.sha256(raw).hexdigest())
+                roles[row['stage']] = {'global': [], 'local': names}
+            Path(config['audit']).write_text(json.dumps(audit), encoding='utf-8')
+            config.update(purpose=N.PROJECT_PURPOSE, configuration_mode='ProjectConfigured',
+                          execution_environment=N.PROJECT_FULLRES, lighting='unlit',
+                          program_selection='ProjectConfiguredStageKeywords', stage_keywords=roles,
+                          stage_selection_reason='测试明确项目阶段选择')
+            _, evidence = N.select_native(entry, material, 1, config)
+            self.assertEqual(evidence['stage_keywords'], roles)
+            self.assertFalse(evidence['original_runtime_pair_verified'])
+            self.assertEqual(material['m_ShaderKeywords'], original)
+            config['stage_keywords'] = {'vp': roles['fp'], 'fp': roles['fp']}
+            with self.assertRaisesRegex(N.NativeShaderError, 'exact vp candidate'):
+                N.select_native(entry, material, 1, config)
+            config['stage_keywords'] = roles
+            config.pop('program_selection')
+            with self.assertRaisesRegex(N.NativeShaderError, 'explicit project choice'):
+                N.select_native(entry, material, 1, config)
+
     def test_mixed_keywords_are_reported_per_candidate_without_changing_strict_selection(self):
         with WorkspaceTemporaryDirectory() as directory:
             _, _, material, _, audit = mixed_keyword_fixture(Path(directory))
@@ -243,7 +274,7 @@ class NativeSourceTests(unittest.TestCase):
                 "m_PropInfo": {"m_Props": []}, "m_SubShaders": [{"m_Passes": [{"m_State": native_state}]}]}}),
                 encoding="utf-8")
             floats = {"_SrcFactor": 1, "_DstFactor": 10, "_Cull": 0, "_ZWrite": 0, "_ZTest": 4}
-            material = {"m_Name": "UnitTestMaterial", "m_Shader": {"m_PathID": 2},
+            material = {"m_Name": "UnitTestMaterial", "m_Shader": {"m_FileID": 0, "m_PathID": 2},
                 "m_ShaderKeywords": "_MASK_ON", "m_DisabledShaderPasses": [], "m_EnabledPassMask": 1,
                 "m_SavedProperties": {"m_Floats": floats, "m_Colors": {}, "m_TexEnvs": {}}}
             material_file = directory / "1.native.json"
@@ -390,7 +421,7 @@ class NativeSourceTests(unittest.TestCase):
             N.render_state(item, {}, {})
 
     def test_native_selection_has_no_implicit_preview_or_global_keyword_choice(self):
-        with self.assertRaisesRegex(N.NativeShaderError, "explicit source_program_preview"):
+        with self.assertRaisesRegex(N.NativeShaderError, "requires an explicit preview, ProjectConfigured or UE equivalent purpose"):
             N.select_native({}, {}, 1, {})
         with self.assertRaisesRegex(N.NativeShaderError, "Explicit pass index"):
             N.select_native({}, {}, 1, {"purpose": "source_program_preview", "pass_index": 0})
