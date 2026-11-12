@@ -14,6 +14,18 @@
   "support_mesh": "/Game/Environments/BH3/Stage/Stage_KevinBoss_P3/StaticMeshes/SM_KevinBossP3_PawnSupport",
   "key_light_actor": "DirectionalLight_0",
   "key_light_tag": "GGYGO.KeyLight",
+  "lighting": {
+    "basis": "project_UE_adaptation_original_photometry_and_runtime_exposure_unknown",
+    "source_layout_colors_local_lights_and_reflection_probes": "preserved",
+    "key_intensity_lux": 2.0,
+    "key_cast_shadows": true,
+    "fill_label": "Kevin_P3_EnvironmentFill",
+    "fill_cubemap": "/Game/Environments/BH3/Stage/Stage_KevinBoss_P3/Textures/T_LunarCrater_Reflection_Probe_Importance2",
+    "fill_intensity": 0.2,
+    "fill_lower_hemisphere_is_black": false,
+    "exposure": "existing_project_fixed_exposure_no_level_override",
+    "source_boundary": "Cubemap 来自原反射探针；用于 SkyLight 漫反射补光及启用 UE 主光阴影属于项目适配。原 HDR 解码与 Cube 面朝向仍未验证。"
+  },
   "owner_tag": "GGYGO.KevinBoss.P3.Scene.v1",
   "player_spawn_xy_cm": [-900.0, 0.0],
   "boss_spawn_xy_cm": [900.0, 0.0],

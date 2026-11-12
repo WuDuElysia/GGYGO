@@ -1,6 +1,24 @@
 # Kevin DemonBattle Boss 完整组装与视听制作
 
-状态：完整组装与单机自验完成。正式 Encounter 战斗、完整 Dash_F 追击、两条空中连招真实落地、主要技能画面和死亡清理均有证据；核心评审问题已修复并定向复验，必要 Obsidian 已同步，分仓交付范围见末节。Kevin 联机、Cook、性能和设备试听未验。
+状态：P3 照明适配已完成并通过保存后独立读回、D3D12 画面检查；启用技能接线复核通过，未发现需要重接的确定缺口。原单机组装交付保留，原版视听完整还原未签完成。贴身落到玩家胶囊上的重复 Landed 已记录待处理；Kevin 联机、Cook、性能和设备试听仍未验。
+
+## 本轮用户反馈与范围
+
+用户 2026-11-13 要求继续制作，并询问框架、Boss 特效／动作／音效和场地还原程度，明确反馈场地目前没有灯光。正式排查入口为 `/Game/Map/BH3/L_KevinBoss_P3`；此前只验证主灯存在、带唯一 `GGYGO.KeyLight` 且强度大于零，不能据此证明场景照明或原版还原正确。
+
+本轮核实际关卡的主光、环境光、曝光及生产运行画面。原光照参数有证据时按来源消费；缺原参数时在已授权场景制作范围内补可用照明，并标记项目适配。已通过的框架、完整技能轨迹、Dash_F、原生落地和死亡清理不重做；22 个 NS 保持已批准的改编／原创范围，声音不凭名称猜原事件、时点或命中条件。
+
+P3 原有 5 盏灯均启用，主光只有 1 lux 且全部灯光不投影，关卡没有 SkyLight 或 PostProcessVolume；全局配置关闭自动曝光。原场景导入保留了原灯颜色／布局／无阴影标记，但 Unity 光度与原运行时曝光未知。实际画面主要依赖天空自发光和镜面地面，角色脚下无投影，不能视为照明还原完成。
+
+本轮已将主光设为 2 lux 并启用阴影，使用原 `T_LunarCrater_Reflection_Probe_Importance2` 做强度 0.2 的 Movable SkyLight 补光。保留主灯方向／颜色、其余 4 盏灯、原反射探针、材质、碰撞、导航及出生配置；全局曝光不改。两档 PIE 比较中 4 lux 地面偏亮，最终采用 2 lux；这是 UE 项目适配，原光度、HDR 解码和 Cube 面朝向未签还原。制作入口为 `configure_kevin_boss_p3.apply_lighting(save=True)`，只保存 P3；`lighting_readback()` 读取实际对象和配置，图像仍须独立验收。
+
+证据位于 `Saved/Codex/KevinBossLighting_20261113/`：`Lighting_Study` 保留原灯和两档适配的实际对照，`Lighting_Save` 记录精确保存，`Lighting_Final/editor.log` 记录新进程只读回、12 个启用入口 Montage／37 个能力相关包的原生配置验证，以及实际运行。Python／JSON 解析与 diff 检查通过，本轮没有 C++ 或 Blueprint 图修改，未重复编译源码。未接管用户未保存关卡，未改 Pyrios Combo GA 与 Normal01～03 Montage。
+
+已查看 `Lighting_Final/001_production.png`、`002_front.png`、`003_back.png`，确认正式镜头、Boss 正背面和角色投影；`007_NS_Kevin_IceWarning_14030df00bfc_030.png`、`016_NS_Kevin_FireCharge_cd10c72ba158_030.png`、`027_NS_Kevin_FireGroundBreak_697aabbd5128_030.png` 确认新照明下预警、蓄力和破环可见。Ice03、Fire02、AirChain01 通过原已授予 GAS 请求结束，结束检查无活跃 FX／声音／弹体残留。这是暂停 BT 后的隔离表现复拍，不替代正式选招或完整胜利。
+
+声音复核：Montage 单次声集合与命中专用声音集合无交集；命中 Cue 仅由 Combat 的有效命中事实进入 GA／GAS，持续声音由原 GA 资源清理退役。本轮未替换声音或重设原时点，录音和组件实例只证明运行播放，不证明设备听感或原版事件语义。
+
+本轮实际发现的未完成项：AirChain01 在贴近静止玩家时，原生 Landed 的命中组件是玩家 `CollisionCylinder`，随后多次 Falling／Landed，能力结束时仍可能 Falling。因此本轮不签稳定地面落地；原物理事实保留，需确认角色胶囊是否允许成为落脚面后处理。未改玩家碰撞、位置或已定技能轨迹来掩盖现象。原版光度／曝光、粒子还原、缺失声音调用、设备试听、联机／Cook／性能与完整中断矩阵仍保持未完成或未验证。
 
 ## 目标与用户决定
 

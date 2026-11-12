@@ -1,5 +1,5 @@
 """@file Kevin P3 场景作者入口。
-@brief 预检实际场地，配置既有玩家/Encounter、主灯Tag与导航，精确保存P3。
+@brief 配置既有玩家／Encounter、主灯、环境补光与导航，仅保存 P3。
 
 导入不执行UE操作。Root在获准同窗调用preflight、apply、request_navigation_build、
 readback、save_scene；新宿主可消费cold_read。
@@ -615,4 +615,84 @@ def cold_read(applied, saved):
         return observed
     observed.update(phase="saved_scene_cold_read_verified_runtime_pending", saved=True,
                     cold_read_verified=True, map_file=saved["map_file"])
+    return observed
+
+
+def lighting_readback(allow_map_dirty=False):
+    """读取 P3 已保存的主光和环境补光；数值通过不代替实际画面验收。"""
+    import unreal as u
+
+    cfg = read_config()
+    world, editor = host(u, allow_map_dirty)
+    lighting = cfg["lighting"]
+    lights = [a for a in editor.get_all_level_actors() if isinstance(a, u.DirectionalLight)
+              and a.actor_has_tag(cfg["key_light_tag"])]
+    require(len(lights) == 1 and lights[0].get_name() == cfg["key_light_actor"], "唯一角色主灯不符")
+    key = lights[0].get_component_by_class(u.DirectionalLightComponent)
+    fills = [a for a in editor.get_all_level_actors() if a.get_actor_label() == lighting["fill_label"]]
+    require(len(fills) == 1 and isinstance(fills[0], u.SkyLight)
+            and fills[0].actor_has_tag(cfg["owner_tag"]), "缺少本场景环境补光")
+    fill = fills[0].get_component_by_class(u.SkyLightComponent)
+    require(abs(key.get_editor_property("intensity") - lighting["key_intensity_lux"]) < 1e-5
+            and key.get_editor_property("cast_shadows") == lighting["key_cast_shadows"], "主光强度或阴影不符")
+    cube = u.load_asset(lighting["fill_cubemap"])
+    require(isinstance(cube, u.TextureCube) and fill.get_editor_property("cubemap") == cube,
+            "环境补光未使用指定原 Cubemap")
+    require(fill.get_editor_property("source_type") == u.SkyLightSourceType.SLS_SPECIFIED_CUBEMAP
+            and abs(fill.get_editor_property("intensity") - lighting["fill_intensity"]) < 1e-5
+            and fill.get_editor_property("lower_hemisphere_is_black") == lighting["fill_lower_hemisphere_is_black"],
+            "环境补光参数不符")
+    for actor, component in ((lights[0], key), (fills[0], fill)):
+        require(not actor.get_editor_property("hidden") and component.is_visible()
+                and component.get_editor_property("affects_world")
+                and component.get_editor_property("mobility") == u.ComponentMobility.MOVABLE,
+                "场景光源没有实际启用：" + actor.get_actor_label())
+    return dict(key_light=lights[0].get_path_name(), key_intensity_lux=float(key.get_editor_property("intensity")),
+                key_cast_shadows=bool(key.get_editor_property("cast_shadows")),
+                fill=fills[0].get_path_name(), fill_cubemap=cube.get_path_name(),
+                fill_intensity=float(fill.get_editor_property("intensity")),
+                basis=lighting["basis"], visual_verified=False)
+
+
+def apply_lighting(save=False):
+    """把明确配置的 UE 照明适配写入 P3；保留原灯布局、颜色、局部灯和反射探针。"""
+    import unreal as u
+
+    cfg = read_config()
+    world, editor = host(u)
+    lighting = cfg["lighting"]
+    require(all(math.isfinite(lighting[k]) and lighting[k] > 0
+                for k in ("key_intensity_lux", "fill_intensity")), "照明强度必须有限且大于零")
+    actors = editor.get_all_level_actors()
+    lights = [a for a in actors if a.get_name() == cfg["key_light_actor"] and isinstance(a, u.DirectionalLight)]
+    require(len(lights) == 1 and lights[0].actor_has_tag(cfg["key_light_tag"]), "原角色主灯缺失")
+    require(len([a for a in actors if a.actor_has_tag(cfg["key_light_tag"])]) == 1, "主灯 Tag 不唯一")
+    fills = [a for a in actors if a.get_actor_label() == lighting["fill_label"]]
+    require(len(fills) <= 1 and all(isinstance(a, u.SkyLight) and a.actor_has_tag(cfg["owner_tag"])
+                                  for a in fills), "同名环境补光不属于本场景")
+    cube = u.load_asset(lighting["fill_cubemap"])
+    require(isinstance(cube, u.TextureCube), "原环境 Cubemap 未导入")
+    key = lights[0].get_component_by_class(u.DirectionalLightComponent)
+    lights[0].modify()
+    key.modify()
+    key.set_intensity(lighting["key_intensity_lux"])
+    key.set_cast_shadows(lighting["key_cast_shadows"])
+    fill_actor = fills[0] if fills else editor.spawn_actor_from_class(u.SkyLight, u.Vector(0, 0, 500))
+    require(fill_actor is not None, "环境补光创建失败")
+    fill_actor.modify()
+    fill_actor.set_actor_label(lighting["fill_label"])
+    fill_actor.set_editor_property("tags", [u.Name(cfg["owner_tag"])])
+    fill = fill_actor.get_component_by_class(u.SkyLightComponent)
+    fill.modify()
+    fill.set_mobility(u.ComponentMobility.MOVABLE)
+    fill.set_editor_property("source_type", u.SkyLightSourceType.SLS_SPECIFIED_CUBEMAP)
+    fill.set_cubemap(cube)
+    fill.set_editor_property("lower_hemisphere_is_black", lighting["fill_lower_hemisphere_is_black"])
+    fill.set_intensity(lighting["fill_intensity"])
+    fill.recapture_sky()
+    observed = lighting_readback(True)
+    if save:
+        require(u.EditorLoadingAndSavingUtils.save_map(world, MAP), "P3 照明保存失败")
+        require(MAP not in dirty(u), "P3 保存后仍 dirty")
+    observed["saved"] = save
     return observed
