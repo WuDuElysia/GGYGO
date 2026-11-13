@@ -23,6 +23,7 @@
 - 冷首击：全新用户目录、不预热的独立 Editor 里，Pawn 资源请求约 22 帧（0.054 s）后 Ready；第一刀在 Ready 后按下，下一帧激活，同帧出现完整主弧，GA 自然结束，没有 `RenderResourcesNotReady` 拒绝。证据 `.agents/tasks/requirements-closeout/evidence/I02.md`。
 - 普攻生产冒烟：`GGYGO.AbilitySystem.PlayerCombo` 23 叶加 NativeBirth 共 24 项，两次运行都是 22 Success、2 Fail，两例 Fail 是 PoseFailure（故意注入姿态失败，生产代码按约定报 Error，测试不过滤）。只改了测试夹具：所有生产叶首按前等资源 Ready。这次也在运行时证实了 Pending 分支：资源未就绪时的按下被拒，按住约 10 s 没有补发。证据 `.agents/tasks/requirements-closeout/evidence/I08.md`。
 - 活尾：Normal01 只有一个 NS，8 个发射器都只在 t=0 发射一次，最晚约 1.0 s 自然完成，早于作者 FX End（1.6834 s）。当前配置里不存在"活过 End 的特效单元"这条分支。
+- 共用网格的后续修复与验证已由[特效与音效接线](fx_audio_wiring.md)交付：20 个既有 FX 网格及 ExSpecial 新增 8 个网格的角点检查通过，Normal02／03、Special／ExSpecial 已完成真实渲染运行和清理验证。具体可见差异按该记录保留，不再列为尚未复拍或影响未知；Rush 仍因生产入口待定而未接线、未验收。
 - 验证级别：已编译、已测试、已在 UE 里运行（真实 RHI）；不涉及联机。
 
 ## 未完成项
@@ -35,7 +36,6 @@
    - 着色器 DDC 真冷没做：要用空 DDC 启动，生成的数据远超 1 GiB，做不做由用户决定。
    - 实体键鼠手感没验。
    - 准备请求失败时终态日志只有 Verbose，玩家按下时才出 Warning；可考虑由持有方在 Failed 时打一次 Error。
-3. 共用 `FXMD_DAO_001_ced427b6fbbf` 的 Normal02／03、Rush、Special 画面没复拍；ZZZ FX 目录里其它网格（`FXMD_Circle_*`、`FXMD_TRAIL_*` 等）也核出同类角点错位，画面影响未确认。两项都归[特效与音效接线](fx_audio_wiring.md)。
 
 ## 验收标准
 
