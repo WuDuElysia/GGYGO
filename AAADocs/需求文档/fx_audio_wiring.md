@@ -60,12 +60,20 @@
 | Python | 本批变换链 13 项、原 Shader 22 项、Renderer 9 项通过；纹理整数读取／稀疏 UV 的 3 项针对性检查也通过（`CodeValidation_20261112/source_import_checks.log`）。见 `VisualSourceAudit_R1/*regression.log` 与 `AttackPhasePreparation_20261112/particle_renderer_regression_r2.log` |
 | 资产制作及接线 | `AttackPhaseAuthor_20261112/result.json`、`AttackPhaseWiring_20261112_R3/wiring.json`：16 系统完成，Normal03／Special／ExSpecial 为 7／2／8 单元；`final_readback.json` 确认运行后磁盘接线保持 |
 | 自然结束 | `AttackPhaseRuntime_Natural_R1/run.json`：Combo／Special／ExSpecial 均通过；51 张实拍，命中分别 2／3／4 次，原 GA 自然结束且 FX 全部清理 |
-| 取消 | `AttackPhaseRuntime_Cancel_R1/run.json`：三个场景均通过；原 GA Cancel 后当前段 FX 立即释放，先前段尾迹最终清理；20 张实拍 |
+| 取消 | `AttackPhaseRuntime_Cancel_R1/run.json`：三个场景均通过；原 GA Cancel 后当前段 FX 立即释放，最终全 FX 清理；20 张实拍。Combo 取消后自然视口已核验，见下节 |
 | 武器跟随 | 上述自然运行中 ExSpecial 金色层 32 次有效附着采样均吻合 `Ctr_Weapon_A_01`；此前完整尾段观察也已看到余光消失 |
 | 可见性诊断 | `AttackPhaseRuntime_Side_R1/` 可见新斩击弧，方向吻合武器轨迹；`AttackPhaseRuntime_FrontOnly_R2/` 隔离旧 06／07 后末段暗长条消失，恢复原配置且未保存诊断修改 |
 | 几何 | `Mesh_Repair_R1/mesh_checks.json` 与 `ExSpecialFrontMeshAudit_20261112/result.json`：既有 20 个和新增 8 个网格角点检查通过 |
 
 技能测试在自有 Editor 内临时授予，经真实 InputKey→Process／ASC 入口激活，结束后恢复且不保存临时授予。诊断机位与 MotionBlur 设置已恢复，自有 UE／UBT 均退出。代码自审覆盖默认继承、独立覆盖、本地创建、发布记录及原关闭链；具体招式仍由资产决定。
+
+### 连段取消画面
+
+`AttackPhaseRuntime_Cancel_R1/Combo/observations.json` 与 `frames.jsonl` 已覆盖真实取消前后。第三段（step=2）在 0.25735 秒、frame 55323 经原 `GameplayAbility.CancelAbility` 取消；7 个当前段系统均在该帧记录 `TerminalDispatched / Abort`，取消返回后当前段组件为空，原 GA 完整退出且 `original_exit_cancelled=true`。frame 55324 起的采样及最终清理均无 FX。
+
+已查看[取消前画面](../../Saved/Codex/PyriosActionFX_20261111/AttackPhaseRuntime_Cancel_R1/Combo/008_2_0.213.png)和[取消后画面](../../Saved/Codex/PyriosActionFX_20261111/AttackPhaseRuntime_Cancel_R1/Combo/009_2_0.257.png)：前者弧光／残影仍在，后者已消失。观察脚本在 Slate post-tick 内先申请截帧、再调用取消；截帧接口只订阅原游戏 viewport 的自然渲染回调。第 009 张虽在取消当帧申请，实际 `render_frame=55324`，晚于取消；第 008 张实际渲染帧为 55323，发生在该帧 post-tick 取消前。两张 PNG 均完成写入和读回校验，不能按文件名中的请求时刻把第 009 张归为取消前画面。原运行日志为 `AttackPhaseAuthor_20261112/editor.log` 的 Combo 取消场景结果。
+
+该结果验证当前段的 Abort 清除；正常闭窗的 `DeactivateDetachKeepWorld` 尾迹仍按原自然结束证据验收，不要求早前已正常结束的尾迹随当前段一同立即消失，也不据这组图补签正常活尾。本次仅复核既有图、观察记录与截帧实现，无代码／资产修改、UE 重跑或新增构建。发布 spec 的 Requirement 5.3 仍因 TurnBack 烟雾来源未定而保持部分完成。
 
 ## 未完成项
 

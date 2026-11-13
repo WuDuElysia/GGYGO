@@ -4,7 +4,7 @@
 
 整改第 3 步。执行规则与命令同第 1 步，输出目录为 `Saved/Kiro/fx-montage-publication-ownership/`（Before/、before_manifest.tsv、Patches/、after_summary.tsv、make_patches.py、edit_*.py）。编译与测试证据与批次 1 同目录：`Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/Build_R5`、`Test_R6`。重核结论与实现差异见 design.md 对应节。
 
-状态（2026-11-12）：发布所有权实现及最小联机已交付；单机普攻出现／正常结束已有运行证据，TurnBack 烟雾与真实打断 Abort 画面未覆盖，因此任务 6 只记部分完成。用户提出的视听返修仍由原需求跟进。
+状态（2026-11-13）：发布所有权实现及最小联机已交付；单机普攻出现／正常结束及真实连段取消后的 Abort 画面均已验证。TurnBack 烟雾来源仍未确定，因此任务 6 只记部分完成。用户提出的视听返修仍由原需求跟进。
 
 ## Tasks
 
@@ -52,7 +52,9 @@
   - [x] 编译 GGYGOEditor：Build_R5 成功（19 个 action）
   - [x] NullRHI 测试：Test_R6 共 74 例（批次 1 回归 58 例＋FX 6 例＋Locomotion 10 例），71 通过。未通过 3 例均非本步引入：`Admission.GroupLifecycle`、`PlayerCombo.ActivationCommitAndEndReentry`（第 4 步）；`Movement.Locomotion.InputConsumer.FailedRequestRecovery` 行为断言全部完成，因生产 Error 日志未声明为预期而判失败，2026-10-02 起已失败（当时 2 条，现 3 条，新增一条为 CMC 来源准入拒绝），属 Movement 模块
   - [x] Editor 中核对 CharacterSlot／BossState 蓝图子类已获得新组件：`GGYGO.FX.MontagePublication.HostSubclassAudit`（Test_R16a，NullRHI）由资产注册表列出 CombatantState 全部 9 个子类，项目中没有蓝图子类；每个类的 CDO 都带 `MontageFXReplication` 组件
-  - [~] PIE 单机（Requirement 5.3）：[首击与生产冒烟](../../../AAADocs/需求文档/normal01_first_strike.md) 及 [FX 当前运行记录](../../../AAADocs/需求文档/fx_audio_wiring.md) 覆盖三段普攻的实际 FX 出现与自然结束／清理；Normal03 分阶段实拍已有。TurnBack 当前只有声音边沿证据，准确烟雾来源未确定；真实连段打断时的 Abort 画面尚未验证，不能用 Normal 停止或资源数值替代。
+  - [~] PIE 单机（Requirement 5.3）：[首击与生产冒烟](../../../AAADocs/需求文档/normal01_first_strike.md) 及 [FX 当前运行记录](../../../AAADocs/需求文档/fx_audio_wiring.md) 覆盖三段普攻的实际 FX 出现与自然结束／清理；Normal03 分阶段实拍已有。
+    - [x] 连段中途真实取消后的 Abort 画面：既有 `AttackPhaseRuntime_Cancel_R1/Combo` 中，原 GA 在第三段 0.25735 秒、frame 55323 经 `CancelAbility` 取消，7 个当前段系统同帧发出 Abort；`008_2_0.213.png` 仍见弧光／残影，`009_2_0.257.png` 的实际渲染回调在 frame 55324，已无该段 FX。已核截帧申请先于取消、自然 Draw 晚于取消，PNG 读回完成且校验通过；后续观察及最终清理为空。正常闭窗尾迹与当前段 Abort 分开验收，未用 Normal 停止或数值清理替代取消后画面。详见 FX 记录「连段取消画面」。本次复核原证据，无代码／资产修改或 UE 重跑。
+    - [ ] TurnBack 烟雾：当前只有声音边沿证据，准确烟雾来源未确定。
   - [x] 最小联机（Requirement 5.4）：D3D12 独立试次的首次活动相关性、闭窗首次相关性、同连接重获，以及追赶隐藏后的活尾回归均通过。当前证据见[最小联机需求记录](../../../AAADocs/需求文档/minimal_multiplayer.md)。
     - [x] N2 live_first：同发布键／代次／原组件的发布、完整快照、Controller、BeginServerTime 对齐及终态通过；同一 Active Draw 的实际 PNG 已查看，下劈弧和地面层可见。原 FX 时长与闭窗语义保持，证据见最小联机需求记录。
     - [x] N3 closed_first：B 在 A 闭窗后首获相关性，收到完整复制快照、同键未 RemoteCreated，实际视口无补播。
