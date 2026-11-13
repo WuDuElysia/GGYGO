@@ -67,7 +67,7 @@
   - 独立进程最小联机已完成：原动作自然收尾、纠正重放、Initial 取消、FX 首次活动相关性／闭窗首次相关性／同连接重获，以及活尾实拍。最终编译与 17 项相关回归通过，边界和证据见[最小联机](minimal_multiplayer.md)。
   - 角色受光与阴影已完成，见下节。
 - 原统筹待修问题里已关闭的：再次附身后客户端不能移动（CMC owner-sync 修正）；Locomotion 输入测试留住测试世界；冷会话首击因 FX 材质未就绪失败（首击等资源就绪）；角色阴影捕获在 PIE 结束时留住世界；倒下画面的阴影条纹。
-- 七份 spec 的勾选和下表已按当前交付记录回写；本次只核对已有报告、日志和需求记录，没有启动 UE 或重跑测试。部分完成与未覆盖项分别保留。
+- 七份 spec 的勾选和下表按当前交付记录回写；首次回写只读取既有证据，后续补齐的 PIE 退出与 Editor 动画组验证分别见下节。部分完成与未覆盖项分别保留。
 
 | Spec | 已完成范围 | 未完成或未覆盖 |
 | --- | --- | --- |
@@ -87,7 +87,9 @@
 
 本次只增加退出验证和文档，不改生产代码或资产，不重复编译。验证使用 NullRHI，不代验画面、实体输入、独立进程联机或 Cook；最新 Kevin 双端日志无旧 Warning 仅作旁证。日志中的启动阶段 `Condition failed` 和两轮 NullRHI 的 R32f 不支持错误原样保留，不声称整宿主零错误或渲染通过。
 
-激活生命周期的 Editor 动画组已于 2026-11-13 补齐：完整过滤器 `GGYGO.Editor.Animation` 在自有 NullRHI Editor 中运行，[原生报告](../../Saved/Codex/ActivationLifecycle_EditorAnimation_20261113/Automation/index.json)记录 9 项 Success、零错误／警告／未运行，[运行日志](../../Saved/Codex/ActivationLifecycle_EditorAnimation_20261113/editor.log)记录正常退出，进程退出码 0。测试只修改自建 `/Temp` 动画、Skeleton、Montage／ABP 及独立 Saved JSON 样本，不保存项目资产；本轮无生产源码修改，复用现有 DLL。启动阶段仍有 13 条 `LogAutomationTest: Error: Condition failed`，发生在测试开始前，来源未在本需求排查，不能把本组通过解释为整个启动日志无错误。
+### 激活生命周期的 Editor 动画组（已完成）
+
+完整过滤器 `GGYGO.Editor.Animation` 已于 2026-11-13 在自有 NullRHI Editor 中运行，[原生报告](../../Saved/Codex/ActivationLifecycle_EditorAnimation_20261113/Automation/index.json)记录 9 项 Success、零错误／警告／未运行，[运行日志](../../Saved/Codex/ActivationLifecycle_EditorAnimation_20261113/editor.log)记录正常退出，进程退出码 0。测试只修改自建 `/Temp` 动画、Skeleton、Montage／ABP 及独立 Saved JSON 样本，不保存项目资产；本轮无生产源码修改，复用现有 DLL。启动阶段仍有 13 条 `LogAutomationTest: Error: Condition failed`，发生在测试开始前，来源未在本需求排查，不能把本组通过解释为整个启动日志无错误。
 
 ### 角色受光与阴影（已完成）
 
@@ -100,7 +102,7 @@
   - 联机测试 `GGYGO.Teams.SquadSwitch.ListenServerClientRequest` 在真实 RHI 且给了 `-GGYGOCaptureDir` 时，死亡自动换人后加取稳定帧和关运动模糊帧，结束时恢复 `r.MotionBlurQuality`。
 - 仍有效的约束：
   - 新增动作如果让武器或斗篷伸得更远，要重新逐帧跟踪所需倍率；以后若把物理资产入库，可以加不参与碰撞的包围体，再把倍率降回去。
-  - `BP_PC_Pyrios` 在 BeginPlay 按 Actor Tag `GGYGO.KeyLight` 找本 World 里唯一的 DirectionalLight 作为角色主灯，找不到就停用角色灯宿主并打印"主灯绑定拒绝"。目前只有 `L_Movement_Test` 配了这个 Tag，Kevin 两张地图没有。
+  - `BP_PC_Pyrios` 在 BeginPlay 按 Actor Tag `GGYGO.KeyLight` 找本 World 里唯一的 DirectionalLight 作为角色主灯，找不到就停用角色灯宿主并打印"主灯绑定拒绝"。`L_Movement_Test` 和后续交付的 `L_KevinBoss_P3` 均已核对唯一主灯；P3 照明与投影证据见 [Kevin 交付](kevin_boss_assembly.md)，不扩推其它地图。
 - 验证级别：已编译；已测试（`GGYGO.Rendering` 4 例、`GGYGO.Teams.SquadSwitch` 8 例）；已在 UE 里运行（真实 D3D12 单机正背机位）；已联机验证（客户端倒下帧地面无条纹，稳定帧对象阴影宽度与单机一致）。
 - 未做：`BoundsScale` 11 的 GPU／VSM 开销没测；修后单机倒下没有单独重拍。
 - 正背对照里与原图 `AAADocs/Assets/Pyrios/Rendering/References/20261009_Pyrios_*.png` 的差异不属于阴影问题，是否另开需求由用户决定：胸口光球偏暗、蓝色手臂发光偏弱、背面头发偏灰紫偏亮、斗篷没有蓝色渐变且金色细线显示为橙红（斗篷只读暂挂）。
