@@ -77,7 +77,7 @@
 | 4 激活生命周期 | 源码、核心回归、基本动作链、纠正重放与最小联机已交付；完整 Editor 动画组 9／9 通过，任务 8 验收缺口已补齐 | 玩法／镜头待定项与原失败保留；本轮仅补 NullRHI 自动化，不新增 Cook／完整网络矩阵或视觉验收 |
 | 5 Avatar 绑定 | 绑定回归、真实 RHI 出生／移动／攻击／重新附身／死亡替补及 Boss 单机出场已验 | 任务 6 部分完成：项目没有复活流程；独立第三端观察换人未覆盖，普攻／FX 观察端结果不代签换人 |
 | 6 换人续放 | 约定测试编队范围内的编译、自动化与真实 RHI 联机已验；共享 UMG 改键和蓝图死亡替补已交付 | 两份 Pyrios 实例与夹具续放 GA 不代验生产续放技能配置；进退场资产缺省按决定跳过，实体设备手感未验 |
-| 7 HealthSet | 保留分类帧已定案；反算迁移、回归、真实 RHI 扣血／上限／破韧及原死者双端数值／死亡广播已验；单机和双端死亡前后段已实拍核对 | 任务 4 部分完成：单机 GE 扣血／破韧数值和广播已过，采样帧仍站立；独立受击／破韧动作、Combat 命中 FX 与音效未验。死亡回调跨复制对象不保证同序 |
+| 7 HealthSet | 保留分类帧已定案；反算迁移、回归、真实 RHI 扣血／上限／破韧及原死者双端数值／死亡广播已验；单机和双端死亡前后段已实拍核对；现有 Combat→GE／Cue 与反应配置已读回 | 任务 4 部分完成：已授予的 GA_HitReact 为空图、无触发，破韧尚无动作反应链；需先确定反应条件、动作和打断／恢复规则。现有命中 Cue 不代签这些动作或设备听感；死亡回调跨复制对象不保证同序 |
 
 ### HealthSet 原死者配对与死亡画面
 
@@ -88,6 +88,20 @@
 已查看全部 15 张自然视口图。落地、无遮挡、实际机位一致后，单机和两端原角色均能看到死亡前段与约 75% 处的跪伏后段：[单机](../../Saved/Codex/HealthAcceptance_20261113/Run_2/Captures/standalone/authority_dying_late.png)、[服务器](../../Saved/Codex/HealthAcceptance_20261113/Run_2/Captures/network/authority_dying_late.png)、[客户端](../../Saved/Codex/HealthAcceptance_20261113/Run_2/Captures/network/client_dying_late.png)。扣血／破韧采样帧仍站立，无活动 Montage；本测试未经过 Combat 命中／Cue，不能据此签受击／破韧动作、命中 FX 或音效。具体勾选和边界见 [HealthSet 任务 4](../../.kiro/specs/abilitysystem-healthset-repnotify/tasks.md)。
 
 自有 Editor 正常退出 0。联机四条、单机两条警告及启动前 13 条 Condition failed 原样保留：涉及渲染 CVar、远端相机 cache 写入拒绝和原 Pawn 输入路由退役。原 `Run_1` 记录保留，其遮挡和过早采样的画面不作为视觉验收依据。独立进程、网络扰动、Cook／性能／实体设备未验；本批无生产结构或接口变化。
+
+#### 受击与破韧的生产入口核查
+
+2026-11-13 对当前磁盘资产做独立 Editor 只读检查，未编译或保存蓝图、未改生产代码、未重跑已通过的死亡／数值项。两次 Commandlet 均退出 0、零错误，保留两条既有 Python 类型重名警告。原生 Blueprint／CDO 导出及授予配置见[资产读回](../../Saved/Codex/HealthAcceptance_20261113/CombatAudit/Config/readback.json)；逐段 Struct 和 GE 数组的直接读取见[配置明细](../../Saved/Codex/HealthAcceptance_20261113/CombatAudit/ConfigDetails/readback.json)。文本导出未展开的数组以直接读取结果为准，不把导出缺行当作配置为空。
+
+| 核查位置 | 当前事实与结论 |
+| --- | --- |
+| 测试入口与生产命中 | HealthAcceptance 直接施加共享 GE，没有 Combat 命中和 Cue 请求。生产 `MeleeTrace → PlayerCombo/BossMelee → BuildHitEffectPayload` 使用同次 HitResult，GA 应用 GE 后另调目标 ASC 的 `ExecuteGameplayCue`。两种伤害 GE 都调用 `GGYGODamageExecution`，其 GameplayCues 数组为空；测试未见命中反馈是入口覆盖边界，不是 GE 漏发 Cue。 |
+| Pyrios 普攻 | 实际三段伤害倍率为 1／2／3，PoiseDamage 各 10，HitCueTag 分别为 `GameplayCue.Hit.Pyrios.Normal01/02/03`。三个 Cue 均选 HitResult／Generic，配置对应 ImpactSound，ImpactEffect 和父类 Burst 粒子为空；因此命中声音已配，独立命中粒子未配。挥刀 FX 属于 Montage 窗口，不能算命中粒子；旧 GA 顶层 HitCueTag 仅迁移存值，运行读取逐段 Tag。 |
+| 已授予的受击 GA | `/Game/Characters/Shared/Abilities/HitReact/GA_HitReact` 继承通用 `GGYGOGameplayAbility`；授予的 InputTag 为空、AbilityTriggers 为空，Activate／End 两个节点 Disabled 且无连线，无 Montage 调用。它目前是配置空壳，不能通过补发一个事件就获得既定受击动作。 |
+| 破韧消费与动作 | 原生 HealthComponent 只转发 `OnPoiseBroken`；HealthSet 发布 `Message.PoiseBreak`。当前 Pyrios、共享父蓝图及 ABP 的作者图／默认配置未找到对应反应绑定；`State.PoiseBreak`／`GameplayCue.PoiseBreak` 的 Tag 声明不等于已有写入／播放链。项目已有 `Avatar_Male_Size03_Pyrois_Ani_Hit_L_Front/Back`、`Hit_H_Front/Back`、`Hit_Shake` 等序列，尚无已配置的选择、触发和恢复规则。 |
+| Kevin 命中反馈 | 当前 Ice03 Cue 配了 `NS_Kevin_IceHitImpact_ce61217ff0ba` 与声音，注册目录在 DefaultGame.ini；它是独立的命中反馈，不触发 Pyrios HitReact。既有[Kevin 最小联机记录](kevin_boss_assembly.md)已有客户端冰／火 HitImpact 组件和画面证据；本次只核配置，不重新签其视听或借此关闭受击／破韧动作缺口。 |
+
+本次未找到“既定反应已配置但被当前入口漏调”的依据。剩余工作需要先确定普通命中与破韧各何时触发反应、轻重／方向动作选择、能否打断现有能力以及恢复时点，再以共享蓝图和角色配置接入。未擅自选择现有素材、添加全局受击策略或提取新素材；Requirement 5.3 继续部分完成。
 
 ### 输入请求组占用与截止（本批验收完成）
 

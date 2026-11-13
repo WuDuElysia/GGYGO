@@ -4,12 +4,12 @@
 
 整改第 7 步，先验证后决定。执行规则与命令同第 1 步，输出目录为 `Saved/Kiro/abilitysystem-healthset-repnotify/`。按顺序在第 6 步验收后执行（两步都会改 ASC 文件，同一文件只有一个写入者）。
 
-状态（2026-11-13）：复现定案为 Requirement 2.2（保留分类帧），属性反算已迁出 ASC；相关自动化通过。真实 RHI 最小联机已检查扣血、MaxHealth 持续下调及破韧的两端数值／广播；原死者的 Health／DeathState／死亡广播配对与死亡前后段实拍已补齐。单机生产 GE 的扣血／破韧数值和广播通过，采样帧仍为站立，不能由此签受击／破韧动作和命中 FX；Requirement 5.3 的这些表现边界保持未验。
+状态（2026-11-13）：复现定案为 Requirement 2.2（保留分类帧），属性反算已迁出 ASC；相关自动化通过。真实 RHI 最小联机已检查扣血、MaxHealth 持续下调及破韧的两端数值／广播；原死者的 Health／DeathState／死亡广播配对与死亡前后段实拍已补齐。受击／破韧动作缺口已定位到生产配置：已授予的 GA_HitReact 无触发、无执行连线，所核角色蓝图／ABP 未接破韧反应；现有命中 Cue 与动作反应分开。Requirement 5.3 保持部分完成，待反应规则确定后接线，不能仅以测试补拍关闭。
 
 ## Tasks
 
 - [x] 0. 开工重核
-  - Health_Consumers：HealthComponent 订阅 HealthSet 的 Health／MaxHealth／Poise 变化、OutOfHealth（服务器上要求 Spec，发 Event.Death）、PoiseBroken，再经自身动态委托给 UI／蓝图；Messages 的 Message.Damage 与 Message.PoiseBreak；死亡投影经 HealthComponent。蓝图／UI 资产上的具体绑定未在 Editor 中逐一核对。
+  - Health_Consumers：HealthComponent 订阅 HealthSet 的 Health／MaxHealth／Poise 变化、OutOfHealth（服务器上要求 Spec，发 Event.Death）、PoiseBroken，再经自身动态委托给 UI／蓝图；Messages 的 Message.Damage 与 Message.PoiseBreak；死亡投影经 HealthComponent。已在 Editor 只读核对 Pyrios、共享父蓝图、ABP、实际授予集及 HitReact；未逐一核对所有 UI／其它角色绑定。
   - HealthMessage 夹具已有客户端接收路径（SetTestNetRole、Begin／EndTestNetReceive、SimulateReplicated*）。
   - 没有客户端预测伤害：PlayerCombo 只在权威端开命中窗（GGYGOPlayerComboAbility.cpp 的 HitWindow 分支要求 HasAuthority），BossMelee 激活要求 HasAuthority。
   - _Requirements: 1.1_
@@ -41,7 +41,7 @@
   - [x] 真实 RHI 的扣血／上限／破韧复制：`Saved/Codex/CharacterDeathPolicy_20261111/rhi2.log` 的 `ListenServerClientRequest` 为 Success，明确记录两端 ASC／HealthComponent 数值与广播一致，覆盖同一生命阶段；不再仅限 Test_R19 的 NullRHI 结果。
   - [x] 原死者死亡两端配对：`GGYGO.AbilitySystem.HealthAcceptance.ListenServer` 通过。原 Pawn 按 NetGUID 与 PlayerId 配对，Health 100→90→0、Poise 100→0；两端 HealthChanged 两次，PoiseChanged、PoiseBroken、OutOfHealth、DeathStarted、DeathFinished 各一次。DeathState 按 NotDead→DeathStarted→DeathFinished 推进，完成广播时原 HealthComponent／持久 ASC 均为零，观察者不改绑替补。
   - [x] 单机死亡与双端死亡可见：`HealthAcceptance.Standalone` 与上述联机项在 D3D12 自然 Draw 采样，已逐图查看。落地后的原角色无遮挡，死亡 Montage 前段及 75% 以后跪伏姿态可见；两端实际 ViewTarget 和视口机位均核对。只用临时诊断相机和测试玩家位置，不改生产镜头／角色资产。
-  - [~] 单机受击／破韧表现：经共享 `GE_Damage_SetByCaller → DamageExecution → HealthSet → HealthComponent` 的数值和广播已核，扣血／破韧采样帧仍站立、无活动 Montage。本测试没有 Combat 命中／Cue 入口，不能据此验收独立受击／破韧动作、命中 FX 或音效；这些表现保持未验。
+  - [~] 单机受击／破韧表现：经共享 `GE_Damage_SetByCaller → DamageExecution → HealthSet → HealthComponent` 的数值和广播已核。实际 Combat 命中由 GA 分别提交 GE 与 Cue；本测试直接施加 GE，明确绕过命中 Cue。生产 `GA_HitReact` 虽已授予，但 AbilityTriggers 为空，Activate／End 节点 Disabled 且无连线；所核 Pyrios／共享父蓝图／ABP 未绑定受击或破韧反应。已有 Hit_L／H／Shake 序列不等于已选动作／打断规则，因此没有临时补接或新增 C++ 反应策略。完整配置、现有 Cue 及所需决策见[原记录的生产入口核查](../../../AAADocs/需求文档/refactor_and_squad_switch.md#受击与破韧的生产入口核查)。
   - 实际复制顺序：客户端先收到 DeathStarted，此回调的 Health／ASC 仍为 90；同帧随后收到 Health=0 与 OutOfHealth，之后两端以零血完成死亡。DeathState 与 ASC 属性来自不同复制对象，本结果证明阶段及最终值收敛，不声明跨对象回调同序或同步到达。
   - 验证证据：2026-11-13 [小增量构建](../../../Saved/Codex/HealthAcceptance_20261113/capture_build.log)通过；[原生报告](../../../Saved/Codex/HealthAcceptance_20261113/Run_2/Report/index.json)两项 Success、零测试错误，[运行日志](../../../Saved/Codex/HealthAcceptance_20261113/Run_2/editor.log)及 [PNG](../../../Saved/Codex/HealthAcceptance_20261113/Run_2/Captures/)保留，自有 Editor 退出码 0。联机四条／单机两条警告（渲染 CVar、远端 Camera cache 写入拒绝、原 Pawn 输入路由退役）与启动前 13 条 Condition failed 未屏蔽。`Run_1` 的数值结果保留，初始落地、遮挡与过早采样的画面不作视觉通过依据。独立进程、网络扰动、Cook／性能／物理设备未验。
   - _Requirements: 4.1-4.4, 5.1-5.3_
