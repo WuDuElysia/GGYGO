@@ -79,6 +79,14 @@
 | 6 换人续放 | 约定测试编队范围内的编译、自动化与真实 RHI 联机已验；共享 UMG 改键和蓝图死亡替补已交付 | 两份 Pyrios 实例与夹具续放 GA 不代验生产续放技能配置；进退场资产缺省按决定跳过，实体设备手感未验 |
 | 7 HealthSet | 保留分类帧已定案；反算迁移、回归及真实 RHI 扣血／上限／破韧的双端数值和广播已验 | 任务 4 部分完成：死亡替补已验，但死者的双端 Health／DeathState／死亡广播未逐边沿配对；单机受击／破韧／死亡表现缺完整专项证据 |
 
+### PIE 退出输入映射清理（已完成）
+
+旧项已由现有归还链解决，本次未发现需要新增修复的生产缺陷。`UGGYGOLocalPlayer::PlayerRemoved` 在子系统反初始化前通知映射拥有者；`AGGYGOPlayerController::Destroyed` 在原生清空 PlayerInput 前通知。Controller 归还 `IMC_Squad`，Hero 归还自身的 `IMC_Default`／`IMC_MouseLook`，均先摘除本次注册及订阅，再向原输入对象移除自己的计数。Controller 蓝图不再重复注册 Hero 的两份映射；没有使用 `ClearAllMappings` 或关闭诊断。
+
+2026-11-13 在生产 `L_Movement_Test`／`BP_PC_Pyrios` 上完成两轮单客户端 PIE 启停：每轮先确认三个映射实际应用，再在三个原生移除回调中通过既有只读装配桥核对原 PC／PlayerInput，并核对原 LocalPlayer 子系统仍有效；每次对应映射已移除，最终三项均不再应用。两轮均完整退出，Editor 正常退出，未出现旧泄漏 Warning。证据：[运行日志](../../Saved/Codex/InputMappingCleanup_20261113/editor.log)、[观察结果](../../Saved/Codex/InputMappingCleanup_20261113/observations.json)；观察脚本及三次 Python 接口适配失败保留在同目录。
+
+本次只增加退出验证和文档，不改生产代码或资产，不重复编译。验证使用 NullRHI，不代验画面、实体输入、独立进程联机或 Cook；最新 Kevin 双端日志无旧 Warning 仅作旁证。日志中的启动阶段 `Condition failed` 和两轮 NullRHI 的 R32f 不支持错误原样保留，不声称整宿主零错误或渲染通过。
+
 ### 角色受光与阴影（已完成）
 
 结论：倒下和转身时地面的放射条纹是 VSM 缓存残影，已修；换人瞬间的拖影是换人时相机跳变造成的运动模糊，属正常表现；换人稳定后的阴影参数和单机一致。证据 `.agents/tasks/requirements-closeout/evidence/I10.md`（只在本机）。
@@ -129,7 +137,6 @@
 
 1. 七份 spec 的剩余验收与待定项见上表；预输入、起停跳变和镜头衡量口径仍等原问题的用户决定。勾选回写已完成，不代表这些项目已验收。
 2. 原统筹待修问题里还开着的：
-   - PIE 结束时 Enhanced Input 报 `IMC_Squad`／`IMC_Default`／`IMC_MouseLook` "仍在应用、可能泄漏"的 Warning（LocalPlayer 子系统先于 Controller／Pawn 的 EndPlay 反初始化），本批没有复查。
    - `AAADocs/Scripts/wire_pyrios_skill_inputs.py` 对 `IMC_Default` 的基线因加了可改键名而失效，脚本会拒绝运行，等 E／R／F 输入线恢复时更新。
    - 业务缺口：公共 `GA_Death` 仍是空图；全员倒下后没有失败／复活流程；进退场 GA／Montage 缺省跳过；需要留场的技能由用户以后把 `AvatarExitPolicy` 改为 ContinueInBackground。
    - 引擎退出阶段偶发 `FVirtualTextureBuiltData::GetTileOffset` 越界断言，只记录。
