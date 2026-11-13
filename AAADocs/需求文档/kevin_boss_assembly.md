@@ -27,6 +27,7 @@
 | 动画 | `build_kevin_skill_animation.py`、`audit_kevin_skill_poses.py`；Editor 的 `KevinMotionAssetBuilder`、`KevinCombatAssetBuilder`、`KevinBossAnimBlueprintAuthor` |
 | GA／AI | `wire_kevin_boss_abilities.py`、`wire_bh3_kevin_combat.py`；Editor 的 `GGYGOBossAbilityGraphLibrary`、`GGYGOBossCombatAssetLibrary` |
 | 场景 | `configure_kevin_boss_p3.py` 的 `apply_lighting(save=True)`、`lighting_readback()`；同配置目录 `BH3_Kevin_P3_Scene_Config.json` |
+| 连续战斗与死亡阴影 | `run_kevin_battle.ps1`、`observe_kevin_battle.py`、`verify_kevin_battle.py`；`-DeathShadow` 只跑死亡阴影隔离夹具 |
 | 最小联机 | `run_kevin_multiplayer.ps1`、`observe_kevin_multiplayer.py`、`verify_kevin_multiplayer.py` |
 
 表中未写目录的脚本均在 `AAADocs/Scripts/`。动作及配置详见 [导入核对](../Assets/BH3/BH3_Kevin_DemonBattle_Import.md)、[职责契约](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Implementation.md)、[动作清单](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Action_Manifest.json)、[制作配置](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Wiring_Config.json)、[运行验证](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Runtime_Verification.md)。
@@ -38,7 +39,7 @@
 | 资产与生产接线 | 22 个 Niagara、8 个材质、13 个命中 Cue 共 43 包；55 个声音包只读复用。26 份派生动画、ABP、19 个技能 Montage 和 5 个表现 Montage 已保存。GA／AI 47 包包含无伤害 Dash_F、两阶段动作池及授予。独立读回见 `Saved/Codex/KevinBossAssembly_20261111/FX_Read_Ready/editor.log`、`Animation_Read/editor.log`、`DashF_Read/editor.log`。 |
 | 场景与导航 | P3 已保存并独立读回，唯一主灯带 `GGYGO.KeyLight`，PlayerStart／Encounter 引用正确，初始间距 18 m；KevinBoss 导航实际投影、完整路径及 9 个空中净空采样通过，原支撑碰撞未改。证据见同目录 `Scene_Create_NavExport/editor.log`、`Scene_Read/editor.log`。 |
 | 编译与自动化 | BossAI、Boss GA、Combat、CMC Flying 和 Editor 制作接口已编译；15 项相关回归、两项动画回归及 NativeFocusRotation 通过。Combat Touch→Block 物理阻挡已与伤害去重分离，相关两项查询回归通过。日志见同目录 `Build_DashF/build.log`、`Build_ReviewFix/build.log`、`Review_Query/editor.log`、`Review_Editor_Read/editor.log`。 |
-| 正式单机交战 | `Battle_R6/editor.log` 覆盖 11 个攻击选招入口、两条 AirChain 原生落地、50% 阶段切换、玩家真实普攻击败 Boss、死亡结束及销毁后 5 秒无残留；录得 15 种声音实例和 Master WAV。该次追击仍被拒，不能写成修复后一次完整胜利。 |
+| 正式连续单机交战 | `Saved/Codex/KevinFinalBattle_20261113/FinalBattle5/editor.log` 与 `checks.json`：同一 P3 World、正式 BT 连续执行，首两次 Dash_F 为 710.86／710.51 cm，玩家静止、双方无伤害，距离 18 m→10.89 m→3.79 m；610→590 血穿过 50% 阈值切池，11 个攻击入口均实际执行。两条 AirChain 的原 Landed 回调当栈匹配各自 GA，均命中场地、0 角色 Landed。玩家生产普攻把 Boss 1200 血打到 0，玩家剩 30 血；原 Death GA／共享蓝图完成销毁，6.96 秒游戏时间后无 Boss Avatar、FX、声音或弹体，玩家 GA 和动作位移也已结束。 |
 | 追击与视听 | `Battle_R7_DashF/editor.log` 证明玩家静止时两次完整 Dash_F 使距离 18 m→10.89 m→3.78 m，双方生命不变，随后攻击。预警平面 Rotator 参数顺序已修，实际画面见 `Battle_R9_Visual`、`Visual_Fire_Air`；后者暂停 BT 后走既有 GAS，只证明对应表现和落地。 |
 | 场地照明 | `Saved/Codex/KevinBossLighting_20261113/Lighting_Final/editor.log` 新进程读回通过；`001_production.png`、`002_front.png`、`003_back.png` 已看图，正式镜头、角色正背与投影可见，冰预警／火蓄力／破环在新照明下可见。 |
 | 全角色禁互踩 | `Saved/Codex/CharacterNoPerch_20261113/build_final2.log` 编译通过；`EffectivePolicy/editor.log` 读回八份 CDO 及实际玩家／Kevin 的有效 Unwalkable，Pawn Profile 保留；`Collision_Final2/editor.log` 八组真实物理下落均为 0 角色 Landed、1 环境 Landed，侧向仍阻挡。49 个真实 SavedMove 的本地预测／校正重放逐帧一致。 |
@@ -46,7 +47,17 @@
 | 最小真实联机 | `Saved/Codex/KevinNetwork_20261113/CloseLanding/` 的原生日志、观察数据与断言证明同 Editor Listen Server＋Client 经 IpConnection／ActorChannel 实际传包。正式 BT 先执行 Dash_F／Ice02，随后暂停 BT 经已授予 GAS 请求 Ice03、Fire02、AirChain01。服务器为 Authority、Boss GA 为 ServerOnly；客户端 SimulatedProxy 有 Montage 进度及骨骼变化，无本地活动 Boss GA。 |
 | 联机落地、命中与清理 | AirChain01 前只在服务器预摆主机玩家至 Boss 前方 96 cm，等复制后起招，不写 Boss／客户端位置或轨迹。自由 Falling 有 10 次角色接触、0 角色 Landed，最终落场地，两端连续 2.19 秒 Walking／环境基底；两名玩家血量最终为 44／72，两端一致。客户端冰火命中 Cue 可见，18 个远端 FX 全部销毁，Encounter Avatar 销毁复制通过。 |
 
-上表未写完整目录的单机日志位于 `Saved/Codex/KevinBossAssembly_20261111/`。联机客户端的 `000_Ice03_0.35.png`、`004_Fire02_1.1.png`、`010_AirChain01_4.0.png`、`011_cleanup.png` 已查看；统筹另复核传包日志、断言、火刃和地面收尾图。此次联机仅新增验证脚本及文档，无生产差分，未重复 UBT；我方 UE／UBT 和占用已清空。
+上表未写完整目录的单机日志位于 `Saved/Codex/KevinBossAssembly_20261111/`。联机客户端的 `000_Ice03_0.35.png`、`004_Fire02_1.1.png`、`010_AirChain01_4.0.png`、`011_cleanup.png` 已查看；统筹另复核传包日志、断言、火刃和地面收尾图。联机批次仅新增验证脚本及文档，无生产差分。
+
+### 连续交战与死亡阴影的证据边界
+
+完整交战使用原玩家输入桥自动提交 W／S／D／鼠标左键，按原招式收招窗决定接近或退让，并用 ControlYaw 配合 Held W 调整普攻朝向；诊断相机和关闭运动模糊只影响本次取景。BT 全程未停，不直接激活 Boss、不写角色位置、不改生命／伤害配置，也不直接销毁代替死亡。上述输入策略有脚本干预，不能代签物理设备或人工操作体验。追击、切池时交战、两条空连、落地和死亡画面已核；`FinalBattle5/194_cleanup.png` 暴露死亡阴影残留，不能称该场原画面完全清空。
+
+死亡阴影已定位为 Kevin 没有 PhysicsAsset 时采用静态导入包围盒，死亡末帧的真实 CPU 蒙皮表面超出其 3.27 倍；VSM 只按图元范围失效，Actor 已销毁仍留下超出部分。`Saved/Codex/KevinFinalBattle_20261113/ShadowDeath2/005_cleanup.png` 可见残影，随后仅临时关闭 VSM 缓存的 `006_cleanup_uncached.png` 残影消失。该隔离夹具暂停 BT，经已配置伤害 GE→HealthSet→原 Death GA／共享蓝图销毁，不替代前述普攻胜利。
+
+现行配置 `mesh_bounds_scale=4` 由 `wire_bh3_kevin_combat.configure_mesh_bounds(apply=True)` 只编译保存 Kevin 蓝图的 Mesh；新制作和读回也核此值。`Saved/Codex/KevinFinalBattle_20261113/BoundsApply/editor.log` 保存成功；新进程 `Saved/Codex/KevinFinalBattle/ShadowFinal/editor.log` 读回 4，末帧表面占新包围盒范围的 0.818。`004_death_finished.png` 可见死亡姿态和正常投影，`005_cleanup.png` 在默认 VSM 缓存仍开启、销毁后 5.01 秒时已无残影，两图已核。未改死亡流程、Mesh 源资产、物理碰撞或生产全局缓存开关。此修复只有蓝图默认值和制作脚本变化，沿用当前已构建 DLL，未重复 UBT；脚本语法、完整战斗日志断言和死亡专项通过，我方 UE 已正常退出。
+
+复现命令：`AAADocs/Scripts/run_kevin_battle.ps1 -RunName <新名称>`；结束后用 `python AAADocs/Scripts/verify_kevin_battle.py <输出目录>` 核日志，关键画面另行查看。只复核死亡阴影时增加 `-DeathShadow`，该模式不输出整场录音或逐次落地截图。原失败试次及提前 EndPIE 引起的 `HeroInputReleased` 诊断保留于 `Saved/Codex/KevinFinalBattle_20261113/`；完整战斗宿主现等待玩家能力和动作位移自然结束，最终场次无 AbilitySystem Error。启动段 13 条通用 Automation 条件失败仍单列为未归因。
 
 ### 特效来源边界
 
@@ -72,7 +83,7 @@
 - 原光度、曝光、HDR 解码、Cube 面朝向及原粒子效果未证明等价；当前照明和 FX 按已授权项目适配交付。
 - 原声音选用、调用条件和精确时点仍有未知，Dash_F 使用同 Boss 候选声音 E3188014124，原映射未证实；组件播放和录音不能代替设备试听。
 - 本次空闲物理内存约 13.6 GiB，低于既有双 Editor 入口要求，因此联机使用同进程双 PIE World。独立进程／跨设备、完整网络与中断矩阵、联机死亡演出、弹体飞行复制和模拟代理独立 RMS 未验；本地 49 SavedMove 重放不代替实际传包。
-- Cook、性能、物理输入设备及原生 Obsidian Canvas 渲染未验。笔记已检查 JSON、节点与链接，不用结构检查代替原生画面。
+- Cook、性能（包括扩大 Kevin 包围盒的 VSM 开销）、物理输入设备及原生 Obsidian Canvas 渲染未验。笔记已检查 JSON、节点与链接，不用结构检查代替原生画面。
 - 专项红绿日志启动段均保留 13 条通用 `LogAutomationTest: Condition failed`，尚未归因。旧跨 move 冲量污染、同轴／微小滑动失败和脚本诊断仍保留在对应证据目录；当前专项通过不表示整份日志无错。
 
 ## 验收标准

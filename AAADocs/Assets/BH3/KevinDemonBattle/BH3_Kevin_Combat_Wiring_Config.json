@@ -13,6 +13,7 @@
     "ability_set": "/Game/Characters/Boss/Kevin/DemonBattle/Data/DA_AbilitySet_Kevin_DemonBattle"
   },
   "mesh": "/Game/Characters/Boss/Kevin/DemonBattle/Mesh/SK_Kevin_DemonBattle",
+  "mesh_bounds_scale": 4.0,
   "anim_blueprint": "/Game/Characters/Boss/Kevin/DemonBattle/Animation/ABP_Kevin_DemonBattle",
   "assembly_alignment_status": "native_standby_sole_and_head_fit; mesh_plus_y_to_actor_plus_x; production_visual_pending",
   "mesh_relative_location": [

@@ -137,6 +137,31 @@ def calibration_bounds(points):
             'max_actor_cm': [max(p[axis] for p in points) for axis in range(3)]}
 
 
+def configure_mesh_bounds(apply=False):
+    """保存或读回 Kevin 的原生包围盒倍率；死亡表面超出静态导入范围会遗留 VSM 缓存。"""
+    import unreal
+    cfg = read_config()
+    scale = cfg['mesh_bounds_scale']
+    require(math.isfinite(scale) and scale > 0, 'Mesh BoundsScale 必须为正有限数')
+    require(unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world() is None,
+            '包围盒制作／读回需要退出 PIE')
+    blueprint = unreal.load_asset(cfg['assets']['pawn'])
+    require(blueprint is not None, 'Kevin 蓝图缺失')
+    require(blueprint.get_outer() not in unreal.EditorLoadingAndSavingUtils.get_dirty_content_packages(),
+            'Kevin 蓝图有未保存工作')
+    component = unreal.get_default_object(blueprint.generated_class()).get_editor_property('mesh')
+    before = float(component.get_editor_property('bounds_scale'))
+    if apply:
+        component.set_editor_property('bounds_scale', scale)
+        unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
+        component = unreal.get_default_object(blueprint.generated_class()).get_editor_property('mesh')
+    actual = float(component.get_editor_property('bounds_scale'))
+    require(abs(actual - scale) < 0.0001, 'Kevin Mesh BoundsScale 与配置不符')
+    if apply:
+        require(unreal.EditorAssetLibrary.save_loaded_asset(blueprint, only_if_is_dirty=False), 'Kevin 蓝图保存失败')
+    return {'blueprint': cfg['assets']['pawn'], 'before': before, 'bounds_scale': actual, 'saved': apply}
+
+
 def calibration_body_geometry(unreal, component, component_to_actor):
     """Read posed LOD0 surfaces by material; all scratch data belongs to this call."""
     mesh = component.get_skeletal_mesh_asset()
@@ -651,7 +676,7 @@ def run(apply=False, batch='assembly', readback=False):
             require(component.get_skeletal_mesh_asset() == mesh, 'assembly Mesh asset differs: ' + obj.get_path_name())
             check_properties(component, {
                 'AnimClass': abp_class, 'RelativeLocation': unreal.Vector(*cfg['mesh_relative_location']),
-                'RelativeRotation': rotation, 'RelativeScale3D': scale})
+                'RelativeRotation': rotation, 'RelativeScale3D': scale, 'BoundsScale': cfg['mesh_bounds_scale']})
             check_properties(receiver.get_editor_property('CapsuleComponent'), {
                 'CapsuleRadius': cfg['capsule_radius'], 'CapsuleHalfHeight': cfg['capsule_half_height']})
             require(receiver.get_editor_property('AutoPossessAI') == unreal.AutoPossessAI.DISABLED, 'Encounter must own Controller creation')
@@ -694,6 +719,7 @@ def run(apply=False, batch='assembly', readback=False):
                 component.set_editor_property('RelativeLocation', unreal.Vector(*cfg['mesh_relative_location']))
                 component.set_editor_property('RelativeRotation', rotation)
                 component.set_editor_property('RelativeScale3D', scale)
+                component.set_editor_property('BoundsScale', cfg['mesh_bounds_scale'])
                 receiver.get_editor_property('CapsuleComponent').set_capsule_size(cfg['capsule_radius'], cfg['capsule_half_height'])
             if parent:
                 unreal.BlueprintEditorLibrary.compile_blueprint(obj)
