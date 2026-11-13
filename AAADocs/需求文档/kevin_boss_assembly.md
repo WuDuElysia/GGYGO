@@ -1,6 +1,6 @@
 # Kevin DemonBattle Boss 完整组装与视听制作
 
-状态：单机禁互踩修复完成：编译、八组完整物理碰撞、49 个 SavedMove 逐帧重放及最终 P3 贴身 AirChain01 稳定收尾均通过，Character／Movement 核心评审无阻塞。P3 照明适配及原单机组装交付保留。原版视听完整还原、Kevin 联机、Cook、性能和设备试听仍未验。
+状态：单机组装、P3 照明、禁互踩及本次最小真实联机验证已交付。正式 P3 的 Listen Server／Client 经 IpNetDriver 实际传包，服务器权威、三招客户端动作／FX／命中、贴身 AirChain01 落地与结束清理通过。本次仅新增验证脚本，无生产代码或资产修复。独立进程、完整网络矩阵、代理独立 RMS、原版视听完整还原、Cook、性能和设备试听仍未验；原本地 49 个 SavedMove 重放结果仍单列。
 
 ## 本轮用户反馈与范围
 
@@ -28,7 +28,19 @@ P3 原有 5 盏灯均启用，主光只有 1 lux 且全部灯光不投影，关�
 
 `Production_Final/editor.log` 从正式 P3 入口启动，暂停 BT 后经已授予 GAS 依次执行 Ice03、Fire02、AirChain01；不移动玩家、不修改生命或原技能轨迹。三次 Landed 均命中场地 `StaticMeshActor_0.StaticMeshComponent0`，角色 Landed 为 0；AirChain01 完成时为 Walking，继续稳定 2 秒游戏时间，动作位移及 FX／声音／弹体无残留。已查看空中与最终贴身站立截图 `015_AirChain01_4.0.png`、`016_cleanup.png`。这证明本次单机稳定落地，不替代完整自动选招、真实联机或 Cook 验收。红绿专项日志启动段各有 13 条通用 `LogAutomationTest: Condition failed`，尚未归因，仍保留原日志；专项通过不写成整份日志无错。
 
-本次不改地图照明、角色动画资产、Dash_F 和原技能轨迹。原版光度／曝光、粒子还原、缺失声音调用、设备试听、联机／Cook／性能及完整中断矩阵仍保持未完成或未验证。
+本次不改地图照明、角色动画资产、Dash_F 和原技能轨迹。原版光度／曝光、粒子还原、缺失声音调用、设备试听、Cook／性能及完整中断矩阵仍保持未完成或未验证；最小联机范围见下节。
+
+## P3 最小真实联机
+
+入口为 `AAADocs/Scripts/run_kevin_multiplayer.ps1`，观察与断言分别在 `observe_kevin_multiplayer.py`、`verify_kevin_multiplayer.py`。本机空闲物理内存约 13.6 GiB，低于既有双 Editor 入口的 14.8 GiB 要求，因此使用一个 D3D12 Editor 的两个 PIE World。日志记录了 `127.0.0.1` 的 IpConnection 握手、SendRawBunch 与 PacketId，原生观察读到同一 Boss NetGUID 的两端 ActorChannel；这是真实复制，不是 SavedMove 本地重放，但不等于独立进程或跨设备验证。
+
+沿正式 P3 Encounter 启动，先观察原 BT 的 Dash_F 和 Ice02，再暂停决策，经原已授予 GAS 依次请求 Ice03、Fire02、AirChain01。Boss GA 保持 ServerOnly，客户端为 SimulatedProxy，没有本地活动 Boss GA。三招均有客户端 Montage 进度、骨骼变化和实际截图；Kevin 专用 AnimInstance 不适用玩家的 finalize 观察器，因此当前骨骼读回不冒充该原生观察。没有修改能力、轨迹、生命、输入语义或生产资产。
+
+贴身落地是明确的测试摆位：仅在服务器于 AirChain01 激活前，把静止的主机玩家摆到 Boss 前方 96 cm，等该位置真实复制到客户端后起招；不写 Boss 位置、客户端位置或下落轨迹。自由 Falling 中记录 10 次角色接触，角色 Landed 为 0，随后 Landed 命中场地；原 GA 正常结束后继续观察约 4 秒游戏时间，最后连续 2.19 秒两端均为 Walking／环境基底，未出现角色基底。最终两端 Boss 胶囊位置相差约 0.0045 cm。
+
+两名玩家血量分别从 100 降到 44 和 72，客户端最终值与服务器一致；客户端实际生成 IceHitImpact 和 FireHitImpact。远端 Montage FX 有 413 条实际模拟到达记录，18 个创建的组件全部有对应销毁事实；技能结束后两端无活动 Kevin FX、声音或弹体，Encounter 销毁后两端 Boss Avatar 均消失。该范围不包含本轮未触发弹体能力的飞行复制、联机死亡演出或全技能／全中断矩阵。
+
+证据为 `Saved/Codex/KevinNetwork_20261113/CloseLanding/observations.json`、`checks.json`、`editor.log` 和 12 张客户端视口图。已查看 `000_Ice03_0.35.png` 的水平预警、`004_Fire02_1.1.png` 的火刃、`010_AirChain01_4.0.png` 的空中姿态、`011_cleanup.png` 的贴身地面站立。脚本语法、结果断言和 diff 检查通过；运行使用已通过构建的 `0616e3f` 源码，未改 C++，不重复 UBT。早期脚本的 PlayerState 就绪时序、玩家专用观察器不适用及过早销毁导致空截图的诊断保留在同目录旧试次；启动段仍有既有 13 条通用 `LogAutomationTest: Condition failed`，未将整份日志声明为无错。
 
 ## 目标与用户决定
 
