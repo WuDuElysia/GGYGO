@@ -4,7 +4,7 @@
 
 整改第 2 步。当前协作规则同第 1 步 Overview，既有证据位于 `Saved/Kiro/abilitysystem-input-request/` 与共同验证目录。
 
-状态（2026-11-12）：源码、编译及约定回归完成；真实 RHI 生产冒烟与共享 UMG 改键操作已有证据。任务 5 保持未勾：门前预输入待用户决定，生产占用后缓冲、过截止不重试及实体设备／断连／外部失焦未覆盖。
+状态（2026-11-13）：源码、编译及约定回归完成；真实 RHI 生产冒烟与共享 UMG 改键操作已有证据。组占用后一次重试及过原截止不重试已补齐四项机制测试和两项生产输入链 PIE 观察；后者使用临时占用夹具，不代表默认授予已有第二个可操作能力。任务 5 保持未勾：门前预输入待用户决定，实体设备／断连／外部失焦未覆盖。
 
 ## Tasks
 
@@ -41,22 +41,27 @@
     - _Requirements: 4.1-4.6, 5.2_
   - [x] 3.3 Input／Admission 既有测试未断言已删除的内部结构或原因值（编译通过；Admission.GroupLifecycle 的 reason=14 早于本步，归第 4 步）
     - _Requirements: 4.1-4.6_
+  - [x] 3.4 新增 `GGYGO.Input.QueuedDeadline` 四项：一次唤醒只消费一次；再次真实 Queued 失败保留原身份与截止；组释放前过期不重试；已唤醒但消费前过期不重试。均经真实 InputKey／PC 输入帧，并验证释放重按正控，不直接改输入记录或广播组释放。
+    - _Requirements: 4.1, 4.2_
 
 - [x] 4. 首击不等移动键（用户 11-03 选 B）
   - 移动来源尚无物理证明时，`ValidateStepStartInputReadiness` 把 AwaitingPhysicalProof 记为零轴 Completed 事实，按当前朝向起段；WaitComboInput TargetData 与 CMC 段首事实校验接受该状态；移动执行仍只接受 Held
   - _Requirements: 4.2, 4.4, 5.3_
 
-- [ ] 5. 检查点：编译、测试、PIE（连段缓冲与要求 5.3 原文不一致，待用户决定；"过截止不重试"无测试；实体设备手感与 V4 的设备断连／外部失焦仍待用户，见下）
+- [ ] 5. 检查点：编译、测试、PIE（连段缓冲与要求 5.3 原文不一致，待用户决定；实体设备手感与 V4 的设备断连／外部失焦仍待用户，见下）
   - [x] 编译与 NullRHI 测试：见 `Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/`（与第 1 步合批）。Input、PlayerCombo、InputRequest 用例通过；`ActivationCommitAndEndReentry`、`Admission.GroupLifecycle` 归第 4 步；`MovementOrigin.NativeBirthFirstDigitalPress` 需原生窗口，NullRHI 下不可运行
   - [x] PlayerCombo 生产冒烟（真实 RHI＋L_Movement_Test）：2026-11-11 `GGYGO.AbilitySystem.PlayerCombo` 23 叶＋NativeBirth 共 24 项，Build_R2（Smoke_R2）与 Build_R3（Smoke_R3）两次都是 22 Success（其中 5 项只带引擎 CMC 步长 Warning）／2 契约性 Fail（PoseFailure×2，见 V2）。首击无移动键（Cold／零轴起段）、攻击接续点之后的连段接续、超窗拒绝（第三段攻击点前请求被拒且不挂起）、按住不重复均有生产证据。修正夹具：所有生产叶首按前等资源 Ready（进程首个 PIE 的 Pending 按下按契约被丢弃，旧夹具因此超时）。证据 [I08](../../../.agents/tasks/requirements-closeout/evidence/I08.md)。
   - [ ] 连段缓冲（要求 5.3 第一项，**需用户决定**）：5.3 原文是"连段缓冲输入在下一段生效"。当前 GA 不调用 `FGGYGOComboWindowState::Store`，攻击接续点（Normal01 在 0.275 s）之前的按下直接被拒、不存起来；冒烟证明的只是接续点之后按下，同一激活内 11～18 ms 接上下一段。HEAD 上就是这样，不是本批引入（台账 CR-1014-B1 已记 `Store` 无生产调用者）。选项：A 接受现状，把 5.3 改为"接续点后的按下在下一段生效，接续点前的按下不生效"；B 另立需求接回预输入（接续点前的按下存起来，开门后生效），玩家手感会变，需重跑冒烟。
-  - [ ] 占用后缓冲（要求 5.3 第二项、4.1）：生产 PIE 到不了（只启用攻击一个能力，攻击自身连段走同一激活）。单元层已覆盖排队与重试：`Admission.GroupLifecycle`（Queued 组拒绝第二实例并报 `GroupOccupiedQueued`；`OnAbilityGroupFreed` 回调内重试成功）；`ProjectDiagnostics.Input.ActivationOrigin.QueuedFailureReleasesBlockerBeforeNotice`、`ProjectDiagnostics.Input.RetryIdentity.SameTimeReentrantPhysicalRequest`（真实 GroupFreed 后重试一次，重试带原有限截止时间）。"超过截止时间不再重试"**未验证**：没有任何测试叶把时间推过截止再断言不重试，只有代码路径（`GGYGOAbilityInputBuffer.cpp` 中 `IsBeforeDeadline` 为假时清空 `RetryableSpecHandles`，重试分发也先查 `IsBeforeDeadline`）。
+  - [x] 占用后缓冲与过截止（要求 5.3 第二／三项、4.1）：2026-11-13 共享 [GGYGOEditor 增量构建](../../../Saved/Codex/HealthAcceptance_20261113/shared_build.log)成功；新增四项机制＋两项 `GGYGO.Input.QueuedDeadlinePIE` 全部 Success，零测试错误，其中过期 PIE 保留一条引擎 `r.MotionVectorSimulation` 警告。证据：[原生测试报告](../../../Saved/Codex/InputQueuedDeadline_20261113/Run_R1/Automation/index.json)、[D3D12 日志](../../../Saved/Codex/InputQueuedDeadline_20261113/Run_R1/editor.log)。Editor 正常退出，本批无生产代码或资产修改。
+    - 机制测试将私有 World 的实际时间从 0 推进到 0.400 s，超过原 0.350 s 截止；分别验证释放前与唤醒后过期均不激活，且新按下仍可激活。重排测试观察到两次真实 Queued 失败携同一请求身份／原截止，之后只入场一次。
+    - 两项自有生产 PIE 保留 `L_Movement_Test`、`BP_PC_Pyrios`、`BP_PlayerController`、`GGYGOPlayerInput`、默认普攻及 `DA_AbilityGroups_Default` 的 Queued 规则。仅通过 GAS 临时授予无输入 Tag 的占用夹具；普攻经既有左键 `PC.InputKey → Hero → PostProcessInput → ASC`。一次重试在原截止前入场并自然结束；过期场景在截止之后释放组，继续观察仍零激活，真实释放重按的正控才入场并自然结束。原生组释放栈不激活，结束后没有残留重试。
+    - 默认授予仍只有一个攻击输入能力；这证明生产输入／执行链在受控占组下的行为，不签默认多能力玩法或 Special／E／R／F 接线。未覆盖物理设备、焦点丢失、网络及 Cook，也未重新验收连段预输入或视听效果。启动阶段 13 条 `Condition failed` 与上述引擎警告原样保留，不声称整个宿主零错误。
   - [x] V1 Normal01 活尾：生产配置为单 NS、8 发射器全部 Once、t=0 一次 Burst，最长 Loop Duration 1.0 s，粒子寿命 ≤0.3 s；作者 FX End 在 1.6834 s。没有单元能活过作者 End，活尾分支在该配置下不存在；三次运行 9 次观察均 `NaturalRetiredBeforeEndUnits=1 TailDetachedUnits=0`。未人为续命。
   - [x] V2 两 PoseFailure：复跑结果与之前一致，每叶两条关联诊断（Acquire／Poll 各一条 MontageTask.Pose，加同 Task 的 RequiredDependencyFailed），清理与自然后继断言通过。按既有测试契约保留未过滤 Error 与原 Fail。
   - [x] V3 之前一次冒烟里出现过的额外攻击：新的冒烟里 NewPress 叶通过，观察到的按键只有夹具自己提交的，没有复现，不追。
   - [x] V4 改键实际生效和持久化（自动化范围）：真实 RHI、L_Movement_Test、生产 Controller 下，用生产菜单把"移动 · 前进"从 W 改到 I 后首按即移动，异步存档写出，第二轮新会话从磁盘读回后仍是 I；恢复默认后 I 无位移、W 恢复并再次写盘。另一轮不改键，验证菜单返回、按住键穿过菜单后释放能恢复移动。证据 [V4i](../../../Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/RHI_KeySettings_V4i/return.json)、[V4h](../../../Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/RHI_KeySettings_V4h/return.json)。按键经 Editor 的 PC.InputKey 桥注入，不代表实体设备；设备断连和外部失焦没有覆盖。
   - [x] 当前共享 UMG 页面已按 [B06 交付](../../../AAADocs/需求文档/blueprint_layering_followups.md) 走过真实前台两轮 PIE：改键、冲突、存档读回、恢复默认、关页不卡键；此结论不扩大为实体键鼠或跨进程读回。
-  - [x] 同 Spec 嵌套 Try 的原输入来源隔离已修复，`Saved/Codex/I23_20261111/Automation/index.json` 六项通过；原 `NestedSameSpecRawTry` 失败已闭合。该修复不补签上述预输入或过截止行为。
+  - [x] 同 Spec 嵌套 Try 的原输入来源隔离已修复，`Saved/Codex/I23_20261111/Automation/index.json` 六项通过；原 `NestedSameSpecRawTry` 失败已闭合。该历史修复不补签预输入；过截止证据见本次专项。
   - _Requirements: 5.1-5.3_
 
 - [x] 6. 更新活动记录
