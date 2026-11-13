@@ -4,7 +4,7 @@
 
 整改第 5 步。执行规则与命令同第 1 步，输出目录为 `Saved/Kiro/combatants-avatar-binding/`。开工前确认第 4 步已验收。
 
-状态（2026-11-12）：源码及绑定回归完成，真实 RHI 客户端出生、移动、攻击、换人后重新操作及死亡替补已有证据，Boss 正式出场与出招已有单机证据。复活流程尚不存在，另一独立观察客户端在换人后的表现未单独取证；任务 6 保持部分完成。
+状态（2026-11-13）：源码及绑定回归完成，真实 RHI 客户端出生、移动、攻击、换人后重新操作及死亡替补已有证据，Boss 正式出场与出招已有单机证据。同一 Editor 的监听服务器＋两个客户端已补齐第三端换人实拍；复活流程尚不存在，任务 6 保持部分完成。
 
 实现与计划的差异见 design.md 末尾"实现差异"。
 
@@ -56,7 +56,7 @@
   - [x] 真实 RHI 出生／操作／换人：`Saved/Codex/CharacterDeathPolicy_20261111/rhi2.log` 的 `GGYGO.Teams.SquadSwitch.ListenServerClientRequest` 为 Success，覆盖客户端初次及重新附身后的移动、攻击、Z／C 请求切换、死亡自动替补和两端状态一致；更早集中运行见 `Verify_R2/RHI_Integrated_R1/Automation/index.json`。
   - [x] Boss 出场与连续出招：[Kevin 正式战斗交付](../../../AAADocs/需求文档/kevin_boss_assembly.md) 已核对原 Encounter、绑定、技能与死亡清理，不扩大为 Kevin 联机。
   - [ ] 复活：项目没有复活流程，不能由死亡替补或再次附身推断通过。
-  - [ ] 独立第三端观察换人：上述换人用例是同进程 listen-server＋一个客户端；最小联机的独立观察端验证的是普攻／FX，未执行换人，不能补签 Requirement 7.4 的其它客户端切换画面。
+  - [x] 第三端观察换人：`GGYGO.Combatants.AvatarSwitch.ThirdClientObserver` 在 D3D12、同一 Editor 的监听服务器＋两个客户端中通过，零测试错误、六条警告。所属客户端经生产 RPC 完成 0→1→0，三端按同一 PlayerId／NetGUID 核对活动 Pawn、可见性、碰撞和 ASC ActorInfo；服务器与所属端保留两组原 Pawn／ASC 资源，观察端遵循原生相关性。服务器和另一客户端各三张自然视口截图已核对，原 Slot／ASC 未替换。使用两份现有 Pyrios 实例和临时诊断机位，不保存编队，不代表不同角色外观、独立进程或网络扰动验收。编译、日志、报告和图片见[第三端换人验收](../../../AAADocs/需求文档/refactor_and_squad_switch.md#avatar-绑定第三端换人观察)。
   - _Requirements: 7.1-7.4_
 
 - [x] 7. 更新活动记录

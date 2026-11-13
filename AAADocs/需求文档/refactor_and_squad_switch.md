@@ -75,9 +75,27 @@
 | 2 输入请求 | 源码及相关回归完成；组占用后一次重试及过原截止不重试新增四项机制＋两项生产输入链 PIE 通过，既有冒烟、改键及嵌套来源证据保持 | 任务 5 保留未勾：预输入待用户决定；实体设备／焦点丢失未覆盖。PIE 使用临时占组夹具，不代表默认授予新增第二个玩家能力 |
 | 3 FX 发布 | 发布所有权与相关回归完成；普攻出现／自然清理、最小联机、活尾及连段取消后的 Abort 画面已验，取消画面复用原证据核收 | 任务 6 部分完成：TurnBack 准确烟雾来源未确定；用户视听返修由原需求跟进，见 [FX 记录](fx_audio_wiring.md#连段取消画面) |
 | 4 激活生命周期 | 源码、核心回归、基本动作链、纠正重放与最小联机已交付；完整 Editor 动画组 9／9 通过，任务 8 验收缺口已补齐 | 玩法／镜头待定项与原失败保留；本轮仅补 NullRHI 自动化，不新增 Cook／完整网络矩阵或视觉验收 |
-| 5 Avatar 绑定 | 绑定回归、真实 RHI 出生／移动／攻击／重新附身／死亡替补及 Boss 单机出场已验 | 任务 6 部分完成：项目没有复活流程；独立第三端观察换人未覆盖，普攻／FX 观察端结果不代签换人 |
+| 5 Avatar 绑定 | 绑定回归、真实 RHI 出生／移动／攻击／重新附身／死亡替补及 Boss 单机出场已验；同一 Editor 的监听服务器＋两个客户端已补齐第三端换人实拍 | 任务 6 部分完成：项目没有复活流程；第三端专项使用两个 Pyrios 实例，未验不同角色外观、独立进程和网络扰动 |
 | 6 换人续放 | 约定测试编队范围内的编译、自动化与真实 RHI 联机已验；共享 UMG 改键和蓝图死亡替补已交付 | 两份 Pyrios 实例与夹具续放 GA 不代验生产续放技能配置；进退场资产缺省按决定跳过，实体设备手感未验 |
 | 7 HealthSet | 保留分类帧已定案；反算迁移、回归、真实 RHI 扣血／上限／破韧及原死者双端数值／死亡广播已验；单机和双端死亡前后段已实拍核对；现有 Combat→GE／Cue 与反应配置已读回 | 任务 4 部分完成：已授予的 GA_HitReact 为空图、无触发，破韧尚无动作反应链；需先确定反应条件、动作和打断／恢复规则。现有命中 Cue 不代签这些动作或设备听感；死亡回调跨复制对象不保证同序 |
+
+### Avatar 绑定第三端换人观察
+
+2026-11-13 [增量构建](../../Saved/Codex/AvatarSwitchObserver_20261113/build.log)通过；`GGYGO.Combatants.AvatarSwitch.ThirdClientObserver` 在 D3D12、同一 Editor 的监听服务器＋两个客户端中为 Success，零测试错误、六条警告，见[报告](../../Saved/Codex/AvatarSwitchObserver_20261113/Run_1/Report/index.json)和[日志](../../Saved/Codex/AvatarSwitchObserver_20261113/Run_1/editor.log)。所属客户端调用生产 `ServerRequestSwitchToSlot` 完成 0→1→0，三个世界均经真实 IpNetDriver 复制，客户端活动 Pawn 有打开的连接和 ActorChannel。
+
+三端按同一玩家核对活动 Slot／Pawn 的 NetGUID、可见性、碰撞、ASC Owner／Avatar 与本地绑定就绪。原 Slot／ASC 全程保留；服务器和所属端的两组原 Pawn／ASC 资源均未替换。另一客户端的非活动 Pawn 可依原生相关性尚未出现或退役，不能要求它永久保有隐藏 Pawn；每次活动 Pawn 则须与服务器一致并完成本地绑定。服务器与所属端的控制关系、所属端生产镜头目标也随切换收敛。
+
+已逐张核对服务器与观察客户端的六张实际视口截图，活动角色全身可见、无其它测试玩家遮挡。画面与同帧 Draw 的活动 Pawn 身份配对：
+
+| 阶段 | 服务器 | 另一客户端 |
+| --- | --- | --- |
+| 换人前 Slot 0 | [画面](../../Saved/Codex/AvatarSwitchObserver_20261113/Run_1/Captures/server_before_slot0.png) | [画面](../../Saved/Codex/AvatarSwitchObserver_20261113/Run_1/Captures/observer_before_slot0.png) |
+| 换到 Slot 1 | [画面](../../Saved/Codex/AvatarSwitchObserver_20261113/Run_1/Captures/server_after_slot1.png) | [画面](../../Saved/Codex/AvatarSwitchObserver_20261113/Run_1/Captures/observer_after_slot1.png) |
+| 切回 Slot 0 | [画面](../../Saved/Codex/AvatarSwitchObserver_20261113/Run_1/Captures/server_returned_slot0.png) | [画面](../../Saved/Codex/AvatarSwitchObserver_20261113/Run_1/Captures/observer_returned_slot0.png) |
+
+测试复用生产地图、角色和换人链，只临时建立两份 Pyrios 实例的编队、设置两观察端诊断机位并移开其它玩家，不保存资产。两实例外观相同，正确角色身份由真实复制和实际 Draw 配对确认，不以模型差异判断。本项没有生产结构或接口修改；未扩大为复活、进退场、不同角色外观、独立进程、网络扰动或 Cook 验收，任务 6 仍部分完成。
+
+自有 Editor 退出 0。六条警告涉及渲染 CVar、两次远端相机 cache 写入拒绝、两次输入路由退役和一次过期原生移动响应拒绝；启动前 13 条 `Condition failed` 原样保留，未计为本专项测试错误。
 
 ### HealthSet 原死者配对与死亡画面
 
