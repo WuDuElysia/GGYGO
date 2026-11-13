@@ -36,4 +36,3 @@
 
 | 负责人 | 需求 | 占用内容 | 开始时间 |
 | --- | --- | --- | --- |
-| Animation 资产生产（Codex） | 激活生命周期 Editor 动画全组验收 | 自有 NullRHI Editor、`Saved/Codex/ActivationLifecycle_EditorAnimation_20261113/`、`.kiro/specs/abilitysystem-activation-lifecycle/tasks.md`、`AAADocs/需求文档/refactor_and_squad_switch.md`；仅测试自建临时资产，完整运行 `GGYGO.Editor.Animation` | 2026-11-13 |

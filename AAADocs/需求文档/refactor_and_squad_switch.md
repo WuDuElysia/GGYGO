@@ -74,7 +74,7 @@
 | 1 冗余清理 | 源码、消费者核查及约定自动化完成；普攻生产冒烟与 Kevin 单机战斗已跑 | 冒烟两项 PoseFailure 的原 Fail 按约定保留；实体设备与完整网络矩阵不在已验范围 |
 | 2 输入请求 | 源码及相关回归完成；生产冒烟、共享 UMG 改键和同 Spec 嵌套输入来源修复已有证据 | 任务 5 保留未勾：预输入待用户决定；生产能力占用后的排队、超过截止不再重试及实体设备／焦点丢失边界未覆盖 |
 | 3 FX 发布 | 发布所有权与相关回归完成；普攻出现／自然清理、最小联机及活尾已验 | 任务 6 部分完成：TurnBack 准确烟雾来源未确定，真实打断 Abort 画面未验；用户视听返修由原需求跟进 |
-| 4 激活生命周期 | 源码、核心回归、基本动作链、纠正重放与最小联机已交付 | 任务 8 部分完成：Requirement 9.2 的完整 `GGYGO.Editor.Animation` 报告未找到，局部专项不代签整组；玩法／镜头待定项保持 |
+| 4 激活生命周期 | 源码、核心回归、基本动作链、纠正重放与最小联机已交付；完整 Editor 动画组 9／9 通过，任务 8 验收缺口已补齐 | 玩法／镜头待定项与原失败保留；本轮仅补 NullRHI 自动化，不新增 Cook／完整网络矩阵或视觉验收 |
 | 5 Avatar 绑定 | 绑定回归、真实 RHI 出生／移动／攻击／重新附身／死亡替补及 Boss 单机出场已验 | 任务 6 部分完成：项目没有复活流程；独立第三端观察换人未覆盖，普攻／FX 观察端结果不代签换人 |
 | 6 换人续放 | 约定测试编队范围内的编译、自动化与真实 RHI 联机已验；共享 UMG 改键和蓝图死亡替补已交付 | 两份 Pyrios 实例与夹具续放 GA 不代验生产续放技能配置；进退场资产缺省按决定跳过，实体设备手感未验 |
 | 7 HealthSet | 保留分类帧已定案；反算迁移、回归及真实 RHI 扣血／上限／破韧的双端数值和广播已验 | 任务 4 部分完成：死亡替补已验，但死者的双端 Health／DeathState／死亡广播未逐边沿配对；单机受击／破韧／死亡表现缺完整专项证据 |
@@ -86,6 +86,8 @@
 2026-11-13 在生产 `L_Movement_Test`／`BP_PC_Pyrios` 上完成两轮单客户端 PIE 启停：每轮先确认三个映射实际应用，再在三个原生移除回调中通过既有只读装配桥核对原 PC／PlayerInput，并核对原 LocalPlayer 子系统仍有效；每次对应映射已移除，最终三项均不再应用。两轮均完整退出，Editor 正常退出，未出现旧泄漏 Warning。证据：[运行日志](../../Saved/Codex/InputMappingCleanup_20261113/editor.log)、[观察结果](../../Saved/Codex/InputMappingCleanup_20261113/observations.json)；观察脚本及三次 Python 接口适配失败保留在同目录。
 
 本次只增加退出验证和文档，不改生产代码或资产，不重复编译。验证使用 NullRHI，不代验画面、实体输入、独立进程联机或 Cook；最新 Kevin 双端日志无旧 Warning 仅作旁证。日志中的启动阶段 `Condition failed` 和两轮 NullRHI 的 R32f 不支持错误原样保留，不声称整宿主零错误或渲染通过。
+
+激活生命周期的 Editor 动画组已于 2026-11-13 补齐：完整过滤器 `GGYGO.Editor.Animation` 在自有 NullRHI Editor 中运行，[原生报告](../../Saved/Codex/ActivationLifecycle_EditorAnimation_20261113/Automation/index.json)记录 9 项 Success、零错误／警告／未运行，[运行日志](../../Saved/Codex/ActivationLifecycle_EditorAnimation_20261113/editor.log)记录正常退出，进程退出码 0。测试只修改自建 `/Temp` 动画、Skeleton、Montage／ABP 及独立 Saved JSON 样本，不保存项目资产；本轮无生产源码修改，复用现有 DLL。启动阶段仍有 13 条 `LogAutomationTest: Error: Condition failed`，发生在测试开始前，来源未在本需求排查，不能把本组通过解释为整个启动日志无错误。
 
 ### 角色受光与阴影（已完成）
 

@@ -4,9 +4,9 @@
 
 整改第 4 步，改动面最大。执行规则与命令同第 1 步，输出目录为 `Saved/Kiro/abilitysystem-activation-lifecycle/`。开工前确认第 3 步已验收。
 
-当前按第 1 步 Overview 所链接的项目规则执行；本次状态核对只读取已有证据，不启动 UE 或重跑测试。
+当前按第 1 步 Overview 所链接的项目规则执行；完整验收证据由既有交付与本轮补齐的 Editor 动画组组成，其余已通过组不重复运行。
 
-状态（2026-11-12）：激活寿命实现、相关回归、单机基本动作链及最小联机纠正已交付；任务 8 保留部分完成。现有交付记录没有给出 Requirement 9.2 中 `GGYGO.Editor.Animation` 完整过滤器的对应报告，不能把局部 Editor 测试推成整组通过。
+状态（2026-11-13）：激活寿命实现、相关回归、单机基本动作链及最小联机纠正已交付；完整 `GGYGO.Editor.Animation` 在 NullRHI Editor 中 9／9 通过，任务 8 的验收缺口已补齐。玩法／镜头待定项、原失败以及未覆盖的 Cook／完整网络矩阵边界保持。
 
 ## Tasks
 
@@ -81,9 +81,9 @@
   - Boss 测试的 protected 接口与精确日志断言随共享资源迁移
   - _Requirements: 7.2, 8.1-8.7, 9.3, 10.6_
 
-- [~] 8. 检查点：编译、测试、PIE、联机
+- [x] 8. 检查点：编译、测试、PIE、联机
   - [x] GGYGOEditor 编译通过，最终联机源码构建为 `Saved/Codex/MinimalMultiplayer_20261111/build_tail_observation.log`。
-  - [~] Requirement 9.2 自动化：`Verify_R2/Test_R9`、`Test_R10`、`Test_R16a` 保留各组结果及 ABA 回归；Test_R9 的 Camera 失败原样保留，其不属于本条要求的过滤器。当前 `GGYGO.Editor.Animation` 只找到 [SyncMarker 两项专项](../../../Saved/Codex/I22_20261111/Rerun/editor.log) 等局部交付，完整组结果未覆盖，不重跑或推断补齐。
+  - [x] Requirement 9.2 自动化：`Saved/Kiro/abilitysystem-redundancy-cleanup/Verify_R2/` 下的 `Test_R9`、`Test_R10`、`Test_R16a` 保留其余七组通过结果及 ABA 回归；Test_R9 的 Camera 失败原样保留，其不属于本条要求的过滤器。完整 `GGYGO.Editor.Animation` 已在 2026-11-13 的 NullRHI Editor 中运行，[原生报告](../../../Saved/Codex/ActivationLifecycle_EditorAnimation_20261113/Automation/index.json)为 9 项 Success、零错误／警告／未运行，[日志](../../../Saved/Codex/ActivationLifecycle_EditorAnimation_20261113/editor.log)记录完整过滤器及正常退出。本轮复用现有 DLL，无源码修改或重复 UBT，仅写测试自有临时对象及 Saved 样本。
   - [x] Requirement 9.4 基本动作链：三段普攻见 [生产冒烟](../../../AAADocs/需求文档/normal01_first_strike.md)，Special／ExSpecial 实跑和自然清理见 [FX 接线](../../../AAADocs/需求文档/fx_audio_wiring.md)，TurnBack 动作见 [生产镜头观察](../../../AAADocs/需求文档/walkrun_turnback_production_camera.md)，Boss 连续选招与正式战斗见 [Kevin 交付](../../../AAADocs/需求文档/kevin_boss_assembly.md)。保留两项 PoseFailure 原 Fail；以上不签用户待定的起停／镜头行为或视听还原。
   - [x] N0/N1：D3D12 双端真实 attack-only 中，同一原 Montage／Task 自然结束，同一 RMS 按真实步长消费最后的 XYZ／Yaw，GA 未取消且原资源全部归还；内存预检与断言证据见[最小联机需求记录](../../../AAADocs/需求文档/minimal_multiplayer.md)。
   - [x] N5：具名 NET 读回仅有 lag；预测段 1 被服务器拒绝，沿 Mode2 原 basis 重放段 0，随后真正新起段 1，两端自然结束并清理。Initial 无法提供的独立试次证明同激活 Reliable TargetDataCancelled 与精准归还。模拟代理独立 Apply／imported RMS 不属于 requirements 9.5 的前提，未扩建该执行链；证据与边界见最小联机需求记录。
