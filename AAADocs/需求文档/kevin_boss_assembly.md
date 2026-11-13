@@ -1,242 +1,85 @@
 # Kevin DemonBattle Boss 完整组装与视听制作
 
-状态：单机组装、P3 照明、禁互踩及本次最小真实联机验证已交付。正式 P3 的 Listen Server／Client 经 IpNetDriver 实际传包，服务器权威、三招客户端动作／FX／命中、贴身 AirChain01 落地与结束清理通过。本次仅新增验证脚本，无生产代码或资产修复。独立进程、完整网络矩阵、代理独立 RMS、原版视听完整还原、Cook、性能和设备试听仍未验；原本地 49 个 SavedMove 重放结果仍单列。
+状态：**单机组装、场地照明、全角色禁互踩和最小真实联机已交付；原版视听完整还原及下列未验证范围未签完成。** 当前入口为 `/Game/Map/BH3/L_KevinBoss_P3`。逐步制作和修复历史保留在 Git，本记录只保留现行结论、接口、证据和剩余边界。
 
-## 本轮用户反馈与范围
+## 目标
 
-用户 2026-11-13 要求继续制作，并询问框架、Boss 特效／动作／音效和场地还原程度，明确反馈场地目前没有灯光。正式排查入口为 `/Game/Map/BH3/L_KevinBoss_P3`；此前只验证主灯存在、带唯一 `GGYGO.KeyLight` 且强度大于零，不能据此证明场景照明或原版还原正确。
+- 现有 DemonBattle 单形态形成可实际交战的完整链路：技能、动画、两阶段选招、位移、命中、特效、声音及死亡清理。初版战斗数值由本项目设计，50% 血量切换递进技能池，配置可调，不冒称原版参数。
+- 动画和声音优先使用真实来源；特效允许参考适配或原创，须明确来源与未知项。没有原调用事实时，不推定声音的选择、时点或命中条件。
+- P3 是独立正式战斗场景；不改其它地图，不引入其它 Kevin 形态、玩家 E／R／F、全员失败／复活系统或引擎修改。
 
-本轮核实际关卡的主光、环境光、曝光及生产运行画面。原光照参数有证据时按来源消费；缺原参数时在已授权场景制作范围内补可用照明，并标记项目适配。已通过的框架、完整技能轨迹、Dash_F、原生落地和死亡清理不重做；22 个 NS 保持已批准的改编／原创范围，声音不凭名称猜原事件、时点或命中条件。
+## 方案要点
 
-P3 原有 5 盏灯均启用，主光只有 1 lux 且全部灯光不投影，关卡没有 SkyLight 或 PostProcessVolume；全局配置关闭自动曝光。原场景导入保留了原灯颜色／布局／无阴影标记，但 Unity 光度与原运行时曝光未知。实际画面主要依赖天空自发光和镜面地面，角色脚下无投影，不能视为照明还原完成。
+- BossAI 经既有 GAS 入口请求能力；具体阶段、选招和表现使用 Blueprint、BT、Montage、Niagara、材质与数据资产。GA 管生命周期，Animation 管姿态和窗口，CMC 唯一执行胶囊位移，Combat 查询／去重，GA／GE／Execution／AttributeSet 结算。
+- 用户已选完整 Dash_F 分段追击：约 1.07 秒、7.1 米，无伤害，经 BT→GAS→CMC 执行，方向由原生 Focus 决定；本 Boss 已移除 MoveTo，不伪造玩家输入。
+- 地空连招保留完整原轨迹。飞行通过 `AcquireFlyingMovementMode`／`ReleaseFlyingMovementMode` 借还模式，结束交回原生重力，等待真实环境 Landed；`LandingRecovery` 只做表现。用户已选取约 0.033 秒 `Fly_Loop` 的末帧全身骨骼制作静止等待姿态，原序列只读，不循环其约 186 cm 根跳变。
+- Kevin 继承共享 `BP_BossCharacter`，死亡结束按共享蓝图下一帧 `K2_HandleDeathFinished → UninitAndDestroy` 处理；不复制第二套原生销毁分支。正常结束、取消、死亡和目标失效须清理本技能资源。
+- 用户已定全角色互相阻挡、不能互踩：共享 `AGGYGOCharacterBase` 胶囊为 `WalkableSlope_Unwalkable`，保留 Pawn 阻挡。CMC 仅在自由 Falling、无水平速度、碰到不可走角色胶囊且原生滑动速度低于清零阈值时，按本碰撞剩余时间的重力步长立即水平扫掠，随后继续原生滑动与重力。方向优先接触法线在重力平面的投影，同轴退为角色前向／右向；动画 RootMotion 或 Override RMS 接管时不介入，无跨 move 冲量、额外 Tick 或位置直写。
+- P3 主光为 2 lux、启用投影，保留原方向／颜色和其余四盏灯；原 `T_LunarCrater_Reflection_Probe_Importance2` 用于强度 0.2 的 Movable SkyLight。原反射探针、材质、碰撞、导航、出生配置和全局曝光不变。这是 UE 项目照明适配。
+- 命中专用声音仅从 Combat 有效命中事实进入 GA／GAS；持续声音随原 GA 资源退役。当前 Montage 单次声音集合与命中专用集合无交集，但播放实例和录音不能证明原版声音语义或设备听感。
 
-本轮已将主光设为 2 lux 并启用阴影，使用原 `T_LunarCrater_Reflection_Probe_Importance2` 做强度 0.2 的 Movable SkyLight 补光。保留主灯方向／颜色、其余 4 盏灯、原反射探针、材质、碰撞、导航及出生配置；全局曝光不改。两档 PIE 比较中 4 lux 地面偏亮，最终采用 2 lux；这是 UE 项目适配，原光度、HDR 解码和 Cube 面朝向未签还原。制作入口为 `configure_kevin_boss_p3.apply_lighting(save=True)`，只保存 P3；`lighting_readback()` 读取实际对象和配置，图像仍须独立验收。
+制作与资料入口：
 
-证据位于 `Saved/Codex/KevinBossLighting_20261113/`：`Lighting_Study` 保留原灯和两档适配的实际对照，`Lighting_Save` 记录精确保存，`Lighting_Final/editor.log` 记录新进程只读回、12 个启用入口 Montage／37 个能力相关包的原生配置验证，以及实际运行。Python／JSON 解析与 diff 检查通过，本轮没有 C++ 或 Blueprint 图修改，未重复编译源码。未接管用户未保存关卡，未改 Pyrios Combo GA 与 Normal01～03 Montage。
+| 内容 | 现行入口 |
+| --- | --- |
+| FX | `AAADocs/Scripts/build_bh3_kevin_fx.py`；`AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json` |
+| 音效 | `build_bh3_kevin_audio.py`、`plan_bh3_kevin_audio.py`；同配置目录 `BH3_Kevin_Audio_Config.json` |
+| 动画 | `build_kevin_skill_animation.py`、`audit_kevin_skill_poses.py`；Editor 的 `KevinMotionAssetBuilder`、`KevinCombatAssetBuilder`、`KevinBossAnimBlueprintAuthor` |
+| GA／AI | `wire_kevin_boss_abilities.py`、`wire_bh3_kevin_combat.py`；Editor 的 `GGYGOBossAbilityGraphLibrary`、`GGYGOBossCombatAssetLibrary` |
+| 场景 | `configure_kevin_boss_p3.py` 的 `apply_lighting(save=True)`、`lighting_readback()`；同配置目录 `BH3_Kevin_P3_Scene_Config.json` |
+| 最小联机 | `run_kevin_multiplayer.ps1`、`observe_kevin_multiplayer.py`、`verify_kevin_multiplayer.py` |
 
-已查看 `Lighting_Final/001_production.png`、`002_front.png`、`003_back.png`，确认正式镜头、Boss 正背面和角色投影；`007_NS_Kevin_IceWarning_14030df00bfc_030.png`、`016_NS_Kevin_FireCharge_cd10c72ba158_030.png`、`027_NS_Kevin_FireGroundBreak_697aabbd5128_030.png` 确认新照明下预警、蓄力和破环可见。Ice03、Fire02、AirChain01 通过原已授予 GAS 请求结束，结束检查无活跃 FX／声音／弹体残留。这是暂停 BT 后的隔离表现复拍，不替代正式选招或完整胜利。
-
-声音复核：Montage 单次声集合与命中专用声音集合无交集；命中 Cue 仅由 Combat 的有效命中事实进入 GA／GAS，持续声音由原 GA 资源清理退役。本轮未替换声音或重设原时点，录音和组件实例只证明运行播放，不证明设备听感或原版事件语义。
-
-## 全角色禁互踩与稳定落地
-
-共享 `AGGYGOCharacterBase` 将胶囊设为原生 `WalkableSlope_Unwalkable`，保留 Pawn 阻挡。原生禁止 StepUp 不能阻止从上方落地，单设不可走又会在同轴／极小偏心下落时产生零滑动；实际胶囊测试已复现。CMC 的 `HandleImpact` 只对自由下落、无水平速度、命中不可走角色胶囊且原生滑动速度低于清零阈值的情况，按本碰撞剩余时间的重力步长执行原生水平扫掠。方向优先取接触法线的重力平面投影，同轴时取角色前向，前向与重力平行时取右向；随后继续原生曲面滑动与重力。动画 RootMotion 或 Override RMS 接管期间不介入，不排跨 move 冲量，没有新增 Tick、长期状态、GA 落地过滤或位置直写。
-
-`EffectivePolicy/editor.log` 通过真实 UFUNCTION `GetWalkableSlopeOverride` 读回八份角色 CDO 及 P3 实际玩家／Kevin 的有效值，均为 Unwalkable，Profile 仍为 Pawn；不是只查看 BodyInstance 的存储值，本次无需改这些 Blueprint 包。校正边界用完整 `MoveAutonomous→PerformMovement`、真实 `OnActorHit` 与 `ClientUpdatePositionAfterServerUpdate` 重放 49 个原 SavedMove；`Replay_Red2` 已复现旧延迟冲量把较早首帧水平位置从 0 污染为 0.272 cm，当前区间扫掠消除了该跨 move 状态。
-
-`Saved/Codex/CharacterNoPerch_20261113/` 保留证据：`build_final2.log` 编译成功；`Collision_Final2/editor.log` 通过完整原生物理入口验证 Hero／Boss 四种上下组合的正上方与偏心下落，八例均没有角色 Landed／角色基底，均在环境地面落地一次并稳定 Walking，水平扫掠仍被另一角色阻挡，49 个真实 SavedMove 的预测与校正重放逐帧一致。原同轴失败、测试夹具修正、旧冲量污染与微小滑动清零失败保留在同目录旧日志；本地校正边界夹具不冒充真实网络传包。
-
-`Production_Final/editor.log` 从正式 P3 入口启动，暂停 BT 后经已授予 GAS 依次执行 Ice03、Fire02、AirChain01；不移动玩家、不修改生命或原技能轨迹。三次 Landed 均命中场地 `StaticMeshActor_0.StaticMeshComponent0`，角色 Landed 为 0；AirChain01 完成时为 Walking，继续稳定 2 秒游戏时间，动作位移及 FX／声音／弹体无残留。已查看空中与最终贴身站立截图 `015_AirChain01_4.0.png`、`016_cleanup.png`。这证明本次单机稳定落地，不替代完整自动选招、真实联机或 Cook 验收。红绿专项日志启动段各有 13 条通用 `LogAutomationTest: Condition failed`，尚未归因，仍保留原日志；专项通过不写成整份日志无错。
-
-本次不改地图照明、角色动画资产、Dash_F 和原技能轨迹。原版光度／曝光、粒子还原、缺失声音调用、设备试听、Cook／性能及完整中断矩阵仍保持未完成或未验证；最小联机范围见下节。
-
-## P3 最小真实联机
-
-入口为 `AAADocs/Scripts/run_kevin_multiplayer.ps1`，观察与断言分别在 `observe_kevin_multiplayer.py`、`verify_kevin_multiplayer.py`。本机空闲物理内存约 13.6 GiB，低于既有双 Editor 入口的 14.8 GiB 要求，因此使用一个 D3D12 Editor 的两个 PIE World。日志记录了 `127.0.0.1` 的 IpConnection 握手、SendRawBunch 与 PacketId，原生观察读到同一 Boss NetGUID 的两端 ActorChannel；这是真实复制，不是 SavedMove 本地重放，但不等于独立进程或跨设备验证。
-
-沿正式 P3 Encounter 启动，先观察原 BT 的 Dash_F 和 Ice02，再暂停决策，经原已授予 GAS 依次请求 Ice03、Fire02、AirChain01。Boss GA 保持 ServerOnly，客户端为 SimulatedProxy，没有本地活动 Boss GA。三招均有客户端 Montage 进度、骨骼变化和实际截图；Kevin 专用 AnimInstance 不适用玩家的 finalize 观察器，因此当前骨骼读回不冒充该原生观察。没有修改能力、轨迹、生命、输入语义或生产资产。
-
-贴身落地是明确的测试摆位：仅在服务器于 AirChain01 激活前，把静止的主机玩家摆到 Boss 前方 96 cm，等该位置真实复制到客户端后起招；不写 Boss 位置、客户端位置或下落轨迹。自由 Falling 中记录 10 次角色接触，角色 Landed 为 0，随后 Landed 命中场地；原 GA 正常结束后继续观察约 4 秒游戏时间，最后连续 2.19 秒两端均为 Walking／环境基底，未出现角色基底。最终两端 Boss 胶囊位置相差约 0.0045 cm。
-
-两名玩家血量分别从 100 降到 44 和 72，客户端最终值与服务器一致；客户端实际生成 IceHitImpact 和 FireHitImpact。远端 Montage FX 有 413 条实际模拟到达记录，18 个创建的组件全部有对应销毁事实；技能结束后两端无活动 Kevin FX、声音或弹体，Encounter 销毁后两端 Boss Avatar 均消失。该范围不包含本轮未触发弹体能力的飞行复制、联机死亡演出或全技能／全中断矩阵。
-
-证据为 `Saved/Codex/KevinNetwork_20261113/CloseLanding/observations.json`、`checks.json`、`editor.log` 和 12 张客户端视口图。已查看 `000_Ice03_0.35.png` 的水平预警、`004_Fire02_1.1.png` 的火刃、`010_AirChain01_4.0.png` 的空中姿态、`011_cleanup.png` 的贴身地面站立。脚本语法、结果断言和 diff 检查通过；运行使用已通过构建的 `0616e3f` 源码，未改 C++，不重复 UBT。早期脚本的 PlayerState 就绪时序、玩家专用观察器不适用及过早销毁导致空截图的诊断保留在同目录旧试次；启动段仍有既有 13 条通用 `LogAutomationTest: Condition failed`，未将整份日志声明为无错。
-
-统筹已复核本批断言与原生日志，并查看客户端 `004_Fire02_1.1.png` 和 `011_cleanup.png`，确认火刃可见及贴身地面收尾。提交仅涉及验证脚本和文档，无生产代码／资产差分，因此不重复编译或启动 UE；已确认远端提交、占用清空及本机无 UE／UBT 在途。以上只核收本节最小真实联机范围，未覆盖项保持。
-
-## 目标与用户决定
-
-- 用户 2026-11-13 决定：**所有角色互相阻挡，但不能踩在其他角色上；滑离后落到场地**。适用于所有角色，不限 Kevin 对玩家。角色胶囊不得作为技能成功落地的地面；保留 CMC 对位移和实际环境落地的权威。
-- 把 Kevin DemonBattle 从素材和少量试招接线组装成可实际交战的 Boss：技能、动画、选招／阶段、位移、命中、特效和音效形成完整链路。
-- 战斗调参由本项目设计（用户 2026-11-05 决定）：完整 DemonBattle 单形态、两阶段，暂定 50% 血量切换递进技能池；血量、伤害、冷却、权重和阶段都做成数据可调，不冒称原版参数。初版数值由负责人结合当前玩家能力自定。
-- 动画和音效优先还原真实来源。特效允许参考原效果图适配创作，也允许完全原创，不用逐项审批，但要区分参考来源、实际改编和未知项。
-- 只用现有 DemonBattle 形态，不引入其他 Kevin 形态、玩家 E／R／F、全员失败／复活系统或引擎修改。
-- 用户 2026-11-11 选择：`Fly_Loop` 原片段约 0.033 秒且根位置跳变约 186 厘米，不能当作静止循环。取其最后一帧全身骨骼制作静止等待姿态，既定技能轨迹和 CMC 原生重力落地保持不变；原始序列只读。
-- 用户 2026-11-11 选择：普通追击按原移动动画曲线补齐，不改成固定速度寻路；确认没有向前走／跑循环后，进一步选择用完整 Dash_F（约 1.07 秒、约 7.1 米）分段接近。它作为无伤害能力经 BT→GAS→CMC 执行，方向由原生 Focus 决定，每次保留完整轨迹，移除本 Boss 的 MoveTo 分支；不为 AI 伪造玩家输入请求。
-
-## 交付范围
-
-1. 按真实片段梳理可用技能、移动、待机、防御／反击、阶段／演出、死亡等用途，逐个说明已组装、辅助片段、缺配对或缺来源不启用。不按 AS／BS／Loop 名称机械拼招。
-2. Kevin 的顶层行为、阶段策略、选招／连招组合、具体技能流程和表现由蓝图、BT、Montage、Niagara、材质图和数据资产完成；C++ 只提供通用机制和接口。BossAI 经既有 GAS 入口选招，形成真实的战斗循环，不停在测试脚本直接激活。
-3. 按真实动作定前摇、有效段、收招和可中断点。Animation 管姿态和窗口，CMC 唯一执行胶囊位移；导出根轨迹与派生原地动画匹配，避免双重位移。远程、范围、召唤、投技不一律伪装成近战扫掠。
-4. Combat 查询和去重，GA／GE／Execution／AttributeSet 结算。正常结束、取消、死亡和目标失效时归还本技能资源。
-5. 每个启用的技能有适配动画的特效和声音；特效有统一的 Boss 视觉语言、危险提示和强弱层次，保留真实挂点、朝向、Follow／Stop 和清理语义。
-6. 音效接挥击、命中、蓄力／爆发、循环、脚步等。没有原调用时点或原声时标"未知／候选"，不把替代声冒称原版；缺口只阻塞对应声音。
-7. 在独立场景 `/Game/Map/BH3/L_KevinBoss_P3` 通过正式 Encounter 入口制作可交战场景：有玩家目标、血量、命中，Boss 正常结束和死亡后清理干净。不改其他地图和用户未保存的关卡。
-
-## 方案要点与约束
-
-- 多段地空轨迹按完整技能保留，不把各段独立当落地技能，也不静默清零 Z。飞行段用 CMC 的 `AcquireFlyingMovementMode`／`ReleaseFlyingMovementMode` 借用和归还 Flying 模式，原曲线结束后交给 CMC 原生重力，等真实 Landed 再回地面池或播落地表现；不固定下降速度，不伪造落地。`LandingRecovery` Montage（Main 2.45 s，Impact 0～0.35 s）只作表现，不代替真实 Landed。
-- Kevin Pawn 已继承共享 `/Game/BP/Character/BP_BossCharacter`，保存及独立读回通过，消费已交付的死亡结束蓝图处理（下一帧 `K2_HandleDeathFinished` → `UninitAndDestroy` → true）；不复制原生自动销毁分支。正式战斗已验证死亡结束、Avatar 销毁及销毁后 5 秒无本技能资源残留。
-- 共享 Kevin Skeleton／ABP／Montage 只能有一个写入者，串行制作；特效、音效、动画、GA、BT 包互不冲突的可以并行。
-- 制作脚本和配置：
-  - 特效：`AAADocs/Scripts/build_bh3_kevin_fx.py`，配置 `AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json`（22 个 NS、8 个材质、13 个命中 Cue，共 43 包）。
-  - 音效：`AAADocs/Scripts/build_bh3_kevin_audio.py`、`plan_bh3_kevin_audio.py`，配置 `BH3_Kevin_Audio_Config.json`，标签 `Config/Tags/BH3_Kevin_AudioTags.ini`。
-  - 动画：`AAADocs/Scripts/build_kevin_skill_animation.py`，Editor 源 `KevinMotionAssetBuilder.cpp`、`KevinCombatAssetBuilder.cpp`、`KevinBossAnimBlueprintAuthor.*`，标签 `Config/Tags/KevinBossAnimationTags.ini`。
-  - GA／AI：`AAADocs/Scripts/wire_kevin_boss_abilities.py`、`wire_bh3_kevin_combat.py`，Editor 源 `GGYGOBossAbilityGraphLibrary.*`、`GGYGOBossCombatAssetLibrary.*`，配置 `BH3_Kevin_Ability_Config.json`，标签 `Config/Tags/KevinBossTags.ini`。
-  - 场景：`AAADocs/Scripts/configure_kevin_boss_p3.py`，配置 `BH3_Kevin_P3_Scene_Config.json`，`Config/DefaultEngine.ini` 的 KevinBoss 导航 Agent（半径 60、高 250，Default 保持第 0 项）。
-- 资料入口：[导入核对](../Assets/BH3/BH3_Kevin_DemonBattle_Import.md)、[动作与职责契约](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Implementation.md)、[动作清单](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Action_Manifest.json)、[制作配置](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Wiring_Config.json)、[原验证入口](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Runtime_Verification.md)。
+表中未写目录的脚本均在 `AAADocs/Scripts/`。动作及配置详见 [导入核对](../Assets/BH3/BH3_Kevin_DemonBattle_Import.md)、[职责契约](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Implementation.md)、[动作清单](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Action_Manifest.json)、[制作配置](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Wiring_Config.json)、[运行验证](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Runtime_Verification.md)。
 
 ## 当前状态
 
-- **FX 资产**：新增 22 个 Niagara 系统和 13 个命中 Cue，复用 8 个材质；43 包独立读回、引用和编译就绪通过。证据：`Saved/Codex/KevinBossAssembly_20261111/FX_Read_Ready/editor.log`。已保存 55 个声音包只读复用；参考／原创区别见下表。
-- **动画资产**：26 份派生动画（含 Fly_Loop 末帧全身静止姿态）、ABP、19 个技能 Montage 与 5 个表现 Montage 已保存。原生轨迹、姿态、窗口和声音引用独立读回及两项作者图／输出保护回归通过，证据：`Animation_Read/editor.log`。
-- **GA／AI 资产**：3 份共享模板、16 个动作子类、死亡 GA、初始化和冷却 GE 共 37 包，及 Pawn／State／BTS／BB／BT／Definition／PawnData／AbilitySet／两阶段动作池共 10 包已保存，独立读回通过（`DashF_Read/editor.log`，47 包）。包括无伤害 Dash_F、两阶段授予和动作池；该 BT 已移除 MoveTo 分支，动作流程仍由共享蓝图管理。
-- **源码与测试**：BossAI、Boss GA、Combat、CMC 飞行和 Editor 制作接口已编译；15 项 BossAI、范围／弹体查询、ActionMotion TimingAndOwnership 及两项动画回归通过。Controller 恢复原生 AAIController Tick，使 BT Focus→ControlRotation→CMC 转向继续执行；跨引擎帧两次换向的 NativeFocusRotation 回归通过。证据：`Battle_R1/editor.log`、`Battle_R2/editor.log`、`Focus_Standalone/editor.log`；最新增量构建：`Build_DashF/build.log`。
-- **P3 场景**：已保存并独立读回；唯一主灯带 GGYGO.KeyLight，双方间距 18 m，KevinBoss 导航的实际投影和完整路径、9 个空中净空采样通过。未修改原支撑碰撞。证据：`Scene_Create_NavExport/editor.log`、`Scene_Read/editor.log`。
-- **正式战斗**：`Battle_R6/editor.log` 同场覆盖 11 个攻击选招入口、两条 AirChain 原生重力落地、50% 阶段切换、死亡结束及销毁后 5 秒无残留；玩家以真实普攻击败 Boss，结束剩余 2 HP。录得 15 种 Kevin 声音实例和 237 秒 Master WAV。该轮普通追击仍被 CMC 拒绝，玩家主动靠近才交战；修复后追击单独由 R7 验证，清晰取景由 R9 及火系／空中隔离复拍补齐，不把不同轮次合称一次完整胜利。
+| 范围 | 已证明的结果与证据 |
+| --- | --- |
+| 资产与生产接线 | 22 个 Niagara、8 个材质、13 个命中 Cue 共 43 包；55 个声音包只读复用。26 份派生动画、ABP、19 个技能 Montage 和 5 个表现 Montage 已保存。GA／AI 47 包包含无伤害 Dash_F、两阶段动作池及授予。独立读回见 `Saved/Codex/KevinBossAssembly_20261111/FX_Read_Ready/editor.log`、`Animation_Read/editor.log`、`DashF_Read/editor.log`。 |
+| 场景与导航 | P3 已保存并独立读回，唯一主灯带 `GGYGO.KeyLight`，PlayerStart／Encounter 引用正确，初始间距 18 m；KevinBoss 导航实际投影、完整路径及 9 个空中净空采样通过，原支撑碰撞未改。证据见同目录 `Scene_Create_NavExport/editor.log`、`Scene_Read/editor.log`。 |
+| 编译与自动化 | BossAI、Boss GA、Combat、CMC Flying 和 Editor 制作接口已编译；15 项相关回归、两项动画回归及 NativeFocusRotation 通过。Combat Touch→Block 物理阻挡已与伤害去重分离，相关两项查询回归通过。日志见同目录 `Build_DashF/build.log`、`Build_ReviewFix/build.log`、`Review_Query/editor.log`、`Review_Editor_Read/editor.log`。 |
+| 正式单机交战 | `Battle_R6/editor.log` 覆盖 11 个攻击选招入口、两条 AirChain 原生落地、50% 阶段切换、玩家真实普攻击败 Boss、死亡结束及销毁后 5 秒无残留；录得 15 种声音实例和 Master WAV。该次追击仍被拒，不能写成修复后一次完整胜利。 |
+| 追击与视听 | `Battle_R7_DashF/editor.log` 证明玩家静止时两次完整 Dash_F 使距离 18 m→10.89 m→3.78 m，双方生命不变，随后攻击。预警平面 Rotator 参数顺序已修，实际画面见 `Battle_R9_Visual`、`Visual_Fire_Air`；后者暂停 BT 后走既有 GAS，只证明对应表现和落地。 |
+| 场地照明 | `Saved/Codex/KevinBossLighting_20261113/Lighting_Final/editor.log` 新进程读回通过；`001_production.png`、`002_front.png`、`003_back.png` 已看图，正式镜头、角色正背与投影可见，冰预警／火蓄力／破环在新照明下可见。 |
+| 全角色禁互踩 | `Saved/Codex/CharacterNoPerch_20261113/build_final2.log` 编译通过；`EffectivePolicy/editor.log` 读回八份 CDO 及实际玩家／Kevin 的有效 Unwalkable，Pawn Profile 保留；`Collision_Final2/editor.log` 八组真实物理下落均为 0 角色 Landed、1 环境 Landed，侧向仍阻挡。49 个真实 SavedMove 的本地预测／校正重放逐帧一致。 |
+| 单机贴身空连 | 同目录 `Production_Final/editor.log` 的 Ice03、Fire02、AirChain01 全部经已授予 GAS，三次环境 Landed、0 角色 Landed，结束后稳定 Walking 至少 2 秒，动作位移／FX／声音／弹体无残留；`015_AirChain01_4.0.png`、`016_cleanup.png` 已看图。 |
+| 最小真实联机 | `Saved/Codex/KevinNetwork_20261113/CloseLanding/` 的原生日志、观察数据与断言证明同 Editor Listen Server＋Client 经 IpConnection／ActorChannel 实际传包。正式 BT 先执行 Dash_F／Ice02，随后暂停 BT 经已授予 GAS 请求 Ice03、Fire02、AirChain01。服务器为 Authority、Boss GA 为 ServerOnly；客户端 SimulatedProxy 有 Montage 进度及骨骼变化，无本地活动 Boss GA。 |
+| 联机落地、命中与清理 | AirChain01 前只在服务器预摆主机玩家至 Boss 前方 96 cm，等复制后起招，不写 Boss／客户端位置或轨迹。自由 Falling 有 10 次角色接触、0 角色 Landed，最终落场地，两端连续 2.19 秒 Walking／环境基底；两名玩家血量最终为 44／72，两端一致。客户端冰火命中 Cue 可见，18 个远端 FX 全部销毁，Encounter Avatar 销毁复制通过。 |
 
-以上相对日志路径位于 `Saved/Codex/KevinBossAssembly_20261111/`。[运行验证](../Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Runtime_Verification.md) 记录入口、结果和未覆盖边界。
+上表未写完整目录的单机日志位于 `Saved/Codex/KevinBossAssembly_20261111/`。联机客户端的 `000_Ice03_0.35.png`、`004_Fire02_1.1.png`、`010_AirChain01_4.0.png`、`011_cleanup.png` 已查看；统筹另复核传包日志、断言、火刃和地面收尾图。此次联机仅新增验证脚本及文档，无生产差分，未重复 UBT；我方 UE／UBT 和占用已清空。
 
-## 追击、画面与评审收尾
+### 特效来源边界
 
-1. **普通追击已通过**：Dash_F 无伤害能力、两阶段池和不含 MoveTo 的 BT 已编译、保存并独立读回。`Battle_R7_DashF/editor.log` 中玩家静止，Boss 前两段水平位移各约 711.145 cm，与原片段约 711.144 cm 对应，距离 18 m→10.89 m→3.78 m；双方生命不变，随后进入正式攻击。该轮共 11 次 Dash_F，无旧 CMC 请求拒绝；玩家约 65 秒死亡，Boss 正常取消。R6 的旧拒绝保留，不冒充当时已有追击。声音复用同 Boss 闪避候选 E3188014124，原版映射与时点仍未证实。
-2. **视听复验**：R8 俯视图确认 IceWarning 平面竖起、被地面截成半圆。原生 Python 读回证实配方 Pitch／Yaw／Roll 被传入了 Roll／Pitch／Yaw 位置参数；改具名构造后保存 9 个实际变化的子蓝图，37 包独立读回通过（`Rotation_Create`／`Rotation_Read/editor.log`）。正式场景的水平预警圆与地面破环已看图确认（`Battle_R9_Visual/027_NS_Kevin_IceWarning_14030df00bfc_030.png`、`030_NS_Kevin_IceGroundBreak_c6025809cf08.png`）。火系／空中由 `Visual_Fire_Air/editor.log` 补拍：五个既有能力均完成，52 张 viewport 读回、13 种声音实例；已看图确认水平火环、刀光、蓄力、空中聚集、冰火爆发及冰弹体。该轮暂停 BT 后走既有 GAS 入口，仅用于受影响表现与真实落地复验，不替代正式自动选招或完整交战。原失败图保留；诊断战斗玩家阵亡，不补签完整胜利。
-3. **核心差分评审**：Movement 的 Flying 接口无阻塞。Combat 发现同 Actor 的 Touch→Block 被伤害去重吞掉，改为独立输出物理阻挡，弹体据此销毁，伤害仍按 Actor 去重；补同段和跨段回归。两处本批制作／读回工具及结果结构迁入 GGYGOEditor，内容包未查到旧类型序列化引用，不保留无消费者的运行时兼容。`Build_ReviewFix/build.log` 编译成功；`Review_Query/editor.log` 两项通过；`Review_Editor_Read/editor.log` 四个 Editor 类型绑定和 GA／AI 47 包、FX 43 包独立只读回通过。
+全部 22 个系统的粒子、材质形状、数量、速度和寿命均为项目创作。原武器贴图仅证明冰刃青蓝／火刃橙黄配色，原翼膜贴图仅证明青白、尖角和破碎轮廓；完整原贴图路径在 FX 配置 `references`。已启用技能有实际画面；未启用的防御、领域效果仅签资产读回。
+
+| 系统 | 来源与创作范围 |
+| --- | --- |
+| Ice／Fire WeaponTrail、Charge、Strike、Warning、GroundBreak、Domain、DashWake、HitImpact | 借用原冰火配色；Ribbon、粒子、蓄力、爆发、地面预警及破环均为项目创作，预警尺寸消费实际判定几何。 |
+| WingGuard、GuardBreak、AerialGather | 参考原翼膜颜色与尖角轮廓，防御／破碎／聚集效果和时序为项目创作。 |
+| IceProjectile | 参考冰刃配色与轮廓，弹体碎片及 Ribbon 为原创，位移和生命周期归实际 Projectile／GA。 |
+| FireWingGuard | 将翼膜尖角与火刃配色组合创作，无原版火翼防御效果证据。 |
+| DeathDissipate | 无直接原效果来源，原创中性青灰碎片消散。 |
+
+### 交付
+
+- 已分仓推送：[单机源码](https://github.com/WuDuElysia/GGYGO_Source/commit/7b6742c)、[原接口笔记](https://github.com/WuDuElysia/Lyra_Learn_note/commit/5fa4f68)、[照明](https://github.com/WuDuElysia/GGYGO/commit/28fb375)、[禁互踩源码](https://github.com/WuDuElysia/GGYGO_Source/commit/0616e3f)、[禁互踩记录](https://github.com/WuDuElysia/GGYGO/commit/0f7883f)、[联机脚本与记录](https://github.com/WuDuElysia/GGYGO/commit/c9409e9)、[联机核收](https://github.com/WuDuElysia/GGYGO/commit/a673014)。精确文件集合以各仓提交为准。
+- Character／Movement 的禁互踩核心差分评审无剩余阻塞；先前 Combat 物理阻挡问题已修并回归。联机批次没有生产接口变更。
+- `Content/Characters/Boss/Kevin/DemonBattle/` 和 `Content/Environments/BH3/Stage/Stage_KevinBoss_P3/` 继续按既有忽略规则留在本机；只有已跟踪的 P3 地图随父工程提交。新 checkout 需要这些原导入及制作资产，不能仅靠 Git 还原完整运行环境。
+- 未覆盖用户手改的 Pyrios Combo GA、Normal01～03 Montage 或其它未提交资产；未 SaveAll。日志、PNG、Master WAV 和运行数据在 Saved 下，不入库。
+
+## 未完成项
+
+- 原光度、曝光、HDR 解码、Cube 面朝向及原粒子效果未证明等价；当前照明和 FX 按已授权项目适配交付。
+- 原声音选用、调用条件和精确时点仍有未知，Dash_F 使用同 Boss 候选声音 E3188014124，原映射未证实；组件播放和录音不能代替设备试听。
+- 本次空闲物理内存约 13.6 GiB，低于既有双 Editor 入口要求，因此联机使用同进程双 PIE World。独立进程／跨设备、完整网络与中断矩阵、联机死亡演出、弹体飞行复制和模拟代理独立 RMS 未验；本地 49 SavedMove 重放不代替实际传包。
+- Cook、性能、物理输入设备及原生 Obsidian Canvas 渲染未验。笔记已检查 JSON、节点与链接，不用结构检查代替原生画面。
+- 专项红绿日志启动段均保留 13 条通用 `LogAutomationTest: Condition failed`，尚未归因。旧跨 move 冲量污染、同轴／微小滑动失败和脚本诊断仍保留在对应证据目录；当前专项通过不表示整份日志无错。
 
 ## 验收标准
 
-### 特效参考与创作对照
-
-本次已查看原导出的武器贴图 `Monster_Boss_411_Texture_Weapon_Color.png` 和翼膜贴图 `Monster_Boss_411_Texture_Body_Wings_Blue_Color.png`（完整路径见 FX 配置的 `references`）。贴图能证明配色和轮廓，不能证明原游戏粒子、触发时点或战斗画面。下表对应配置中的全部 22 个系统；粒子、材质形状、数量、速度和寿命均为项目创作，启用技能的主要效果已在正式场景或专项画面核对；全部 22 个系统是制作清单，不等于全部进入当前战斗池或全部取得运行画面，未启用的防御、领域等效果只签资产读回。
-
-| 系统 | 参考事实 | 项目创作与改编 |
-| --- | --- | --- |
-| IceWeaponTrail／FireWeaponTrail | 武器青蓝冰刃、橙黄火刃配色 | 武器世界空间 Ribbon；火刃增加短条粒子 |
-| IceCharge／FireCharge | 同上配色 | 碎片／火条与光晕组合成蓄力层 |
-| IceStrike／FireStrike | 同上配色 | 短促碎片／火条爆发及光晕 |
-| IceWarning／FireWarning | 仅借用冰火配色 | 原创低亮地面提示；圆、扇区和线形尺寸消费实际判定几何 |
-| IceGroundBreak／FireGroundBreak | 仅借用冰火配色 | 原创破环地面形状与向外碎片／火条 |
-| IceDomain／FireDomain | 仅借用冰火配色 | 原创低遮挡持续破环，边缘清楚、中心留空 |
-| WingGuard／GuardBreak | 翼膜青白、尖角和破碎轮廓 | 防御持续碎片及破防爆发；强度和时序为项目设计 |
-| IceDashWake／FireDashWake | 武器冰火配色 | 原创移动尾迹碎片／火条 |
-| AerialGather | 翼膜青白和细长尖角 | 原创空中聚集碎片 |
-| IceHitImpact／FireHitImpact | 武器冰火配色 | 原创命中短爆发；13 个 Cue 引用对应效果和既有 SoundCue，使用真实命中参数 |
-| IceProjectile | 冰刃配色与锐利轮廓 | 原创碎片弹体和 Ribbon 尾迹；移动与生命周期由实际 Projectile／GA 管理 |
-| FireWingGuard | 翼膜尖角；火刃配色 | 两类参考的原创组合，无原版火翼防御效果证据 |
-| DeathDissipate | 无直接原效果来源 | 原创中性青灰碎片消散 |
-
-### 分项通过条件
-
-- 特效：35 个包落盘，Niagara 编译无错，读回引用正确；对照表区分参考改编和原创。
-- 动画：包落盘并编译，Montage 窗口和标签读回正确，派生动画根位移为 0 且与原轨迹对应。
-- GA 与 AI：37 包落盘编译通过；模板图的事件和关键连线读回正确；Definition 的阶段池和授予引用正确。
-- 场景：P3 保存后 NavMesh 覆盖战斗区，PlayerStart 和 Encounter 引用正确，其他地图没改。
-- 实战：Boss 能完成至少一次完整战斗循环到死亡，两阶段切换可见，主要技能有画面和声音证据，死亡后没有残留。
-
-## 交付文件与共享边界
-
-源码提交：[完成 Kevin Boss 原生资源接口与单机战斗支撑](https://github.com/WuDuElysia/GGYGO_Source/commit/7b6742c)。Obsidian 提交：[同步 Kevin 战斗及跨模块接口](https://github.com/WuDuElysia/Lyra_Learn_note/commit/5fa4f68)。构建和运行基于完整工作树；统筹只在多线交付后做一轮受影响集成，不把这些结果声称为干净 HEAD 的独立验证。
-
-共享文件的本需求边界：
-
-- `Character/Components/GGYGOCharacterMovementComponent.h/.cpp` 的现有未提交差分均是本批 Flying 借还；已随子仓提交。
-- `Character/Components/GGYGOActionMotionExecution.cpp` 只提交 `IsMontageActionMovementModeSupported` 增加 Flying，以及两处对应准入／运行诊断。网络取消、中性化和自然混出末段差分保留给 AbilitySystem；`GGYGOActionCurveRootMotionSource.h/.cpp` 本次完全不提交。
-- `GGYGOProjectedDecalRendererProperties.h/.cpp` 的本批材质读回接口与结果结构已完整迁到 `GGYGOEditor/GGYGOMaterialAuthorLibrary`，当前 Rendering 文件的 FX 初始化差分未提交。未迁历史作者接口。
-- `Blueprint_Layering_Audit.md` 只更新 Q01 及其摘要。用户的 `Module_Repair_04_Subleases.md`、Pyrios／Test 资产、AS／FX 制作及网络差分均保留。
-
-父工程精确文件（不含其它工作线看板改动）：
-
-```text
-AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Ability_Config.json
-AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Audio_Config.json
-AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Action_Manifest.json
-AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Montage_Config.json
-AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Runtime_Verification.md
-AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Wiring_Config.json
-AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_FX_Config.json
-AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_P3_Scene_Config.json
-AAADocs/Coordination/Blueprint_Layering_Audit.md
-AAADocs/Scripts/audit_kevin_action_motion.py
-AAADocs/Scripts/audit_kevin_skill_poses.py
-AAADocs/Scripts/build_bh3_kevin_audio.py
-AAADocs/Scripts/build_bh3_kevin_fx.py
-AAADocs/Scripts/build_kevin_skill_animation.py
-AAADocs/Scripts/configure_kevin_boss_p3.py
-AAADocs/Scripts/plan_bh3_kevin_audio.py
-AAADocs/Scripts/wire_bh3_kevin_combat.py
-AAADocs/Scripts/wire_kevin_boss_abilities.py
-AAADocs/需求文档/kevin_boss_assembly.md
-Config/DefaultEngine.ini
-Config/DefaultGame.ini
-Config/Tags/BH3_Kevin_AudioTags.ini
-Config/Tags/KevinBossAnimationTags.ini
-Config/Tags/KevinBossTags.ini
-Content/Map/BH3/L_KevinBoss_P3.umap
-Source/GGYGO
-Source/GGYGOEditor/GGYGOEditor.Build.cs
-Source/GGYGOEditor/Private/GGYGOBossAbilityAssetConfiguration.cpp
-Source/GGYGOEditor/Private/GGYGOBossAbilityGraphLibrary.cpp
-Source/GGYGOEditor/Private/GGYGOBossCombatAssetLibrary.cpp
-Source/GGYGOEditor/Private/GGYGOMaterialAuthorLibrary.cpp
-Source/GGYGOEditor/Private/KevinBossAnimBlueprintAuthor.cpp
-Source/GGYGOEditor/Private/KevinBossAnimBlueprintAuthor.h
-Source/GGYGOEditor/Private/KevinCombatAssetBuilder.cpp
-Source/GGYGOEditor/Private/KevinMotionAssetBuilder.cpp
-Source/GGYGOEditor/Public/GGYGOBossAbilityAssetConfiguration.h
-Source/GGYGOEditor/Public/GGYGOBossAbilityGraphLibrary.h
-Source/GGYGOEditor/Public/GGYGOBossCombatAssetLibrary.h
-Source/GGYGOEditor/Public/GGYGOMaterialAuthorLibrary.h
-```
-
-Source/GGYGO 子仓精确文件：
-
-```text
-AI/Boss/Abilities/GGYGOBossAttackAbility.cpp
-AI/Boss/Abilities/GGYGOBossAttackAbility.h
-AI/Boss/Abilities/GGYGOBossAudioActor.cpp
-AI/Boss/Abilities/GGYGOBossAudioActor.h
-AI/Boss/Abilities/GGYGOBossDeathAbility.cpp
-AI/Boss/Abilities/GGYGOBossDeathAbility.h
-AI/Boss/Abilities/GGYGOBossMeleeAbility.cpp
-AI/Boss/Abilities/GGYGOBossMeleeAbility.h
-AI/Boss/Abilities/GGYGOBossProjectile.cpp
-AI/Boss/Abilities/GGYGOBossProjectile.h
-AI/Boss/GGYGOBossAIController.cpp
-AI/Boss/GGYGOBossAIController.h
-AI/Boss/GGYGOBossCharacter.cpp
-AI/Boss/GGYGOBossCharacter.h
-AI/Boss/GGYGOBossDefinition.cpp
-AI/Boss/GGYGOBossDefinition.h
-AI/Boss/GGYGOBossEncounter.cpp
-AI/Boss/GGYGOBossState.cpp
-AI/Boss/GGYGOBossState.h
-AI/Boss/Tests/GGYGOBossCombatDecisionTest.cpp
-AI/Boss/Tests/GGYGOBossEncounterBehaviorTreeTest.cpp
-AI/Boss/Tests/GGYGOBossMeleeEndReentryTest.cpp
-AI/Boss/Tests/GGYGOBossProjectileTest.cpp
-Character/Components/GGYGOActionMotionExecution.cpp
-Character/Components/GGYGOCharacterMovementComponent.cpp
-Character/Components/GGYGOCharacterMovementComponent.h
-Combat/HitDetection/GGYGOCombatHitQuery.cpp
-Combat/HitDetection/GGYGOCombatHitQuery.h
-Combat/Tests/GGYGOCombatHitQueryTest.cpp
-```
-
-Obsidian 精确文件（相对 `F:/Obsidian/Doc/lyra学习笔记`）：
-
-```text
-GGYGO架构规划/Animation/GGYGO_流程_Kevin战斗动画.canvas
-GGYGO架构规划/Animation/Kevin战斗动画实施.md
-GGYGO架构规划/Audio/结构.md
-GGYGO架构规划/BossAI/GGYGO_流程_BossAI.canvas
-GGYGO架构规划/BossAI/GGYGO_流程_Boss选招.canvas
-GGYGO架构规划/BossAI/GGYGO_结构_BossAI.canvas
-GGYGO架构规划/BossAI/结构.md
-GGYGO架构规划/BossAI/计划_Kevin_DemonBattle战斗接入.md
-GGYGO架构规划/Combat/GGYGO_流程_Combat.canvas
-GGYGO架构规划/Combat/GGYGO_结构_Combat.canvas
-GGYGO架构规划/Combat/结构.md
-GGYGO架构规划/Movement/GGYGO_流程_移动与位移.canvas
-GGYGO架构规划/Movement/GGYGO_结构_移动与位移.canvas
-GGYGO架构规划/Movement/结构.md
-```
-
-Obsidian 的 JSON、ID、边端点、新节点无重叠及改动链接已核对；保留既有节点布局，未做原生 Obsidian 渲染验收。
-
-### 本地忽略资产
-
-- `Content/Characters/Boss/Kevin/DemonBattle/`：Mesh／Skeleton、原序列、派生动画与 Montage／ABP、声音、FX、GA／GE、Blueprints／Data；包含本次保存并独立读回的制作产物及原导入依赖。
-- `Content/Environments/BH3/Stage/Stage_KevinBoss_P3/`：已导入 P3 场景的网格／材质／贴图依赖。
-- 上述目录继续按现有 `.gitignore` 留在本机，没有强制加入 Git 或放开忽略规则；已跟踪的 P3 地图随父工程提交。外部新 checkout 仍须具备这些本地导入素材，不能仅靠 Git 还原完整运行环境。
-- 取证脚本、日志、PNG 和 Master WAV 在 `Saved/Codex/KevinBossAssembly_20261111/`，仅本机保留。
+- 启用动画、GA／AI、FX 和场景配置保存并独立读回；Montage 窗口、标签和原轨迹对应，顶层业务留在可视化资产。
+- P3 的 NavMesh 覆盖战斗区，PlayerStart 和 Encounter 引用正确，其他地图保持原状。
+- 正式 BT／Encounter 能执行可交战循环、两阶段切换和死亡清理，普通追击消费完整原 Dash_F，主要技能取得实际画面及声音播放证据。
+- 角色保持相互阻挡，不能把其它角色当成落地基底；技能回到原生重力后滑离到环境地面，资源正常退役。
+- 最小联机逐项证明权威、实际传包、客户端动作／FX／命中、贴身环境落地和结束清理；同进程结果不代签独立进程或未触发场景。
+- 项目创作、原版来源和未知项明确区分；原版等价、完整网络或设备听感只能由对应证据验收，不能从已有局部成功推定。
