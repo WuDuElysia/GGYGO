@@ -77,7 +77,17 @@
 | 4 激活生命周期 | 源码、核心回归、基本动作链、纠正重放与最小联机已交付；完整 Editor 动画组 9／9 通过，任务 8 验收缺口已补齐 | 玩法／镜头待定项与原失败保留；本轮仅补 NullRHI 自动化，不新增 Cook／完整网络矩阵或视觉验收 |
 | 5 Avatar 绑定 | 绑定回归、真实 RHI 出生／移动／攻击／重新附身／死亡替补及 Boss 单机出场已验 | 任务 6 部分完成：项目没有复活流程；独立第三端观察换人未覆盖，普攻／FX 观察端结果不代签换人 |
 | 6 换人续放 | 约定测试编队范围内的编译、自动化与真实 RHI 联机已验；共享 UMG 改键和蓝图死亡替补已交付 | 两份 Pyrios 实例与夹具续放 GA 不代验生产续放技能配置；进退场资产缺省按决定跳过，实体设备手感未验 |
-| 7 HealthSet | 保留分类帧已定案；反算迁移、回归及真实 RHI 扣血／上限／破韧的双端数值和广播已验 | 任务 4 部分完成：死亡替补已验，但死者的双端 Health／DeathState／死亡广播未逐边沿配对；单机受击／破韧／死亡表现缺完整专项证据 |
+| 7 HealthSet | 保留分类帧已定案；反算迁移、回归、真实 RHI 扣血／上限／破韧及原死者双端数值／死亡广播已验；单机和双端死亡前后段已实拍核对 | 任务 4 部分完成：单机 GE 扣血／破韧数值和广播已过，采样帧仍站立；独立受击／破韧动作、Combat 命中 FX 与音效未验。死亡回调跨复制对象不保证同序 |
+
+### HealthSet 原死者配对与死亡画面
+
+2026-11-13 [增量构建](../../Saved/Codex/HealthAcceptance_20261113/capture_build.log)通过；`GGYGO.AbilitySystem.HealthAcceptance` 的单机与同进程监听服务器＋客户端两项 D3D12 测试均为 Success、零测试错误，[报告](../../Saved/Codex/HealthAcceptance_20261113/Run_2/Report/index.json)和[日志](../../Saved/Codex/HealthAcceptance_20261113/Run_2/editor.log)保留。新增测试使用生产地图、角色、共享伤害 GE 和死亡能力；只临时建立两成员编队、诊断机位并移开遮挡玩家，不保存资产或修改生产逻辑。
+
+服务器和客户端按原 Pawn 的 NetGUID／PlayerId 配对，观察者始终绑定原死者。Health 100→90→0、Poise 100→0，两端 HealthChanged 各两次，破韧、零血及死亡开始／完成各一次；死亡阶段单调，完成回调时原 HealthComponent 与持久 ASC 均为零。客户端实际先 DeathStarted（回调时 Health 仍 90），同帧再到 Health=0／OutOfHealth；这一顺序照实保留，不把分属 Pawn 和 ASC 的复制解释为同步同序。
+
+已查看全部 15 张自然视口图。落地、无遮挡、实际机位一致后，单机和两端原角色均能看到死亡前段与约 75% 处的跪伏后段：[单机](../../Saved/Codex/HealthAcceptance_20261113/Run_2/Captures/standalone/authority_dying_late.png)、[服务器](../../Saved/Codex/HealthAcceptance_20261113/Run_2/Captures/network/authority_dying_late.png)、[客户端](../../Saved/Codex/HealthAcceptance_20261113/Run_2/Captures/network/client_dying_late.png)。扣血／破韧采样帧仍站立，无活动 Montage；本测试未经过 Combat 命中／Cue，不能据此签受击／破韧动作、命中 FX 或音效。具体勾选和边界见 [HealthSet 任务 4](../../.kiro/specs/abilitysystem-healthset-repnotify/tasks.md)。
+
+自有 Editor 正常退出 0。联机四条、单机两条警告及启动前 13 条 Condition failed 原样保留：涉及渲染 CVar、远端相机 cache 写入拒绝和原 Pawn 输入路由退役。原 `Run_1` 记录保留，其遮挡和过早采样的画面不作为视觉验收依据。独立进程、网络扰动、Cook／性能／实体设备未验；本批无生产结构或接口变化。
 
 ### 输入请求组占用与截止（本批验收完成）
 
@@ -110,7 +120,7 @@ PIE 保留默认 Pyrios、普攻输入与 Queued 组规则，仅临时授予无�
   - 新增动作如果让武器或斗篷伸得更远，要重新逐帧跟踪所需倍率；以后若把物理资产入库，可以加不参与碰撞的包围体，再把倍率降回去。
   - `BP_PC_Pyrios` 在 BeginPlay 按 Actor Tag `GGYGO.KeyLight` 找本 World 里唯一的 DirectionalLight 作为角色主灯，找不到就停用角色灯宿主并打印"主灯绑定拒绝"。`L_Movement_Test` 和后续交付的 `L_KevinBoss_P3` 均已核对唯一主灯；P3 照明与投影证据见 [Kevin 交付](kevin_boss_assembly.md)，不扩推其它地图。
 - 验证级别：已编译；已测试（`GGYGO.Rendering` 4 例、`GGYGO.Teams.SquadSwitch` 8 例）；已在 UE 里运行（真实 D3D12 单机正背机位）；已联机验证（客户端倒下帧地面无条纹，稳定帧对象阴影宽度与单机一致）。
-- 未做：`BoundsScale` 11 的 GPU／VSM 开销没测；修后单机倒下没有单独重拍。
+- 未做：`BoundsScale` 11 的 GPU／VSM 开销没测；单机死亡前后段实拍已由上节 HealthSet 验收补齐，仅覆盖所列采样帧。
 - 正背对照里与原图 `AAADocs/Assets/Pyrios/Rendering/References/20261009_Pyrios_*.png` 的差异不属于阴影问题，是否另开需求由用户决定：胸口光球偏暗、蓝色手臂发光偏弱、背面头发偏灰紫偏亮、斗篷没有蓝色渐变且金色细线显示为橙红（斗篷只读暂挂）。
 
 ## 死亡结束后的 Pawn 处理
