@@ -17,7 +17,7 @@ import re
 import traceback
 
 
-PROJECT = Path("F:/ue_project/GGYGO")
+PROJECT = Path("F:/ue_project/GGYGO_UE59")
 BASE = "/Game/Characters/Player/Pyrios/"
 ANIMATION = BASE + "Animation/"
 FAMILIES = ("Special", "ExSpecial", "Rush")

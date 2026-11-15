@@ -103,7 +103,7 @@ UGGYGOSignedFieldSpriteRendererProperties::UGGYGOSignedFieldSpriteRendererProper
 	// 原shader/WPO管理覆盖率、尺寸及颜色；native像素覆盖率不能再次修改PCol或扩quad。
 	PixelCoverageMode = ENiagaraRendererPixelCoverageMode::Disabled;
 #if WITH_EDITORONLY_DATA
-	bUseMaterialCutoutTexture = false;
+	CutoutMode = ENiagaraSpriteCutoutMode::None;
 	CutoutTexture = nullptr;
 #endif
 }
@@ -127,7 +127,7 @@ bool UGGYGOSignedFieldSpriteRendererProperties::ValidateFieldConfiguration(FStri
 		return false;
 	}
 #if WITH_EDITORONLY_DATA
-	if (bUseMaterialCutoutTexture || CutoutTexture)
+	if (CutoutMode != ENiagaraSpriteCutoutMode::None || CutoutTexture)
 	{
 		OutReason = TEXT("源Sprite/WPO需要原始0..1完整quad，不能由native cutout再裁剪几何");
 		return false;

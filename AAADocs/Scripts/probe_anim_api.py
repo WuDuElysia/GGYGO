@@ -3,7 +3,7 @@
 probe_anim_api.py —— 只读：探测本引擎版本下 AnimSequence 读取曲线值的可用 API
 
 在 UE 编辑器 Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/probe_anim_api.py", encoding="utf-8").read())
+  exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/probe_anim_api.py", encoding="utf-8").read())
 
 打印 AnimSequence / Controller / DataModel 上与 curve/model/float/key 相关的方法名，
 用于确定读取 RM_ 曲线数值的正确调用方式。不写任何资产。

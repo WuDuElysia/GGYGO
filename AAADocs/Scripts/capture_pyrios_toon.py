@@ -106,7 +106,7 @@ def _capture_toon():
     actor = sub.spawn_actor_from_class(unreal.SkeletalMeshActor, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
     actor.get_editor_property("skeletal_mesh_component").set_skeletal_mesh_asset(mesh)
     rt = unreal.RenderingLibrary.create_render_target2d(world, 768, 1024, unreal.TextureRenderTargetFormat.RTF_RGBA8_SRGB)
-    out = "F:/ue_project/GGYGO/AAADocs/References/Captures/PyriosToon"
+    out = "F:/ue_project/GGYGO_UE59/AAADocs/References/Captures/PyriosToon"
     os.makedirs(out, exist_ok=True)
     tag = os.environ.get("PYRIOS_CAP_TAG", "cap")
     for name, yaw, z, dist, fov in (("front", 0, 95, 330, 40.0), ("chest", 0, 150, 160, 40.0), ("back", 180, 120, 260, 40.0)):

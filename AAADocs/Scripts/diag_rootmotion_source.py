@@ -3,7 +3,7 @@
 diag_rootmotion_source.py —— 只读诊断：找出 AnimSequence 里到底哪根骨骼承载位移/转身
 
 在 UE 编辑器 Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/diag_rootmotion_source.py", encoding="utf-8").read())
+  exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/diag_rootmotion_source.py", encoding="utf-8").read())
 
 只读日志，不写任何资产。用于确定：
   - 骨架里实际存在的骨骼轨道名；

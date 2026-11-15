@@ -3,7 +3,7 @@
 organize_movement_assets.py —— 把移动相关动画与 BlendSpace 归到 Animation/Movement/。
 
 在 UE 编辑器 Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/organize_movement_assets.py", encoding="utf-8").read())
+  exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/organize_movement_assets.py", encoding="utf-8").read())
 
 范围按「locomotion 状态机会用到的表现」划：走跑起停、转身、以及站立待机。
 待机放进来是因为它属于同一个状态机的 NotMoving 分支，不是独立系统；

@@ -6,7 +6,7 @@ verify_turnback_program_rotation.py —— 独立只读验证已保存的 Progra
 也不调用 save_loaded_asset；只重新加载资产并读取保存后的结果。
 
 在 Unreal Editor Python Console 中执行：
-    exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/verify_turnback_program_rotation.py",
+    exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/verify_turnback_program_rotation.py",
               encoding="utf-8").read())
 """
 

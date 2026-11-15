@@ -1,7 +1,7 @@
 """Wire only the seven accepted Profiles into the formal default MovementSet.
 
 Import is inert. In the coordinator's exclusive Unreal Python window:
-    api = runpy.run_path('F:/ue_project/GGYGO/AAADocs/Scripts/wire_pyrios_locomotion_profiles.py')
+    api = runpy.run_path('F:/ue_project/GGYGO_UE59/AAADocs/Scripts/wire_pyrios_locomotion_profiles.py')
     inspection = api['inspect']()       # read-only; inspect inspection.receipt
     result = api['apply'](inspection)   # explicit, once, in that same process
 
@@ -21,7 +21,7 @@ from pathlib import Path
 import struct
 
 
-PROJECT = Path('F:/ue_project/GGYGO')
+PROJECT = Path('F:/ue_project/GGYGO_UE59')
 SCRIPT = PROJECT / 'AAADocs/Scripts/wire_pyrios_locomotion_profiles.py'
 DA_PACKAGE = '/Game/System/DA_Movement_Default'
 MOVEMENT = '/Game/Characters/Player/Pyrios/Animation/Movement/'

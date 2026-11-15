@@ -3,7 +3,7 @@
 probe_bone_space.py —— 只读：查清 Bip001 的 local 轴向与 component space 的关系。
 
 在 UE 编辑器 Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/probe_bone_space.py", encoding="utf-8").read())
+  exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/probe_bone_space.py", encoding="utf-8").read())
 
 要回答的问题：FBX Y-up 到 UE Z-up 的坐标系转换烘在哪一级？
 Bip001 的 local 位移里前进量落在 Z 轴，说明它自己没被转换；

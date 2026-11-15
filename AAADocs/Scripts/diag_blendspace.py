@@ -3,7 +3,7 @@
 diag_blendspace.py —— 只读诊断：为什么 WalkRun BlendSpace 没有表现。
 
 在 UE 编辑器 Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/diag_blendspace.py", encoding="utf-8").read())
+  exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/diag_blendspace.py", encoding="utf-8").read())
 
 按可能性从高到低逐项打印：
   1. 资产类型（BlendSpace1D 只用 X 轴；2D 才吃 Y）

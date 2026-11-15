@@ -3,7 +3,7 @@
 dump_rm_curves.py —— 只读：导出 AnimSequence 上已有 RM_ 授权曲线的实际数值
 
 在 UE 编辑器 Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/dump_rm_curves.py", encoding="utf-8").read())
+  exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/dump_rm_curves.py", encoding="utf-8").read())
 
 用途：看清游戏真正消费的移动数据（rm_speed / RM_VelocityDirX/Y / rm_yaw / rm_pos / rm_dist）
       随时间的形状，判断 dirxy 当前在哪个坐标系、以及正确的 root 局部重表达方式。

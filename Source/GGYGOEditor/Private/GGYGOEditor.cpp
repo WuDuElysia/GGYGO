@@ -5,7 +5,6 @@
 #include "GGYGONiagaraCompileLibrary.h"
 
 #include "Misc/CoreDelegates.h"
-#include "ToolsetRegistry/ToolsetRegistrySubsystem.h"
 #include "ToolsetRegistry/UToolsetRegistry.h"
 
 IMPLEMENT_MODULE(FGGYGOEditorModule, GGYGOEditor);
@@ -26,8 +25,8 @@ void FGGYGOEditorModule::ShutdownModule()
 
 void FGGYGOEditorModule::RegisterNiagaraCompileTools()
 {
-	// 启动早期尚无 Editor Registry；由同一个原生加载完成信号注册，不另设重试器。
-	if (UToolsetRegistrySubsystem::Get().HasValue()
+	// 启动早期 Registry 尚未可用；由同一个原生加载完成信号注册，不另设重试器。
+	if (UToolsetRegistry::IsAvailable()
 		&& !UToolsetRegistry::IsToolsetClassRegistered(UGGYGONiagaraCompileLibrary::StaticClass()))
 	{
 		UToolsetRegistry::RegisterToolsetClass(UGGYGONiagaraCompileLibrary::StaticClass());
@@ -36,7 +35,7 @@ void FGGYGOEditorModule::RegisterNiagaraCompileTools()
 
 void FGGYGOEditorModule::UnregisterNiagaraCompileTools()
 {
-	if (UObjectInitialized() && UToolsetRegistrySubsystem::Get().HasValue())
+	if (UObjectInitialized() && UToolsetRegistry::IsAvailable())
 	{
 		UToolsetRegistry::UnregisterToolsetClass(UGGYGONiagaraCompileLibrary::StaticClass());
 	}

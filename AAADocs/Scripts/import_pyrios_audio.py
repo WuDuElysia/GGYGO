@@ -18,7 +18,7 @@ import re
 import wave
 
 
-PROJECT = Path("F:/ue_project/GGYGO")
+PROJECT = Path("F:/ue_project/GGYGO_UE59")
 SOURCE = Path("F:/AnimeStudio/Exports/ZZZ/Avatar_Male_Size03_Pyrois_Model")
 AUDIO = SOURCE / "Audio"
 TARGET_ROOT = "/Game/Characters/Player/Pyrios/Audio"

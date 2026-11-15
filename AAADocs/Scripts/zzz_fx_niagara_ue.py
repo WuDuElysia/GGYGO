@@ -1578,7 +1578,8 @@ class NiagaraBuilder:
                 properties["UVScaleBinding"] = self.attribute_binding("Particles.UVScale")
                 properties["DynamicMaterial3Binding"] = self.attribute_binding("Particles.DynamicMaterialParameter3")
             if rd.get("material_facing") is not None:
-                properties.update(bUseMaterialCutoutTexture=False, CutoutTexture="None")
+                # 原生模式通知清理 CutoutTexture；None 模式下纹理字段不可编辑。
+                properties["CutoutMode"] = "None"
             if rd["subuv"]["animated"]:
                 properties["MaterialRandomBinding"] = self.attribute_binding("Particles.SubImageIndex")
         if field is not None:
@@ -1589,7 +1590,7 @@ class NiagaraBuilder:
                 attribute = "Particles.DynamicMaterialParameter" + suffix if mask & (0xF << (slot * 4)) else None
                 properties["DynamicMaterial" + suffix + "Binding"] = self.attribute_binding(attribute)
         if rd["sort_attribute"] is not None:
-            # UE 5.8 uses RootName/ParamMapVariable/DataSetName for live lookup;
+            # 原生绑定用 RootName/ParamMapVariable/DataSetName 进行实时查询；
             # BoundVariable is retained only for loading older editor assets.
             # The new mesh renderer's native Age binding already has Float type.
             attribute = rd["sort_attribute"]

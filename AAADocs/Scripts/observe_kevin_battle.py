@@ -15,7 +15,7 @@ sys.dont_write_bytecode = True
 OUT = Path(os.environ['GGYGO_KEVIN_LOG']).parent
 MAP = '/Game/Map/BH3/L_KevinBoss_P3'
 TESTS = ''
-CONFIG = json.loads(Path('F:/ue_project/GGYGO/AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Montage_Config.json').read_text(encoding='utf-8-sig'))
+CONFIG = json.loads(Path('F:/ue_project/GGYGO_UE59/AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Combat_Montage_Config.json').read_text(encoding='utf-8-sig'))
 RECOVERY = {a['montage'].rsplit('/',1)[-1]:max((w['end_seconds'] for w in a.get('hit_windows',[])),default=0) for a in CONFIG['skill_assemblies']}
 VISUAL_MODE = os.environ.get('GGYGO_KEVIN_DIAGNOSTIC_CAMERA') == '1'
 STATIONARY_SECONDS = 4.0

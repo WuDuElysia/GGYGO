@@ -3,7 +3,7 @@
 probe_root_bone.py —— 只读：确认骨架里的 `Root` 骨骼是否直接承载 root motion。
 
 在 UE 编辑器 Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/probe_root_bone.py", encoding="utf-8").read())
+  exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/probe_root_bone.py", encoding="utf-8").read())
 
 FBX 里的外部 Null 节点 `Root` 被导入成了骨架的一根骨骼（在骨骼列表末尾）。
 如果它的轨道里带着完整的位移与 yaw，那它的 component transform 就是现成的

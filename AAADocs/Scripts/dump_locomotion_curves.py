@@ -9,7 +9,7 @@ yaw / 位移 / 速度随时间的真实走向。
 import json
 import sys
 
-SRC = r"F:\ue_project\GGYGO\Saved\AnimRootMotion\Pyrios_RootMotion.json"
+SRC = r"F:\ue_project\GGYGO_UE59\Saved\AnimRootMotion\Pyrios_RootMotion.json"
 
 DEFAULT = ["Ani_TurnBack", "Ani_Walk_Start", "Ani_Walk_Loop", "Ani_Walk_End",
            "Ani_Walk_Start_End", "Ani_Run_Loop", "Ani_Run_End"]

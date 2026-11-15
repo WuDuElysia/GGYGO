@@ -12,7 +12,7 @@
 import json
 from collections import defaultdict
 
-SRC = r"F:\ue_project\GGYGO\Saved\AnimRootMotion\Pyrios_RootMotion.json"
+SRC = r"F:\ue_project\GGYGO_UE59\Saved\AnimRootMotion\Pyrios_RootMotion.json"
 SPEED_EPS = 1.0   # cm/s，低于此视为静止
 
 with open(SRC, "r", encoding="utf-8") as f:

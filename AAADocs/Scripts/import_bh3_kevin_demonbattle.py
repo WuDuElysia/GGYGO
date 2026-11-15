@@ -1,7 +1,7 @@
 """Import the isolated BH3 Kevin DemonBattle package without overwriting assets.
 
 Outside UE: python import_bh3_kevin_demonbattle.py --stage audit
-UE Cmd: py "F:/ue_project/GGYGO/AAADocs/Scripts/import_bh3_kevin_demonbattle.py" --stage smoke
+UE Cmd: py "F:/ue_project/GGYGO_UE59/AAADocs/Scripts/import_bh3_kevin_demonbattle.py" --stage smoke
 After reviewing smoke preview: repeat with --stage all.
 Uses adjacent generic FBX reader, never edits source FBX or applies Pyrios processing.
 """

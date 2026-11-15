@@ -42,6 +42,7 @@ public class GGYGOEditor : ModuleRules
 			"RHI",                        // GPU staging readback 与原表面格式转换
 			"RenderCore",                 // 原渲染命令队列，不阻塞 GT 等待 GPU
 			"ImageWrapper",               // 后台 PNG 编码；GT 入场只核模块已预载
+			"ToolsetRegistryEditor",       // Renderer 批属性工具的编辑器实现。
 			"UnrealEd"
 		});
 
@@ -50,8 +51,8 @@ public class GGYGOEditor : ModuleRules
 		string rendererPrivate = Path.Combine(rendererDirectory, "Private");
 		string rendererInternal = Path.Combine(rendererDirectory, "Internal");
 		bool useNativeMeshProbe = Target.Platform == UnrealTargetPlatform.Win64
-			&& Target.Version.MajorVersion == 5 && Target.Version.MinorVersion == 8
-			&& Target.Version.PatchVersion == 1 && Target.Version.Changelist == 56057345
+			&& Target.Version.MajorVersion == 5 && Target.Version.MinorVersion == 9
+			&& Target.Version.PatchVersion == 0 && Target.Version.Changelist == 60351404
 			&& File.Exists(Path.Combine(rendererPrivate, "SceneRendering.h"))
 			&& File.Exists(Path.Combine(rendererInternal, "TranslucentPassResource.h"));
 		PrivateDefinitions.Add($"GGYGO_WITH_NATIVE_MESH_PROBE={(useNativeMeshProbe ? 1 : 0)}");

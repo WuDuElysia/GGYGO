@@ -4,7 +4,7 @@ bake_anim_rootmotion_curves.py —— 把 anim_rootmotion_extract.py 产出的�
 AnimSequence 上的真实 FloatCurve。
 
 在 UE 编辑器 Python 命令行执行：
-  p = r"F:/ue_project/GGYGO/AAADocs/Scripts/bake_anim_rootmotion_curves.py"
+  p = r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/bake_anim_rootmotion_curves.py"
   exec(compile(open(p, encoding="utf-8").read(), p, "exec"), {"__name__": "__main__", "__file__": p})
 
 MODE 控制行为：
@@ -54,10 +54,10 @@ MODE = "all"
 # 成功缓存绑定源记录/本脚本/配置/磁盘资产指纹；失败和缺失下次自动重试。
 BATCH_SIZE = 15
 
-SOURCE_JSON = r"F:/ue_project/GGYGO/Saved/AnimRootMotion/Pyrios_RootMotion.json"
+SOURCE_JSON = r"F:/ue_project/GGYGO_UE59/Saved/AnimRootMotion/Pyrios_RootMotion.json"
 ANIM_FOLDER = "/Game/Characters/Player/Pyrios/Animation"
-REPORT_JSON = r"F:/ue_project/GGYGO/Saved/AnimRootMotion/BakeReport.json"
-PROGRESS_JSON = r"F:/ue_project/GGYGO/Saved/AnimRootMotion/BakeProgress.json"
+REPORT_JSON = r"F:/ue_project/GGYGO_UE59/Saved/AnimRootMotion/BakeReport.json"
+PROGRESS_JSON = r"F:/ue_project/GGYGO_UE59/Saved/AnimRootMotion/BakeProgress.json"
 
 PROBE_CLIPS = [
     "Avatar_Male_Size03_Pyrois_Ani_TurnBack",   # 唯一同时带 180° yaw 和往复位移的动作

@@ -3,7 +3,7 @@
 fix_blendspace_axis.py —— 回读并修正 BS_Pyrios_WalkRun 的轴范围。
 
 在 UE 编辑器 Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/fix_blendspace_axis.py", encoding="utf-8").read())
+  exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/fix_blendspace_axis.py", encoding="utf-8").read())
 
 轴必须是 0..1，因为公开语义 WalkRunBlendAlpha 就是 0（Walk）到 1（Run）。
 当前 AnimBP 仍通过 StateMemory.GaitBlendY 兼容字段接线，但该旧名不再作为新资产命名依据。

@@ -1,6 +1,6 @@
 """Single-asset UE import/readback; execute only in the coordinator's UE window.
 
-UE Python: py "F:/ue_project/GGYGO/AAADocs/Scripts/import_pyrois_normal01_skill_audio.py" --mode import
+UE Python: py "F:/ue_project/GGYGO_UE59/AAADocs/Scripts/import_pyrois_normal01_skill_audio.py" --mode import
 MCP Python: runpy.run_path(SCRIPT_PATH)["run"]("import")  # or "readback"
 No playback, Montage edits, overwrite, SaveAll, or automatic failure cleanup.
 """
@@ -16,7 +16,7 @@ import traceback
 import wave
 
 
-PROJECT = Path("F:/ue_project/GGYGO")
+PROJECT = Path("F:/ue_project/GGYGO_UE59")
 SOURCE = Path("F:/AnimeStudio/Exports/ZZZ/Avatar_Male_Size03_Pyrois_Model/Audio/"
               "Avatar_Male_Size03_Pyrois_Ani_Attack_Normal_01/Skill_Attack_Normal_01.wav")
 MAPPING = SOURCE.parent / "mapping.json"

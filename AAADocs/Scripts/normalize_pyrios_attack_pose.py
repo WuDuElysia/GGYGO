@@ -22,7 +22,7 @@ import struct
 import traceback
 
 
-PROJECT = Path("F:/ue_project/GGYGO")
+PROJECT = Path("F:/ue_project/GGYGO_UE59")
 BASE = "/Game/Characters/Player/Pyrios/"
 PREFIX = BASE + "Animation/Avatar_Male_Size03_Pyrois_Ani_Attack_Normal_"
 CASES = {name: (PREFIX + name, keys) for name, keys in (

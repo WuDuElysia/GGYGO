@@ -23,8 +23,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$taskRoot = 'F:\ue_project\GGYGO'
-$taskExe = 'F:\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe'
+$taskRoot = 'F:\ue_project\GGYGO_UE59'
+$taskExe = 'F:\UE5.9\UE_5.9\Engine\Binaries\Win64\UnrealEditor.exe'
 $taskOutput = Join-Path $taskRoot ('Saved\Codex\' + $RunName)
 $taskRuntime = Join-Path $taskRoot 'Binaries\Win64\UnrealEditor-GGYGO.dll'
 $taskEditor = Join-Path $taskRoot 'Binaries\Win64\UnrealEditor-GGYGOEditor.dll'
@@ -129,7 +129,7 @@ if (@($taskProtected | Where-Object { $_.missing }).Count -ne 0) {
 } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskOutput 'before.json') -Encoding utf8
 
 $taskArgs = @(
-    '"F:\ue_project\GGYGO\GGYGO.uproject"', '/Engine/Maps/Entry',
+    '"F:\ue_project\GGYGO_UE59\GGYGO.uproject"', '/Engine/Maps/Entry',
     '-unattended', '-NoSplash', '-NoSound', '-NoLiveCoding', '-SCCProvider=None',
     '-stdout', '-FullStdOutLogOutput', '-ForceLogFlush',
     '-ModelContextProtocolStartServer', '-ModelContextProtocolPort=8000',

@@ -343,7 +343,7 @@ def main():
     anim_dir = sys.argv[1] if len(sys.argv) > 1 else \
         r"F:\AnimeStudio\Exports\ZZZ\Avatar_Male_Size03_Pyrois_Model\anim"
     out_path = sys.argv[2] if len(sys.argv) > 2 else \
-        r"F:\ue_project\GGYGO\Saved\AnimRootMotion\Pyrios_RootMotion.json"
+        r"F:\ue_project\GGYGO_UE59\Saved\AnimRootMotion\Pyrios_RootMotion.json"
 
     fbx_files = sorted(glob.glob(os.path.join(anim_dir, "*.fbx")))
     records = []

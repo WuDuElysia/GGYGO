@@ -3,7 +3,7 @@
 create_walkrun_blendspace.py —— 创建走跑混合用的 BlendSpace1D 并接进 ABP 的 AnimSet。
 
 在 UE 编辑器 Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/create_walkrun_blendspace.py", encoding="utf-8").read())
+  exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/create_walkrun_blendspace.py", encoding="utf-8").read())
 
 为什么是 1D 而不是 2D：Pyrios 只有 Walk_Loop / Run_Loop 两个移动循环动画，
 没有侧向或后退的循环，2D 的另一个轴无从填充。ZZZ 的移动是「角色转向移动方向」，

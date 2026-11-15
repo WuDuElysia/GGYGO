@@ -1,7 +1,7 @@
 """Build a baseline editor preview for the BH3 Kevin DemonBattle export.
 
 Run in the UE 5.8 editor after the animation import owns and finishes the mesh:
-    py F:/ue_project/GGYGO/AAADocs/Scripts/setup_bh3_kevin_materials.py
+    py F:/ue_project/GGYGO_UE59/AAADocs/Scripts/setup_bh3_kevin_materials.py
 
 Only /Game/Characters/Boss/Kevin/DemonBattle is modified. This is a texture
 preview, not a port of the BH3 character shaders or their runtime lighting.

@@ -23,7 +23,7 @@ from pathlib import Path
 import re
 
 
-PROJECT = Path("F:/ue_project/GGYGO")
+PROJECT = Path("F:/ue_project/GGYGO_UE59")
 MONTAGE = "/Game/Characters/Player/Pyrios/Animation/Attack/AM_Pyrios_Attack_Normal_01"
 MAIN = "/Game/Characters/Player/Pyrios/Animation/Avatar_Male_Size03_Pyrois_Ani_Attack_Normal_01"
 END = MAIN + "_End"
@@ -403,7 +403,7 @@ def _compare_readback_point_event(expected, actual):
         "after_raw_value": offset_values[1],
         "consumed_for_this_event": False,
         "reason": "NotifyStateClass=null: native GetEndTriggerTime returns GetTriggerTime",
-        "native_contract": "UE_5.8/Engine/Source/Runtime/Engine/Private/Animation/AnimTypes.cpp:86-98",
+        "native_contract": "F:/UE5.9/UE_5.9/Engine/Source/Runtime/Engine/Private/Animation/AnimTypes.cpp:86-98",
         "effective_end_seconds_by_native_contract": {
             "before": expected["trigger_seconds"], "after": actual["trigger_seconds"],
         },

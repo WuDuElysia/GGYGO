@@ -4,9 +4,9 @@
 The coordinator must first confirm the latest build's new DLL and the actual C20
 GGYGO.Editor.Animation.FloatCurveSnapshot success from that same build, with that UE process exited.
 Only the coordinator may run this script in its exclusive UE window:
-  F:/UE_5.8/Engine/Binaries/Win64/UnrealEditor-Cmd.exe
-  F:/ue_project/GGYGO/GGYGO.uproject -run=pythonscript
-  -script=F:/ue_project/GGYGO/AAADocs/Scripts/probe_animation_float_curve_snapshot.py
+  F:/UE5.9/UE_5.9/Engine/Binaries/Win64/UnrealEditor-Cmd.exe
+  F:/ue_project/GGYGO_UE59/GGYGO.uproject -run=pythonscript
+  -script=F:/ue_project/GGYGO_UE59/AAADocs/Scripts/probe_animation_float_curve_snapshot.py
   -EnablePlugins=PythonScriptPlugin -Unattended -NoSplash -NoSound -NullRHI
   -NoP4 -NoTurnkey -log=GGYGO_AnimationCurveSnapshot_Python_20261001_R3.log
 
@@ -35,7 +35,7 @@ import sys
 import traceback
 
 
-PROJECT_ROOT = Path("F:/ue_project/GGYGO")
+PROJECT_ROOT = Path("F:/ue_project/GGYGO_UE59")
 REPORT_PATH = PROJECT_ROOT / "Saved/AnimationCurveReadback/ReadFloatCurveSnapshot_Python_20261001_R3.json"
 LOG_PATH = PROJECT_ROOT / "Saved/Logs/GGYGO_AnimationCurveSnapshot_Python_20261001_R3.log"
 SOURCE_PATH = (

@@ -2,7 +2,7 @@
 param([Parameter(Mandatory=$true)][string]$RunName, [switch]$DeathShadow)
 $ErrorActionPreference='Stop'
 $taskDriver=if ($DeathShadow) { 'observe_kevin_death_shadow.py' } else { 'observe_kevin_battle.py' }
-$taskRoot='F:/ue_project/GGYGO'
+$taskRoot='F:/ue_project/GGYGO_UE59'
 $taskRun=Join-Path $taskRoot ('Saved/Codex/KevinFinalBattle/'+$RunName)
 if (Test-Path -LiteralPath $taskRun) { throw '不得覆盖旧试次' }
 $taskConflicts=@(Get-CimInstance Win32_Process | Where-Object {
@@ -13,7 +13,7 @@ if ($taskConflicts.Count) { throw '有 UE 或 UBT 占用' }
 New-Item -ItemType Directory -Path $taskRun | Out-Null
 $env:GGYGO_KEVIN_LOG=Join-Path $taskRun 'editor.log'
 $env:GGYGO_KEVIN_DIAGNOSTIC_CAMERA='1'
-$taskArgs=@('F:/ue_project/GGYGO/GGYGO.uproject', '-d3d12','-RenderOffScreen','-unattended','-NoSplash','-NoLiveCoding',
+$taskArgs=@('F:/ue_project/GGYGO_UE59/GGYGO.uproject', '-d3d12','-RenderOffScreen','-unattended','-NoSplash','-NoLiveCoding',
     '-SCCProvider=None','-NoAssetRegistryCacheWrite','-notraceserver','-traceautostart=0','-LogFlushInterval=0.02',
     ('-UserDir="'+$taskRun+'/Editor"'),('-AbsLog="'+$taskRun+'/editor.log"'),
     '-ini:EditorPerProjectUserSettings:[/Script/UnrealEd.EditorLoadingSavingSettings]:LoadLevelAtStartup=None',
@@ -26,6 +26,6 @@ $taskArgs=@('F:/ue_project/GGYGO/GGYGO.uproject', '-d3d12','-RenderOffScreen','-
     '-ini:EditorPerProjectUserSettings:[/Script/UnrealEd.LevelEditorPlaySettings]:NewWindowWidth=1280',
     '-ini:EditorPerProjectUserSettings:[/Script/UnrealEd.LevelEditorPlaySettings]:NewWindowHeight=720',
     ('-ExecCmds="py '+$PSScriptRoot.Replace('\','/')+'/'+$taskDriver+'"'))
-$taskProcess=Start-Process -FilePath 'F:/UE_5.8/Engine/Binaries/Win64/UnrealEditor.exe' -ArgumentList $taskArgs -WorkingDirectory $taskRoot -WindowStyle Hidden -PassThru
+$taskProcess=Start-Process -FilePath 'F:/UE5.9/UE_5.9/Engine/Binaries/Win64/UnrealEditor.exe' -ArgumentList $taskArgs -WorkingDirectory $taskRoot -WindowStyle Hidden -PassThru
 @{pid=$taskProcess.Id;arguments=$taskArgs} | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $taskRun 'process.json') -Encoding utf8
 $taskProcess.Id

@@ -8,7 +8,7 @@
 """
 import json
 
-SRC = r"F:\ue_project\GGYGO\Saved\AnimRootMotion\Pyrios_RootMotion.json"
+SRC = r"F:\ue_project\GGYGO_UE59\Saved\AnimRootMotion\Pyrios_RootMotion.json"
 NAMES = ["Ani_TurnBack", "Ani_Run_Loop", "Ani_Walk_Loop", "Ani_Walk_Start",
          "Ani_Walk_End", "Ani_Walk_Start_End", "Ani_Run_End"]
 

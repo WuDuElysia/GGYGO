@@ -8,7 +8,7 @@ from pathlib import Path
 import runpy
 import sys
 
-AUTHOR = Path("F:/ue_project/GGYGO/AAADocs/Scripts/create_pyrios_walk_motion_profiles.py")
+AUTHOR = Path("F:/ue_project/GGYGO_UE59/AAADocs/Scripts/create_pyrios_walk_motion_profiles.py")
 AUTHOR_SHA256 = "098c9eaeba204f47df5c24ca9ba3b044b6f73d2072d0430dedf8158938aea424"
 ENTRY = {
     "RunLoop": "create_run_loop",

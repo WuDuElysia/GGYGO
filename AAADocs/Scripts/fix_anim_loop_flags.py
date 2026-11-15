@@ -3,7 +3,7 @@
 fix_anim_loop_flags.py —— 按 Cfg_LoopTime 曲线设置 AnimSequence 的 loop 标记。
 
 在 UE 编辑器 Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/fix_anim_loop_flags.py", encoding="utf-8").read())
+  exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/fix_anim_loop_flags.py", encoding="utf-8").read())
 
 FBX 导入出来的 AnimSequence 一律 loop=False。循环动画保持 False 的后果很隐蔽：
 单独播放看不出问题（播完停在最后一帧），但放进 BlendSpace 当样本时，

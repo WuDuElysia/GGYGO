@@ -23,7 +23,7 @@ import struct
 import unreal as ue
 
 
-PROJECT = Path("F:/ue_project/GGYGO").resolve()
+PROJECT = Path("F:/ue_project/GGYGO_UE59").resolve()
 BASE = "/Game/Characters/Player/Pyrios/Animation/"
 SKELETON = "/Game/Characters/Player/Pyrios/Avatar_Male_Size03_Pyrois_Model_Skeleton"
 CASES = {

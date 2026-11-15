@@ -14,7 +14,7 @@ import re
 import xml.etree.ElementTree as ET
 
 
-PROJECT = Path("F:/ue_project/GGYGO")
+PROJECT = Path("F:/ue_project/GGYGO_UE59")
 SOURCE = Path("F:/AnimeStudio/Exports/BH3/Animator/Kevin/05_BOSS_411_DemonBattle")
 AUDIO = SOURCE / "Audio"
 CONFIG = PROJECT / "AAADocs/Assets/BH3/KevinDemonBattle/BH3_Kevin_Audio_Config.json"

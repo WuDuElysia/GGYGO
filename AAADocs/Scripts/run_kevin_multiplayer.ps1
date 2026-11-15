@@ -1,7 +1,7 @@
 <# .SYNOPSIS 启动正式 P3 联机专项的自有 D3D12 Editor；不保存资产。 #>
 param([Parameter(Mandatory=$true)][string]$Output)
 $ErrorActionPreference = 'Stop'
-$taskRoot = 'F:\ue_project\GGYGO'
+$taskRoot = 'F:\ue_project\GGYGO_UE59'
 $taskOutput = [IO.Path]::GetFullPath($Output)
 if (-not $taskOutput.StartsWith((Join-Path $taskRoot 'Saved\Codex\'), [StringComparison]::OrdinalIgnoreCase)) {
     throw '输出必须位于本项目 Saved\Codex 内。'
@@ -25,7 +25,7 @@ $taskArgs = @(
     '-LogCmds="LogNet Log,LogNetTraffic Verbose,LogNetLifecycle Log,LogGGYGOAbilitySystem Verbose"',
     ('-ExecCmds="py '+(Join-Path $taskRoot 'AAADocs/Scripts/observe_kevin_multiplayer.py').Replace('\','/')+'"')
 )
-$taskProcess = Start-Process -FilePath 'F:\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe' -ArgumentList $taskArgs -WorkingDirectory $taskRoot -WindowStyle Hidden -PassThru
+$taskProcess = Start-Process -FilePath 'F:\UE5.9\UE_5.9\Engine\Binaries\Win64\UnrealEditor.exe' -ArgumentList $taskArgs -WorkingDirectory $taskRoot -WindowStyle Hidden -PassThru
 [ordered]@{pid=$taskProcess.Id; log=(Join-Path $taskOutput 'editor.log'); arguments=$taskArgs} |
     ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $taskOutput 'process.json') -Encoding utf8
 $taskProcess.Id

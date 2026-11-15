@@ -8,9 +8,9 @@ never substitute defaults, parse object strings, fall back to keys, or scan
 other animations. No asset setters, Controller, Modify, transactions or saves.
 
 The coordinator runs this frozen script in its exclusive UE window:
-  F:/UE_5.8/Engine/Binaries/Win64/UnrealEditor-Cmd.exe
-  F:/ue_project/GGYGO/GGYGO.uproject -run=pythonscript
-  -script=F:/ue_project/GGYGO/AAADocs/Scripts/probe_animation_float_curve_readback.py
+  F:/UE5.9/UE_5.9/Engine/Binaries/Win64/UnrealEditor-Cmd.exe
+  F:/ue_project/GGYGO_UE59/GGYGO.uproject -run=pythonscript
+  -script=F:/ue_project/GGYGO_UE59/AAADocs/Scripts/probe_animation_float_curve_readback.py
   -EnablePlugins=PythonScriptPlugin -Unattended -NoSplash -NoSound -NullRHI
   -NoP4 -NoTurnkey -log=GGYGO_AnimationCurveReadback_Python_20260930_R2.log
 
@@ -28,7 +28,7 @@ import sys
 import traceback
 
 
-PROJECT_ROOT = Path("F:/ue_project/GGYGO")
+PROJECT_ROOT = Path("F:/ue_project/GGYGO_UE59")
 REPORT_PATH = PROJECT_ROOT / "Saved/AnimationCurveReadback/ReadFloatCurves_Python_20260930_R2.json"
 LOG_PATH = PROJECT_ROOT / "Saved/Logs/GGYGO_AnimationCurveReadback_Python_20260930_R2.log"
 SOURCE_PATH = (

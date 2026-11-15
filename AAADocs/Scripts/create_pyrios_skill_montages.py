@@ -17,7 +17,7 @@ import struct
 import traceback
 
 
-PROJECT = Path("F:/ue_project/GGYGO")
+PROJECT = Path("F:/ue_project/GGYGO_UE59")
 AUDIT_FILE = PROJECT / "AAADocs/Scripts/audit_pyrios_skill_assets_readonly.py"
 AUDIT_SHA = "42de1d1d770355ea7d0bc2d28fb1483ae5c4189563a53878809be9979efd6d1a"
 SCHEMA = "PyriosSkillMontages/v1"

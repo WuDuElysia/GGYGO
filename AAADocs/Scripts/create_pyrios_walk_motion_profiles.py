@@ -24,7 +24,7 @@ import re
 import struct
 
 
-PROJECT = Path("F:/ue_project/GGYGO")
+PROJECT = Path("F:/ue_project/GGYGO_UE59")
 EVIDENCE = PROJECT / "Saved/ValidationRecords/LocomotionAssetReadback_20261003_Pawn00.json"
 EVIDENCE_SHA256 = "159c5b59079f6d88860a07c2e3699755435f6eaef0b9f1828d55735f46a345a2"
 MOVEMENT = "/Game/Characters/Player/Pyrios/Animation/Movement/"

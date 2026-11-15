@@ -10,7 +10,7 @@ fix_turnback_program_rotation.py —— 直接修正既有 TurnBack ProgramRotat
   - 保存前后做结构和数据校验。
 
 在 Unreal Editor Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/fix_turnback_program_rotation.py",
+  exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/fix_turnback_program_rotation.py",
             encoding="utf-8").read())
 """
 

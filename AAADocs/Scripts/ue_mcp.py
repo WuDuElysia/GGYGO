@@ -5,9 +5,9 @@
 
     from ue_mcp import Mcp
     m = Mcp()                                   # 初始化新会话
-    m.call("describe_toolset", toolset_name="...")          # 顶层工具
+    m.describe("...")          # 顶层工具
     m.tool("editor_toolset.toolsets.asset.AssetTools.exists", path="/Game/X")  # 工具集工具
-    m.script(PY)                                 # ProgrammaticToolset.execute_tool_script
+    m.script(PY)                                 # PythonScriptingTools.execute_python；首次先调用其 read_me
 
 命令行：python ue_mcp.py <tool_name> '<json args>' [toolset]
 工具返回 isError 时抛 RuntimeError，不吞错误。
@@ -52,10 +52,13 @@ class Mcp:
         return res["result"]
 
     def describe(self, toolset_name):
-        return self.raw("describe_toolset", toolset_name=toolset_name)
+        result = self.raw("describe_toolsets", toolset_names=[toolset_name], include_schemas=True)
+        if result.get("errors", {}).get(toolset_name):
+            raise RuntimeError(result["errors"][toolset_name])
+        return result["toolsets"][toolset_name]
 
     def raw(self, name, **arguments):
-        """调用服务直接暴露的 MCP 工具（list_toolsets / describe_toolset / call_tool）。"""
+        """调用服务直接暴露的 MCP 工具（list_toolsets / describe_toolsets / describe_tools / call_tool）。"""
         res = self._rpc("tools/call", {"name": name, "arguments": arguments})
         text = "".join(c.get("text", "") for c in res.get("content", []))
         if res.get("isError"):
@@ -101,8 +104,16 @@ class Mcp:
         return self.call(name, toolset, **arguments)
 
     def script(self, code):
-        out = self.tool("editor_toolset.toolsets.programmatic.ProgrammaticToolset.execute_tool_script", script=code)
-        return json.loads(out["returnValue"]) if isinstance(out, dict) and "returnValue" in out else out
+        out = self.tool("editor_toolset.toolsets.python_scripting.PythonScriptingTools.execute_python",
+                        script={"content": code, "language": "Python"})
+        value = out["returnValue"] if isinstance(out, dict) and "returnValue" in out else out
+        if not isinstance(value, str):
+            return value
+        # 原生接口也允许空结果或普通字符串；仅转换实际返回的 JSON 文本。
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return value
 
 
 if __name__ == "__main__":

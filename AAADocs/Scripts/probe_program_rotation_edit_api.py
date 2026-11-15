@@ -4,7 +4,7 @@ probe_program_rotation_edit_api.py —— 只读探测 ProgramRotation AnimSeque
 
 本脚本只读取反射属性、getter 返回值和骨骼轨道相关对象，不写入、不修改、不保存资产。
 在 Unreal Editor Python Console 中执行：
-    exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/probe_program_rotation_edit_api.py", encoding="utf-8").read())
+    exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/probe_program_rotation_edit_api.py", encoding="utf-8").read())
 """
 
 import unreal

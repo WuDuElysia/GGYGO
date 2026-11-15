@@ -15,8 +15,8 @@ param(
     [switch]$TailSeekProbe
 )
 $ErrorActionPreference = 'Stop'
-$taskRoot = 'F:\ue_project\GGYGO'
-$taskEngine = 'F:\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe'
+$taskRoot = 'F:\ue_project\GGYGO_UE59'
+$taskEngine = 'F:\UE5.9\UE_5.9\Engine\Binaries\Win64\UnrealEditor.exe'
 $taskPython = Join-Path $taskRoot 'AAADocs\Scripts\observe_minimal_multiplayer.py'
 $taskOutput = [IO.Path]::GetFullPath($Output)
 if ($Case -contains 'all' -and $Case.Count -ne 1) { throw 'all 不能与单独场景混用。' }

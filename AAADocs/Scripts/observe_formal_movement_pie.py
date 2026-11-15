@@ -2,7 +2,7 @@
 
 Import is inert. In the editor Python console (the coordinator owns UE):
     import runpy
-    probe = runpy.run_path(r'F:/ue_project/GGYGO/AAADocs/Scripts/observe_formal_movement_pie.py')
+    probe = runpy.run_path(r'F:/ue_project/GGYGO_UE59/AAADocs/Scripts/observe_formal_movement_pie.py')
     probe['verify_reflection']()  # All required Python methods/properties, no PIE needed.
     probe['start'](begin_play=True, duration_seconds=90)
     probe['mark']('physical W hold / release / repress')

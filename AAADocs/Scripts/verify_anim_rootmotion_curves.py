@@ -4,7 +4,7 @@ verify_anim_rootmotion_curves.py —— 只读校验：回读全部 119 个 Anim
 与 anim_rootmotion_extract.py 的源数据逐点比对。不写任何资产。
 
 在 UE 编辑器 Python 命令行执行：
-  exec(open(r"F:/ue_project/GGYGO/AAADocs/Scripts/verify_anim_rootmotion_curves.py", encoding="utf-8").read())
+  exec(open(r"F:/ue_project/GGYGO_UE59/AAADocs/Scripts/verify_anim_rootmotion_curves.py", encoding="utf-8").read())
 
 查两件事：
   1. 帧时间点上的值是否与源数据一致（写入正确性）。
@@ -18,9 +18,9 @@ import os
 
 import unreal
 
-SOURCE_JSON = r"F:/ue_project/GGYGO/Saved/AnimRootMotion/Pyrios_RootMotion.json"
+SOURCE_JSON = r"F:/ue_project/GGYGO_UE59/Saved/AnimRootMotion/Pyrios_RootMotion.json"
 ANIM_FOLDER = "/Game/Characters/Player/Pyrios/Animation"
-REPORT = r"F:/ue_project/GGYGO/Saved/AnimRootMotion/VerifyReport.json"
+REPORT = r"F:/ue_project/GGYGO_UE59/Saved/AnimRootMotion/VerifyReport.json"
 
 MOTION_CURVES = [
     "RootMotion_PosX", "RootMotion_PosY", "RootMotion_PosZ",
