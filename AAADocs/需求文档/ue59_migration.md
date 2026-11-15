@@ -16,7 +16,7 @@
 
 ## 当前状态
 
-- **普通启动返修通过**：Game／Editor 两份 Target 均改为 `DefaultBuildSettings = BuildSettingsVersion.V8`，Editor 增量构建成功，生成的 receipt 为 `V8 / Shared`。5.9 的 Editor Target 原生保留 Tests，项目无模块根 Tests 目录；59 个现有测试源文件的编译输入前后完全一致，无需额外覆盖设置。旧的 Unattended 运行绕过交互启动门槛，原验收因此漏掉用户遇到的 Target Upgrade Required；本次仅带独立日志参数普通启动 Editor，实际进入 Untitled 工程主窗口，升级弹窗未再出现，已截图并正常退出。未改引擎或使用 Unique；本次没有重跑既往战斗，也没有构建 Game 独立可执行文件。修复待统筹核收与推送。
+- **普通启动返修通过**：Game／Editor 两份 Target 均改为 `DefaultBuildSettings = BuildSettingsVersion.V8`，Editor 增量构建成功，生成的 receipt 为 `V8 / Shared`。5.9 的 Editor Target 原生保留 Tests，项目无模块根 Tests 目录；59 个现有测试源文件的编译输入前后完全一致，无需额外覆盖设置。旧的 Unattended 运行绕过交互启动门槛，原验收因此漏掉用户遇到的 Target Upgrade Required；本次仅带独立日志参数普通启动 Editor，实际进入 Untitled 工程主窗口，升级弹窗未再出现，已截图并正常退出。未改引擎或使用 Unique；本次没有重跑既往战斗，也没有构建 Game 独立可执行文件。统筹已核对差分、构建结果、编译输入和启动截图；[修复提交](https://github.com/WuDuElysia/GGYGO/commit/fdf1e76)已推送 `codex/ue59-migration`，无 UE／UBT 在途。
 - **源码与工具适配完成**：EngineAssociation／IncludeOrderVersion 切到 5.9；制作和运行脚本指向实际副本与引擎。GameFeature 删除 5.9 已移除的 lifetime-control 开关查询，保留原生 handle、GT、退出阶段及结果校验；Sprite 使用 `CutoutMode`；Editor 接入全局 ToolsetRegistry 和拆分后的 ToolsetRegistryEditor；私有渲染取证匹配实际 5.9.0 版本。MCP 客户端使用 `describe_toolsets` 与 `PythonScriptingTools.execute_python`，实际接口及 Cutout 写入已验证。
 - **资产转换完成**：70 个蓝图／动画蓝图、66 个 Niagara、32 个目标材质／实例首次检查通过；补齐实际引用的 598 个材质／实例编译，均有有效当前 D3D12 ShaderMap。66 个 Niagara 完成编译后逐包保存为 5.9；新进程不再出现原批次的旧 Niagara 编译数据不匹配诊断。
 - **玩家运行与换人联机通过**：转换后新进程四项原测试全部 Success，覆盖普攻连段、自然结束、移动／攻击取消、Normal01 特效生命周期、客户端输入、换人、致死伤害和死亡自动换人。首次准备约 21.6 秒 Ready，满足原 30 秒截止。2 项带告警，包含 CMC 帧耗时迭代上限、旧 owner 响应拒绝及退场通知；未隐藏或降低断言。另有死亡蓝图配置、逐单元挂点和四项 Rendering 检查通过。
