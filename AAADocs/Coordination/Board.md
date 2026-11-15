@@ -10,7 +10,7 @@
 
 | 需求 | 负责人 | 状态 | 需求记录 |
 | --- | --- | --- | --- |
-| UE 5.9 副本迁移 | System 原会话（Codex） | 已完成并推送父子 codex/ue59-migration 分支：编译、资产、玩家／换人、Kevin 完整战斗与死亡清理、最小联机通过，统筹实拍核收和 GameFeature 差分评审通过。可用副本 F:/ue_project/GGYGO_UE59；原 5.8 工程保留。启动诊断／运行告警及 Cook、设备、性能、完整网络、非空受管 GF 未验范围保持，无在途。[迁移提交](https://github.com/WuDuElysia/GGYGO/commit/22566e2) | [ue59_migration](../需求文档/ue59_migration.md) |
+| UE 5.9 副本迁移 | System 原会话（Codex） | V8 普通启动返修已通过，待统筹核收推送：两份 Target 升 V8、59 个测试编译输入保留，Editor 构建与普通启动实拍通过，自有 UE 已退出。原迁移已完成并推送父子 codex/ue59-migration 分支：编译、资产、玩家／换人、Kevin 完整战斗与死亡清理、最小联机通过，统筹实拍核收和 GameFeature 差分评审通过。可用副本 F:/ue_project/GGYGO_UE59；原 5.8 工程保留。启动诊断／运行告警及 Cook、设备、性能、完整网络、非空受管 GF 未验范围保持，无在途。[迁移提交](https://github.com/WuDuElysia/GGYGO/commit/22566e2) | [ue59_migration](../需求文档/ue59_migration.md) |
 | 普攻第一段主弧与冷首击 | Kiro | 已完成：共享网格角点错位重导入后主弧连续可见；未预热首击等资源就绪后出刀，FX 同帧可见（[主弧证据](../../.agents/tasks/requirements-closeout/evidence/I01.md)、[冷首击证据](../../.agents/tasks/requirements-closeout/evidence/I02.md)） | [normal01_first_strike](../需求文档/normal01_first_strike.md) |
 | 普攻连段生产冒烟与活尾 | Codex（待统筹指定） | 需用户：攻击接续点之前的按下要不要存起来留到下一段？A 接受现状并改 spec 措辞，B 另立需求接回预输入。冒烟 22／24 通过，2 例按约定保留失败（[证据](../../.agents/tasks/requirements-closeout/evidence/I08.md)） | [normal01_first_strike](../需求文档/normal01_first_strike.md) |
 | 走跑与转身：生产镜头侧倾和取景 | Codex（待统筹指定） | 需用户：起步／停步各有一次骨盆单帧跳变，A 接受，B 另开动画修复？20° 档侧倾按骨盆算达标（19.8°）、按头部算超出（22.7°），按哪个算？60° 档、纯方向键换向、TurnBack 已通过；取景已选 A（[证据](../../.agents/tasks/requirements-closeout/evidence/I04.md)） | [walkrun_turnback_production_camera](../需求文档/walkrun_turnback_production_camera.md) |

@@ -8,7 +8,7 @@ public class GGYGOTarget : TargetRules
 	public GGYGOTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V7;
+		DefaultBuildSettings = BuildSettingsVersion.V8;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_9;
 		ExtraModuleNames.Add("GGYGO");
 	}
