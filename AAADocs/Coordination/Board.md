@@ -10,7 +10,7 @@
 
 | 需求 | 负责人 | 状态 | 需求记录 |
 | --- | --- | --- | --- |
-| 箱庭世界与首关设计 | 地编原会话（Codex） | 月坑环站设计稿已交付评审，含分区、路线放样、近路及 Kevin P3 入口。灰盒与跨图试玩待制作。 | [箱庭世界与首关设计](../需求文档/箱庭世界与首关设计.md) |
+| 箱庭世界与首关设计 | 地编原会话（Codex） | 5.9 [可玩灰盒已交付](https://github.com/WuDuElysia/GGYGO/commit/20d281a)。上下两路、开闸折返、跨图移动与命中 Kevin 已通过单机实走；首次玩家辨路待真人试玩。 | [箱庭世界与首关设计](../需求文档/箱庭世界与首关设计.md) |
 | 普攻第一段主弧与冷首击 | Kiro | 已完成：共享网格角点错位重导入后主弧连续可见；未预热首击等资源就绪后出刀，FX 同帧可见（[主弧证据](../../.agents/tasks/requirements-closeout/evidence/I01.md)、[冷首击证据](../../.agents/tasks/requirements-closeout/evidence/I02.md)） | [normal01_first_strike](../需求文档/normal01_first_strike.md) |
 | 普攻连段生产冒烟与活尾 | Codex（待统筹指定） | 需用户：攻击接续点之前的按下要不要存起来留到下一段？A 接受现状并改 spec 措辞，B 另立需求接回预输入。冒烟 22／24 通过，2 例按约定保留失败（[证据](../../.agents/tasks/requirements-closeout/evidence/I08.md)） | [normal01_first_strike](../需求文档/normal01_first_strike.md) |
 | 走跑与转身：生产镜头侧倾和取景 | Codex（待统筹指定） | 需用户：起步／停步各有一次骨盆单帧跳变，A 接受，B 另开动画修复？20° 档侧倾按骨盆算达标（19.8°）、按头部算超出（22.7°），按哪个算？60° 档、纯方向键换向、TurnBack 已通过；取景已选 A（[证据](../../.agents/tasks/requirements-closeout/evidence/I04.md)） | [walkrun_turnback_production_camera](../需求文档/walkrun_turnback_production_camera.md) |
