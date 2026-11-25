@@ -303,3 +303,5 @@ if __name__ == "__main__":
     style_impacts()
     align_pivot()
     refresh_first_strike_field()
+    from refine_pyrios_blade import build as build_live_blade
+    build_live_blade()

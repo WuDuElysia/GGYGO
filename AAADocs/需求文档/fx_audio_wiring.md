@@ -25,7 +25,7 @@
 
 - `Space=Attached` 时，FX 上的 `SocketName`、`LocalTransform` 是整组默认值。
 - 要单独移动一层，在 `SystemUnits` 对应项启用 `OverrideAttachment`，填写该项的 `SocketName` 和 `LocalTransform`。此变换**替换**整组默认值；空挂点表示角色 Mesh 根。平移单位为 cm，旋转为度。
-- ExSpecial 金色武器层当前挂 `Ctr_Weapon_A_01`。原地面层仍用 Mesh 根；Normal02 的整组 Z 为用户已授权的 −64 cm。
+- ExSpecial 金色武器层当前挂 `Ctr_Weapon_A_01`。原地面层仍用 Mesh 根；Normal02 的场地表现沿用 −64 cm。可见刀带直接从实际角色 Mesh 取武器骨世界坐标，独立于这一偏移。
 - 修改已有单元挂点不需改 C++。新增 Niagara 系统引用时同步角色 `AbilityInputRenderSystems`；调整阶段时点在 Niagara／上述配置中处理，生命周期仍由原 Montage FX 窗口管理。
 
 ## 当前状态
@@ -90,7 +90,9 @@
 
 ## 2026-11-25 战斗表现与急转
 
-在 5.9 副本重做了佩洛伊斯的刀弧、星屑与前后闪避拖尾，18 个角色 Niagara 系统共调整 71 个渲染器。近白刃芯和琥珀亮面沿原武器轨迹收束成朱红尾丝。五个既有命中 Cue 使用独立接触星屑并保留命中音效。两份闪避资产是候选表现，独立闪避输入仍待玩法确定。
+5.9 副本的普攻前两段沿 Montage 原有 FX 窗口生成刀带。刀柄取当前角色 Mesh 上的 Ctr_Weapon_A_02。刀尖按 LOD0 最外端刃面顶点在 Ctr_Weapon_B_05 下的局部坐标随姿态变换，该顶点对末骨的蒙皮权重为 99.84%。刀带按这两端的位置、距离和方向生成，前一帧留下的轨迹在世界空间中用 0.14 秒消退。前两段关闭漂出的锥形烟团。第二段另外关闭模糊烟、自由散点、碎块和重复的代理拖尾，接地投影与签名扭曲场各自保留。三段普攻使用冷白、蓝紫的纵向笔触，特殊技沿用暖金色。颜色和透光轮廓取自同一张项目绘制的 [笔触纹理](../Assets/Pyrios/FX/T_Pyrios_Emberglow_Stroke.png)。实战对照看了[佩洛伊斯演示第 2 P，1 分 04 秒起](https://www.bilibili.com/video/BV1sGEy6mEKe/?p=2&t=64)。五个既有命中 Cue 使用独立接触星屑并保留命中音效。两份闪避资产是候选表现，独立闪避输入仍待玩法确定。
+
+5.9 副本用正式攻击键在 D3D12 PIE 打完三段，各命中一次，动作自然收尾，记录到音效播放，FX 组件正常释放。二段挥刀至 0.088 秒时，将 Niagara 最新刀带两端与同帧角色刀柄、LOD0 蒙皮刀尖对照，两端误差均小于 0.01 厘米。侧面实拍可见外侧亮线和内层笔触，原先飞出画面的蓝灰烟团已移除。特殊技和强化特殊技沿用本批暖色材质实测，各命中 3 次和 5 次。[二段慢放](../../Saved/Codex/PyriosBladeReview/Pyrios_Normal02.webp) · [三连日志](../../Saved/Codex/PyriosBladeReview/side.log) · [特殊技日志](../../Saved/Codex/PyriosBladeReview/play.log)
 
 CMC 已经转向时，角色骨盆仍大幅反拧。本次只编辑 TurnBack 的 Bip001 旋转轨。原位移和转向曲线、刹步及首尾跑姿均保留。144 个源采样中最大修正 65.5°，修后髋部相对起始朝向最多 30°。月坑环站连续反向输入两次，均经过 Turning、Braking、RunOut 后回到跑步。
 
