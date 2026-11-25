@@ -6,6 +6,7 @@ import unreal as ue
 
 PROJECT = Path(ue.Paths.convert_relative_path_to_full(ue.Paths.project_dir()))
 sys.path.insert(0, str(PROJECT / 'AAADocs/Scripts'))
+from pyrios_normal03_finisher import refine_normal03
 from pyrios_prism_material import build_prism_materials
 from zzz_fx_material_ue import configure_native_custom
 from zzz_fx_niagara_ue import NiagaraBuilder, TYPES, EMPTY_EMITTER
@@ -243,7 +244,8 @@ def build():
             continue
         # Unit04 的末斩环使用金白掠光，其余实际刀弧使用蓝紫交叉斩材质。
         style = 'Crown' if '_Unit04_' in system.get_name() else 'Cross'
-        if style_existing(system, variants[style], False):
+        styled = style_existing(system, variants[style], False)
+        if refine_normal03(system, DAWN, tool, target, assign) or styled:
             finish(system)
     # 特殊技已有独立武器层；其金色材质沿用同一笔触贴图。
     material(warm=True)

@@ -94,9 +94,11 @@
 
 5.9 副本用正式攻击键在 D3D12 PIE 打完三段，各命中一次，动作自然收尾，记录到音效播放，FX 组件正常释放。二段挥刀至 0.088 秒时，将 Niagara 最新刀带两端与同帧角色刀柄、LOD0 蒙皮刀尖对照，两端误差均小于 0.01 厘米。侧面实拍可见外侧亮线和内层笔触，原先飞出画面的蓝灰烟团已移除。特殊技和强化特殊技沿用本批暖色材质实测，各命中 3 次和 5 次。[二段慢放](../../Saved/Codex/PyriosBladeReview/Pyrios_Normal02.webp) · [三连日志](../../Saved/Codex/PyriosBladeReview/side.log) · [特殊技日志](../../Saved/Codex/PyriosBladeReview/play.log)
 
-三段普攻采用单独绘制的[棱纹贴图](../Assets/Pyrios/FX/T_Pyrios_PrismInlay.png)。一段以冰青外刃带出靛紫刀面。二段沿同一条武器轨迹错峰展开紫金外弦，外刃的一个历史采样短暂折光。三段在交叉斩中保留冷色层次，回旋刀环局部转为金白。纹理两端逐渐收尖。
+三段普攻采用单独绘制的[棱纹贴图](../Assets/Pyrios/FX/T_Pyrios_PrismInlay.png)。一段以冰青外刃带出靛紫刀面。二段沿同一条武器轨迹错峰展开紫金外弦，外刃的一个历史采样短暂折光。三段起手的四组多重斩沿原刀弧平面伸长 32%，刃面高光和边缘多留 25%，保留原有挂点和法向厚度。回旋刀环局部转为金白。砸地沿用原冲击窗口，向下查询地面，在交点投射分叉的[岩面裂纹](../Assets/Pyrios/FX/T_Pyrios_SlamFracture.png)。裂纹从中心展开，亮缝先冷却，暗色裂口随后淡去。
 
 D3D12 独立 PIE 以正式普攻输入实拍。三段各命中一次，动作自然结束，FX 正常释放。二段在 0.148 秒的粒子读回中有一个折光标记。此次覆盖单机运行和侧面视觉。联机、Cook 和性能未复测。[原速录像](../../Saved/Codex/PyriosBladeReview/Pyrios_Prism_Combo.mp4) · [慢放](../../Saved/Codex/PyriosBladeReview/Pyrios_Prism_Combo.webp) · [运行日志](../../Saved/Codex/PyriosBladeReview/prism.log)
+
+三段返修在 UE 5.9 D3D12 单机 PIE 用完整三连复验，各段各命中一次并自然收尾。实拍可见开场多重刀弧伸展，砸地后角色移开，烟尘散去时裂纹仍留在原处；随后特效释放。本次未复测联机、Cook 或性能。[第三段原速](../../Saved/Codex/PyriosBladeReview/Pyrios_Normal03_Slam.mp4) · [实拍对照](../../Saved/Codex/PyriosBladeReview/Pyrios_Normal03_Finisher.jpg) · [运行日志](../../Saved/Codex/PyriosBladeReview/slam_final.log)
 
 CMC 已经转向时，角色骨盆仍大幅反拧。本次只编辑 TurnBack 的 Bip001 旋转轨。原位移和转向曲线、刹步及首尾跑姿均保留。144 个源采样中最大修正 65.5°，修后髋部相对起始朝向最多 30°。月坑环站连续反向输入两次，均经过 Turning、Braking、RunOut 后回到跑步。
 
