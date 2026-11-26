@@ -9,13 +9,12 @@ from zzz_fx_niagara_ue import NiagaraBuilder
 
 LIB = ue.GGYGONiagaraCompileLibrary
 EDITOR = ue.EditorAssetLibrary
-SWEEPS = ('M00_root_andi_main_', 'M04_root_Trail_rot_', 'M06_root_MeleeTrail_andi_main_', 'M09_root_andi_main_')
-BLADES = ('FXMD_DAO_001_ced427b6fbbf', 'FXMD_Circle_bf347410c141')
+SWEEPS = ('M00_root_andi_main_', 'M04_root_Trail_rot_', 'M06_root_MeleeTrail_andi_main_', 'M09_root_andi_main_',
+          'M11_root_Trail_rot_', 'M12_root_Trail_rot_', 'M14_root_Trail_rot_')
 IMPACT = 'M15_root_decal__1__UEFX'
 STAMP = 'Pyrios.Normal03CleaveFracture'
 VERSION = 'sweep-1'
 SURFACE_VERSION = 'shattered-2'
-NS = 'NiagaraToolsets.NiagaraToolset_System.'
 SHADE = """
 float age = saturate(Clock.r);
 float radius = length((UV-0.5)*2.0);
@@ -92,44 +91,19 @@ def fracture_material(directory):
     return mat
 
 
-def extend_sweep(system, emitter, tool):
-    extended = False
-    for info in LIB.authoring_get_renderer_identities(system,emitter).renderers:
-        if not info.renderer_class.endswith('NiagaraMeshRendererProperties'):
+def disable_baked_sweep(system, emitter, classes):
+    # LinePoint 的横线和暗边也有 Sprite/Ribbon 版本，按原层移除，保留残影人物和砸地层。
+    changed = False
+    for info in LIB.authoring_get_renderer_identities(system, emitter).renderers:
+        if not info.renderer_class.endswith(classes):
             continue
-        renderer = ue.find_object(None, info.renderer_path)
-        slots = list(renderer.get_editor_property('meshes'))
-        changed = False
-        for slot in slots:
-            mesh = slot.get_editor_property('mesh')
-            if mesh and mesh.get_name() in BLADES:
-                # 两种原生弧面都在网格局部 XY；保留挂点、旋转、法向厚度。
-                slot.set_editor_property('scale', ue.Vector(1.32, 1.32, 1.0))
-                changed = True
-        if changed:
-            renderer.set_editor_property('meshes', slots)
-            extended = True
-    if not extended:
-        return False
-    ref = dict(system={'refPath':system.get_path_name()}, emitterName=emitter, rendererIndex=-1,
-               scriptName='ParticleSpawnScript', moduleName='', inputNameStack=[])
-    modules = tool(NS+'GetScriptStackInputValues',scriptRef=ref)
-    for module in modules:
-        for item in module['inputs']:
-            if item['name'] != 'Particles.Lifetime':
-                continue
-            value = item['value']
-            expr = value['value'].get('hlslExpression','')
-            try:
-                seconds = float(expr)
-            except ValueError:
-                continue
-            value['value']['hlslExpression'] = format(seconds*1.25,'.9g')
-            saved = tool(NS+'SetStackInputData',stackInputRef=dict(ref,moduleName=module['moduleName'],
-                         inputNameStack=['Particles.Lifetime']),inputData=value)
-            if saved != value:
-                raise RuntimeError('刀弧寿命读回不符 '+emitter)
-    return True
+        props = json.loads(LIB.authoring_get_renderer_data(system, emitter, info.renderer_index).property_values)
+        if props.get('bIsEnabled', True):
+            result = LIB.authoring_set_renderer_data(system, emitter, info.renderer_index, json.dumps({'bIsEnabled':False}))
+            if not result.succeeded:
+                raise RuntimeError(result.error)
+            changed = True
+    return changed
 
 
 def add_fracture(system, mat, tool, target, assign):
@@ -158,16 +132,54 @@ def add_fracture(system, mat, tool, target, assign):
         raise RuntimeError(configured.error)
 
 
-def refine_normal03(system, directory, tool, target, assign):
+def align_blade_wake(system, name, tool, target, weapon_frame):
+    # 原折射网格最长约 18.4 米。将可见扰动限制在刀尖内侧的一小段，正负场继续用原材质。
+    di, sample = weapon_frame()
+    sample += """
+bool valid = Count == 2 && Base >= 0 && Tip >= 0 && Width > 1.0;
+float3 along = Axis / max(Width,0.001);
+float4 q = float4(0,-along.z,along.y,1.0+along.x);
+{{OUT:Particles.CutWakeValid}} = valid;
+{{OUT:Particles.CutWakeOrigin}} = A + 0.78*Axis;
+{{OUT:Particles.CutWakeScale}} = valid ? (Width/1842.0)*float3(0.40,0.12,0.12) : float3(0,0,0);
+{{OUT:Particles.CutWakeRotation}} = dot(q,q) > 0.0001 ? q*rsqrt(max(dot(q,q),0.0001)) : float4(0,0,1,0);
+"""
+    outputs = [target('CutWakeValid','Bool'),target('CutWakeOrigin','Position'),
+               target('CutWakeScale','Vector'),target('CutWakeRotation','Quat')]
+    work = [dict(kind='ParticleRead',emitterName=name,scriptName=script,
+                 interfaceTemplate={'refPath':di.get_path_name()},outputTargets=outputs,hlslBodyTemplate=sample)
+            for script in ('ParticleSpawnScript','ParticleUpdateScript')]
+    result = tool('GGYGOEditor.GGYGONiagaraCompileLibrary.ApplyAuthoringStackBatch',
+                  system={'refPath':system.get_path_name()},workItems=work)
+    if not result.get('bApplied'):
+        raise RuntimeError(result.get('error','刀尖折射制作失败'))
+    renderers = LIB.authoring_get_renderer_identities(system,name).renderers
+    if len(renderers)!=1 or not renderers[0].renderer_class.endswith('GGYGOSignedFieldMeshRendererProperties'):
+        raise RuntimeError('原刀光折射层与制作配置不符 '+name)
+    bind = NiagaraBuilder.attribute_binding
+    props = dict(PositionBinding=bind('Particles.CutWakeOrigin'), ScaleBinding=bind('Particles.CutWakeScale'),
+                 MeshOrientationBinding=bind('Particles.CutWakeRotation'))
+    saved = LIB.authoring_set_renderer_data(system,name,renderers[0].renderer_index,json.dumps(props))
+    if not saved.succeeded:
+        raise RuntimeError(saved.error)
+
+
+def refine_normal03(system, directory, tool, target, assign, weapon_frame):
     names = [em.emitter_name for em in LIB.authoring_get_system_summary(system).emitters]
     surface = fracture_material(directory) if IMPACT in names else None
-    if EDITOR.get_metadata_tag(system, STAMP) == VERSION:
-        return False
+    has_fracture = EDITOR.get_metadata_tag(system, STAMP) == VERSION
     changed = False
     for name in names:
-        if name.startswith(SWEEPS) and extend_sweep(system, name, tool):
+        if name.startswith(SWEEPS) and disable_baked_sweep(system, name, ('NiagaraMeshRendererProperties',)):
             changed = True
-        if name == IMPACT:
+        if name.startswith('M05_root_') or (name.startswith(('M02_','M06_','M07_')) and 'LinePoint' in name):
+            if disable_baked_sweep(system, name, ('NiagaraMeshRendererProperties','NiagaraSpriteRendererProperties','NiagaraRibbonRendererProperties')):
+                changed = True
+        if name == 'M06_root_MeleeTrail_andi_main_Distor_UEFX' and EDITOR.get_metadata_tag(system,'Pyrios.Normal03BladeWake') != 'blade-tip-1':
+            align_blade_wake(system,name,tool,target,weapon_frame)
+            EDITOR.set_metadata_tag(system,'Pyrios.Normal03BladeWake','blade-tip-1')
+            changed = True
+        if name == IMPACT and not has_fracture:
             add_fracture(system, surface, tool, target, assign)
             changed = True
     if changed:

@@ -19,7 +19,7 @@ SKILL = '/Game/Characters/Player/Pyrios/FX/Skill/'
 EMITTER = 'Emberglow_LiveBlade'
 STAMP = 'Pyrios.EmberglowBrush'
 VERSION = 'live-v1'
-SYSTEM_VERSION = 'prism-v2'
+SYSTEM_VERSION = 'weapon-bevel-v3'
 SYSTEMS = (
     ('NS_Pyrios_Normal01_MainComposition_2a7c90937cab', 0.23),
     ('NS_Pyrios_Normal02_MainComposition_d7bd1888f9a7', 0.245),
@@ -102,14 +102,16 @@ def assign(script, **rows):
     return dict(kind='Assignments',emitterName=EMITTER,scriptName=script,
                 assignments=[dict(**target(name,kind),hlslExpression=value) for name,(kind,value) in rows.items()])
 
-def add_live_blade(system, mat, end, accents=None):
-    made=LIB.authoring_add_emitter(system,ue.load_asset(EMPTY_EMITTER),EMITTER)
-    require(made.succeeded,made.error)
-    data=LIB.authoring_set_emitter_data(system,EMITTER,json.dumps({'bLocalSpace':False,'CalculateBoundsMode':'Dynamic',
-        'AttributesToPreserve':['Particles.UniqueID']}))
-    require(data.succeeded,data.error)
+def blade_section():
+    # X 从刀根到刀尖，Y 在扫掠面法向上。纹理 V 在正反面回走，外沿纹理咬合。
+    profile = [(-.50,0),(-.39,-.031),(-.06,-.056),(.27,-.037),(.45,-.024),
+               (.50,0),(.45,.032),(.20,.073),(-.09,.087),(-.39,.042)]
+    return [dict(Position=dict(X=x,Y=y), TextureV=x+.5) for x,y in profile]
+
+
+def weapon_frame():
     di=ue.new_object(ue.load_class(None,'/Script/Niagara.NiagaraDataInterfaceSkeletalMesh'))
-    state={'SourceMode':'AttachParent','FilteredBones':['Ctr_Weapon_A_02','Ctr_Weapon_B_05']}
+    state={'SourceMode':'AttachParent','bRequireCurrentFrameData':True,'FilteredBones':['Ctr_Weapon_A_02','Ctr_Weapon_B_05']}
     require(tool('EditorToolset.ObjectToolset.SetProperties',instance=ref(di),values=json.dumps(state)), '武器骨绑定失败')
     # 使用 Mesh 的世界空间骨位；场地层的 -64 cm 不参与刀光定位。
     # LOD0 参考网格的刀尖顶点对 B_05 的权重为 99.84%。CustomSideVector 以朝向的反向为纹理 V 正方向。
@@ -128,21 +130,50 @@ float3 BoneScale = InBoneAxes + 2.0*cross(LocalBR.xyz,cross(LocalBR.xyz,InBoneAx
 float3 Offset = float3(40.55396,-1.86295,0.0)*BoneScale;
 float3 EndPoint = B + Offset + 2.0*cross(BR.xyz,cross(BR.xyz,Offset)+BR.w*Offset);
 float3 Axis=EndPoint-A; float Width=length(Axis);
+"""
+    return di, body
+
+def add_live_blade(system, mat, end, accents=None, combo_finisher=False):
+    made=LIB.authoring_add_emitter(system,ue.load_asset(EMPTY_EMITTER),EMITTER)
+    require(made.succeeded,made.error)
+    data=LIB.authoring_set_emitter_data(system,EMITTER,json.dumps({'bLocalSpace':False,'CalculateBoundsMode':'Dynamic',
+        'AttributesToPreserve':['Particles.UniqueID']}))
+    require(data.succeeded,data.error)
+    di, body = weapon_frame()
+    body += """
 {{OUT:Particles.BladeHasSample}} = Count==2 && Base>=0 && Tip>=0 && Width>1;
 {{OUT:Particles.Position}} = 0.5*(A+EndPoint);
 {{OUT:Particles.RibbonFacing}} = -Axis/max(Width,0.001);
 {{OUT:Particles.RibbonWidth}} = Width;
 """
+    outputs = [target('BladeHasSample','Bool'),target('Position','Position'),
+               target('RibbonFacing','Vector'),target('RibbonWidth','Float')]
+    if combo_finisher:
+        # 每次变招重新接带，前一刀的余光独立消散。分段只划分表现，不驱动动作。
+        body += '''
+float phase = Emitter.Age;
+{{OUT:Particles.BladeStroke}}.Index =
+    (phase < 0.095) ? 0 :
+    (phase < 0.20)  ? 1 :
+    (phase < 0.40)  ? 2 :
+    (phase < 0.54)  ? 3 :
+    (phase < 0.73)  ? 4 : 5;
+{{OUT:Particles.BladeStroke}}.AcquireTag = 0;
+'''
+        outputs.append(target('BladeStroke','ID'))
     ps,pu,eu='ParticleSpawnScript','ParticleUpdateScript','EmitterUpdateScript'
     num=NiagaraBuilder.num
+    lifetime = '0.18' if combo_finisher else '0.14'
+    if accents:
+        lifetime = '0.205'
     work=[module(eu,'/Niagara/Modules/Emitter/EmitterState',**{
         'Life Cycle Mode':NiagaraBuilder.enum('/Niagara/Enums/ENiagaraEmitterLifeCycleMode.ENiagaraEmitterLifeCycleMode','NewEnumerator1','Self'),
         'Loop Behavior':NiagaraBuilder.enum('/Niagara/Enums/ENiagara_EmitterStateOptions.ENiagara_EmitterStateOptions','NewEnumerator1','Once'),
         'Loop Duration':num('Float',end)}),
-        module(eu,'/Niagara/Modules/Emitter/SpawnRate',SpawnRate=num('Float',110)),
-        assign(ps,Lifetime=('Float','0.205' if accents else '0.14'),Color=('LinearColor','float4(1,1,1,1)')),
+        module(eu,'/Niagara/Modules/Emitter/SpawnPerFrame',**{'Spawn Count':num('Int32',1)}),
+        assign(ps,Lifetime=('Float',lifetime),Color=('LinearColor','float4(1,1,1,1)')),
         dict(kind='ParticleRead',emitterName=EMITTER,scriptName=ps,interfaceTemplate=ref(di),
-             outputTargets=[target('BladeHasSample','Bool'),target('Position','Position'),target('RibbonFacing','Vector'),target('RibbonWidth','Float')],
+             outputTargets=outputs,
              hlslBodyTemplate=body),
         assign(ps,Alive=('Bool','Particles.Alive && Particles.BladeHasSample')),
         module(pu,'/Niagara/Modules/Update/Lifetime/ParticleState'),
@@ -154,27 +185,31 @@ float3 Axis=EndPoint-A; float Width=length(Axis);
             work.append(assign(script, PrismEchoPosition=('Position',echo_position+expansion),
                                PrismEchoWidth=('Float','Particles.RibbonWidth * 0.115')))
         # 只选挥刀约 0.11 秒时的一个轨迹采样，让折光留在对应的外刃上。
-        work.append(assign(ps, PrismFlareTag=('Int','Particles.UniqueID == 12 ? 1 : 0'),
+        work.append(assign(ps, PrismFlareTag=('Int','Emitter.Age >= 0.11 && (Emitter.Age - Engine.DeltaTime) < 0.11 ? 1 : 0'),
                            PrismFlarePosition=('Position','Particles.Position - Particles.RibbonFacing * Particles.RibbonWidth * 0.31'),
                            PrismFlareSize=('Vector2','float2(75,75)')))
     res=tool('GGYGOEditor.GGYGONiagaraCompileLibrary.ApplyAuthoringStackBatch',system=ref(system),workItems=work)
     require(res.get('bApplied'),res.get('error','刀光栈制作失败'))
-    def add_blade_renderer(surface, position, width):
+    def add_blade_renderer(surface, position, width, solid):
         renderer = LIB.authoring_add_renderer(system, EMITTER, ue.load_class(None, '/Script/Niagara.NiagaraRibbonRendererProperties'))
         require(renderer.succeeded, renderer.error)
         binding = NiagaraBuilder.attribute_binding
         props = dict(Material=surface.get_path_name(), FacingMode='CustomSideVector', Shape='Plane',
-                     MaxNumRibbons=1, bUseGPUInit=False, TessellationMode='Automatic',
+                     MaxNumRibbons=6 if combo_finisher else 1, bUseGPUInit=False, TessellationMode='Automatic',
                      PositionBinding=binding(position), RibbonWidthBinding=binding(width),
                      RibbonFacingBinding=binding('Particles.RibbonFacing'))
+        if solid:
+            enabled = LIB.authoring_set_renderer_data(system, EMITTER, renderer.renderer_index, json.dumps({'Shape':'Custom'}))
+            require(enabled.succeeded, enabled.error)
+            props.update(Shape='Custom', CustomVertices=blade_section(), bCustomShapeClosed=True)
         result = LIB.authoring_set_renderer_data(system, EMITTER, renderer.renderer_index, json.dumps(props))
         require(result.succeeded, result.error)
-        link = LIB.configure_ribbon_unique_id(system, EMITTER, renderer.renderer_index, '')
+        link = LIB.configure_ribbon_unique_id(system, EMITTER, renderer.renderer_index, 'Particles.BladeStroke' if combo_finisher else '')
         require(link.applied, link.error)
 
-    add_blade_renderer(mat, 'Particles.Position', 'Particles.RibbonWidth')
+    add_blade_renderer(mat, 'Particles.Position', 'Particles.RibbonWidth', True)
     if accents:
-        add_blade_renderer(accents['Echo'], 'Particles.PrismEchoPosition', 'Particles.PrismEchoWidth')
+        add_blade_renderer(accents['Echo'], 'Particles.PrismEchoPosition', 'Particles.PrismEchoWidth', False)
         sprite = LIB.authoring_add_renderer(system, EMITTER, ue.load_class(None, '/Script/Niagara.NiagaraSpriteRendererProperties'))
         require(sprite.succeeded, sprite.error)
         binding = NiagaraBuilder.attribute_binding
@@ -231,7 +266,7 @@ def build():
             continue
         existing = [entry.emitter_name for entry in LIB.authoring_get_system_summary(system).emitters]
         if EMITTER in existing:
-            require(EDITOR.get_metadata_tag(system,STAMP) in ('live-v1','live-v2','live-v3','live-v4','live-v5','prism-v1'), '已有同名刀带且来源不明')
+            require(EDITOR.get_metadata_tag(system,STAMP) in ('live-v1','live-v2','live-v3','live-v4','live-v5','prism-v1','prism-v2'), '已有同名刀带且来源不明')
             tool('NiagaraToolsets.NiagaraToolset_System.RemoveEmitter',emitterRef={'system':ref(system),'emitterName':EMITTER})
         add_live_blade(system, variants[style], end, variants if style == 'Crescent' else None)
         style_existing(system, variants[style], True)
@@ -245,7 +280,12 @@ def build():
         # Unit04 的末斩环使用金白掠光，其余实际刀弧使用蓝紫交叉斩材质。
         style = 'Crown' if '_Unit04_' in system.get_name() else 'Cross'
         styled = style_existing(system, variants[style], False)
-        if refine_normal03(system, DAWN, tool, target, assign) or styled:
+        ground_or_sweep = refine_normal03(system, DAWN, tool, target, assign, weapon_frame)
+        weapon_added = False
+        if '_Unit00_' in system.get_name() and EDITOR.get_metadata_tag(system,STAMP) != SYSTEM_VERSION:
+            add_live_blade(system, variants['Cross'], 0.84, combo_finisher=True)
+            weapon_added = True
+        if weapon_added or ground_or_sweep or styled:
             finish(system)
     # 特殊技已有独立武器层；其金色材质沿用同一笔触贴图。
     material(warm=True)

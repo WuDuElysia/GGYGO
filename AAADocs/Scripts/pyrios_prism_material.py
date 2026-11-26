@@ -62,10 +62,17 @@ else if (Tier > 2.5)
 }
 if (Tier < 3.5)
 {
-    float tip = saturate(min(u,1.0-u) * 7.0);
-    float halfWidth = lerp(0.018,0.87,tip);
-    float taper = 1.0-smoothstep(halfWidth,halfWidth+0.04,abs(v-0.79));
-    envelope *= taper * smoothstep(0.0,0.24,tip);
+    // 棱线绕闭合刃面连续，受光侧与背光侧随截面法向变化。
+    float3 normal = normalize(SurfaceNormal);
+    float facet = saturate(0.42 + dot(normal,float3(-0.26,0.37,0.89))*0.55);
+    float grazing = pow(1.0 - saturate(abs(dot(normal,ViewVector))), 2.0);
+    float edge = smoothstep(0.65,0.93,v) * (1.0-smoothstep(0.975,1.0,v));
+    float ridge = 1-smoothstep(0.03,0.20,abs(v-0.61));
+    float3 body = lerp(float3(0.030,0.013,0.12),float3(0.10,0.25,0.72),facet);
+    rgb = rgb*(0.42+0.63*facet) + body*(0.46+0.50*ridge);
+    rgb += grazing*(edge*float3(0.11,0.65,1.1) + ridge*float3(0.19,0.09,0.35));
+    opacity = max(opacity,0.52+0.36*facet);
+    envelope *= smoothstep(0.0,0.48,fade);
 }
 Coverage = saturate(opacity * envelope);
 return rgb * envelope;
@@ -90,7 +97,7 @@ def build_prism_materials(directory):
     material_name = 'M_Pyrios_PrismInlay'
     path = directory + '/' + material_name
     master = ue.load_asset(path) if editor.does_asset_exist(path) else None
-    if not master or editor.get_metadata_tag(master, 'Pyrios.PrismArt') != 'facet-2':
+    if not master or editor.get_metadata_tag(master, 'Pyrios.PrismArt') != 'bevel-3':
         texture.set_editor_properties(dict(srgb=False, compression_settings=ue.TextureCompressionSettings.TC_MASKS,
             address_x=ue.TextureAddress.TA_CLAMP, address_y=ue.TextureAddress.TA_CLAMP))
         if not editor.save_loaded_asset(texture, False):
@@ -108,10 +115,12 @@ def build_prism_materials(directory):
         life = edit.create_material_expression(master, ue.MaterialExpressionParticleColor, -650, 180)
         tier = edit.create_material_expression(master, ue.MaterialExpressionScalarParameter, -650, 340)
         tier.set_editor_property('parameter_name', 'PrismTier')
+        normal = edit.create_material_expression(master, ue.MaterialExpressionPixelNormalWS, -650, 475)
+        view = edit.create_material_expression(master, ue.MaterialExpressionCameraVectorWS, -650, 585)
         shader = edit.create_material_expression(master, ue.MaterialExpressionCustom, -200, 40)
-        configure_native_custom(ue, shader, ['UV','Ink','Life','Tier'], SHADER, 'CMOT_Float3', '刃面镶纹和分段掠光',
+        configure_native_custom(ue, shader, ['UV','Ink','Life','Tier','SurfaceNormal','ViewVector'], SHADER, 'CMOT_Float3', '刃面镶纹和分段掠光',
                                 native_sync=lambda _,call:call(), additional_outputs=[('Coverage','CMOT_Float1')])
-        for source, pin, target in [(uv,'','UV'),(sampler,'RGBA','Ink'),(life,'A','Life'),(tier,'','Tier')]:
+        for source, pin, target in [(uv,'','UV'),(sampler,'RGBA','Ink'),(life,'A','Life'),(tier,'','Tier'),(normal,'','SurfaceNormal'),(view,'','ViewVector')]:
             if not edit.connect_material_expressions(source, pin, shader, target):
                 raise RuntimeError('棱彩接线失败 '+target)
         if not edit.connect_material_property(shader,'',ue.MaterialProperty.MP_EMISSIVE_COLOR):
@@ -120,7 +129,7 @@ def build_prism_materials(directory):
             raise RuntimeError('棱彩透明度未连接')
         if edit.recompile_material(master):
             raise RuntimeError('棱彩母材质编译失败')
-        editor.set_metadata_tag(master, 'Pyrios.PrismArt', 'facet-2')
+        editor.set_metadata_tag(master, 'Pyrios.PrismArt', 'bevel-3')
         if not editor.save_loaded_asset(master, False):
             raise RuntimeError('棱彩母材质保存失败')
     variants = {}
