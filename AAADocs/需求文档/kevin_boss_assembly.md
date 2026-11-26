@@ -63,9 +63,11 @@
 
 基础 22 个系统的粒子、材质形状、数量、速度和寿命均为项目创作。基础冰火效果参考了原武器与翼膜贴图的配色和轮廓，源图路径见 FX 配置的 `references`。未启用的防御、领域效果仅完成资产读回。
 
-UE 5.9 副本另有贴刀系统 `NS_Kevin_BladeFire`。它沿实测武器骨从护手上方延伸到刀尖，材质采样原武器色图和原材质引用的 `noise_rough`，两侧火舌独立流动。金橙色火刃的观感参考原版战斗画面，焰形和时序为项目适配。[强敌侦察报告丨「业魔」凯文](https://game.xiaomi.com/viewpoint/16515215_1679659999313_13)
+UE 5.9 的 `NS_Kevin_BladeFire` 参考「业魔」凯文战斗录像中的起手亮点、金色锋线和外层橙红流火。刀身材质采样本形态的武器色图和 `noise_rough`。具体焰形、轨迹和时序按项目动作重建，同招原发射器参数仍待核实。[强敌侦察报告丨「业魔」凯文](https://game.xiaomi.com/viewpoint/16515215_1679659999313_13)
 
-Fire01～04 与 AirChain01／02 的九个火系挥砍窗口通过现有 GA 挂在 `KevinWeaponTraceEnd`；窗口结束时同时移除贴刃火焰和本次扫迹，防止整把火刃悬在空中。制作入口为 `AAADocs/Scripts/build_kevin_flame_blade.py`。六份 GA 编译及独立读回通过，P3 单机 D3D12 隔离激活六招，九个窗口均观察到挂点上起火和结束。Fire03 两刀间可见原刀身。实拍位于 `Saved/Codex/KevinFlameBlade/delivery/`，运行日志为 `Saved/Codex/KevinFlameBlade/release.log`。本次火刃未单独验证联机和 Cook。
+Fire01～04 与 AirChain01／02 共九个窗口。刀尖挂点 `KevinWeaponTraceEnd` 带动两侧刃焰和点火闪光，扫过的武器姿态在世界空间连成短弧。火舌和火屑从刃身各处剥落，继承挥刀速度。GA 在窗口结束时清理火刃。角色蓝图装配 `BP_Kevin_FlamePreparation`，进场时异步准备材质，退场时取消等待中的请求。制作入口为 `AAADocs/Scripts/build_kevin_flame_blade.py`。
+
+P3 单机 D3D12 实拍使用正式角色和六份 GA，隔离选招以复现同一机位。初次验证出现首刀漏火。加入进场准备后，新进程中的首次 Fire01 在动作 0.462 秒观察到刃焰，六招九个窗口均观察到激活与结束。截图在 `Saved/Codex/KevinFlameBlade/showcase/`，同目录上一级的 `showcase.log` 记录窗口与材质就绪，`Kevin_Fire03_Comparison.webp` 为第三招同机位对照。本轮未复验联机及 Cook。
 
 | 系统 | 来源与创作范围 |
 | --- | --- |

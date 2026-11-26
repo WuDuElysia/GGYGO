@@ -245,8 +245,10 @@ def make_plan(config):
                 require(phase["space"] == "Attached" and phase["socket_name"] == blade["socket"]
                         and transform == {"translation": [0, 0, 0], "rotation_degrees": [0, 0, 0], "scale": [1, 1, 1]},
                         "火刃必须沿真实刀尖挂点原位挂载")
-                plan["action_windows"][-1]["system_units"].append(
-                    {"system": blade["system"], "field_settings": {"mode": "NoCustomField"}})
+                units = plan["action_windows"][-1]["system_units"]
+                if phase["effect"] == blade.get("replace_trail"):
+                    units.clear()
+                units.append({"system": blade["system"], "field_settings": {"mode": "NoCustomField"}})
                 plan["action_windows"][-1]["normal_stop_mode"] = blade["normal_stop_mode"]
     plan["hit_cues"] = {action_id: {**row, "system": plan["systems"][row["effect"]]["package"],
         "package": asset_path("Cues", "GC_Kevin_" + action_id + "Hit", {"source": row,

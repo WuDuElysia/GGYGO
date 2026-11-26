@@ -8,6 +8,8 @@ import unreal as ue
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import wire_kevin_boss_abilities as abilities
+from kevin_flame_particles import build_sweep_and_embers
+from kevin_flame_preparation import install as install_preparation
 from zzz_fx_material_ue import configure_native_custom
 from zzz_fx_niagara_ue import DEFAULT_SYSTEM, EMPTY_EMITTER, NS, TYPES, NiagaraBuilder
 
@@ -25,24 +27,22 @@ SECTIONS = [(17, 17, 3), (28, 24, 5), (45, 25.4, 5.8), (62, 21, 5.3), (85, 16, 3
 
 SHADE = """
 float side=step(1.5,UV.x), u=UV.x-2.0*side, v=UV.y;
-float flow=u-.44*v*v, clock=Age*(8.0+side*1.2);
-float crest=.5+.5*sin(23.0*flow-clock+4.7*side+2.6*Coarse.r);
-float flick=.5+.5*sin(45.0*flow-clock*1.31+3.0*Fine.g);
-float reach=.30+(.23+.22*side)*pow(crest,2.4)+.12*flick+.12*(Coarse.r-.5);
-float edge = reach-v;
-float cap = smoothstep(0,.045,u)*(1.0-smoothstep(.958,1.0,u));
-float fire=smoothstep(-.018,.045,edge);
-float core=exp(-95.0*(v-.195)*(v-.195))*(.57+.43*Fine.r);
-float heat=saturate(.86*edge+.42*core+.12*Coarse.r);
-float3 red=float3(1.16,.029,.002);
-float3 gold=float3(2.65,.62,.018);
-float3 light=float3(3.0,1.62,.42);
-float3 flame = lerp(red,gold,smoothstep(.12,.73,heat));
-flame = lerp(flame,light,core*.83);
-float detail = .82+.38*dot(Blade.rgb,float3(.54,.32,.14))+.12*Fine.r;
-float skin=lerp(.21,.97,smoothstep(.025,.17,v));
-Coverage=cap*fire*skin*Ignition;
-return flame*detail;
+float phase=Age*7.1+side*2.74;
+float folded=u-.39*v*v+.040*sin(11*u-phase+5*v)+.041*(Fine.g-.5);
+float wave=.5+.5*sin(25*folded-phase+2.9*Coarse.r);
+float wave2=.5+.5*sin(47*folded-phase*1.42+2*Fine.g);
+float reach=.255+(.16+.18*side)*wave*wave+.09*wave2;
+float cap=smoothstep(0,.075,u)*(1-smoothstep(.978,1,u));
+float inside=smoothstep(-.019,.035,reach-v);
+float rim=exp(-abs(v-.25)*47);
+float filament=pow(wave,5)*smoothstep(.21,.32,v)*inside;
+float gap=smoothstep(.08,.48,wave2+.24*(Coarse.r-.5));
+float foil=.27+.73*smoothstep(.07,.24,v);
+float ivory=rim*(.75+.25*Fine.r);
+float3 colour=lerp(float3(.86,.027,.004),float3(2.1,.43,.017),saturate(.25+.78*wave-.6*v));
+colour=lerp(colour,float3(3.8,2.02,.46),ivory)+filament*float3(.65,.17,.015);
+Coverage=cap*Ignition*inside*foil*lerp(.52+.32*Blade.r,gap,smoothstep(.22,.48,v));
+return colour;
 """
 
 
@@ -62,7 +62,7 @@ def material():
     path = FOLDER+'/'+name
     if EDITOR.does_asset_exist(path):
         mat=ue.load_asset(path)
-        if EDITOR.get_metadata_tag(mat,'Kevin.BladeSurface')=='flow':
+        if EDITOR.get_metadata_tag(mat,'Kevin.BladeSurface')=='tempered-edge':
             return mat
         ue.MaterialEditingLibrary.delete_all_material_expressions(mat)
     else:
@@ -102,7 +102,7 @@ def material():
     need(edit.connect_material_property(shader,'',ue.MaterialProperty.MP_EMISSIVE_COLOR) and
          edit.connect_material_property(shader,'Coverage',ue.MaterialProperty.MP_OPACITY),'火刃材质输出失败')
     need(not edit.recompile_material(mat),'火刃材质编译失败')
-    EDITOR.set_metadata_tag(mat,'Kevin.BladeSurface','flow')
+    EDITOR.set_metadata_tag(mat,'Kevin.BladeSurface','tempered-edge')
     return save(mat)
 
 
@@ -155,9 +155,9 @@ def system(mat,blade):
     if EDITOR.does_asset_exist(BLADE['system']):
         obj=ue.load_asset(BLADE['system'])
         version=EDITOR.get_metadata_tag(obj,'Kevin.FlameBlade')
-        if version=='socket-release':
+        if version=='swept-fire-ignition':
             return obj
-        need(version=='1','已有未识别的火刃系统')
+        need(version in ('1','socket-release','swept-fire'),'已有未识别的火刃系统')
     else:
         tool(ns,'CreateNiagaraSystem',assetName=SYSTEM_NAME,assetPath=FOLDER,templateSystem={'refPath':DEFAULT_SYSTEM})
         obj=need(ue.load_asset(BLADE['system']),'未创建火刃系统')
@@ -170,13 +170,13 @@ def system(mat,blade):
     check(LIB.authoring_set_emitter_data(obj,EMITTER,json.dumps({'bLocalSpace':True,'CalculateBoundsMode':'Dynamic'})))
     eu,ps,pu='EmitterUpdateScript','ParticleSpawnScript','ParticleUpdateScript'
 
-    def module(script,path,**inputs):
-        return dict(kind='Module',emitterName=EMITTER,scriptName=script,
+    def module(script,path,*,emitter=EMITTER,**inputs):
+        return dict(kind='Module',emitterName=emitter,scriptName=script,
             moduleAsset={'refPath':path+'.'+path.rsplit('/',1)[1]},
             inputs=[dict(namePath=[key],inputData=val) for key,val in inputs.items()])
 
-    def assign(script,**values):
-        return dict(kind='Assignments',emitterName=EMITTER,scriptName=script,
+    def assign(script,*,emitter=EMITTER,**values):
+        return dict(kind='Assignments',emitterName=emitter,scriptName=script,
             assignments=[dict(name='Particles.'+key,type={'classStructOrEnum':{'refPath':TYPES[kind]}},
                 hlslExpression=val) for key,(kind,val) in values.items()])
 
@@ -200,9 +200,10 @@ def system(mat,blade):
             OverrideMaterials=[dict(ExplicitMat=mat.get_path_name())],PositionBinding=bind('Particles.Position'),
             ScaleBinding=bind('Particles.Scale'),MeshOrientationBinding=bind('Particles.MeshOrientation'),ColorBinding=bind('Particles.Color'))):
         check(LIB.authoring_set_renderer_data(obj,EMITTER,renderer.renderer_index,json.dumps(props)))
+    build_sweep_and_embers(obj,FOLDER,module,assign,tool)
     state=LIB.force_compile(obj)
     need(state.native_ready and state.system_valid,'火刃 Niagara 编译失败 '+LIB.read_system_compile_diagnostics(obj).export_text())
-    EDITOR.set_metadata_tag(obj,'Kevin.FlameBlade','socket-release')
+    EDITOR.set_metadata_tag(obj,'Kevin.FlameBlade','swept-fire-ignition')
     return save(obj)
 
 
@@ -229,13 +230,16 @@ def wire(read_only=False):
             expected=[u['system'] for u in authored['system_units']]
             units=list(window.get_editor_property('SystemUnits'))
             paths=[u.get_editor_property('System').get_path_name().split('.')[0] for u in units]
-            need(paths in (expected,expected[:-1]) and str(window.get_editor_property('SocketName'))==BLADE['socket'],
+            original={'system':plan['systems'][tags[tagname]]['package'],'field_settings':{'mode':'NoCustomField'}}
+            legacy=[original['system'],BLADE['system']]
+            need(paths in (expected,legacy,legacy[:1]) and str(window.get_editor_property('SocketName'))==BLADE['socket'],
                  '现有火招窗口配置有冲突 '+tagname)
             target=abilities.playback_value(ue,authored,ue.load_asset)
             if window.export_text()!=target.export_text():
                 need(not read_only,'冷载时火刃窗口不一致 '+tagname)
-                before={**authored,'system_units':authored['system_units'][:len(paths)],
-                        'normal_stop_mode':FX['effects'][tags[tagname]]['normal_stop']}
+                old_units=[original,authored['system_units'][-1]][:len(paths)]
+                before={**authored,'system_units':old_units,'normal_stop_mode':(
+                    BLADE['normal_stop_mode'] if len(paths)==2 else FX['effects'][tags[tagname]]['normal_stop'])}
                 need(window.export_text()==abilities.playback_value(ue,before,ue.load_asset).export_text(),
                      '现有窗口参数与配方不匹配 '+tagname)
                 windows[i]=target
@@ -260,6 +264,7 @@ def build_assets():
 def build():
     flame=build_assets()
     wire()
+    install_preparation(FOLDER,flame)
     ue.log('KEVIN_FIRE_READY '+flame.get_path_name())
 
 
