@@ -4,6 +4,7 @@ from pathlib import Path
 
 import unreal as ue
 
+from pyrios_impact_slabs import broken_slabs, cut_rock_material
 from zzz_fx_material_ue import configure_native_custom
 from zzz_fx_niagara_ue import NiagaraBuilder
 
@@ -14,18 +15,28 @@ SWEEPS = ('M00_root_andi_main_', 'M04_root_Trail_rot_', 'M06_root_MeleeTrail_and
 IMPACT = 'M15_root_decal__1__UEFX'
 STAMP = 'Pyrios.Normal03CleaveFracture'
 VERSION = 'sweep-1'
-SURFACE_VERSION = 'shattered-2'
+SURFACE_VERSION = 'collapsed-slabs-3'
+FRACTURE_SIZE = 'float3(18,900,790)'
+ROCKS = 'M15_root_Rocl__1__UEFX'
+DUST_RING = 'M15_root_Hit_Glow02_di_smoke_ring__1__UEFX'
 SHADE = """
 float age = saturate(Clock.r);
-float radius = length((UV-0.5)*2.0);
-float front = 0.24 + 1.18*smoothstep(0.0,0.105,age);
-float open = 1-smoothstep(front-0.12,front,radius);
-float close = 1-smoothstep(0.69,1,age);
-Coverage = saturate(max(Ink.r,max(Ink.g,Ink.b))*1.65)*open*close;
-float hot = 1-smoothstep(0.18,0.74,age);
-float3 seam = lerp(float3(1.95,0.34,0.09),float3(0.24,0.32,2.35),saturate(radius*2));
-SeamLight = open*close*(Ink.b*seam*(hot*1.72+0.025)+Ink.g*float3(0.11,0.15,0.23)*hot);
-return lerp(float3(0.007,0.004,0.018),float3(0.46,0.43,0.51),Ink.g);
+float2 delta = (UV-float2(0.493,0.503))*2.0;
+float radius = length(delta);
+float angle = atan2(delta.y,delta.x);
+float fault = radius*(1+0.048*sin(angle*7)+0.067*sin(angle*3-0.7));
+float front = 0.10 + 1.15*smoothstep(0,0.22,age);
+float split = 1-smoothstep(front-0.14,front,fault);
+float close = 1-smoothstep(0.70,1,age);
+float powder = saturate(1-abs(front-fault)/0.13)*(1-smoothstep(0.11,0.31,age));
+powder *= 0.34 * smoothstep(-0.6,0.85,sin(angle*11+radius*16)+0.6*sin(angle*7-1.2));
+float exposed = saturate(max(Ink.r,max(Ink.g,Ink.b))*1.72)*split;
+Coverage = saturate(exposed+powder)*close;
+float hot = 1-smoothstep(0.12,0.53,age);
+float3 seam = lerp(float3(1.8,0.45,0.15),float3(0.40,0.52,2.5),smoothstep(0.09,0.48,radius));
+SeamLight = close*split*(Ink.b*seam*(hot*1.85+0.015)+Ink.g*float3(0.08,0.10,0.16)*hot);
+float3 rock = lerp(float3(0.012,0.010,0.022),float3(0.47,0.45,0.48),smoothstep(0.05,0.86,Ink.g));
+return lerp(rock,float3(0.52,0.49,0.46),powder/max(0.001,exposed+powder));
 """
 GROUND_QUERY = """
 bool hit; bool inside; float3 impactPosition; float3 normal; float friction; float restitution; int surface;
@@ -112,7 +123,7 @@ def add_fracture(system, mat, tool, target, assign):
     work = [dict(kind='ParticleRead',emitterName=IMPACT,scriptName=ps,interfaceTemplate={'refPath':di.get_path_name()},
         outputTargets=[target('FractureVisible','Bool'),target('FracturePosition','Position'),target('FractureRotation','Quat')],
         hlslBodyTemplate=GROUND_QUERY)]
-    work.append(dict(assign(ps, FractureSize=('Vector','float3(18,350,330)'),FractureOrder=('Int','50'),
+    work.append(dict(assign(ps, FractureSize=('Vector',FRACTURE_SIZE),FractureOrder=('Int','50'),
                     FractureColor=('LinearColor','float4(0,1,1,1)')),emitterName=IMPACT))
     work.append(dict(assign('ParticleUpdateScript',FractureColor=('LinearColor','float4(Particles.NormalizedAge,1,1,1)')),
                      emitterName=IMPACT))
@@ -130,6 +141,66 @@ def add_fracture(system, mat, tool, target, assign):
     configured=LIB.authoring_set_renderer_data(system,IMPACT,result.renderer_index,json.dumps(props))
     if not configured.succeeded:
         raise RuntimeError(configured.error)
+
+
+def enlarge_ground_impact(system, tool, assign, existing_decal):
+    # 扩展原撞击的五块飞石和贴地烟环。使用原粒子的寿命和轨迹，缩放只写给渲染器。
+    work = []
+    if existing_decal:
+        work.append(dict(assign('ParticleSpawnScript', FractureSize=('Vector', FRACTURE_SIZE)), emitterName=IMPACT))
+    for stage in ('ParticleSpawnScript', 'ParticleUpdateScript'):
+        work.append(dict(assign(stage,
+            RubbleScale=('Vector', 'Particles.Scale * float3(2.4,1.85,1.55)'),
+            RubblePosition=('Position', 'Particles.Position + float3(0,0,42.0*sin(3.141593*saturate(Particles.NormalizedAge)))')),
+            emitterName=ROCKS))
+        work.append(dict(assign(stage, GroundRingScale=('Vector',
+            'Particles.Scale * (1.0+1.15*saturate(Particles.NormalizedAge/0.48))')), emitterName=DUST_RING))
+    result = tool('GGYGOEditor.GGYGONiagaraCompileLibrary.ApplyAuthoringStackBatch',
+                  system={'refPath':system.get_path_name()}, workItems=work)
+    if not result.get('bApplied'):
+        raise RuntimeError(result.get('error','砸地飞石与尘浪制作失败'))
+    bind = NiagaraBuilder.attribute_binding
+    layers = [(ROCKS, dict(ScaleBinding=bind('Particles.RubbleScale'),PositionBinding=bind('Particles.RubblePosition'))),
+              (DUST_RING, dict(ScaleBinding=bind('Particles.GroundRingScale')))]
+    for emitter, props in layers:
+        renderers = LIB.authoring_get_renderer_identities(system, emitter).renderers
+        if not renderers or any(not r.renderer_class.endswith('NiagaraMeshRendererProperties') for r in renderers):
+            raise RuntimeError('砸地网格层与预期不符 '+emitter)
+        for renderer in renderers:
+            changed = LIB.authoring_set_renderer_data(system, emitter, renderer.renderer_index, json.dumps(props))
+            if not changed.succeeded:
+                raise RuntimeError(changed.error)
+
+
+def add_uplifted_slabs(system, directory, tool, assign):
+    mesh = broken_slabs(directory)
+    material = cut_rock_material(directory)
+    # 局部负 X 是地面法向，纵向先抬升，外缘始终接地，回落时沉回地表。
+    rise = 'saturate(Particles.NormalizedAge/0.09)'
+    settle = 'saturate((Particles.NormalizedAge-0.16)/0.32)'
+    sink = 'saturate((0.88-Particles.NormalizedAge)/0.20)'
+    height = f'{rise}*(1.0-0.54*{settle})*{sink}'
+    work = [dict(assign(stage, SlabScale=('Vector', f'float3({height},1,1)'),
+                SlabVisible=('Int', 'Particles.FractureVisible && Particles.NormalizedAge < 0.88 ? 1 : 0')),
+                emitterName=IMPACT) for stage in ('ParticleSpawnScript','ParticleUpdateScript')]
+    result = tool('GGYGOEditor.GGYGONiagaraCompileLibrary.ApplyAuthoringStackBatch',
+                  system={'refPath':system.get_path_name()},workItems=work)
+    if not result.get('bApplied'):
+        raise RuntimeError(result.get('error','断板抬升栈制作失败'))
+    renderer = LIB.authoring_add_renderer(system, IMPACT, ue.load_class(None,'/Script/Niagara.NiagaraMeshRendererProperties'))
+    if not renderer.succeeded:
+        raise RuntimeError(renderer.error)
+    override = LIB.authoring_set_renderer_data(system, IMPACT, renderer.renderer_index, json.dumps({'bOverrideMaterials':True}))
+    if not override.succeeded:
+        raise RuntimeError(override.error)
+    bind = NiagaraBuilder.attribute_binding
+    props = dict(Meshes=[dict(Mesh=mesh.get_path_name())],
+                 OverrideMaterials=[dict(ExplicitMat=material.get_path_name())],
+                 PositionBinding=bind('Particles.FracturePosition'), MeshOrientationBinding=bind('Particles.FractureRotation'),
+                 ScaleBinding=bind('Particles.SlabScale'), RendererVisibility=1, RendererVisibilityTagBinding=bind('Particles.SlabVisible'))
+    saved = LIB.authoring_set_renderer_data(system, IMPACT, renderer.renderer_index, json.dumps(props))
+    if not saved.succeeded:
+        raise RuntimeError(saved.error)
 
 
 def align_blade_wake(system, name, tool, target, weapon_frame):
@@ -179,8 +250,15 @@ def refine_normal03(system, directory, tool, target, assign, weapon_frame):
             align_blade_wake(system,name,tool,target,weapon_frame)
             EDITOR.set_metadata_tag(system,'Pyrios.Normal03BladeWake','blade-tip-1')
             changed = True
-        if name == IMPACT and not has_fracture:
-            add_fracture(system, surface, tool, target, assign)
+        if name == IMPACT and EDITOR.get_metadata_tag(system, 'Pyrios.GroundBreak') != SURFACE_VERSION:
+            if not has_fracture:
+                add_fracture(system, surface, tool, target, assign)
+            enlarge_ground_impact(system, tool, assign, has_fracture)
+            EDITOR.set_metadata_tag(system, 'Pyrios.GroundBreak', SURFACE_VERSION)
+            changed = True
+        if name == IMPACT and EDITOR.get_metadata_tag(system, 'Pyrios.UpliftedSlabs') != 'raised-1':
+            add_uplifted_slabs(system, directory, tool, assign)
+            EDITOR.set_metadata_tag(system, 'Pyrios.UpliftedSlabs', 'raised-1')
             changed = True
     if changed:
         EDITOR.set_metadata_tag(system, STAMP, VERSION)
