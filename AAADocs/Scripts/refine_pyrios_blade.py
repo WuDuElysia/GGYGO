@@ -7,7 +7,7 @@ import unreal as ue
 PROJECT = Path(ue.Paths.convert_relative_path_to_full(ue.Paths.project_dir()))
 sys.path.insert(0, str(PROJECT / 'AAADocs/Scripts'))
 from pyrios_normal03_finisher import refine_normal03
-from pyrios_multicut_marks import SCARS, VERSION as CUT_VERSION, add_opening_marks, scar_material
+from pyrios_multicut_marks import SCARS, VERSION as CUT_VERSION, add_opening_marks, extend_space_cuts, scar_material
 from pyrios_prism_material import build_prism_materials
 from zzz_fx_material_ue import configure_native_custom
 from zzz_fx_niagara_ue import NiagaraBuilder, TYPES, EMPTY_EMITTER
@@ -297,7 +297,8 @@ def build():
             add_opening_marks(system, DAWN, cut_surface, tool, target, assign, module, weapon_frame)
             EDITOR.set_metadata_tag(system,'Pyrios.Normal03MultiCut',CUT_VERSION)
             weapon_added = True
-        if weapon_added or ground_or_sweep or styled:
+        extended = '_Unit00_' in system.get_name() and extend_space_cuts(system, DAWN)
+        if extended or weapon_added or ground_or_sweep or styled:
             finish(system)
     # 特殊技已有独立武器层；其金色材质沿用同一笔触贴图。
     material(warm=True)

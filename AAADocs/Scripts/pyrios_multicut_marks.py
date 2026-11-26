@@ -10,28 +10,33 @@ from zzz_fx_niagara_ue import EMPTY_EMITTER, NiagaraBuilder
 
 SCARS = 'Pyrios_AftercutMarks'
 VERSION = 'three-incisions-2'
-SURFACE_VERSION = 'source-edge-1'
+SURFACE_VERSION = 'refracted-edge-2'
 # Normal03 的 03/09_MeleeTrail 原 andi_main 刀面，以及三次 MeleeTrail 共用的 light_edge 与高光遮罩。
 TEXTURES = {'Face': 'Eff_MeleeTrail_239_4f346e732ad4', 'Edge': 'Eff_MeleeTrail_089_LYX_01_2d474876c2a0',
             'Highlight': 'Eff_MeleeTrail_116_YZ_06_f2c948b7ce36'}
 SHADE = """
 float u = saturate(UV.x);
-float v = abs(2.0*UV.y-1.0);
-float edgeLuma = dot(Edge.rgb,float3(.23,.62,.15));
-float etched = saturate(Face.r*.70 + Highlight.r*.30);
-// 中线先亮，外侧仅留薄辉。原刀面纹理切开亮带，高光遮罩保留刃腹明暗变化。
-float ridge = 1.0-smoothstep(.055,.30,v);
-float shoulder = 1.0-smoothstep(.25,.82,v);
-float lip = smoothstep(.55,.68,v)*(1.0-smoothstep(.68,.88,v))*etched;
-float3 flank = lerp(float3(.028,.046,.19),float3(.13,.23,.78),etched);
-float3 foil = flank*(.60+.40*shoulder) + Edge.rgb*(.33+.45*etched);
-float3 light = float3(1.67,2.12,3.0)*(.75+.25*Highlight.r);
-float3 color = lerp(foil,light,ridge) + float3(.34,.50,1.1)*lip;
-float reveal = 1.0-smoothstep(Progress-.085,Progress,lerp(u,1.0-u,Reverse));
-float feather = 1.0-smoothstep(.64,.99,v);
-float flankAlpha = (.66+.26*etched+.08*edgeLuma)*feather;
-float coverage = reveal*Life*max(flankAlpha,ridge);
-Coverage=saturate(coverage);
+float signedV = 2*UV.y-1;
+float v = abs(signedV);
+float travel = lerp(u,1-u,Reverse);
+float etched = saturate(.64*Face.r+.36*Highlight.r);
+// 刀面透出背景，最亮的切口略微开裂。沿刀长保留原图的明暗以读出入刃方向。
+float split = .085*(Face.r-Highlight.r)+.065*sin(29*u+.9)*Highlight.r;
+float seam = abs(signedV-split);
+float ridge = 1-smoothstep(.015,.16,seam);
+float facets = saturate(.52+.48*signedV+.34*Face.r);
+float3 flank = lerp(float3(.008,.017,.078),float3(.073,.14,.66),facets);
+float3 foil = flank + Edge.rgb*(.14+.36*etched);
+float fuse = smoothstep(.18,.84,travel)*(.5+.5*Highlight.r);
+float3 color = lerp(foil,float3(2.0,2.65,3.85)*(.46+.58*fuse),ridge);
+float filament = (1-smoothstep(.015,.085,abs(seam-.39*Face.r)))*Highlight.r;
+color += float3(.30,.62,1.45)*filament;
+float reveal = 1-smoothstep(Progress-.085,Progress,travel);
+float strand = smoothstep(.18,.80,abs(signedV + .68 - .80*Face.r));
+float shoulder = (1-smoothstep(.40,.98,v))*(.71+.22*etched);
+color *= lerp(.49,1.0,strand);
+color += float3(.17,.23,.74)*filament*fuse;
+Coverage = saturate(reveal*Life*max(shoulder,max(ridge,.62*filament)));
 return color*Coverage;
 """
 
@@ -44,7 +49,7 @@ def scar_material(directory):
         mat = ue.load_asset(path)
         if editor.get_metadata_tag(mat,'Pyrios.Aftercut') == SURFACE_VERSION:
             return mat
-        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('three-incisions-1', VERSION):
+        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('three-incisions-1', 'source-edge-1', 'refracted-edge-1', VERSION):
             raise RuntimeError('已有未识别的斩痕材质 '+path)
         edit.delete_all_material_expressions(mat)
     else:
@@ -65,7 +70,7 @@ def scar_material(directory):
     connect(uv,'',node,'UV')
     # 源图的亮刃位于上沿。刀脊在 UV 的中线，两侧斜面使用同一段原图。
     coords = edit.create_material_expression(mat,ue.MaterialExpressionCustom,-720,-200)
-    configure_native_custom(ue,coords,['UV'],'return float2(lerp(.04,.96,UV.x),.008+.46*abs(2.0*UV.y-1.0));',
+    configure_native_custom(ue,coords,['UV'],'return float2(lerp(.04,.96,UV.x),.055+.66*abs(2.0*UV.y-1.0));',
                             'CMOT_Float2','沿刃脊展开原纹理',native_sync=lambda _,call:call())
     connect(uv,'',coords,'UV')
     for i,(key,t) in enumerate(textures.items()):
@@ -188,3 +193,111 @@ float3 PlaneAxis = BoneD + 2*cross(BR.xyz,cross(BR.xyz,BoneD)+BR.w*BoneD);
         result=lib.authoring_set_renderer_data(system,SCARS,renderer.renderer_index,json.dumps(props))
         if not result.succeeded:
             raise RuntimeError(result.error)
+
+
+def extend_space_cuts(system, directory):
+    """共用原三刀的落点、方向与寿命。在同一斩痕周围折射场地背景。"""
+    lib = ue.GGYGONiagaraCompileLibrary
+    editor = ue.EditorAssetLibrary
+    tag = 'Pyrios.AftercutRefraction'
+    sheath = refraction_material(directory)
+    if editor.get_metadata_tag(system, tag) == 'long-cut-1':
+        return False
+    renderers = lib.authoring_get_renderer_identities(system, SCARS).renderers
+    if len(renderers) != 1 or not renderers[0].renderer_class.endswith('NiagaraMeshRendererProperties'):
+        raise RuntimeError('缺少三刀的切面渲染器 '+system.get_name())
+    mesh = scar_mesh(directory)
+    core = renderers[0].renderer_index
+    def configure(index, props):
+        result = lib.authoring_set_renderer_data(system, SCARS, index, json.dumps(props))
+        if not result.succeeded:
+            raise RuntimeError(result.error)
+    def shape(width, depth):
+        return [dict(Mesh=mesh.get_path_name(), Scale=dict(X=1.85,Y=width,Z=depth))]
+    configure(core, dict(Meshes=shape(1.12,1.12)))
+    layer = lib.authoring_add_renderer(system, SCARS, ue.load_class(None, '/Script/Niagara.NiagaraMeshRendererProperties'))
+    if not layer.succeeded:
+        raise RuntimeError(layer.error)
+    configure(layer.renderer_index, {'bOverrideMaterials':True})
+    bind = NiagaraBuilder.attribute_binding
+    configure(layer.renderer_index, dict(Meshes=shape(3.1,2.4),
+        OverrideMaterials=[dict(ExplicitMat=sheath.get_path_name())],
+        PositionBinding=bind('Particles.Position'), MeshOrientationBinding=bind('Particles.MeshOrientation'),
+        ScaleBinding=bind('Particles.Scale'),ColorBinding=bind('Particles.Color'),SortOrderHint=-1))
+    editor.set_metadata_tag(system, tag, 'long-cut-1')
+    return True
+
+
+def refraction_material(directory):
+    """用原 Distor 层的扰动与遮罩，按刀线在视口的实际方向偏移背景采样。"""
+    editor, edit = ue.EditorAssetLibrary, ue.MaterialEditingLibrary
+    name = 'M_Pyrios_AftercutRefraction'
+    path = directory+'/'+name
+    if editor.does_asset_exist(path):
+        material = ue.load_asset(path)
+        stamp = editor.get_metadata_tag(material, 'Pyrios.AftercutRefraction')
+        if stamp == 'cut-field-2':
+            return material
+        if stamp != 'cut-field-1':
+            raise RuntimeError('已有未识别的空间斩折射材质 '+path)
+        edit.delete_all_material_expressions(material)
+    else:
+        material = ue.AssetToolsHelpers.get_asset_tools().create_asset(name,directory,ue.Material,ue.MaterialFactoryNew())
+    material.set_editor_properties(dict(blend_mode=ue.BlendMode.BLEND_TRANSLUCENT,shading_model=ue.MaterialShadingModel.MSM_UNLIT,
+        two_sided=False,used_with_niagara_mesh_particles=True,refraction_method=ue.RefractionMode.RM_2D_OFFSET,
+        translucency_pass=ue.MaterialTranslucencyPass.MTP_BEFORE_DOF))
+    def connect(a, pin, b, field):
+        if not edit.connect_material_expressions(a,pin,b,field):
+            raise RuntimeError('空间斩折射输入失败 '+field)
+    uv = edit.create_material_expression(material,ue.MaterialExpressionTextureCoordinate,-970,0)
+    coords = edit.create_material_expression(material,ue.MaterialExpressionCustom,-740,-200)
+    configure_native_custom(ue,coords,['UV'],'return float2(UV.x,.015+.50*abs(UV.y*2-1));',
+        'CMOT_Float2','展开原折射遮罩',native_sync=lambda _,f:f())
+    connect(uv,'',coords,'UV')
+    node = edit.create_material_expression(material,ue.MaterialExpressionCustom,-230,0)
+    code = """
+float s = UV.y*2-1;
+float across = abs(s);
+float belly = smoothstep(0,.12,UV.x)*(1-smoothstep(.86,1,UV.x));
+float reveal = 1-smoothstep(Clock.r-.085,Clock.r,lerp(UV.x,1-UV.x,Clock.g));
+float width = 1-smoothstep(.25,.98,across);
+float etching = .28+.72*sqrt(saturate(Mask.r));
+float field = Life*belly*width*reveal*etching;
+// 由屏幕导数求刀宽的投影方向。刀脊两侧偏移相反，切面退光时位移同时归零。
+float2 gradient = float2(ddx(s),ddy(s));
+float2 normal = gradient*rsqrt(max(dot(gradient,gradient),1e-9));
+float ripple = .70+.30*Noise.r;
+float push = sin(s*3.14159)*field*ripple;
+Offset = normal*push*(Size.y*.022/max(Size,float2(1,1)));
+float crest = 1-smoothstep(.06,.38,abs(across-.32-.18*Noise.r));
+Haze = field*(.09+.28*crest)*ripple;
+return lerp(float3(.07,.15,.52),float3(.52,.89,1.8),crest*Mask.r);
+"""
+    configure_native_custom(ue,node,['UV','Clock','Life','Size','Mask','Noise'],code,'CMOT_Float3','刀线两侧的屏幕折射',
+        native_sync=lambda _,f:f(),additional_outputs=[('Offset','CMOT_Float2'),('Haze','CMOT_Float1')])
+    connect(uv,'',node,'UV')
+    color=edit.create_material_expression(material,ue.MaterialExpressionParticleColor,-660,360)
+    connect(color,'',node,'Clock')
+    connect(color,'A',node,'Life')
+    view=edit.create_material_expression(material,ue.MaterialExpressionViewSize,-680,480)
+    connect(view,'',node,'Size')
+    directory_tex='/Game/Characters/Shared/FX/ZZZ/Textures/'
+    for i,(key,asset) in enumerate((('Mask','Eff_MeleeTrail_244_18e1e41208b4'),('Noise','Eff_Noise_098_c0bd347eec31'))):
+        texture=ue.load_asset(directory_tex+asset)
+        if not isinstance(texture,ue.Texture2D):
+            raise RuntimeError('缺少原折射纹理 '+asset)
+        sample=edit.create_material_expression(material,ue.MaterialExpressionTextureSample,-510,-220+i*140)
+        sample.set_editor_properties(dict(texture=texture,sampler_type=ue.MaterialSamplerType.SAMPLERTYPE_COLOR if texture.srgb
+            else ue.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR))
+        connect(coords,'',sample,'Coordinates')
+        connect(sample,'RGB',node,key)
+    for pin,prop in (('',ue.MaterialProperty.MP_EMISSIVE_COLOR),('Offset',ue.MaterialProperty.MP_REFRACTION),('Haze',ue.MaterialProperty.MP_OPACITY)):
+        if not edit.connect_material_property(node,pin,prop):
+            raise RuntimeError('空间斩折射输出失败 '+pin)
+    errors=edit.recompile_material(material)
+    if errors:
+        raise RuntimeError('空间斩折射材质编译失败 '+str(errors))
+    editor.set_metadata_tag(material,'Pyrios.AftercutRefraction','cut-field-2')
+    if not editor.save_loaded_asset(material,False):
+        raise RuntimeError('空间斩折射材质保存失败')
+    return material
