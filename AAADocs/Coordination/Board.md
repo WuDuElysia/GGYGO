@@ -10,7 +10,7 @@
 
 | 需求 | 负责人 | 状态 | 需求记录 |
 | --- | --- | --- | --- |
-| Pyrios 战斗特效与急转返修 | Codex | 三段普攻改为实时刀轨和立体刃面，第三段横斩与砸地裂痕已在 UE 5.9 D3D12 双机位完整三连实拍通过。[刀光修复](https://github.com/WuDuElysia/GGYGO/commit/db69410)。第三段砸地扩大裂面并掀起断板，玩家视角与侧面复验通过。[砸地提交](https://github.com/WuDuElysia/GGYGO/commit/21c0bf4)。急转已交付 | [制作与验收](../需求文档/fx_audio_wiring.md#2026-11-25-战斗表现与急转) |
+| Pyrios 战斗特效与急转返修 | Codex | 三段普攻改为实时刀轨和立体刃面，第三段横斩与砸地裂痕已在 UE 5.9 D3D12 双机位完整三连实拍通过。[刀光修复](https://github.com/WuDuElysia/GGYGO/commit/db69410)。第三段砸地扩大裂面并掀起断板，玩家视角与侧面复验通过。[砸地提交](https://github.com/WuDuElysia/GGYGO/commit/21c0bf4)。第三段起手的三道刀痕已加宽、收锋，在双机位连段中验收。[多重斩提交](https://github.com/WuDuElysia/GGYGO/commit/4d43ccb)。急转已交付 | [制作与验收](../需求文档/fx_audio_wiring.md#2026-11-25-战斗表现与急转) |
 | UE 5.9 副本迁移 | System 原会话（Codex） | 11-25 已修复副本双击时的 Fab 模块不匹配，实际打开月坑环站并将窗口交付现场演示。V8 普通启动返修已核收并推送（[修复提交](https://github.com/WuDuElysia/GGYGO/commit/fdf1e76)）：两份 Target 升 V8、59 个测试编译输入保留，Editor 构建与普通启动实拍通过，自有 UE 已退出。原迁移已完成并推送父子 codex/ue59-migration 分支：编译、资产、玩家／换人、Kevin 完整战斗与死亡清理、最小联机通过，统筹实拍核收和 GameFeature 差分评审通过。可用副本 F:/ue_project/GGYGO_UE59；原 5.8 工程保留。启动诊断／运行告警及 Cook、设备、性能、完整网络、非空受管 GF 未验范围保持，无在途。[迁移提交](https://github.com/WuDuElysia/GGYGO/commit/22566e2) | [ue59_migration](../需求文档/ue59_migration.md) |
 | 普攻第一段主弧与冷首击 | Kiro | 已完成：共享网格角点错位重导入后主弧连续可见；未预热首击等资源就绪后出刀，FX 同帧可见（[主弧证据](../../.agents/tasks/requirements-closeout/evidence/I01.md)、[冷首击证据](../../.agents/tasks/requirements-closeout/evidence/I02.md)） | [normal01_first_strike](../需求文档/normal01_first_strike.md) |
 | 普攻连段生产冒烟与活尾 | Codex（待统筹指定） | 需用户：攻击接续点之前的按下要不要存起来留到下一段？A 接受现状并改 spec 措辞，B 另立需求接回预输入。冒烟 22／24 通过，2 例按约定保留失败（[证据](../../.agents/tasks/requirements-closeout/evidence/I08.md)） | [normal01_first_strike](../需求文档/normal01_first_strike.md) |
