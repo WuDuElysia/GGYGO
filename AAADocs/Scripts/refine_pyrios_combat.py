@@ -99,11 +99,69 @@ def systems():
         if '/NS_UEEquivalent_Eff_Pyrois_Evade_' in path: paths.add(path.split('.')[0])
     return sorted(paths)
 
-def style_actions():
-    mats={name:material(name,code) for name,code in [('Blade',BLADE),('Glint',GLINT),('Slipstream',WAKE)]}
+# 从原技能系统的同名渲染层读回。四段强化斩有各自的亮边，复用发射器名也要分别配置。
+SKILL_SURFACES = {
+    'NS_Pyrios_Special_Phased_Pyrios_Special_MainComposition_8279ab1ed40b_Unit00_ecf18f56cb44': {
+        'M00_root_rot__1__HighLight_UEFX': 'MI_Eff_Objects_LKJ_GUID6cfcb6781f63a704fb97670a8c8a781a_8aeb989a7f97',
+        'M00_root_rot__1__light_edge_UEFX': 'MI_Eff_Objects_LKJ_GUID93bbcefa9a0c9544d80a4a5a1b9c3fd6_586ffa00867e',
+        'M00_root_rot__1__Shining_UEFX': 'MI_Eff_Objects_LKJ_GUID5b0312e87ded4644ca3051a1169e3fef_3fcc6f2064ed',
+        'M01_root__1__rot__1__HighLight_UEFX': 'MI_Eff_Objects_LKJ_GUID6cfcb6781f63a704fb97670a8c8a781a_8aeb989a7f97',
+        'M01_root__1__rot__1__light_edge_UEFX': 'MI_Eff_Objects_LKJ_GUID93bbcefa9a0c9544d80a4a5a1b9c3fd6_586ffa00867e',
+        'M01_root__1__rot__1__Shining_UEFX': 'MI_Eff_Objects_LKJ_GUID5b0312e87ded4644ca3051a1169e3fef_3fcc6f2064ed',
+        'M02_Trail_Main_002_Trail_Main_1_Trail_Main_star__1__UEFX': 'MI_Eff_Others_LZL_GUID5106122fc00cea348b084666824c6cb7_3e5d554acbd3',
+        'M02_Trail_Main_002_Trail_Main_1_Trail_Main_star_UEFX': 'MI_Eff_Others_LZL_GUIDfcc275f4a300e164c959339b925745fa_cef55e7bfa75',
+        'M02_Trail_Main_002_Trail_Main_1_Dots01_UEFX': 'MI_Eff_Others_ZZY_GUID00ba1247b1265a8449aa2c06138d9ec4_d75f833c273e',
+        'M02_Trail_Main_002_Trail_Main_1_Trail_Main_star__2__UEFX': 'MI_Eff_Objects_LZL_GUIDded4aed73fe68d745acb8d492018a331_378632bd8591',
+        'M03_X_WeaponTrailCustom_UEFX': 'MI_Eff_Others_LZL_GUIDddcf648f778786c43af60e1563e62140_b4b286895981',
+    },
+    'NS_Pyrios_ExSpecial_Phased_Pyrios_ExSpecial_MainComposition_c8e2e209220c_Unit00_3763cbd79b38': {
+        'M00_root__1__root_MeleeTrail_andi_main_HighLight_main_UEFX': 'MI_Eff_Objects_LKJ_GUID088cf883ac8e06548bcd087a399ad3ce_8203a11cb384',
+        'M00_root__1__root_MeleeTrail_andi_main_light_edge_UEFX': 'MI_Eff_Objects_LKJ_GUID42fc5bdfe3322b249b59a841bdbfc20a_a9112f9991b0',
+        'M00_root__1__root_MeleeTrail_andi_main_Shining__1__UEFX': 'MI_Eff_Objects_LKJ_GUIDb09523a4a3293a94db98dda6c0bd4c2d_c54720cefb00',
+    },
+    'NS_Pyrios_ExSpecial_Phased_Pyrios_ExSpecial_MainComposition_c8e2e209220c_Unit01_7e685b5f5d78': {
+        'M01_root__1__root_MeleeTrail_andi_main_HighLight_main_UEFX': 'MI_Eff_Objects_LKJ_GUID088cf883ac8e06548bcd087a399ad3ce_c2440d4ecc4f',
+        'M01_root__1__root_MeleeTrail_andi_main_light_edge_UEFX': 'MI_Eff_Objects_LKJ_GUID42fc5bdfe3322b249b59a841bdbfc20a_9f27fea4f5fc',
+        'M01_root__1__root_MeleeTrail_andi_main_Shining__1__UEFX': 'MI_Eff_Objects_LKJ_GUIDb09523a4a3293a94db98dda6c0bd4c2d_0eb6ec393b3b',
+    },
+    'NS_Pyrios_ExSpecial_Phased_Eff_Pyrois_Attack_ExSpecial_01_01_Trail_6e542cde2b42': {
+        'root_Trail_rot_HighLight_UEFX': 'MI_Eff_Objects_LKJ_GUIDd169a75fdf987b64fbc9f5d996567768_4c24dc96d60d',
+        'root_Trail_rot_light_edge_UEFX': 'MI_Eff_Objects_LKJ_GUID79ffe342eefaa2d46a5654b23731b7fd_b43385293147',
+        'root_Trail_rot_Shining_UEFX': 'MI_Eff_Objects_LKJ_GUID5b0312e87ded4644ca3051a1169e3fef_e66a17bf2d62',
+    },
+    'NS_Pyrios_ExSpecial_Phased_Eff_Pyrois_Attack_ExSpecial_01_02_Trail_0f4d5adb982e': {
+        'root_Trail_rot_HighLight_UEFX': 'MI_Eff_Objects_LKJ_GUIDd169a75fdf987b64fbc9f5d996567768_4c24dc96d60d',
+        'root_Trail_rot_light_edge_UEFX': 'MI_Eff_Objects_LZL_GUID1e1e675fa82520b4c8f4324f8d2c8a4a_f008dfa10860',
+        'root_Trail_rot_Shining_UEFX': 'MI_Eff_Objects_LKJ_GUID5b0312e87ded4644ca3051a1169e3fef_e66a17bf2d62',
+    },
+    'NS_Pyrios_ExSpecial_Phased_Eff_Pyrois_Attack_ExSpecial_01_03_Trail_95aca0e4929e': {
+        'root_Trail_rot_HighLight_UEFX': 'MI_Eff_Objects_LKJ_GUIDd169a75fdf987b64fbc9f5d996567768_4c24dc96d60d',
+        'root_Trail_rot_light_edge_UEFX': 'MI_Eff_Objects_LZL_GUID1e1e675fa82520b4c8f4324f8d2c8a4a_c68e1b1549f0',
+        'root_Trail_rot_Shining_UEFX': 'MI_Eff_Objects_LKJ_GUID5b0312e87ded4644ca3051a1169e3fef_e66a17bf2d62',
+    },
+    'NS_Pyrios_ExSpecial_Phased_Eff_Pyrois_Attack_ExSpecial_01_04_Trail_b1031caaaf45': {
+        'root_Trail_rot_HighLight_UEFX': 'MI_Eff_Objects_LKJ_GUIDd169a75fdf987b64fbc9f5d996567768_4c24dc96d60d',
+        'root_Trail_rot_light_edge_UEFX': 'MI_Eff_Objects_LKJ_GUID79ffe342eefaa2d46a5654b23731b7fd_c8b55edf4099',
+        'root_Trail_rot_Shining_UEFX': 'MI_Eff_Objects_LKJ_GUID5b0312e87ded4644ca3051a1169e3fef_e66a17bf2d62',
+    },
+    'NS_Eff_Pyrois_Attack_ExSpecial_01_09_MOD_3f003f915dcc': {
+        'root__1__Glow__1__root__1__BG_Flare01_Line__1__UEFX': 'MI_Eff_Hit_LKJ_GUID99ab82550e8ceee4abc83b63e5367cb0_b5081f64afef',
+        'root__1__Glow__1__root__1__BG_Flare01_Line__6__UEFX': 'MI_Eff_Hit_LKJ_GUID3a98e1501a55a78418e5bcdf870c984f_a13c65743ff4',
+        'root__1__Glow__1__root__1__root__3__BG_Flare01_Line_UEFX': 'MI_Eff_Hit_LKJ_GUID1f37b9975a55f9b4e9cf0281494038e7_62127ad57938',
+        'root__1__Glow__1__root__1__root__3__BG_Flare01_Line__1__UEFX': 'MI_Eff_Hit_LKJ_GUID7400c52ab2bfd7a4c99503e0ee481a4a_fe3121d3e132',
+        'root__1__Glow__1__root__1__root__3__BG_Flare01_Line__2__UEFX': 'MI_Eff_Hit_LKJ_GUID1f37b9975a55f9b4e9cf0281494038e7_62127ad57938',
+    },
+}
+
+def style_actions(only_skills=False):
+    mats={} if only_skills else {name:material(name,code) for name,code in [('Blade',BLADE),('Glint',GLINT),('Slipstream',WAKE)]}
     count=0
     for path in systems():
         system=ue.load_asset(path)
+        is_skill = 'Special' in system.get_name()
+        if only_skills and not is_skill:
+            continue
+        sources = SKILL_SURFACES.get(system.get_name(), {})
         summary=LIB.authoring_get_system_summary(system)
         if not summary.succeeded:
             raise RuntimeError(summary.error)
@@ -111,15 +169,24 @@ def style_actions():
         for emitter in summary.emitters:
             name=emitter.emitter_name
             style=classify(path,name)
-            if not style:
+            source_name=sources.get(name)
+            if is_skill and not source_name or not is_skill and not style:
                 continue
+            if is_skill:
+                source=ue.load_asset('/Game/Characters/Shared/FX/ZZZ/MaterialInstances/'+source_name)
+                if not isinstance(source,ue.MaterialInstanceConstant):
+                    raise RuntimeError('技能粒子原材质缺失 '+source_name)
+                dest=source.get_path_name()
+            else:
+                dest=mats[style].get_path_name()
             for entry in LIB.authoring_get_renderer_identities(system,name).renderers:
                 kind=entry.renderer_class.split('.')[-1]
                 if kind not in ('NiagaraSpriteRendererProperties','NiagaraMeshRendererProperties','NiagaraRibbonRendererProperties'):
                     continue
                 idx=entry.renderer_index
                 old=json.loads(LIB.authoring_get_renderer_data(system,name,idx).property_values)
-                dest=mats[style].get_path_name()
+                if is_skill and not any(LOOK+'/M_Pyrios_'+n+'.' in str(old) for n in ('Blade','Glint','Slipstream','Emberglow')):
+                    continue
                 if kind=='NiagaraMeshRendererProperties':
                     slots=old.get('OverrideMaterials',old.get('overrideMaterials',[]))
                     if len(slots)!=1:

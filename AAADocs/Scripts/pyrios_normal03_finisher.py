@@ -16,6 +16,7 @@ IMPACT = 'M15_root_decal__1__UEFX'
 STAMP = 'Pyrios.Normal03CleaveFracture'
 VERSION = 'sweep-1'
 SURFACE_VERSION = 'collapsed-slabs-3'
+DECAL_VERSION = 'source-impact-1'
 FRACTURE_SIZE = 'float3(18,900,790)'
 ROCKS = 'M15_root_Rocl__1__UEFX'
 DUST_RING = 'M15_root_Hit_Glow02_di_smoke_ring__1__UEFX'
@@ -31,12 +32,15 @@ float close = 1-smoothstep(0.70,1,age);
 float powder = saturate(1-abs(front-fault)/0.13)*(1-smoothstep(0.11,0.31,age));
 powder *= 0.34 * smoothstep(-0.6,0.85,sin(angle*11+radius*16)+0.6*sin(angle*7-1.2));
 float exposed = saturate(max(Ink.r,max(Ink.g,Ink.b))*1.72)*split;
-Coverage = saturate(exposed+powder)*close;
+float gouge = saturate(SourceCrack.a)*split;
+Coverage = saturate(max(exposed,gouge)+powder)*close;
 float hot = 1-smoothstep(0.12,0.53,age);
 float3 seam = lerp(float3(1.8,0.45,0.15),float3(0.40,0.52,2.5),smoothstep(0.09,0.48,radius));
 SeamLight = close*split*(Ink.b*seam*(hot*1.85+0.015)+Ink.g*float3(0.08,0.10,0.16)*hot);
 float3 rock = lerp(float3(0.012,0.010,0.022),float3(0.47,0.45,0.48),smoothstep(0.05,0.86,Ink.g));
-return lerp(rock,float3(0.52,0.49,0.46),powder/max(0.001,exposed+powder));
+// 原 decal 的颜色和透明通道保留中心犁痕，项目地裂板继续承接外圈冲击。
+rock = lerp(rock,SourceCrack.rgb,gouge);
+return lerp(rock,float3(0.52,0.49,0.46),powder/max(0.001,max(exposed,gouge)+powder));
 """
 GROUND_QUERY = """
 bool hit; bool inside; float3 impactPosition; float3 normal; float friction; float restitution; int surface;
@@ -56,7 +60,7 @@ def fracture_material(directory):
     name = 'M_Pyrios_SlamFracture'
     path = directory + '/' + name
     mat = ue.load_asset(path) if EDITOR.does_asset_exist(path) else None
-    if mat and EDITOR.get_metadata_tag(mat, STAMP) == SURFACE_VERSION:
+    if mat and EDITOR.get_metadata_tag(mat, STAMP) == DECAL_VERSION:
         return mat
     tex_name = 'T_Pyrios_SlamFracture'
     tex_path = directory + '/' + tex_name
@@ -83,11 +87,16 @@ def fracture_material(directory):
     uv = edit.create_material_expression(mat, ue.MaterialExpressionTextureCoordinate, -640, -150)
     sampler = edit.create_material_expression(mat, ue.MaterialExpressionTextureSample, -640, 10)
     sampler.set_editor_properties(dict(texture=texture, sampler_type=ue.MaterialSamplerType.SAMPLERTYPE_MASKS))
+    source = ue.load_asset('/Game/Characters/Shared/FX/ZZZ/Textures/Eff_Crack_198_MSH_01_d167a6640610')
+    if not isinstance(source,ue.Texture2D):
+        raise RuntimeError('缺少原砸地 decal 主纹理')
+    crack = edit.create_material_expression(mat,ue.MaterialExpressionTextureSample,-630,365)
+    crack.set_editor_properties(dict(texture=source,sampler_type=ue.MaterialSamplerType.SAMPLERTYPE_COLOR))
     color = edit.create_material_expression(mat, ue.MaterialExpressionDecalColor, -640, 210)
     shader = edit.create_material_expression(mat, ue.MaterialExpressionCustom, -200, 0)
-    configure_native_custom(ue, shader, ['UV','Ink','Clock'], SHADE, 'CMOT_Float3', '裂隙扩散、岩壁和热缝冷却',
+    configure_native_custom(ue, shader, ['UV','Ink','Clock','SourceCrack'], SHADE, 'CMOT_Float3', '裂隙扩散、岩壁和热缝冷却',
         native_sync=lambda _, call: call(), additional_outputs=[('Coverage','CMOT_Float1'),('SeamLight','CMOT_Float3')])
-    for node, pin, target in [(uv,'','UV'),(sampler,'RGB','Ink'),(color,'','Clock')]:
+    for node, pin, target in [(uv,'','UV'),(sampler,'RGB','Ink'),(color,'','Clock'),(crack,'RGBA','SourceCrack')]:
         if not edit.connect_material_expressions(node, pin, shader, target):
             raise RuntimeError('裂纹材质输入接线失败 '+target)
     for output, prop in [('',ue.MaterialProperty.MP_BASE_COLOR),('Coverage',ue.MaterialProperty.MP_OPACITY),
@@ -96,7 +105,7 @@ def fracture_material(directory):
             raise RuntimeError('裂纹材质输出接线失败 '+output)
     if edit.recompile_material(mat):
         raise RuntimeError('裂纹材质编译失败')
-    EDITOR.set_metadata_tag(mat, STAMP, SURFACE_VERSION)
+    EDITOR.set_metadata_tag(mat, STAMP, DECAL_VERSION)
     if not EDITOR.save_loaded_asset(mat, False):
         raise RuntimeError('保存裂纹材质失败')
     return mat

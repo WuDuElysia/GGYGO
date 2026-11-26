@@ -7,7 +7,7 @@ import unreal as ue
 PROJECT = Path(ue.Paths.convert_relative_path_to_full(ue.Paths.project_dir()))
 sys.path.insert(0, str(PROJECT / 'AAADocs/Scripts'))
 from pyrios_normal03_finisher import refine_normal03
-from pyrios_multicut_marks import SCARS, VERSION as CUT_VERSION, add_opening_marks, extend_space_cuts, scar_material
+from pyrios_multicut_marks import SCARS, VERSION as CUT_VERSION, add_opening_marks, extend_space_cuts, refraction_material, scar_material
 from pyrios_prism_material import build_prism_materials
 from zzz_fx_material_ue import configure_native_custom
 from zzz_fx_niagara_ue import NiagaraBuilder, TYPES, EMPTY_EMITTER
@@ -106,8 +106,8 @@ def assign(script, *, emitter=EMITTER, **rows):
 
 def blade_section():
     # X 从刀根到刀尖，Y 在扫掠面法向上。纹理 V 在正反面回走，外沿纹理咬合。
-    profile = [(-.50,0),(-.39,-.031),(-.06,-.056),(.27,-.037),(.45,-.024),
-               (.50,0),(.45,.032),(.20,.073),(-.09,.087),(-.39,.042)]
+    profile = [(-.50,0),(-.39,-.038),(-.09,-.105),(.25,-.080),(.45,-.029),
+               (.50,0),(.45,.051),(.20,.119),(-.09,.157),(-.39,.050)]
     return [dict(Position=dict(X=x,Y=y), TextureV=x+.5) for x,y in profile]
 
 
@@ -251,6 +251,43 @@ def style_existing(system, mat, live):
                 changed=True
     return changed
 
+def apply_blade_volume(system, emitter, field):
+    """刀身与折射共用世界空间武器采样、分刀 ID 和寿命。波面围在刃腹外侧。"""
+    tag='Pyrios.BladeVolume'
+    if EDITOR.get_metadata_tag(system,tag)=='wake-1':
+        return False
+    renderers=LIB.authoring_get_renderer_identities(system,emitter).renderers
+    for renderer in renderers:
+        if not renderer.renderer_class.endswith('NiagaraRibbonRendererProperties'):
+            continue
+        props=json.loads(LIB.authoring_get_renderer_data(system,emitter,renderer.renderer_index).property_values)
+        if not props.get('bCustomShapeClosed') or not any(label in str(props.get('Material')) for label in
+                ('MI_Pyrios_Prism_Draw','MI_Pyrios_Prism_Crescent','MI_Pyrios_Prism_Cross')):
+            continue
+        def configure(index,values):
+            result=LIB.authoring_set_renderer_data(system,emitter,index,json.dumps(values))
+            require(result.succeeded,result.error)
+        profile=blade_section()
+        configure(renderer.renderer_index,dict(CustomVertices=profile))
+        wave=LIB.authoring_add_renderer(system,emitter,ue.load_class(None,'/Script/Niagara.NiagaraRibbonRendererProperties'))
+        require(wave.succeeded,wave.error)
+        index=wave.renderer_index
+        configure(index,dict(Shape='Custom'))
+        for vertex in profile:
+            vertex['Position']['Y'] *= 1.55
+            vertex['Position']['X'] *= 1.22
+        bind=NiagaraBuilder.attribute_binding
+        configure(index,dict(Shape='Custom',CustomVertices=profile,bCustomShapeClosed=True,Material=field.get_path_name(),
+                FacingMode='CustomSideVector',MaxNumRibbons=6 if emitter==FINISHER_BLADE else 1,bUseGPUInit=False,
+                PositionBinding=bind('Particles.Position'),RibbonWidthBinding=bind('Particles.RibbonWidth'),
+                RibbonFacingBinding=bind('Particles.RibbonFacing'),ColorBinding=bind('Particles.Color'),SortOrderHint=-1))
+        link=LIB.configure_ribbon_unique_id(system,emitter,index,'Particles.BladeStroke' if emitter==FINISHER_BLADE else '')
+        require(link.applied,link.error)
+        EDITOR.set_metadata_tag(system,tag,'wake-1')
+        return True
+    raise RuntimeError('当前武器的闭合刃面缺失 '+system.get_name())
+
+
 def finish(system):
     state=LIB.compile_authoring_batch(system)
     if not state.native_ready or not state.system_valid:
@@ -261,13 +298,16 @@ def finish(system):
     ue.log('EMBERGLOW_SAVED '+system.get_name())
 
 def build():
-    material()  # 确保旧暖金特殊技依赖的笔触贴图已经导入。
+    material()  # 保留既有笔触材质供其它引用者使用。
     variants = build_prism_materials(DAWN)
     cut_surface = scar_material(DAWN)
+    field = refraction_material(DAWN)
     for (name,end), style in zip(SYSTEMS, ('Draw','Crescent')):
         system=ue.load_asset(SKILL+name)
         require(system is not None,'缺正式普攻系统 '+name)
         if EDITOR.get_metadata_tag(system,STAMP)==SYSTEM_VERSION:
+            if apply_blade_volume(system,EMITTER,field):
+                finish(system)
             continue
         existing = [entry.emitter_name for entry in LIB.authoring_get_system_summary(system).emitters]
         if EMITTER in existing:
@@ -275,6 +315,7 @@ def build():
             tool('NiagaraToolsets.NiagaraToolset_System.RemoveEmitter',emitterRef={'system':ref(system),'emitterName':EMITTER})
         add_live_blade(system, variants[style], end, variants if style == 'Crescent' else None)
         style_existing(system, variants[style], True)
+        apply_blade_volume(system,EMITTER,field)
         finish(system)
     bp=ue.load_asset('/Game/Characters/Player/Pyrios/Abilities/GA_Pyrios_Attack_Combo')
     fx=ue.get_default_object(bp.generated_class()).get_editor_property('combo_steps')[2].get_editor_property('fx')
@@ -298,9 +339,10 @@ def build():
             EDITOR.set_metadata_tag(system,'Pyrios.Normal03MultiCut',CUT_VERSION)
             weapon_added = True
         extended = '_Unit00_' in system.get_name() and extend_space_cuts(system, DAWN)
-        if extended or weapon_added or ground_or_sweep or styled:
+        volume = '_Unit00_' in system.get_name() and apply_blade_volume(system,FINISHER_BLADE,field)
+        if volume or extended or weapon_added or ground_or_sweep or styled:
             finish(system)
-    # 特殊技已有独立武器层；其金色材质沿用同一笔触贴图。
+    # 兼容仍引用暖金笔触的资产。特殊技的逐层材质由 style_actions 配置。
     material(warm=True)
     ue.log('EMBERGLOW_COMPLETE')
 

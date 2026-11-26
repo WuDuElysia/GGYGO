@@ -62,17 +62,28 @@ else if (Tier > 2.5)
 }
 if (Tier < 3.5)
 {
-    // 棱线绕闭合刃面连续，受光侧与背光侧随截面法向变化。
-    float3 normal = normalize(SurfaceNormal);
-    float facet = saturate(0.42 + dot(normal,float3(-0.26,0.37,0.89))*0.55);
-    float grazing = pow(1.0 - saturate(abs(dot(normal,ViewVector))), 2.0);
-    float edge = smoothstep(0.65,0.93,v) * (1.0-smoothstep(0.975,1.0,v));
-    float ridge = 1-smoothstep(0.03,0.20,abs(v-0.61));
-    float3 body = lerp(float3(0.030,0.013,0.12),float3(0.10,0.25,0.72),facet);
-    rgb = rgb*(0.42+0.63*facet) + body*(0.46+0.50*ridge);
-    rgb += grazing*(edge*float3(0.11,0.65,1.1) + ridge*float3(0.19,0.09,0.35));
-    opacity = max(opacity,0.52+0.36*facet);
-    envelope *= smoothstep(0.0,0.48,fade);
+    // 原包 Smoke_trail 使用 125 的烟纹乘 237 的遮罩；亮边与高光各有自己的纹理。
+    float3 N = normalize(SurfaceNormal);
+    float3 V = normalize(ViewVector);
+    float face = saturate(.5 + .5*dot(N,float3(-.48,.28,.82)));
+    float fresnel = pow(1-saturate(abs(dot(N,V))),2.3);
+    float body = sqrt(saturate(Smoke.r*SmokeMask.r));
+    float edge = sqrt(saturate(max(SourceEdge.r,max(SourceEdge.g,SourceEdge.b))));
+    // 两组刻槽由原烟纹与镶纹错开。暗槽保留在刃腹，掠过的窄高光随视角变换。
+    float crossUV = v+.14*(Smoke.r-SmokeMask.r)+.045*(Ink.g-.5);
+    float flute = abs(frac(crossUV*3.35 + .31*u + .28*Ink.b)-.5);
+    float silver = 1-smoothstep(.012,.075+fwidth(flute),flute);
+    float cavity = smoothstep(.06,.24,flute);
+    float active = smoothstep(.05,.42,body+.45*Ink.a);
+    float glint = pow(saturate(dot(reflect(-V,N),normalize(float3(-.51,.41,.76)))),6);
+    float shimmer = smoothstep(.45,.88,1-abs(u-(.18+.71*fade)))*(.18+.82*face);
+    float3 metal = lerp(float3(.025,.017,.105),float3(.18,.32,.84),face*cavity);
+    float3 silverTint = lerp(float3(.28,.54,1.55),float3(.95,1.5,2.45),shimmer);
+    float3 rimTint = SourceEdge.rgb/max(.001,max(SourceEdge.r,max(SourceEdge.g,SourceEdge.b)));
+    opacity = saturate(active*(.61+.20*cavity) + edge*.78);
+    rgb = active*(metal*.70 + silver*silverTint*(.32+.82*shimmer) + glint*float3(.39,.37,.93));
+    rgb += edge*(rimTint*.95 + float3(.72,.93,1.76)) + active*fresnel*SourceHighlight.r*float3(.28,.30,1.01);
+    envelope *= smoothstep(0.0,0.45,fade);
 }
 Coverage = saturate(opacity * envelope);
 return rgb * envelope;
@@ -97,7 +108,7 @@ def build_prism_materials(directory):
     material_name = 'M_Pyrios_PrismInlay'
     path = directory + '/' + material_name
     master = ue.load_asset(path) if editor.does_asset_exist(path) else None
-    if not master or editor.get_metadata_tag(master, 'Pyrios.PrismArt') != 'bevel-3':
+    if not master or editor.get_metadata_tag(master, 'Pyrios.PrismArt') != 'fluted-steel-1':
         texture.set_editor_properties(dict(srgb=False, compression_settings=ue.TextureCompressionSettings.TC_MASKS,
             address_x=ue.TextureAddress.TA_CLAMP, address_y=ue.TextureAddress.TA_CLAMP))
         if not editor.save_loaded_asset(texture, False):
@@ -117,19 +128,35 @@ def build_prism_materials(directory):
         tier.set_editor_property('parameter_name', 'PrismTier')
         normal = edit.create_material_expression(master, ue.MaterialExpressionPixelNormalWS, -650, 475)
         view = edit.create_material_expression(master, ue.MaterialExpressionCameraVectorWS, -650, 585)
+        source_textures = {
+            'Smoke':'Eff_MeleeTrail_125_YZ_01_318015ec2a80','SmokeMask':'Eff_MeleeTrail_237_148ae2cbe983',
+            'SourceEdge':'Eff_MeleeTrail_089_LYX_01_2d474876c2a0','SourceHighlight':'Eff_MeleeTrail_116_YZ_06_f2c948b7ce36'}
+        source_uv = edit.create_material_expression(master, ue.MaterialExpressionCustom, -980, -525)
+        configure_native_custom(ue,source_uv,['UV'],'return float2(lerp(.045,.945,saturate(UV.x)),.008+.965*(1-saturate(UV.y)));',
+            'CMOT_Float2','将原图亮边对齐武器外刃',native_sync=lambda _,call:call())
+        if not edit.connect_material_expressions(uv,'',source_uv,'UV'):
+            raise RuntimeError('原普攻刀面 UV 连接失败')
         shader = edit.create_material_expression(master, ue.MaterialExpressionCustom, -200, 40)
-        configure_native_custom(ue, shader, ['UV','Ink','Life','Tier','SurfaceNormal','ViewVector'], SHADER, 'CMOT_Float3', '刃面镶纹和分段掠光',
+        configure_native_custom(ue, shader, ['UV','Ink','Life','Tier','SurfaceNormal','ViewVector',*source_textures], SHADER, 'CMOT_Float3', '刃面镶纹和分段掠光',
                                 native_sync=lambda _,call:call(), additional_outputs=[('Coverage','CMOT_Float1')])
         for source, pin, target in [(uv,'','UV'),(sampler,'RGBA','Ink'),(life,'A','Life'),(tier,'','Tier'),(normal,'','SurfaceNormal'),(view,'','ViewVector')]:
             if not edit.connect_material_expressions(source, pin, shader, target):
                 raise RuntimeError('棱彩接线失败 '+target)
+        for i,(slot,asset) in enumerate(source_textures.items()):
+            src = ue.load_asset('/Game/Characters/Shared/FX/ZZZ/Textures/'+asset)
+            if not isinstance(src,ue.Texture2D):
+                raise RuntimeError('缺少原普攻纹理 '+asset)
+            node = edit.create_material_expression(master,ue.MaterialExpressionTextureSample,-650,-850+i*155)
+            node.set_editor_properties(dict(texture=src,sampler_type=ue.MaterialSamplerType.SAMPLERTYPE_COLOR))
+            if not edit.connect_material_expressions(source_uv,'',node,'Coordinates') or not edit.connect_material_expressions(node,'RGB',shader,slot):
+                raise RuntimeError('原普攻材质纹理连接失败 '+slot)
         if not edit.connect_material_property(shader,'',ue.MaterialProperty.MP_EMISSIVE_COLOR):
             raise RuntimeError('棱彩自发光未连接')
         if not edit.connect_material_property(shader,'Coverage',ue.MaterialProperty.MP_OPACITY):
             raise RuntimeError('棱彩透明度未连接')
         if edit.recompile_material(master):
             raise RuntimeError('棱彩母材质编译失败')
-        editor.set_metadata_tag(master, 'Pyrios.PrismArt', 'bevel-3')
+        editor.set_metadata_tag(master, 'Pyrios.PrismArt', 'fluted-steel-1')
         if not editor.save_loaded_asset(master, False):
             raise RuntimeError('棱彩母材质保存失败')
     variants = {}
