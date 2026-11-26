@@ -1,120 +1,190 @@
-"""佩洛伊斯第三段起手的刀痕。沿已有刀带采样留下宽刃面与楔形收锋。"""
+"""佩洛伊斯三段起手的空间斩痕。每刀留下一个收锋的切面。"""
 import json
+from math import sin, pi
 
 import unreal as ue
 
 from zzz_fx_material_ue import configure_native_custom
-from zzz_fx_niagara_ue import NiagaraBuilder
+from zzz_fx_niagara_ue import EMPTY_EMITTER, NiagaraBuilder
 
 
-# 横向覆盖整块切面，亮边只占外沿。使用每刀自己的进度，尾部消散时棱线不游动。
+SCARS = 'Pyrios_AftercutMarks'
+VERSION = 'three-incisions-2'
+SURFACE_VERSION = 'source-edge-1'
+# Normal03 的 03/09_MeleeTrail 原 andi_main 刀面，以及三次 MeleeTrail 共用的 light_edge 与高光遮罩。
+TEXTURES = {'Face': 'Eff_MeleeTrail_239_4f346e732ad4', 'Edge': 'Eff_MeleeTrail_089_LYX_01_2d474876c2a0',
+            'Highlight': 'Eff_MeleeTrail_116_YZ_06_f2c948b7ce36'}
 SHADE = """
-float along = saturate(Stroke.r);
-float across = saturate(UV.y);
-float fade = saturate(Life);
-float tip = abs(2.0*along-1.0);
-float notch = sin(along*13.0+across*4.0)*0.021 + (Ink.g-.5)*.027;
-float spine = .59 + .13*sin(along*3.14159) - .11*along + notch;
-float bevel = smoothstep(spine-.030,spine+.020,across);
-float lit = saturate(.48 + .43*dot(normalize(Normal),float3(-.25,.38,.89)));
-float3 shadow = lerp(float3(.055,.007,.14),float3(.125,.032,.28),lit);
-float3 violet = lerp(float3(.26,.075,.84),float3(.21,.33,1.12),Stroke.g);
-float3 face = lerp(shadow, violet*(.60+.38*lit),bevel);
-float ridge = 1.0-smoothstep(.010,.071,abs(across-spine));
-float edge = smoothstep(.78,.96,across+notch);
-float3 silver = lerp(float3(.91,.77,1.8),float3(.57,1.34,1.76),Stroke.g);
-face += silver*(edge*.99+ridge*.19);
-float groove = 1.0-smoothstep(.01,.032,abs(across-(spine-.14+.048*sin(along*5.1))));
-face *= 1.0-.40*groove;
-face += Ink.g*violet*.40 + Ink.b*float3(.52,.37,.68)*(.45+.55*tip);
-// 沿行刀方向把切口收成斜尖，亮刃多留一截，宽刀腹稍早消退。
-float arc = saturate(UV.x);
-float endTaper = smoothstep(0,.15,arc)*smoothstep(0,.22,1.0-arc);
-float bladeDistance = abs(across-.77)/lerp(.77,.23,step(.77,across));
-float silhouette = 1.0-smoothstep(.10+.85*endTaper,.18+.85*endTaper,bladeDistance);
-float opacity = smoothstep(.01,.37,fade)*(.79+.13*lit)*silhouette;
-Coverage = opacity;
-return face*opacity;
+float u = saturate(UV.x);
+float v = abs(2.0*UV.y-1.0);
+float edgeLuma = dot(Edge.rgb,float3(.23,.62,.15));
+float etched = saturate(Face.r*.70 + Highlight.r*.30);
+// 中线先亮，外侧仅留薄辉。原刀面纹理切开亮带，高光遮罩保留刃腹明暗变化。
+float ridge = 1.0-smoothstep(.055,.30,v);
+float shoulder = 1.0-smoothstep(.25,.82,v);
+float lip = smoothstep(.55,.68,v)*(1.0-smoothstep(.68,.88,v))*etched;
+float3 flank = lerp(float3(.028,.046,.19),float3(.13,.23,.78),etched);
+float3 foil = flank*(.60+.40*shoulder) + Edge.rgb*(.33+.45*etched);
+float3 light = float3(1.67,2.12,3.0)*(.75+.25*Highlight.r);
+float3 color = lerp(foil,light,ridge) + float3(.34,.50,1.1)*lip;
+float reveal = 1.0-smoothstep(Progress-.085,Progress,lerp(u,1.0-u,Reverse));
+float feather = 1.0-smoothstep(.64,.99,v);
+float flankAlpha = (.66+.26*etched+.08*edgeLuma)*feather;
+float coverage = reveal*Life*max(flankAlpha,ridge);
+Coverage=saturate(coverage);
+return color*Coverage;
 """
 
 
-def slash_material(directory):
-    editor = ue.EditorAssetLibrary
-    name = 'M_Pyrios_MultiCutScar'
+def scar_material(directory):
+    editor, edit = ue.EditorAssetLibrary, ue.MaterialEditingLibrary
+    name = 'M_Pyrios_Aftercut'
     path = directory+'/'+name
-    mat = ue.load_asset(path) if editor.does_asset_exist(path) else None
-    if mat and editor.get_metadata_tag(mat,'Pyrios.MultiCutSurface') == 'etched-1':
-        return mat
-    texture = ue.load_asset(directory+'/T_Pyrios_PrismInlay')
-    if not isinstance(texture, ue.Texture2D):
-        raise RuntimeError('三段刀痕缺少棱纹贴图')
-    edit = ue.MaterialEditingLibrary
-    if mat:
+    if editor.does_asset_exist(path):
+        mat = ue.load_asset(path)
+        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') == SURFACE_VERSION:
+            return mat
+        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('three-incisions-1', VERSION):
+            raise RuntimeError('已有未识别的斩痕材质 '+path)
         edit.delete_all_material_expressions(mat)
     else:
-        mat = ue.AssetToolsHelpers.get_asset_tools().create_asset(name, directory, ue.Material, ue.MaterialFactoryNew())
+        mat = ue.AssetToolsHelpers.get_asset_tools().create_asset(name,directory,ue.Material,ue.MaterialFactoryNew())
+    textures = {k:ue.load_asset('/Game/Characters/Shared/FX/ZZZ/Textures/'+v) for k,v in TEXTURES.items()}
+    if not all(isinstance(t,ue.Texture2D) for t in textures.values()):
+        raise RuntimeError('缺少 Normal03 原刀面、亮刃或高光遮罩')
     mat.set_editor_properties(dict(blend_mode=ue.BlendMode.BLEND_ALPHA_COMPOSITE,
-        shading_model=ue.MaterialShadingModel.MSM_UNLIT, two_sided=True, used_with_niagara_ribbons=True))
-    uv = edit.create_material_expression(mat,ue.MaterialExpressionTextureCoordinate,-630,-120)
-    ink = edit.create_material_expression(mat,ue.MaterialExpressionTextureSample,-630,0)
-    ink.set_editor_properties(dict(texture=texture,sampler_type=ue.MaterialSamplerType.SAMPLERTYPE_MASKS))
-    color = edit.create_material_expression(mat,ue.MaterialExpressionParticleColor,-630,160)
-    normal = edit.create_material_expression(mat,ue.MaterialExpressionPixelNormalWS,-630,310)
-    node = edit.create_material_expression(mat,ue.MaterialExpressionCustom,-210,35)
-    configure_native_custom(ue,node,['UV','Ink','Stroke','Life','Normal'],SHADE,'CMOT_Float3','斩痕宽切面与收锋',
-        native_sync=lambda _,call:call(),additional_outputs=[('Coverage','CMOT_Float1')])
-    for source,pin,target in [(uv,'','UV'),(ink,'RGBA','Ink'),(color,'RGB','Stroke'),(color,'A','Life'),(normal,'','Normal')]:
-        if not edit.connect_material_expressions(source,pin,node,target):
-            raise RuntimeError('刀痕材质输入未连接 '+target)
+        shading_model=ue.MaterialShadingModel.MSM_UNLIT,two_sided=True,used_with_niagara_mesh_particles=True))
+    uv = edit.create_material_expression(mat,ue.MaterialExpressionTextureCoordinate,-900,0)
+    color = edit.create_material_expression(mat,ue.MaterialExpressionParticleColor,-600,380)
+    node = edit.create_material_expression(mat,ue.MaterialExpressionCustom,-250,0)
+    configure_native_custom(ue,node,['UV',*textures,'Life','Progress','Reverse'],SHADE,'CMOT_Float3','源纹理切面与刃口',
+                            native_sync=lambda _,call:call(),additional_outputs=[('Coverage','CMOT_Float1')])
+    def connect(src,pin,dst,field):
+        if not edit.connect_material_expressions(src,pin,dst,field):
+            raise RuntimeError('斩痕材质连接失败 '+field)
+    connect(uv,'',node,'UV')
+    # 源图的亮刃位于上沿。刀脊在 UV 的中线，两侧斜面使用同一段原图。
+    coords = edit.create_material_expression(mat,ue.MaterialExpressionCustom,-720,-200)
+    configure_native_custom(ue,coords,['UV'],'return float2(lerp(.04,.96,UV.x),.008+.46*abs(2.0*UV.y-1.0));',
+                            'CMOT_Float2','沿刃脊展开原纹理',native_sync=lambda _,call:call())
+    connect(uv,'',coords,'UV')
+    for i,(key,t) in enumerate(textures.items()):
+        sample = edit.create_material_expression(mat,ue.MaterialExpressionTextureSample,-470,-280+i*140)
+        sample.set_editor_properties(dict(texture=t,sampler_type=ue.MaterialSamplerType.SAMPLERTYPE_COLOR))
+        connect(coords,'',sample,'Coordinates')
+        connect(sample,'RGBA',node,key)
+    connect(color,'A',node,'Life')
+    connect(color,'R',node,'Progress')
+    connect(color,'G',node,'Reverse')
     if (not edit.connect_material_property(node,'',ue.MaterialProperty.MP_EMISSIVE_COLOR)
-            or not edit.connect_material_property(node,'Coverage',ue.MaterialProperty.MP_OPACITY)
-            or edit.recompile_material(mat)):
-        raise RuntimeError('刀痕材质编译失败')
-    editor.set_metadata_tag(mat,'Pyrios.MultiCutSurface','etched-1')
+            or not edit.connect_material_property(node,'Coverage',ue.MaterialProperty.MP_OPACITY) or edit.recompile_material(mat)):
+        raise RuntimeError('斩痕原纹理材质编译失败')
+    editor.set_metadata_tag(mat,'Pyrios.Aftercut',SURFACE_VERSION)
     if not editor.save_loaded_asset(mat,False):
-        raise RuntimeError('刀痕材质保存失败')
+        raise RuntimeError('斩痕材质保存失败')
     return mat
 
 
-def add_opening_marks(system, emitter, mat, tool, assign):
-    lib = ue.GGYGONiagaraCompileLibrary
-    original = lib.authoring_get_renderer_identities(system,emitter).renderers
-    if len(original)!=1 or not original[0].renderer_class.endswith('NiagaraRibbonRendererProperties'):
-        raise RuntimeError('第三段起手需要现有的单层武器刀带')
-    ps,pu = 'ParticleSpawnScript','ParticleUpdateScript'
-    # 刀痕仅在前三次分刀时采样。每个截面的位置、方向来自本帧实际武器，新采样不会拖动旧刀痕。
-    phase = ('Emitter.Age < 0.095 ? Emitter.Age/0.095 : '
-             '(Emitter.Age < 0.20 ? (Emitter.Age-0.095)/0.105 : (Emitter.Age-0.20)/0.20)')
-    work = [assign(ps,emitter=emitter,CutActive=('Bool','Emitter.Age < 0.40'),CutPhase=('Float','saturate('+phase+')'),
-                   CutTone=('Float','Emitter.Age < 0.095 ? 0.0 : (Emitter.Age < 0.20 ? 0.5 : 1.0)'))]
-    work.append(assign(ps,emitter=emitter,
-        CutWidth=('Float','Particles.CutActive ? Particles.RibbonWidth*(0.035+0.965*pow(max(0.0,sin(3.141593*Particles.CutPhase)),0.60)) : 0.0'),
-        CutCenter=('Position','Particles.Position - Particles.RibbonFacing*Particles.RibbonWidth*(0.06+0.23*abs(2.0*Particles.CutPhase-1.0))')))
-    for stage in (ps,pu):
-        work.append(assign(stage,emitter=emitter,
-            CutColor=('LinearColor','float4(Particles.CutPhase,Particles.CutTone,0,Particles.CutActive ? saturate((1.0-Particles.NormalizedAge)*1.7) : 0.0)'),
-            EdgeColor=('LinearColor','float4(1,1,1,Particles.CutActive ? 0.22*saturate(1.0-Particles.NormalizedAge*1.70) : Particles.Color.w)')))
-    built = tool('GGYGOEditor.GGYGONiagaraCompileLibrary.ApplyAuthoringStackBatch',system={'refPath':system.get_path_name()},workItems=work)
-    if not built.get('bApplied'):
-        raise RuntimeError(built.get('error','起手刀痕制作失败'))
-    bind = NiagaraBuilder.attribute_binding
-    def configure(index,props):
-        result = lib.authoring_set_renderer_data(system,emitter,index,json.dumps(props))
+def scar_mesh(directory):
+    path = directory+'/SM_Pyrios_Aftercut'
+    if ue.EditorAssetLibrary.does_asset_exist(path):
+        return ue.load_asset(path)
+    # 稍偏向收刀端的刀腹，四个硬切面共用两端尖点。UV 沿行刀方向，不随相机旋转。
+    verts, uvs, tris = [], [], []
+    rings = [(0,0),(.085,.13),(.28,.56),(.50,.97),(.60,1),(.76,.66),(.92,.18),(1,0)]
+    section = [(-.5,0,0),(.035,.5,.5),(.5,0,1),(.035,-.5,.5)]
+    for side,a in enumerate(section):
+        b = section[(side+1)%len(section)]
+        for j in range(len(rings)-1):
+            face=[]
+            for i,(y,z,v) in [(j,a),(j+1,a),(j+1,b),(j,b)]:
+                u,width = rings[i]
+                point = ue.Vector(100*(u-.5),100*y*width,100*(z*width+.06*sin(pi*u)))
+                if not any(point==prev[0] for prev in face):
+                    face.append((point,ue.Vector2D(u,v if width else .5)))
+            base=len(verts)
+            for point,uv in face:
+                verts.append(point)
+                uvs.append(uv)
+            for i in range(1,len(face)-1):
+                tris.append(ue.IntVector(base,base+i,base+i+1))
+    mesh = ue.DynamicMesh()
+    buffers = ue.GeometryScriptSimpleMeshBuffers(vertices=verts,uv0=uvs,triangles=tris)
+    ue.GeometryScript_MeshEdits.append_buffers_to_mesh(mesh,buffers)
+    if mesh.get_triangle_count()!=len(tris):
+        raise RuntimeError('斩痕截面生成失败')
+    opts=ue.GeometryScriptCreateNewStaticMeshAssetOptions(enable_recompute_normals=True,enable_recompute_tangents=True,
+                                                         enable_nanite=False,enable_collision=False)
+    asset,result=ue.GeometryScript_NewAssetUtils.create_new_static_mesh_asset_from_mesh(mesh,path,opts)
+    if result!=ue.GeometryScriptOutcomePins.SUCCESS or not asset or not ue.EditorAssetLibrary.save_loaded_asset(asset,False):
+        raise RuntimeError('斩痕网格保存失败')
+    return asset
+
+
+def add_opening_marks(system,directory,mat,tool,target,assign,module,weapon_frame):
+    lib=ue.GGYGONiagaraCompileLibrary
+    mesh=scar_mesh(directory)
+    made=lib.authoring_add_emitter(system,ue.load_asset(EMPTY_EMITTER),SCARS)
+    if not made.succeeded:
+        raise RuntimeError(made.error)
+    data=lib.authoring_set_emitter_data(system,SCARS,json.dumps({'bLocalSpace':False,'CalculateBoundsMode':'Dynamic',
+                                                                'AttributesToPreserve':['Particles.UniqueID']}))
+    if not data.succeeded:
+        raise RuntimeError(data.error)
+    eu,ps,pu='EmitterUpdateScript','ParticleSpawnScript','ParticleUpdateScript'
+    num=NiagaraBuilder.num
+    work=[module(eu,'/Niagara/Modules/Emitter/EmitterState',emitter=SCARS,**{
+        'Life Cycle Mode':NiagaraBuilder.enum('/Niagara/Enums/ENiagaraEmitterLifeCycleMode.ENiagaraEmitterLifeCycleMode','NewEnumerator1','Self'),
+        'Loop Behavior':NiagaraBuilder.enum('/Niagara/Enums/ENiagara_EmitterStateOptions.ENiagara_EmitterStateOptions','NewEnumerator1','Once'),
+        'Loop Duration':num('Float',.60)})]
+    for t in (.031,.095,.194):
+        work.append(module(eu,'/Niagara/Modules/Emitter/SpawnBurst_Instantaneous',emitter=SCARS,
+                           **{'Spawn Time':num('Float',t),'Spawn Count':num('Int32',1)}))
+    di,sample=weapon_frame()
+    sample += """
+{{OUT:Particles.HasContact}} = Count == 2 && Base >= 0 && Tip >= 0 && Width > 1;
+{{OUT:Particles.Contact}} = A + Axis*.55;
+// 用同一武器骨的组件与世界旋转求角色局部对角线，不受武器甩动或相机转动影响。
+float3 D = normalize(float3(1,1,0));
+float3 BoneD = D + 2*cross(-LocalBR.xyz,cross(-LocalBR.xyz,D)+LocalBR.w*D);
+float3 PlaneAxis = BoneD + 2*cross(BR.xyz,cross(BR.xyz,BoneD)+BR.w*BoneD);
+{{OUT:Particles.SlashPlane}} = normalize(float3(PlaneAxis.xy,0));
+"""
+    def sample_weapon(stage):
+        return dict(kind='ParticleRead', emitterName=SCARS, scriptName=stage,
+                    interfaceTemplate={'refPath':di.get_path_name()}, hlslBodyTemplate=sample,
+                    outputTargets=[target('HasContact','Bool'), target('Contact','Position'), target('SlashPlane','Vector')])
+
+    work.extend([sample_weapon(ps),assign(ps,emitter=SCARS,Alive=('Bool','Particles.Alive && Particles.HasContact'),
+        Lifetime=('Float','Particles.UniqueID == 0 ? .255 : (Particles.UniqueID == 1 ? .224 : .190)'),
+        CutStart=('Position','Particles.Contact'),CutFixed=('Bool','false'),CutReverse=('Bool','false'),
+        Position=('Position','Particles.Contact'),Scale=('Vector','float3(0,0,0)'),
+        MeshOrientation=('Quat','float4(0,0,0,1)'),Color=('LinearColor','float4(0,0,0,0)')),
+        module(pu,'/Niagara/Modules/Update/Lifetime/ParticleState',emitter=SCARS),sample_weapon(pu)])
+    # 用两次刀锋采样的中点落痕，在角色局部斩击面展开三个方向，显影从入刃指向出刃。
+    # 锁定以后只显影和退光。角色转身、刀骨回摆都不再更新这道切口。
+    work.extend([assign(pu,emitter=SCARS,
+        CutLockNow=('Bool','!Particles.CutFixed && Particles.HasContact && Particles.Age >= .021 && length((Particles.Contact-Particles.CutStart).xy)>4')),
+        assign(pu,emitter=SCARS,
+        CutDirection=('Vector','normalize(float3(Particles.SlashPlane.xy,Particles.UniqueID==0 ? .06 : (Particles.UniqueID==1 ? -.73 : 1.95)))'),
+        CutLength=('Float','Particles.UniqueID==0 ? 378.0 : (Particles.UniqueID==1 ? 350.0 : 290.0)')),
+        assign(pu,emitter=SCARS,
+        Position=('Position','Particles.CutLockNow ? Particles.CutStart + (Particles.Contact-Particles.CutStart)*.52 : Particles.Position'),
+        Scale=('Vector','Particles.CutLockNow ? float3(Particles.CutLength,Particles.UniqueID==1 ? 32.0 : 27.0,18.0)*.01 : Particles.Scale'),
+        MeshOrientation=('Quat','Particles.CutLockNow ? (Particles.CutDirection.x < -.9999 ? float4(0,0,1,0) : normalize(float4(0,-Particles.CutDirection.z,Particles.CutDirection.y,1+Particles.CutDirection.x))) : Particles.MeshOrientation'),
+        CutReverse=('Bool','Particles.CutLockNow ? dot(Particles.Contact-Particles.CutStart,Particles.CutDirection)<0.0 : Particles.CutReverse'),
+        CutFixed=('Bool','Particles.CutFixed || Particles.CutLockNow')),
+        assign(pu,emitter=SCARS,Color=('LinearColor','float4(saturate((Particles.Age-.016)/.031)*1.10,Particles.CutReverse ? 1.0 : 0.0,1,Particles.CutFixed ? saturate((1.0-Particles.NormalizedAge)/.49) : 0.0)'))])
+    res=tool('GGYGOEditor.GGYGONiagaraCompileLibrary.ApplyAuthoringStackBatch',system={'refPath':system.get_path_name()},workItems=work)
+    if not res.get('bApplied'):
+        raise RuntimeError(res.get('error','空间斩痕制作失败'))
+    renderer=lib.authoring_add_renderer(system,SCARS,ue.load_class(None,'/Script/Niagara.NiagaraMeshRendererProperties'))
+    if not renderer.succeeded:
+        raise RuntimeError(renderer.error)
+    bind=NiagaraBuilder.attribute_binding
+    for props in ({'bOverrideMaterials':True},dict(Meshes=[dict(Mesh=mesh.get_path_name())],OverrideMaterials=[dict(ExplicitMat=mat.get_path_name())],
+                PositionBinding=bind('Particles.Position'),ScaleBinding=bind('Particles.Scale'),
+                MeshOrientationBinding=bind('Particles.MeshOrientation'),ColorBinding=bind('Particles.Color'))):
+        result=lib.authoring_set_renderer_data(system,SCARS,renderer.renderer_index,json.dumps(props))
         if not result.succeeded:
             raise RuntimeError(result.error)
-    configure(original[0].renderer_index,dict(ColorBinding=bind('Particles.EdgeColor')))
-    mark = lib.authoring_add_renderer(system,emitter,ue.load_class(None,'/Script/Niagara.NiagaraRibbonRendererProperties'))
-    if not mark.succeeded:
-        raise RuntimeError(mark.error)
-    configure(mark.renderer_index,{'Shape':'Custom'})
-    # 靠近切刃收薄，背棱厚。正反面有独立斜面，从侧视也能读出刀痕的宽腹。
-    profile = [(-.50,0),(-.35,-.078),(-.11,-.145),(.25,-.098),(.45,-.027),
-               (.50,0),(.40,.060),(.16,.192),(-.12,.255),(-.39,.131)]
-    verts = [dict(Position=dict(X=x,Y=y),TextureV=x+.50) for x,y in profile]
-    configure(mark.renderer_index,dict(Material=mat.get_path_name(),FacingMode='CustomSideVector',MaxNumRibbons=3,
-        bUseGPUInit=False,TessellationMode='Automatic',CustomVertices=verts,bCustomShapeClosed=True,
-        PositionBinding=bind('Particles.CutCenter'),RibbonWidthBinding=bind('Particles.CutWidth'),
-        RibbonFacingBinding=bind('Particles.RibbonFacing'),ColorBinding=bind('Particles.CutColor')))
-    linked = lib.configure_ribbon_unique_id(system,emitter,mark.renderer_index,'Particles.BladeStroke')
-    if not linked.applied:
-        raise RuntimeError(linked.error)

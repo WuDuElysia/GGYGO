@@ -7,7 +7,7 @@ import unreal as ue
 PROJECT = Path(ue.Paths.convert_relative_path_to_full(ue.Paths.project_dir()))
 sys.path.insert(0, str(PROJECT / 'AAADocs/Scripts'))
 from pyrios_normal03_finisher import refine_normal03
-from pyrios_multicut_marks import add_opening_marks, slash_material
+from pyrios_multicut_marks import SCARS, VERSION as CUT_VERSION, add_opening_marks, scar_material
 from pyrios_prism_material import build_prism_materials
 from zzz_fx_material_ue import configure_native_custom
 from zzz_fx_niagara_ue import NiagaraBuilder, TYPES, EMPTY_EMITTER
@@ -21,7 +21,7 @@ EMITTER = 'Emberglow_LiveBlade'
 STAMP = 'Pyrios.EmberglowBrush'
 VERSION = 'live-v1'
 SYSTEM_VERSION = 'weapon-bevel-v3'
-FINISHER_BLADE = 'Pyrios_FinisherBlade'
+FINISHER_BLADE = 'Pyrios_FinalSweep'
 SYSTEMS = (
     ('NS_Pyrios_Normal01_MainComposition_2a7c90937cab', 0.23),
     ('NS_Pyrios_Normal02_MainComposition_d7bd1888f9a7', 0.245),
@@ -155,6 +155,7 @@ def add_live_blade(system, mat, end, accents=None, combo_finisher=False):
         # 每次变招重新接带，前一刀的余光独立消散。分段只划分表现，不驱动动作。
         body += '''
 float phase = Emitter.Age;
+{{OUT:Particles.RibbonWidth}} = phase < 0.40 ? 0.0 : Width;
 {{OUT:Particles.BladeStroke}}.Index =
     (phase < 0.095) ? 0 :
     (phase < 0.20)  ? 1 :
@@ -226,7 +227,7 @@ def style_existing(system, mat, live):
     changed=False
     for em in LIB.authoring_get_system_summary(system).emitters:
         name=em.emitter_name
-        if name in (EMITTER, FINISHER_BLADE):
+        if name in (EMITTER, FINISHER_BLADE, SCARS):
             continue
         # 固定的可见刀弧由活刃带替代。签名场仍由原动作场配置验证并消费。
         suppress=live and (name.startswith('M00_root_Trail_rot_') or name in SECONDARY_CUT or name in AIRBORNE_SMOKE)
@@ -262,7 +263,7 @@ def finish(system):
 def build():
     material()  # 确保旧暖金特殊技依赖的笔触贴图已经导入。
     variants = build_prism_materials(DAWN)
-    cut_surface = slash_material(DAWN)
+    cut_surface = scar_material(DAWN)
     for (name,end), style in zip(SYSTEMS, ('Draw','Crescent')):
         system=ue.load_asset(SKILL+name)
         require(system is not None,'缺正式普攻系统 '+name)
@@ -286,14 +287,15 @@ def build():
         styled = style_existing(system, variants[style], False)
         ground_or_sweep = refine_normal03(system, DAWN, tool, target, assign, weapon_frame)
         weapon_added = False
-        if '_Unit00_' in system.get_name() and EDITOR.get_metadata_tag(system,'Pyrios.Normal03MultiCut') != 'honed-3':
-            existing = [entry.emitter_name for entry in LIB.authoring_get_system_summary(system).emitters]
-            if EMITTER in existing:
-                require(EDITOR.get_metadata_tag(system,STAMP)==SYSTEM_VERSION,'三段刀带来源不符 '+system.get_name())
-                tool('NiagaraToolsets.NiagaraToolset_System.RemoveEmitter',emitterRef={'system':ref(system),'emitterName':EMITTER})
+        if '_Unit00_' in system.get_name() and EDITOR.get_metadata_tag(system,'Pyrios.Normal03MultiCut') != CUT_VERSION:
+            existing = {entry.emitter_name for entry in LIB.authoring_get_system_summary(system).emitters}
+            for previous in ('Pyrios_FinisherBlade', EMITTER):
+                if previous in existing:
+                    require(EDITOR.get_metadata_tag(system,STAMP)==SYSTEM_VERSION,'三段刀带来源不符 '+system.get_name())
+                    tool('NiagaraToolsets.NiagaraToolset_System.RemoveEmitter',emitterRef={'system':ref(system),'emitterName':previous})
             add_live_blade(system, variants['Cross'], 0.84, combo_finisher=True)
-            add_opening_marks(system, FINISHER_BLADE, cut_surface, tool, assign)
-            EDITOR.set_metadata_tag(system,'Pyrios.Normal03MultiCut','honed-3')
+            add_opening_marks(system, DAWN, cut_surface, tool, target, assign, module, weapon_frame)
+            EDITOR.set_metadata_tag(system,'Pyrios.Normal03MultiCut',CUT_VERSION)
             weapon_added = True
         if weapon_added or ground_or_sweep or styled:
             finish(system)
