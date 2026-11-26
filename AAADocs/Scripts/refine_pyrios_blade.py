@@ -7,6 +7,7 @@ import unreal as ue
 PROJECT = Path(ue.Paths.convert_relative_path_to_full(ue.Paths.project_dir()))
 sys.path.insert(0, str(PROJECT / 'AAADocs/Scripts'))
 from pyrios_normal03_finisher import refine_normal03
+from pyrios_multicut_marks import add_opening_marks, slash_material
 from pyrios_prism_material import build_prism_materials
 from zzz_fx_material_ue import configure_native_custom
 from zzz_fx_niagara_ue import NiagaraBuilder, TYPES, EMPTY_EMITTER
@@ -20,6 +21,7 @@ EMITTER = 'Emberglow_LiveBlade'
 STAMP = 'Pyrios.EmberglowBrush'
 VERSION = 'live-v1'
 SYSTEM_VERSION = 'weapon-bevel-v3'
+FINISHER_BLADE = 'Pyrios_FinisherBlade'
 SYSTEMS = (
     ('NS_Pyrios_Normal01_MainComposition_2a7c90937cab', 0.23),
     ('NS_Pyrios_Normal02_MainComposition_d7bd1888f9a7', 0.245),
@@ -90,16 +92,16 @@ def material(warm=False):
 def ref(obj):
     return {'refPath': obj.get_path_name()}
 
-def module(script, asset, **inputs):
-    return dict(kind='Module',emitterName=EMITTER,scriptName=script,
+def module(script, asset, *, emitter=EMITTER, **inputs):
+    return dict(kind='Module',emitterName=emitter,scriptName=script,
         moduleAsset={'refPath':asset+'.'+asset.rsplit('/',1)[-1]},
         inputs=[dict(namePath=[name],inputData=value) for name,value in inputs.items()])
 
 def target(name, kind):
     return dict(name='Particles.'+name, type={'classStructOrEnum':{'refPath':TYPES[kind]}})
 
-def assign(script, **rows):
-    return dict(kind='Assignments',emitterName=EMITTER,scriptName=script,
+def assign(script, *, emitter=EMITTER, **rows):
+    return dict(kind='Assignments',emitterName=emitter,scriptName=script,
                 assignments=[dict(**target(name,kind),hlslExpression=value) for name,(kind,value) in rows.items()])
 
 def blade_section():
@@ -134,9 +136,10 @@ float3 Axis=EndPoint-A; float Width=length(Axis);
     return di, body
 
 def add_live_blade(system, mat, end, accents=None, combo_finisher=False):
-    made=LIB.authoring_add_emitter(system,ue.load_asset(EMPTY_EMITTER),EMITTER)
+    emitter = FINISHER_BLADE if combo_finisher else EMITTER
+    made=LIB.authoring_add_emitter(system,ue.load_asset(EMPTY_EMITTER),emitter)
     require(made.succeeded,made.error)
-    data=LIB.authoring_set_emitter_data(system,EMITTER,json.dumps({'bLocalSpace':False,'CalculateBoundsMode':'Dynamic',
+    data=LIB.authoring_set_emitter_data(system,emitter,json.dumps({'bLocalSpace':False,'CalculateBoundsMode':'Dynamic',
         'AttributesToPreserve':['Particles.UniqueID']}))
     require(data.succeeded,data.error)
     di, body = weapon_frame()
@@ -166,32 +169,32 @@ float phase = Emitter.Age;
     lifetime = '0.18' if combo_finisher else '0.14'
     if accents:
         lifetime = '0.205'
-    work=[module(eu,'/Niagara/Modules/Emitter/EmitterState',**{
+    work=[module(eu,'/Niagara/Modules/Emitter/EmitterState',emitter=emitter,**{
         'Life Cycle Mode':NiagaraBuilder.enum('/Niagara/Enums/ENiagaraEmitterLifeCycleMode.ENiagaraEmitterLifeCycleMode','NewEnumerator1','Self'),
         'Loop Behavior':NiagaraBuilder.enum('/Niagara/Enums/ENiagara_EmitterStateOptions.ENiagara_EmitterStateOptions','NewEnumerator1','Once'),
         'Loop Duration':num('Float',end)}),
-        module(eu,'/Niagara/Modules/Emitter/SpawnPerFrame',**{'Spawn Count':num('Int32',1)}),
-        assign(ps,Lifetime=('Float',lifetime),Color=('LinearColor','float4(1,1,1,1)')),
-        dict(kind='ParticleRead',emitterName=EMITTER,scriptName=ps,interfaceTemplate=ref(di),
+        module(eu,'/Niagara/Modules/Emitter/SpawnPerFrame',emitter=emitter,**{'Spawn Count':num('Int32',1)}),
+        assign(ps,emitter=emitter,Lifetime=('Float',lifetime),Color=('LinearColor','float4(1,1,1,1)')),
+        dict(kind='ParticleRead',emitterName=emitter,scriptName=ps,interfaceTemplate=ref(di),
              outputTargets=outputs,
              hlslBodyTemplate=body),
-        assign(ps,Alive=('Bool','Particles.Alive && Particles.BladeHasSample')),
-        module(pu,'/Niagara/Modules/Update/Lifetime/ParticleState'),
-        assign(pu,Color=('LinearColor','float4(1,1,1,pow(saturate(1.0-Particles.NormalizedAge),1.15))'))]
+        assign(ps,emitter=emitter,Alive=('Bool','Particles.Alive && Particles.BladeHasSample')),
+        module(pu,'/Niagara/Modules/Update/Lifetime/ParticleState',emitter=emitter),
+        assign(pu,emitter=emitter,Color=('LinearColor','float4(1,1,1,pow(saturate(1.0-Particles.NormalizedAge),1.15))'))]
     if accents:
         # 同一次挥刀的历史采样沿刀尖方向略微外展。出生帧先给渲染器有效坐标。
         echo_position = 'Particles.Position - Particles.RibbonFacing * Particles.RibbonWidth * '
         for script, expansion in [(ps, '0.35'), (pu, '(0.35 + 0.18 * saturate((Particles.NormalizedAge - 0.05) / 0.8))')]:
-            work.append(assign(script, PrismEchoPosition=('Position',echo_position+expansion),
+            work.append(assign(script, emitter=emitter, PrismEchoPosition=('Position',echo_position+expansion),
                                PrismEchoWidth=('Float','Particles.RibbonWidth * 0.115')))
         # 只选挥刀约 0.11 秒时的一个轨迹采样，让折光留在对应的外刃上。
-        work.append(assign(ps, PrismFlareTag=('Int','Emitter.Age >= 0.11 && (Emitter.Age - Engine.DeltaTime) < 0.11 ? 1 : 0'),
+        work.append(assign(ps,emitter=emitter, PrismFlareTag=('Int','Emitter.Age >= 0.11 && (Emitter.Age - Engine.DeltaTime) < 0.11 ? 1 : 0'),
                            PrismFlarePosition=('Position','Particles.Position - Particles.RibbonFacing * Particles.RibbonWidth * 0.31'),
                            PrismFlareSize=('Vector2','float2(75,75)')))
     res=tool('GGYGOEditor.GGYGONiagaraCompileLibrary.ApplyAuthoringStackBatch',system=ref(system),workItems=work)
     require(res.get('bApplied'),res.get('error','刀光栈制作失败'))
     def add_blade_renderer(surface, position, width, solid):
-        renderer = LIB.authoring_add_renderer(system, EMITTER, ue.load_class(None, '/Script/Niagara.NiagaraRibbonRendererProperties'))
+        renderer = LIB.authoring_add_renderer(system, emitter, ue.load_class(None, '/Script/Niagara.NiagaraRibbonRendererProperties'))
         require(renderer.succeeded, renderer.error)
         binding = NiagaraBuilder.attribute_binding
         props = dict(Material=surface.get_path_name(), FacingMode='CustomSideVector', Shape='Plane',
@@ -199,31 +202,31 @@ float phase = Emitter.Age;
                      PositionBinding=binding(position), RibbonWidthBinding=binding(width),
                      RibbonFacingBinding=binding('Particles.RibbonFacing'))
         if solid:
-            enabled = LIB.authoring_set_renderer_data(system, EMITTER, renderer.renderer_index, json.dumps({'Shape':'Custom'}))
+            enabled = LIB.authoring_set_renderer_data(system, emitter, renderer.renderer_index, json.dumps({'Shape':'Custom'}))
             require(enabled.succeeded, enabled.error)
             props.update(Shape='Custom', CustomVertices=blade_section(), bCustomShapeClosed=True)
-        result = LIB.authoring_set_renderer_data(system, EMITTER, renderer.renderer_index, json.dumps(props))
+        result = LIB.authoring_set_renderer_data(system, emitter, renderer.renderer_index, json.dumps(props))
         require(result.succeeded, result.error)
-        link = LIB.configure_ribbon_unique_id(system, EMITTER, renderer.renderer_index, 'Particles.BladeStroke' if combo_finisher else '')
+        link = LIB.configure_ribbon_unique_id(system, emitter, renderer.renderer_index, 'Particles.BladeStroke' if combo_finisher else '')
         require(link.applied, link.error)
 
     add_blade_renderer(mat, 'Particles.Position', 'Particles.RibbonWidth', True)
     if accents:
         add_blade_renderer(accents['Echo'], 'Particles.PrismEchoPosition', 'Particles.PrismEchoWidth', False)
-        sprite = LIB.authoring_add_renderer(system, EMITTER, ue.load_class(None, '/Script/Niagara.NiagaraSpriteRendererProperties'))
+        sprite = LIB.authoring_add_renderer(system, emitter, ue.load_class(None, '/Script/Niagara.NiagaraSpriteRendererProperties'))
         require(sprite.succeeded, sprite.error)
         binding = NiagaraBuilder.attribute_binding
         props = dict(Material=accents['Flare'].get_path_name(), PositionBinding=binding('Particles.PrismFlarePosition'),
                      SpriteSizeBinding=binding('Particles.PrismFlareSize'), RendererVisibility=1,
                      RendererVisibilityTagBinding=binding('Particles.PrismFlareTag'))
-        result = LIB.authoring_set_renderer_data(system, EMITTER, sprite.renderer_index, json.dumps(props))
+        result = LIB.authoring_set_renderer_data(system, emitter, sprite.renderer_index, json.dumps(props))
         require(result.succeeded, result.error)
 
 def style_existing(system, mat, live):
     changed=False
     for em in LIB.authoring_get_system_summary(system).emitters:
         name=em.emitter_name
-        if name==EMITTER:
+        if name in (EMITTER, FINISHER_BLADE):
             continue
         # 固定的可见刀弧由活刃带替代。签名场仍由原动作场配置验证并消费。
         suppress=live and (name.startswith('M00_root_Trail_rot_') or name in SECONDARY_CUT or name in AIRBORNE_SMOKE)
@@ -259,6 +262,7 @@ def finish(system):
 def build():
     material()  # 确保旧暖金特殊技依赖的笔触贴图已经导入。
     variants = build_prism_materials(DAWN)
+    cut_surface = slash_material(DAWN)
     for (name,end), style in zip(SYSTEMS, ('Draw','Crescent')):
         system=ue.load_asset(SKILL+name)
         require(system is not None,'缺正式普攻系统 '+name)
@@ -282,8 +286,14 @@ def build():
         styled = style_existing(system, variants[style], False)
         ground_or_sweep = refine_normal03(system, DAWN, tool, target, assign, weapon_frame)
         weapon_added = False
-        if '_Unit00_' in system.get_name() and EDITOR.get_metadata_tag(system,STAMP) != SYSTEM_VERSION:
+        if '_Unit00_' in system.get_name() and EDITOR.get_metadata_tag(system,'Pyrios.Normal03MultiCut') != 'honed-3':
+            existing = [entry.emitter_name for entry in LIB.authoring_get_system_summary(system).emitters]
+            if EMITTER in existing:
+                require(EDITOR.get_metadata_tag(system,STAMP)==SYSTEM_VERSION,'三段刀带来源不符 '+system.get_name())
+                tool('NiagaraToolsets.NiagaraToolset_System.RemoveEmitter',emitterRef={'system':ref(system),'emitterName':EMITTER})
             add_live_blade(system, variants['Cross'], 0.84, combo_finisher=True)
+            add_opening_marks(system, FINISHER_BLADE, cut_surface, tool, assign)
+            EDITOR.set_metadata_tag(system,'Pyrios.Normal03MultiCut','honed-3')
             weapon_added = True
         if weapon_added or ground_or_sweep or styled:
             finish(system)
