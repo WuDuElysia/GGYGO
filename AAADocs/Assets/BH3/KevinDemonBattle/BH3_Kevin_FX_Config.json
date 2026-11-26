@@ -4,6 +4,12 @@
   "authorship": "project_authored",
   "asset_root": "/Game/Characters/Boss/Kevin/DemonBattle/FX",
   "revision": "R1",
+  "blade_flame": {
+    "system": "/Game/Characters/Boss/Kevin/DemonBattle/FX/BladeFire/NS_Kevin_BladeFire",
+    "socket": "KevinWeaponTraceEnd",
+    "normal_stop_mode": "DestroyImmediately",
+    "effects": ["FireWeaponTrail", "FireStrike"]
+  },
   "status": "assets_saved_independent_readback_passed_runtime_visual_pending",
   "references": [
     {

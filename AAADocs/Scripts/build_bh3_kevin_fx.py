@@ -240,6 +240,14 @@ def make_plan(config):
             if action.get("contract_kind") == "presentation":
                 plan["action_windows"][-1].update(trigger=action["trigger"], movement_mode=action["movement_mode"],
                                                   section=action["section"], damage_mode="none")
+            blade = config.get("blade_flame")
+            if blade and phase["effect"] in blade["effects"]:
+                require(phase["space"] == "Attached" and phase["socket_name"] == blade["socket"]
+                        and transform == {"translation": [0, 0, 0], "rotation_degrees": [0, 0, 0], "scale": [1, 1, 1]},
+                        "火刃必须沿真实刀尖挂点原位挂载")
+                plan["action_windows"][-1]["system_units"].append(
+                    {"system": blade["system"], "field_settings": {"mode": "NoCustomField"}})
+                plan["action_windows"][-1]["normal_stop_mode"] = blade["normal_stop_mode"]
     plan["hit_cues"] = {action_id: {**row, "system": plan["systems"][row["effect"]]["package"],
         "package": asset_path("Cues", "GC_Kevin_" + action_id + "Hit", {"source": row,
                     "system": plan["systems"][row["effect"]]["package"]})}
