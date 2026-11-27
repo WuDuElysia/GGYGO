@@ -6,6 +6,9 @@ import unreal as ue
 from zzz_fx_material_ue import configure_native_custom
 
 
+PRISM_VERSION = 'slow-reference-crescent-2'
+
+
 # 同一套 UV 跟随实际挥刀曲面。分色由笔触控制，延迟外弦由粒子寿命控制。
 SHADER = """
 float u = saturate(UV.x);
@@ -46,12 +49,12 @@ if (Tier > 4.5)
 }
 else if (Tier > 3.5)
 {
-    // 外弦在主刀之后显色，薄金线围着紫色的余辉逐渐散去。
+    // 第二刀扬起后，较宽的刀面先散，留下冷蓝色的一道细弧。
     float edge = 1.0 - smoothstep(0.05, 0.21, abs(v - 0.62));
     float glass = 1.0 - smoothstep(0.12, 0.47, abs(v - 0.53));
     float taper = smoothstep(0.0, 0.17, u) * (1.0 - smoothstep(0.87, 1.0, u));
-    rgb = taper * (glass * amethyst * 0.67 + edge * lerp(amber, turquoise, u * u));
-    opacity = taper * max(0.62 * glass, edge);
+    rgb = taper * (glass * float3(.025,.075,.39) + edge * lerp(float3(.08,.29,1.12),float3(.34,.65,1.68),u));
+    opacity = taper * max(.24 * glass, .86*edge);
     envelope = smoothstep(0.035, 0.38, fade) * (1.0 - smoothstep(0.65, 0.94, fade));
 }
 else if (Tier > 2.5)
@@ -80,10 +83,19 @@ if (Tier < 3.5)
     float3 metal = lerp(float3(.025,.017,.105),float3(.18,.32,.84),face*cavity);
     float3 silverTint = lerp(float3(.28,.54,1.55),float3(.95,1.5,2.45),shimmer);
     float3 rimTint = SourceEdge.rgb/max(.001,max(SourceEdge.r,max(SourceEdge.g,SourceEdge.b)));
-    opacity = saturate(active*(.61+.20*cavity) + edge*.78);
-    rgb = active*(metal*.70 + silver*silverTint*(.32+.82*shimmer) + glint*float3(.39,.37,.93));
-    rgb += edge*(rimTint*.95 + float3(.72,.93,1.76)) + active*fresnel*SourceHighlight.r*float3(.28,.30,1.01);
-    envelope *= smoothstep(0.0,0.45,fade);
+    // 新采样的刀尖先亮。刀身按原烟纹变透，旧采样在同一条武器轨迹上留下窄弧。
+    float tip = smoothstep(.65,.97,v);
+    float head = smoothstep(.52,.95,fade);
+    float mass = active*(.28+.55*head)*(.42+.58*body);
+    float lip = exp2(-220*(1-v)*(1-v))*(.57+.43*edge);
+    float back = exp2(-115*(v-.83)*(v-.83))*(.65+.35*body);
+    opacity = saturate(mass*(.55+.27*cavity) + lip*.94 + head*edge*.20 + back*.76);
+    rgb = mass*(metal*.60 + silver*silverTint*(.19+.45*shimmer) + glint*float3(.18,.25,.67));
+    rgb += lip*lerp(float3(.13,.34,1.4),float3(1.95,2.8,4.5),head)
+        + tip*head*edge*(.25*rimTint+float3(.27,.52,1.05))
+        + mass*fresnel*SourceHighlight.r*float3(.18,.27,.84)
+        + back*lerp(float3(.016,.034,.24),float3(.052,.13,.53),face);
+    envelope = sqrt(fade);
 }
 Coverage = saturate(opacity * envelope);
 return rgb * envelope;
@@ -108,7 +120,7 @@ def build_prism_materials(directory):
     material_name = 'M_Pyrios_PrismInlay'
     path = directory + '/' + material_name
     master = ue.load_asset(path) if editor.does_asset_exist(path) else None
-    if not master or editor.get_metadata_tag(master, 'Pyrios.PrismArt') != 'fluted-steel-1':
+    if not master or editor.get_metadata_tag(master, 'Pyrios.PrismArt') != PRISM_VERSION:
         texture.set_editor_properties(dict(srgb=False, compression_settings=ue.TextureCompressionSettings.TC_MASKS,
             address_x=ue.TextureAddress.TA_CLAMP, address_y=ue.TextureAddress.TA_CLAMP))
         if not editor.save_loaded_asset(texture, False):
@@ -156,7 +168,7 @@ def build_prism_materials(directory):
             raise RuntimeError('棱彩透明度未连接')
         if edit.recompile_material(master):
             raise RuntimeError('棱彩母材质编译失败')
-        editor.set_metadata_tag(master, 'Pyrios.PrismArt', 'fluted-steel-1')
+        editor.set_metadata_tag(master, 'Pyrios.PrismArt', PRISM_VERSION)
         if not editor.save_loaded_asset(master, False):
             raise RuntimeError('棱彩母材质保存失败')
     variants = {}

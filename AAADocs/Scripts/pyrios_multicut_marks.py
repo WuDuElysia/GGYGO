@@ -10,7 +10,7 @@ from zzz_fx_niagara_ue import EMPTY_EMITTER, NiagaraBuilder
 
 SCARS = 'Pyrios_AftercutMarks'
 VERSION = 'three-incisions-2'
-SURFACE_VERSION = 'rift-facets-2'
+SURFACE_VERSION = 'slow-reference-edge-2'
 # Normal03 的 03/09_MeleeTrail 原 andi_main 刀面，以及三次 MeleeTrail 共用的 light_edge 与高光遮罩。
 TEXTURES = {'Face': 'Eff_MeleeTrail_239_4f346e732ad4', 'Edge': 'Eff_MeleeTrail_089_LYX_01_2d474876c2a0',
             'Highlight': 'Eff_MeleeTrail_116_YZ_06_f2c948b7ce36'}
@@ -40,23 +40,29 @@ float incision = (1-smoothstep(.025,.115+fwidth(grain),abs(grain-.50)))*profile;
 // 暗腔占据真实切面的中央。两侧折唇错开，视角改变时背壁沿刀宽错动。
 float parallax = .13 * dot(reflect(-V,N),normalize(float3(.42,.64,-.35)));
 float seam = v - (.14*(profile-.5) + .075*sin(12*u + 1.8*gleam) + parallax);
-float throat = 1-smoothstep(.19,.45,abs(seam));
+float throat = 1-smoothstep(.14,.38,abs(seam));
 float iceLip = 1-smoothstep(.025,.12+fwidth(seam),abs(seam-.35));
 float farLip = 1-smoothstep(.018,.095+fwidth(seam),abs(seam+.31));
 float cover = saturate(body + lip*.76 + flash*.32 + shadow*.68 + bevel*.49 + incision*.39);
 float3 haze = lerp(float3(.11,.12,.55),float3(.37,.55,1.25),saturate(.52+.48*v));
 float3 rim = lerp(float3(1.35,1.53,2.45), Edge.rgb/max(.001,ridge)*2.4,.35);
+// 新刀的亮点沿出刃方向走；旧刀腹先退，窄边在下一刀经过时仍可读。
+float pulseTravel = saturate(.72*saturate(Progress)+.28*(1-ageFade));
+float pulse = exp2(-40*(travel-pulseTravel)*(travel-pulseTravel));
+float wake = smoothstep(.08,.9,ageFade) * (.28+.72*pulse);
 float visibility = reveal*tipFade*ageFade;
-float cutIn = reveal*tipFade*smoothstep(.015,.47,ageFade);
-Coverage = saturate(max(visibility*cover,cutIn*(.96*throat+.80*iceLip+.72*farLip)));
+float cutIn = reveal*tipFade*smoothstep(.06,.76,ageFade);
+float edgeHold = reveal*tipFade*sqrt(ageFade);
+Coverage = saturate(max(visibility*cover*(.36+.64*wake),
+    cutIn*throat*(.93+.06*wake) + edgeHold*(.80*iceLip+.66*farLip)));
 float3 folded = lerp(float3(.015,.010,.071),float3(.12,.22,.76),faceLight);
 float3 outer = body*haze+shadow*folded+bevel*float3(.58,.84,2.05)
     +incision*(.28+.76*faceLight)*lerp(float3(.18,.27,1.08),float3(1.36,1.56,2.45),sheen)
     +lip*rim+flash*float3(.65,.78,1.25);
-float3 walls = lerp(float3(.011,.004,.044),float3(.075,.027,.21),faceLight)*(.35+.65*profile);
-float3 inner = iceLip*(.48+.85*gleam)*float3(.47,.92,1.9)
-             + farLip*(.23+.77*profile)*lerp(float3(.36,.07,.72),float3(.87,.38,.82),sheen);
-return visibility*outer*(1-.96*throat) + cutIn*(walls*throat+inner);
+float3 walls = lerp(float3(.005,.009,.058),float3(.026,.053,.26),faceLight)*(.35+.65*profile);
+float3 inner = iceLip*(.34+.76*gleam)*lerp(float3(.15,.46,1.65),float3(2.3,3.0,4.6),pulse)
+    + farLip*(.14+.65*profile)*lerp(float3(.10,.17,.66),float3(.38,.36,.94),sheen);
+return visibility*outer*(.28+.72*wake)*(1-.86*throat) + cutIn*walls*throat + edgeHold*inner;
 """
 
 
@@ -68,7 +74,7 @@ def scar_material(directory):
         mat = ue.load_asset(path)
         if editor.get_metadata_tag(mat,'Pyrios.Aftercut') == SURFACE_VERSION:
             return mat
-        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('three-incisions-1', 'source-edge-1', 'refracted-edge-1', 'refracted-edge-2', 'source-lamella-1', 'source-lamella-2', 'fluted-scar-1', VERSION):
+        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('three-incisions-1', 'source-edge-1', 'refracted-edge-1', 'refracted-edge-2', 'source-lamella-1', 'source-lamella-2', 'fluted-scar-1','rift-facets-2','slow-reference-edge-1', VERSION):
             raise RuntimeError('已有未识别的斩痕材质 '+path)
         edit.delete_all_material_expressions(mat)
     else:
