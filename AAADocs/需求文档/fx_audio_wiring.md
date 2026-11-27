@@ -98,6 +98,8 @@
 
 11 月 27 日按 1emonTxT 的佩洛伊斯动作慢放复核。录像 0.4–0.8 秒的横斩由亮弧退成线，2.8–3.2 秒的上挑也先收刀面。4.1–5.2 秒，斜痕在前，横光随后穿过，旧轨迹与新亮刃短暂交叠。前两段用武器真实采样的宽度和寿命控制亮刃及尾迹，第三段用各刀自身的显影方向控制流光。慢放的秒数仅作参考定位。UE 5.9 D3D12 单机从正式输入打完三段，蒙太奇自然收尾，特效释放。[慢放参考](https://www.bilibili.com/video/BV1ZdLQ6SEYF/?t=4) · [改前改后实拍](../../Saved/Codex/PyriosSlowReference/佩洛伊斯刀光实机对照.mp4) · [运行日志](../../Saved/Codex/PyriosBladeReview/slowref_edge.log)
 
+正式普攻由 GA 的三段 FX 配置启动 Niagara。前两段和第三段后半段用 Ribbon 采样武器，新的采样保留全刃，旧采样围绕各自记录的刀尖收窄。第三段起手的三道空间斩各由 Mesh 粒子生成，入刀端固定，先沿出刀方向伸长，随后刃腹和外围折射一起变窄。三刀方向与寿命按录像重建。Windows D3D12 独立 PIE 通过正式攻击输入完成三连，收招后 FX 正常释放。[同机位改前改后慢放](../../Saved/Codex/PyriosTrailFlow/刀轨收尾实机慢放.mp4) · [Niagara 渲染器绑定](../../Saved/Codex/PyriosBladeReview/trail_flow_finish.log) · [运行日志](../../Saved/Codex/PyriosBladeReview/trail_flow.log)
+
 本地从绝区零 3.3.0 佩洛伊斯的七个战斗 Prefab 读取粒子、渲染器、材质及纹理。原版实录 8.57–8.85 秒可见三道长痕交错，近处地面随之扭曲。UE 的切面、色彩与波动时序是对照录像后的美术重建。完整原 Shader 与上层逐招调用时序仍未恢复。特殊技和强化特殊技已恢复 34 个渲染槽各自的材质，两招在独立 D3D12 PIE 临时授予后通过输入触发，分别命中 3 次、5 次，收招后 FX 正常释放。[原版动作演示](https://www.bilibili.com/video/BV1sGEy6mEKe/?p=2&t=64) · [本地原包读取日志](../../Saved/Codex/PyriosSourceReview/live.log) · [技能运行日志](../../Saved/Codex/PyriosBladeReview/volume_special.log)
 
 本轮在玩家视角和侧面用正式攻击输入打完三段。浅色场地上能分辨切口中央的暗槽、两侧的折边与掠光。在同一蒙太奇姿态关闭再恢复折射，切口附近的角色轮廓与地面线条随开关偏移。暂停取样后继续播放的诊断场次在第三段失去 CMC 移动意图来源，未通过自然收招；侧面连续出招另用全程未暂停的实例验证。[双机位慢放](../../Saved/Codex/PyriosSourceReview/刀光与空间波动.mp4) · [同姿态折射对照](../../Saved/Codex/PyriosSourceReview/刀痕局部折射对照.jpg) · [玩家视角日志](../../Saved/Codex/PyriosBladeReview/rift_game.log) · [连续侧面日志](../../Saved/Codex/PyriosBladeReview/rift_continuous_side.log) · [暂停折射取样日志](../../Saved/Codex/PyriosBladeReview/rift_side.log)
