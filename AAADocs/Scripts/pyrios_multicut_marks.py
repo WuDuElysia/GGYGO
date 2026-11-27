@@ -4,7 +4,7 @@ from math import sin, pi
 
 import unreal as ue
 
-from pyrios_blade_reach import CUT_LENGTH
+from pyrios_blade_reach import CUT_BURSTS, CUT_CENTER, CUT_DIRECTION, CUT_LENGTH, CUT_LOCK, CUT_POSITION
 
 from pyrios_authored_arc import cut_brush
 from zzz_fx_material_ue import configure_native_custom
@@ -175,42 +175,37 @@ def add_opening_marks(system,directory,mat,tool,target,assign,module,weapon_fram
         'Life Cycle Mode':NiagaraBuilder.enum('/Niagara/Enums/ENiagaraEmitterLifeCycleMode.ENiagaraEmitterLifeCycleMode','NewEnumerator1','Self'),
         'Loop Behavior':NiagaraBuilder.enum('/Niagara/Enums/ENiagara_EmitterStateOptions.ENiagara_EmitterStateOptions','NewEnumerator1','Once'),
         'Loop Duration':num('Float',.60)})]
-    for t in (.031,.095,.194):
+    for t in CUT_BURSTS:
         work.append(module(eu,'/Niagara/Modules/Emitter/SpawnBurst_Instantaneous',emitter=SCARS,
                            **{'Spawn Time':num('Float',t),'Spawn Count':num('Int32',1)}))
     di,sample=weapon_frame()
     sample += """
 {{OUT:Particles.HasContact}} = Count == 2 && Base >= 0 && Tip >= 0 && Width > 1;
 {{OUT:Particles.Contact}} = A + Axis*.55;
-// 用同一武器骨的组件与世界旋转求角色局部对角线，不受武器甩动或相机转动影响。
-float3 D = normalize(float3(1,1,0));
-float3 BoneD = D + 2*cross(-LocalBR.xyz,cross(-LocalBR.xyz,D)+LocalBR.w*D);
-float3 PlaneAxis = BoneD + 2*cross(BR.xyz,cross(BR.xyz,BoneD)+BR.w*BoneD);
-{{OUT:Particles.SlashPlane}} = normalize(float3(PlaneAxis.xy,0));
 """
     def sample_weapon(stage):
         return dict(kind='ParticleRead', emitterName=SCARS, scriptName=stage,
                     interfaceTemplate={'refPath':di.get_path_name()}, hlslBodyTemplate=sample,
-                    outputTargets=[target('HasContact','Bool'), target('Contact','Position'), target('SlashPlane','Vector')])
+                    outputTargets=[target('HasContact','Bool'), target('Contact','Position')])
 
     work.extend([sample_weapon(ps),assign(ps,emitter=SCARS,Alive=('Bool','Particles.Alive && Particles.HasContact'),
         Lifetime=('Float','Particles.UniqueID == 0 ? .255 : (Particles.UniqueID == 1 ? .224 : .190)'),
-        CutStart=('Position','Particles.Contact'),CutFixed=('Bool','false'),CutReverse=('Bool','false'),
+        CutStart=('Position',CUT_CENTER),CutFixed=('Bool','false'),CutReverse=('Bool','false'),
         Position=('Position','Particles.Contact'),Scale=('Vector','float3(0,0,0)'),
         MeshOrientation=('Quat','float4(0,0,0,1)'),Color=('LinearColor','float4(0,0,0,0)')),
         module(pu,'/Niagara/Modules/Update/Lifetime/ParticleState',emitter=SCARS),sample_weapon(pu)])
-    # 用两次刀锋采样的中点落痕，在角色局部斩击面展开三个方向，显影从入刃指向出刃。
+    # 在实拍穿切的中点落痕，沿这一刀的入刃方向显影。
     # 锁定以后只显影和退光。角色转身、刀骨回摆都不再更新这道切口。
     work.extend([assign(pu,emitter=SCARS,
-        CutLockNow=('Bool','!Particles.CutFixed && Particles.HasContact && Particles.Age >= .021 && length((Particles.Contact-Particles.CutStart).xy)>4')),
+        CutLockNow=('Bool',CUT_LOCK)),
         assign(pu,emitter=SCARS,
-        CutDirection=('Vector','normalize(float3(Particles.SlashPlane.xy,Particles.UniqueID==0 ? -.32 : (Particles.UniqueID==1 ? -.22 : .035)))'),
+        CutDirection=('Vector',CUT_DIRECTION),
         CutLength=('Float',CUT_LENGTH)),
         assign(pu,emitter=SCARS,
-        Position=('Position','Particles.CutLockNow ? Particles.CutStart + (Particles.Contact-Particles.CutStart)*.52 : Particles.Position'),
+        Position=('Position',CUT_POSITION),
         Scale=('Vector','Particles.CutLockNow ? float3(Particles.CutLength,Particles.UniqueID==1 ? 32.0 : 27.0,18.0)*.01 : Particles.Scale'),
         MeshOrientation=('Quat','Particles.CutLockNow ? (Particles.CutDirection.x < -.9999 ? float4(0,0,1,0) : normalize(float4(0,-Particles.CutDirection.z,Particles.CutDirection.y,1+Particles.CutDirection.x))) : Particles.MeshOrientation'),
-        CutReverse=('Bool','Particles.CutLockNow ? dot(Particles.Contact-Particles.CutStart,Particles.CutDirection)<0.0 : Particles.CutReverse'),
+        CutReverse=('Bool','false'),
         CutFixed=('Bool','Particles.CutFixed || Particles.CutLockNow')),
         assign(pu,emitter=SCARS,Color=('LinearColor','float4(saturate((Particles.Age-.016)/.031)*1.10,Particles.CutReverse ? 1.0 : 0.0,1,Particles.CutFixed ? saturate((1.0-Particles.NormalizedAge)/.49) : 0.0)'))])
     res=tool('GGYGOEditor.GGYGONiagaraCompileLibrary.ApplyAuthoringStackBatch',system={'refPath':system.get_path_name()},workItems=work)

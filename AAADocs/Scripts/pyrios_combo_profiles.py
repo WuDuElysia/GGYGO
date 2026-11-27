@@ -3,7 +3,7 @@ import json
 import unreal as ue
 
 from pyrios_blade_reach import update_slash_inputs
-from pyrios_source_slashes import LIB, SOURCE_FIELDS, SOURCE_SURFACES
+from pyrios_source_slashes import LIB, SOURCE_FIELDS, SOURCE_SURFACES, SPACE_SWINGS
 from zzz_fx_niagara_ue import NiagaraBuilder, NS
 
 
@@ -16,22 +16,35 @@ FIRST_SWING = (
 )
 
 
-def first_blade_rotation():
-    q = 'Particles.SourceSlashOrientation'
+# 上挑在蓄力下探后反向，沿立面从脚下扫过身前，最后在举剑姿态退光。
+UPPERCUT_BURST = .133
+UPPERCUT_SWING = (
+    (0, 193), (.006, 218), (.014, 255), (.023, 271),
+    (.053, 318), (.077, 355), (.100, 368), (.123, 373),
+)
 
-    def left_product(x, y, z, w):
-        axis = f'float3({x},{y},{z})'
-        return (f'float4({w}*{q}.xyz+{q}.w*{axis}+cross({axis},{q}.xyz),'
-                f'{w}*{q}.w-dot({axis},{q}.xyz))')
 
-    yaw = str(FIRST_SWING[0][1])
-    for (start, previous), (end, target) in zip(FIRST_SWING, FIRST_SWING[1:]):
+def quat_product(source, rotation):
+    x, y, z, w = rotation
+    axis = f'float3({x},{y},{z})'
+    return (f'float4({w}*{source}.xyz+{source}.w*{axis}+cross({axis},{source}.xyz),'
+            f'{w}*{source}.w-dot({axis},{source}.xyz))')
+
+
+def sweep_rotation(source, keys, plane_basis, normal_times_basis):
+    yaw = str(keys[0][1])
+    for (start, previous), (end, target) in zip(keys, keys[1:]):
         yaw += f'+({target-previous})*saturate((Particles.Age-{start:.3f})/{end-start:.3f})'
     half = f'radians({yaw})*0.5'
-    # 左乘挥剑平面基准；第二个基底等于该平面单位法向四元数乘第一个基底。
-    base = left_product(-.0114304, .2535602, .1570965, .9544113)
-    normal_times_base = left_product(.0214334, -.0111426, .9869470, -.1592350)
-    return f'normalize(cos({half})*{base}+sin({half})*{normal_times_base})'
+    base = quat_product(source, plane_basis)
+    along_normal = quat_product(source, normal_times_basis)
+    return f'normalize(cos({half})*{base}+sin({half})*{along_normal})'
+
+
+def first_blade_rotation():
+    return sweep_rotation('Particles.SourceSlashOrientation', FIRST_SWING,
+                          (-.0114304, .2535602, .1570965, .9544113),
+                          (.0214334, -.0111426, .9869470, -.1592350))
 
 
 # 半径只收在宽雾和直射白光上。地面裂纹、岩块与电弧继续使用原范围。
@@ -93,8 +106,6 @@ def apply_combo_profile(system, tool, assign):
                 set_slash_burst(system, name, tool, FIRST_BURST)
                 values['FilmBladeRotation'] = ('Quat', first_blade_rotation())
                 bindings['MeshOrientationBinding'] = 'FilmBladeRotation'
-            elif second:
-                set_slash_burst(system, name, tool, .058)
         elif name in CONTACT:
             size, radius, gain = CONTACT[name]
             kind = 'Vector' if size == 'Scale' else 'Vector2'
@@ -121,5 +132,64 @@ def apply_combo_profile(system, tool, assign):
         update = LIB.authoring_set_renderer_data(system, name, index, json.dumps(props))
         if not update.succeeded:
             raise RuntimeError(update.error)
+    ue.EditorAssetLibrary.set_metadata_tag(system, tag, stamp)
+    return True
+
+
+def align_followup_swings(system, tool, assign):
+    name = system.get_name()
+    uppercut = name.startswith('NS_Pyrios_Normal02_')
+    layers = sorted({*SOURCE_SURFACES.get(name, {}), *SOURCE_FIELDS.get(name, ())})
+    if not uppercut:
+        layers = [e for e in layers if name.startswith('NS_Pyrios_Normal03_') and e[:3] in SPACE_SWINGS]
+    tag = 'Pyrios.FollowupSwing'
+    previous = ue.EditorAssetLibrary.get_metadata_tag(system, tag)
+    stamp = 'weapon-swing-2' if uppercut or '_Unit00_' in name else 'weapon-swing-1'
+    if not layers or previous == stamp:
+        return False
+    work = []
+    for emitter in layers:
+        if uppercut:
+            set_slash_burst(system, emitter, tool, UPPERCUT_BURST)
+            rotation = sweep_rotation('Particles.MeshOrientation', UPPERCUT_SWING,
+                                      (-.0263211, -.6468961, 0, .7621238), (.6468961, -.0263211, -.7621238, 0))
+        else:
+            delay, _, tilt = SPACE_SWINGS[emitter[:3]]
+            # 移动整个原片段，内部旋转曲线与原有单次爆发一同起笔。
+            ref = dict(system={'refPath': system.get_path_name()}, emitterName=emitter,
+                       scriptName='EmitterUpdateScript', moduleName='EmitterState')
+            # 首道伴随系统激活，首轮的循环延迟没有推迟原爆发，直接给爆发定时。
+            first_cut = emitter.startswith('M00_')
+            timing = [('UseLoopDelay', 'Bool', not first_cut)]
+            if not first_cut:
+                timing.append(('Loop Delay', 'Float', delay))
+            for pin, kind, value in timing:
+                tool(NS + 'SetStackInputData', stackInputRef=dict(ref, inputNameStack=[pin]),
+                     inputData=NiagaraBuilder.num(kind, value))
+            if first_cut:
+                set_slash_burst(system, emitter, tool, delay)
+            rotation = 'normalize(' + quat_product('Particles.SourceSlashOrientation', tilt) + ')'
+        for stage in ('ParticleSpawnScript', 'ParticleUpdateScript'):
+            if previous != 'weapon-swing-1':
+                work.append(assign(stage, emitter=emitter, FilmBladeRotation=('Quat', rotation)))
+            elif uppercut:
+                ref = dict(system={'refPath': system.get_path_name()}, emitterName=emitter, scriptName=stage)
+                update_slash_inputs(tool, ref, {'Particles.FilmBladeRotation': rotation})
+    if not work:
+        ue.EditorAssetLibrary.set_metadata_tag(system, tag, stamp)
+        return True
+    result = tool('GGYGOEditor.GGYGONiagaraCompileLibrary.ApplyAuthoringStackBatch',
+                  system={'refPath': system.get_path_name()}, workItems=work)
+    if not result.get('bApplied'):
+        raise RuntimeError(result.get('error', '上挑与空间斩校准失败'))
+    binding = NiagaraBuilder.attribute_binding('Particles.FilmBladeRotation')
+    for emitter in layers:
+        identity = LIB.authoring_get_renderer_identities(system, emitter)
+        if not identity.succeeded or len(identity.renderers) != 1:
+            raise RuntimeError('刀面缺少唯一渲染器 ' + emitter)
+        result = LIB.authoring_set_renderer_data(system, emitter, identity.renderers[0].renderer_index,
+                                                 json.dumps({'MeshOrientationBinding': binding}))
+        if not result.succeeded:
+            raise RuntimeError(result.error)
     ue.EditorAssetLibrary.set_metadata_tag(system, tag, stamp)
     return True

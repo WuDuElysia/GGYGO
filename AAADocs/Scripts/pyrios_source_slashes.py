@@ -92,7 +92,16 @@ SOURCE_FIELDS = {
 }
 
 
-def align_mesh_origin(data, system_name):
+# 第三段前三次挥动，按实际刃身在起笔与出笔之间的方向校准原刀面。
+# 前缀与 SOURCE_SURFACES / SOURCE_FIELDS 共同限定具体渲染器。
+SPACE_SWINGS = {
+    'M00': (.034, (99, -76, -88), (.5356594, -.0313491, -.6469168, .5418347)),
+    'M04': (.083, (-61, 65, -119), (.2516345, -.6902938, .6218227, .2711291)),
+    'M09': (.126, (-146, -67, -18), (.0249107, .0118532, -.4316058, .9016404)),
+}
+
+
+def align_mesh_origin(data, system_name, emitter):
     renderer = ue.find_object(None, data.renderer_path)
     slots = list(renderer.get_editor_property('meshes'))
     if len(slots) != 1:
@@ -106,7 +115,10 @@ def align_mesh_origin(data, system_name):
         target = ue.Vector(31, -17, -77)
         space = ue.NiagaraMeshPivotOffsetSpace.LOCAL
     elif system_name.startswith('NS_Pyrios_Normal02_'):
-        target = ue.Vector(-246, -248, -280)
+        target = ue.Vector(-25, -45, 28)
+        space = ue.NiagaraMeshPivotOffsetSpace.LOCAL
+    elif system_name.startswith('NS_Pyrios_Normal03_') and emitter[:3] in SPACE_SWINGS:
+        target = ue.Vector(*SPACE_SWINGS[emitter[:3]][1])
         space = ue.NiagaraMeshPivotOffsetSpace.LOCAL
     if slot.pivot_offset == target and slot.pivot_offset_space == space:
         return False
@@ -290,7 +302,7 @@ def restore_source_surfaces(system):
         material = ue.load_asset(MAT_DIR + asset)
         if not isinstance(material, ue.MaterialInstanceConstant) or not material.parent or not material.parent.get_name().startswith('M_ZZZFX_ProjectConfigured_'):
             raise RuntimeError(f'{emitter} 缺少原程序移植材质 {asset}')
-        changed = align_mesh_origin(data, system.get_name()) or changed
+        changed = align_mesh_origin(data, system.get_name(), emitter) or changed
         path = slash_material(system.get_name(), emitter, material).get_path_name()
         if props.get('bIsEnabled', True) and props.get('bOverrideMaterials') and slots[0].get('explicitMat', {}).get('refPath') == path:
             continue
@@ -303,7 +315,7 @@ def restore_source_surfaces(system):
         data = LIB.authoring_get_renderer_data(system, emitter, 0)
         if not data.succeeded or not data.renderer_class.endswith('.GGYGOSignedFieldMeshRendererProperties'):
             raise RuntimeError(f'{emitter} 缺少原折射网格')
-        changed = align_mesh_origin(data, system.get_name()) or changed
+        changed = align_mesh_origin(data, system.get_name(), emitter) or changed
     return changed
 
 

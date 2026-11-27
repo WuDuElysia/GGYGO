@@ -20,6 +20,27 @@ MESH_AXES = {
 }
 # 原长切口长度同时驱动网格和沿刃移动的光。地面的扫光有独立宽度和范围。
 CUT_LENGTH = 'Particles.UniqueID==0 ? 612.0 : (Particles.UniqueID==1 ? 567.0 : 470.0)'
+# 实机逐帧取刃身 55% 处，按每次穿切的整段位移定向。用招式坐标系在出生时落笔，
+# 避免较长的游戏帧跨过两次穿切，把后一刀的方向画在前一道切痕上。
+CUT_BURSTS = (.044, .088, .138)
+
+
+def stroke_vector(vectors):
+    def world(v):
+        return '(' + ' + '.join(f'Engine.Owner.System{axis}Axis*({value})'
+                                for axis, value in zip('XYZ', v)) + ')'
+    a, b, c = map(world, vectors)
+    return f'(Particles.UniqueID==0 ? {a} : (Particles.UniqueID==1 ? {b} : {c}))'
+
+
+CUT_CENTER = 'Engine.Owner.Position + ' + stroke_vector(((-106, 52, 72), (-59, 12, 50), (70, -4, 101)))
+CUT_AXIS = 'normalize(' + stroke_vector(((-.60, .60, -.54), (.91, .41, .08), (-.88, -.48, -.06))) + ')'
+CUT_LOCK = '!Particles.CutFixed && Particles.HasContact'
+CUT_POSITION = 'Particles.CutLockNow ? Particles.CutStart : Particles.Position'
+# 锁定后由网格自身的朝向还原世界轴，灯光、地面反射和折射沿同一次入刀走。
+CUT_DIRECTION = ('Particles.CutLockNow ? ' + CUT_AXIS + ' : '
+                 'float3(1,0,0)+2*cross(Particles.MeshOrientation.xyz,'
+                 'cross(Particles.MeshOrientation.xyz,float3(1,0,0))+Particles.MeshOrientation.w*float3(1,0,0))')
 GROUND_SIZE = 'float3(13,(Particles.UniqueID==0 ? 378.0 : (Particles.UniqueID==1 ? 350.0 : 290.0))*2.1,154)'
 
 
@@ -93,11 +114,30 @@ def fit_blade_meshes(system):
 
 
 def update_locked_cuts(system, tool):
-    """在已制作的资产上更新原赋值节点，同时保留锁点、显影和碰撞投影。"""
+    """更新已有资产的三次起笔和随刃落痕，沿用原显影与碰撞投影。"""
     script = dict(system={'refPath': system.get_path_name()}, emitterName='Pyrios_AftercutMarks',
                   scriptName='ParticleUpdateScript')
-    targets = {'Particles.CutLength': CUT_LENGTH, 'Particles.WashSize': GROUND_SIZE}
-    return update_slash_inputs(tool, script, targets)
+    targets = {'Particles.CutLength': CUT_LENGTH, 'Particles.WashSize': GROUND_SIZE,
+               'Particles.CutLockNow': CUT_LOCK, 'Particles.CutDirection': CUT_DIRECTION,
+               'Particles.Position': CUT_POSITION, 'Particles.CutReverse': 'false'}
+    changed = update_slash_inputs(tool, dict(script, scriptName='ParticleSpawnScript'),
+                                  {'Particles.CutStart': CUT_CENTER})
+    changed = update_slash_inputs(tool, script, targets) or changed
+    emitter_script = dict(script, scriptName='EmitterUpdateScript')
+    modules = tool(NS + 'GetScriptStackTopology', scriptRef=emitter_script)['modules']
+    bursts = [m['moduleName'] for m in modules if m['moduleName'].startswith('SpawnBurst_Instantaneous')]
+    if len(bursts) != len(CUT_BURSTS):
+        raise RuntimeError('空间斩缺少三次独立起笔')
+    for name, time in zip(bursts, CUT_BURSTS):
+        ref = dict(emitter_script, moduleName=name)
+        inputs = tool(NS + 'GetModuleInputValues', moduleRef=ref)['inputs']
+        value = next(i['value'] for i in inputs if i['name'] == 'Spawn Time')
+        if abs(value['value']['value'] - time) < .00001:
+            continue
+        tool(NS + 'SetStackInputData', stackInputRef=dict(ref, inputNameStack=['Spawn Time']),
+             inputData=NiagaraBuilder.num('Float', time))
+        changed = True
+    return changed
 
 
 def update_slash_inputs(tool, script, targets):

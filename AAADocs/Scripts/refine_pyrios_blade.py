@@ -8,7 +8,7 @@ PROJECT = Path(ue.Paths.convert_relative_path_to_full(ue.Paths.project_dir()))
 sys.path.insert(0, str(PROJECT / 'AAADocs/Scripts'))
 from pyrios_authored_arc import ARC, ground_sweep
 from pyrios_blade_reach import fit_blade_meshes, update_locked_cuts
-from pyrios_combo_profiles import apply_combo_profile
+from pyrios_combo_profiles import align_followup_swings, apply_combo_profile
 from pyrios_source_slashes import SOURCE_SURFACES, align_slash_directions, disable_replaced_surface, restore_source_surfaces, set_project_surface_enabled
 from pyrios_normal03_finisher import refine_normal03
 from pyrios_multicut_marks import SCARS, VERSION as CUT_VERSION, add_cut_light, add_opening_marks, extend_space_cuts, refraction_material, scar_material
@@ -418,6 +418,7 @@ def build():
         # 第二刀的原弧面垂直挑起，剑身拖尾只负责近刃运动。
         restored = restore_source_surfaces(system)
         restored = apply_combo_profile(system,tool,assign) or restored
+        restored = align_followup_swings(system,tool,assign) or restored
         restored = fit_blade_meshes(system) or restored
         if EDITOR.get_metadata_tag(system,STAMP)==SYSTEM_VERSION:
             if apply_blade_volume(system,EMITTER,field) or restored:
@@ -465,6 +466,7 @@ def build():
         restored = restore_source_surfaces(system)
         restored = align_slash_directions(system,tool,assign) or restored
         restored = apply_combo_profile(system,tool,assign) or restored
+        restored = align_followup_swings(system,tool,assign) or restored
         restored = fit_blade_meshes(system) or restored
         if '_Unit00_' in system.get_name():
             restored = update_locked_cuts(system,tool) or restored
