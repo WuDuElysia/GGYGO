@@ -1,5 +1,6 @@
 """首刀的定形月牙与三段切口的地面蓝光。两层均由原 Niagara 表现窗口驱动。"""
 import json
+from pathlib import Path
 from math import cos, pi, sin
 
 import unreal as ue
@@ -11,82 +12,52 @@ EDITOR = ue.EditorAssetLibrary
 LIB = ue.GGYGONiagaraCompileLibrary
 ARC = 'Pyrios_OpeningCrescent'
 ARC_VERSION = 'horizontal-crescent-4'
-ARC_SURFACE_VERSION = 'brushed-crescent-12'
+ARC_SURFACE_VERSION = 'painted-crescent-14'
 WASH_VERSION = 'brushed-reflection-10'
 TAG = 'Pyrios.AuthoredSlash'
 
 # 时间沿整张弧面推进。白晕在挥刀前半拍变宽，后半拍只剩远侧的一段亮弦。
 ARC_SHADE = """
-float u=saturate(UV.x);
-float v=UV.y;
-float t=saturate(Clock.r);
-// 亮锋从月牙的收口一侧扫向出刀一侧。刃面已亮过的部分分别留下细边和更长的蓝晕。
-float advance=smoothstep(.205,.405,t);
-float retire=smoothstep(.41,.76,t);
-float peakAt=.95-.73*advance+.095*retire;
-float behind=u-peakAt;
-float reveal=smoothstep(-.085,-.015,behind)*smoothstep(.045,.16,t);
-float edgeEnd=smoothstep(.0,.048,u)*(1-smoothstep(.955,1,u));
-float tailLoss=smoothstep(.38,.66,t);
-float tailEnd=1-smoothstep(.91-.55*tailLoss,1.0-.45*tailLoss,u);
-float envelope=reveal*edgeEnd*tailEnd*(1-smoothstep(.77,1,t));
-float lead=exp2(-pow(behind/(behind<0 ? .050 : .132),2));
-float after=exp2(-max(0,behind)*lerp(2.15,4.5,retire));
-float earlyBlue=1-smoothstep(.38,.545,t);
-float wake=after*(.63+.37*earlyBlue);
-float grain=saturate(Ink.r);
-float taper=sqrt(saturate(sin(3.14159*u)));
-float width=(.36+.64*taper)*lerp(1,.50,retire);
-float d=(v-.63)/width;
-float aa=max(fwidth(d),.0015);
-float core=1-smoothstep(.013+.015*lead,.024+.021*lead+aa,abs(d));
-float shoulder=exp2(-pow(d/(.029+.092*lead+.025*after),2));
-float halo=exp2(-pow(d/(.13+.20*lead),2));
-float inner=exp2(-pow((d+.14)/.16,2))*grain*lead;
-float soft=smoothstep(0,.14,v)*(1-smoothstep(.85,1,v));
-// 细边可以贯穿刚展开的月牙；只有掠过的这一小段具有宽白芯。
-float white=lead*(1-.68*retire);
-float filament=.16+.94*wake+.54*earlyBlue+.64*retire*after;
-float3 light=core*(filament*float3(2.3,3.55,6.0)+white*float3(8.2,8.4,10.8));
-light+=shoulder*(wake*float3(.26,.50,2.02)+white*float3(2.7,3.9,8.1));
-light+=halo*(.56*wake+1.03*lead)*float3(.018,.074,2.55)+inner*float3(.23,.45,1.21);
-// 116 的透明通道保存的是带缺口的笔锋。两次取样的透明边界错开，笔尖与白锋一同移动。
-float depth=-d;
-float face=smoothstep(.005,.05,depth)*(1-smoothstep(.47,.60,depth));
-float run=saturate(max(0,behind));
-float nibX=clamp(.91-.86*run-.045*retire,.06,.94);
-float2 brushUV=float2(clamp(.48+.85*run,.09,.94),clamp(.16+2.19*depth+.13*run,.015,.975));
-float feather=Texture2DSample(FlowMask,FlowMaskSampler,brushUV).r;
-float curl=.09*(grain-.35)+.105*(feather-.38);
-float2 nibUV=float2(nibX,clamp(.07+1.89*depth+curl,.012,.985));
-float shape=Texture2DSample(Nib,NibSampler,nibUV).a;
-float inset=Texture2DSample(Nib,NibSampler,float2(clamp(nibX-.085,.05,.92),clamp(nibUV.y+.11,.012,.985))).a;
-float softNib=Texture2DSample(Nib,NibSampler,float2(nibX,clamp(nibUV.y+.045,.012,.985))).a;
-float lip=saturate((.54*shape+.46*softNib-inset)*1.40);
-float body=face*shape;
-float splitY=depth-.115-.14*(1-run)+.30*curl;
-float innerNib=Texture2DSample(Nib,NibSampler,float2(clamp(nibX-.12,.05,.90),clamp(.08+3.35*splitY,.012,.985))).a;
-float strand=face*smoothstep(.005,.048,splitY)*innerNib;
-float strokeEnd=1-smoothstep(.19,.63,run);
-float strength=(.14+.86*max(lead,wake))*strokeEnd*(1-.66*retire);
-float pigment=.16+.84*sqrt(saturate(feather));
-light*=1-face*strength*(.77-.20*grain);
-light+=strength*(body*float3(.019,.083,.58)+face*lip*pigment*float3(.15,.63,1.80)
-    +strand*pigment*float3(.085,.39,1.32)+body*feather*float3(.035,.25,.76));
-// 用 237 的分叉端在刀腹扣出一道暗纹。暗纹从亮头后方起笔，尖梢在弧中段收尽。
-float strokeU=saturate((behind+.045)/.53);
-float strokeV=(depth-.08-.16*strokeU+.15*curl)*3.75+.10;
-float2 strokeUV=clamp(float2(.12+.80*strokeU,strokeV),.012,.98);
-float carve=Texture2DSample(FlowMask,FlowMaskSampler,strokeUV).r;
-float bank=Texture2DSample(FlowMask,FlowMaskSampler,float2(strokeUV.x,clamp(strokeUV.y+.115,.012,.98))).r;
-float carved=face*(1-smoothstep(.39,.60,run))*smoothstep(.02,.12,strokeV)
-    *(1-smoothstep(.83,.99,strokeV))*smoothstep(.16,.80,carve);
-float coloredEdge=face*saturate((carve-bank)*2.15)*strokeEnd;
-light*=1-.86*carved;
-light+=strength*coloredEdge*float3(.12,.72,1.65);
-float opacity=core*(.63+.30*wake)+shoulder*(.22+.73*lead)+halo*(.67*wake+.42*lead);
-Coverage=envelope*soft*saturate(opacity+strength*face*(.26+.56*shape*pigment)+.71*carved);
-return envelope*soft*light;
+float u = saturate(UV.x);
+float t = saturate(Clock.r);
+// 笔锋整片升起；热白沿外刃跑过，冷蓝刀腹稍后才显影。
+float front = .95-.73*smoothstep(.205,.405,t)+.095*smoothstep(.41,.76,t);
+float lag = u-front;
+float pulse = exp2(-pow(lag/(lag<0 ? .058 : .117),2));
+float sweep = smoothstep(-.088,-.002,lag)*smoothstep(.045,.15,t);
+float retire = smoothstep(.40,.73,t);
+float wake = exp2(-max(0,lag)*lerp(1.9,4.2,retire));
+float tail = 1-smoothstep(.92-.54*retire,1.0-.43*retire,u);
+float fade = sweep*tail*(1-smoothstep(.76,1,t));
+float v = (UV.y-.64)/lerp(1.05,.70,retire)+.64;
+float2 grainUV = clamp(float2(.08+.84*u,.10+1.22*v),.012,.985);
+float feather = Texture2DSample(FlowMask,FlowMaskSampler,grainUV).r;
+float nib = Texture2DSample(Nib,NibSampler,float2(.14+.75*u,clamp(.18+1.15*v,.015,.98))).a;
+float y = v+.024*(feather-.5)+.012*(Ink.r-.5);
+float2 brushUV = float2(u,clamp(y,.004,.996)*.25);
+float3 brush = Texture2DSample(Brush,BrushSampler,brushUV).rgb;
+float outside = Texture2DSample(Brush,BrushSampler,brushUV+float2(0,.008)).r;
+float lip = saturate((brush.r-outside)*2.2);
+float body = brush.r;
+float groove = brush.b;
+float bevel = brush.g;
+// 蓝紫背面覆盖场地底色，凹口、刃脊和内纹分别退去。
+float edgeAge = 1-.44*retire;
+float faceAge = (1-.78*retire)*(.52+.48*wake);
+float pigment = .38+.40*nib+.22*feather;
+float3 color = body*faceAge*lerp(float3(.006,.018,.10),float3(.018,.17,1.09),pigment);
+color *= 1-.98*groove;
+color += bevel*edgeAge*(.36+.64*wake)*lerp(float3(.028,.31,1.65),float3(.25,.89,2.72),pigment);
+float softV = (v-.655-.033*sin(6.28*u))/lerp(.16,.24,pulse);
+float halo = exp2(-softV*softV)*(.11*wake+.64*pulse);
+float hotSpine = lip+.16*bevel;
+color += pulse*(hotSpine*float3(9.8,10.9,11.7)+body*float3(.21,.37,.68))*(1-.72*groove);
+color += lip*(.17+.83*wake)*float3(.75,1.62,3.35);
+color += halo*float3(.026,.098,2.10)+pulse*halo*float3(.42,.56,.83);
+float extent = smoothstep(.003,.043,u)*(1-smoothstep(.956,.998,u));
+float fringe = smoothstep(.005,.095,UV.y)*(1-smoothstep(.865,.995,UV.y));
+Coverage = fade*extent*fringe*saturate(smoothstep(.06,.75,body)*lerp(.79,.97,faceAge)+bevel*.83+halo*.40);
+return fade*extent*fringe*color;
 """
 
 # 地面反光是一抹宽而断续的蓝色，中心的白光沿切口横扫，两端先后熄灭。
@@ -122,6 +93,35 @@ Coverage=fade*saturate(.80*pearl+.71*thread+.51*veil);
 Tint=float3(.011,.026,.102);
 return fade*(pearl*float3(1.54,2.3,5.2)+thread*float3(.085,.37,3.45)+veil*float3(.017,.083,1.64));
 """
+
+
+def cut_brush(directory):
+    """四行线性遮罩对应首刀和三次切口，RGB 分别控制刀腹、刃脊和暗槽。"""
+    name = 'T_Pyrios_CutBrushes'
+    path = directory+'/'+name
+    if EDITOR.does_asset_exist(path):
+        texture = ue.load_asset(path)
+    else:
+        project = Path(ue.Paths.convert_relative_path_to_full(ue.Paths.project_dir()))
+        task = ue.AssetImportTask()
+        task.set_editor_properties(dict(filename=str(project/'AAADocs/Assets/Pyrios/FX'/(name+'.png')),
+                                        destination_path=directory,destination_name=name,automated=True,save=False))
+        ue.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+        texture = ue.load_asset(path)
+        if not isinstance(texture,ue.Texture2D):
+            raise RuntimeError('四刀笔纹导入失败 '+path)
+        texture.set_editor_properties(dict(srgb=False,compression_settings=ue.TextureCompressionSettings.TC_MASKS,
+                                            address_x=ue.TextureAddress.TA_CLAMP,address_y=ue.TextureAddress.TA_CLAMP))
+        if not EDITOR.save_loaded_asset(texture,False):
+            raise RuntimeError('四刀笔纹保存失败 '+path)
+    if not isinstance(texture,ue.Texture2D) or texture.srgb or texture.compression_settings!=ue.TextureCompressionSettings.TC_MASKS:
+        raise RuntimeError('四刀笔纹需要线性遮罩 '+path)
+    # 一刀不到四分之一秒，首帧须能读到窄脊和缺口。
+    if not texture.never_stream:
+        texture.set_editor_property('never_stream',True)
+        if not EDITOR.save_loaded_asset(texture,False):
+            raise RuntimeError('首刀纹理驻留设置保存失败 '+path)
+    return texture
 
 
 def surface(directory, ground):
@@ -161,6 +161,10 @@ def surface(directory, ground):
         obj=edit.create_material_expression(mat,ue.MaterialExpressionTextureObjectParameter,-560,450+i*200)
         obj.set_editor_properties(dict(parameter_name=slot,texture=texture,sampler_type=ue.MaterialSamplerType.SAMPLERTYPE_COLOR))
         inputs.append((obj,'',slot))
+    if not ground:
+        brush=edit.create_material_expression(mat,ue.MaterialExpressionTextureObjectParameter,-560,850)
+        brush.set_editor_properties(dict(parameter_name='Brush',texture=cut_brush(directory),sampler_type=ue.MaterialSamplerType.SAMPLERTYPE_MASKS))
+        inputs.append((brush,'','Brush'))
     code=edit.create_material_expression(mat,ue.MaterialExpressionCustom,-220,0)
     configure_native_custom(ue,code,[slot for _,_,slot in inputs],WASH_SHADE if ground else ARC_SHADE,'CMOT_Float3',
         '切口落地的分叉蓝纹' if ground else '沿月牙展开的笔锋与退弦',native_sync=lambda _,fn:fn(),additional_outputs=[('Coverage','CMOT_Float1')]+([('Tint','CMOT_Float3')] if ground else []))

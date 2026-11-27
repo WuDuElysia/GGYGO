@@ -4,60 +4,52 @@ from math import sin, pi
 
 import unreal as ue
 
+from pyrios_authored_arc import cut_brush
 from zzz_fx_material_ue import configure_native_custom
 from zzz_fx_niagara_ue import EMPTY_EMITTER, NiagaraBuilder
 
 
 SCARS = 'Pyrios_AftercutMarks'
 VERSION = 'reference-diagonals-ground-7'
-SURFACE_VERSION = 'brushed-spine-4'
+SURFACE_VERSION = 'painted-spine-6'
 # Normal03 的 03/09_MeleeTrail 原 andi_main 刀面，以及三次 MeleeTrail 共用的 light_edge 与高光遮罩。
 TEXTURES = {'Face': 'Eff_MeleeTrail_239_4f346e732ad4', 'Edge': 'Eff_MeleeTrail_089_LYX_01_2d474876c2a0',
             'Highlight': 'Eff_MeleeTrail_116_YZ_06_f2c948b7ce36'}
 SHADE = """
 float u = saturate(UV.x);
-float v = 2.0*UV.y-1.0;
 float travel = lerp(u,1-u,Reverse);
 float reveal = 1-smoothstep(Progress-.09,Progress,travel);
-// 239 的锯齿轮廓形成刀腹，089 的原色只出现在切口，116 单独控制掠过的高光。
+float life = saturate(Life);
 float profile = saturate(Face.r);
-float ridge = saturate(max(Edge.r,max(Edge.g,Edge.b)));
-float gleam = saturate(Highlight.r);
-float tipFade = smoothstep(0,.055,u)*(1-smoothstep(.966,1,u));
-float ageFade = saturate(Life);
-// 原片中的切口只有一条主亮脊；对侧保留蓝色折面和暗部，避免两条平行线。
+float gloss = max(Edge.r,max(Edge.g,Edge.b));
+float row = 1+floor(2*saturate(BrushIndex)+.5);
+// 三种方向共用一张分区笔纹。按入刀方向采样，刀背的斜纹始终收向出刃端。
+float y = clamp(UV.y+.026*(profile-.5),.004,.996);
+float2 brushUV = float2(travel,(row+y)*.25);
+float3 mark = Texture2DSample(Brush,BrushSampler,brushUV).rgb;
+float outside = Texture2DSample(Brush,BrushSampler,float2(travel,(row+min(.997,y+.065))*.25)).r;
+float edgeLip = saturate((mark.r-outside)*1.7);
+float mass = mark.r;
+float rim = mark.g;
+float gouge = mark.b;
+float t = saturate(.59*Progress+.33*(1-life));
+float delta = travel-t;
+float head = exp2(-pow(delta/(delta>0 ? .072 : .168),2));
+float cut = pow(life,.53)*reveal;
 float3 N = normalize(FacetNormal);
-float3 V = normalize(View);
-float faceLight = saturate(.5+.5*dot(N,normalize(float3(-.48,.28,.82))));
-float facet = saturate(1-abs(dot(N,V)));
-float axis = v-.10*(profile-.5)-.07*(gleam-.5);
-float aa = max(fwidth(axis),.001);
-float spine = 1-smoothstep(.058,.11+aa,abs(axis-.13));
-float blueFold = exp2(-9*(axis+.08)*(axis+.08));
-float trough = (1-smoothstep(.20,.69,abs(axis+.28)))*(.42+.58*profile);
-float back = exp2(-42*(axis+.56)*(axis+.56))*profile;
-// 切口显影后，白色刃肩继续向出刃端掠过。背侧保留原纹理的冷色刻痕。
-float pulseAt = saturate(.56*Progress+.36*(1-ageFade));
-float distanceToPulse=travel-pulseAt;
-float pulse = exp2(-pow(distanceToPulse/(distanceToPulse>0 ? .074 : .15),2));
-float lift = smoothstep(.035,.88,ageFade);
-float ice = spine*(.71+.29*ridge)*(.56+.44*pulse);
-float mass = blueFold*(.42+.58*profile)*(.44+.56*lift);
-float edgeLife = reveal*tipFade*sqrt(ageFade);
-float3 walls = lerp(float3(.007,.012,.072),float3(.047,.095,.39),faceLight);
-float3 color = trough*walls + mass*float3(.035,.13,1.13)
-             + back*(.20+.28*facet)*float3(.13,.27,1.05)
-             + mass*gleam*facet*float3(.09,.18,.64)
-             + ice*(float3(.093,.26,1.67)+pulse*lift*float3(4.8,6.1,9.2));
-// 239 原图内有分层的刃面和锯齿形收笔，以灰阶分出两道错位的亮肩和暗槽。
-float etch=smoothstep(.045,.48,profile)*(1-smoothstep(.66,.96,profile));
-float bladeSide=smoothstep(.012,.14,-axis)*(1-smoothstep(.65,1,-axis));
-float flute=exp2(-pow((axis+.18+.29*profile)/(.054+aa),2));
-float inset=exp2(-pow((axis+.36+.29*profile)/(.075+aa),2));
-color*=1-.78*bladeSide*inset;
-color+=bladeSide*(.35+.65*lift)*(etch*float3(.04,.22,.65)+flute*(.16+.84*profile)*(.29+.71*max(pulse,gleam))*float3(.17,.68,2.1));
-Coverage = edgeLife*saturate(ice*.89+mass*.45+trough*.56+back*.18+bladeSide*(.35*etch+.53*inset+.34*flute));
-return edgeLife*color;
+float wall = saturate(.5+.5*dot(N,normalize(float3(-.48,.28,.82))));
+float grazing = 1-saturate(abs(dot(N,normalize(View))));
+float back = mass*(.22+.78*wall)*(.35+.65*profile);
+float3 color = back*lerp(float3(.006,.009,.045),float3(.024,.095,.49),Highlight.r);
+color *= 1-.92*gouge;
+float wake = exp2(-5.5*abs(delta));
+color += rim*(.22+.78*wake)*(.33+.67*wall)*(.71+.29*gloss)*float3(.045,.36,1.42);
+color += edgeLip*(.12+.88*wake)*float3(.12,.66,2.15);
+color += (edgeLip+.27*rim)*head*(.55+.45*grazing)*float3(4.9,6.7,8.8);
+color += head*back*(1-gouge)*float3(.36,.82,1.65);
+// 暗槽有覆盖率，背光的一面保留刀厚；白脊仅随掠光短暂出现。
+Coverage = cut*saturate(smoothstep(.065,.66,mass)*(.85+.14*life)+rim*.72);
+return cut*color;
 """
 
 
@@ -69,7 +61,7 @@ def scar_material(directory):
         mat = ue.load_asset(path)
         if editor.get_metadata_tag(mat,'Pyrios.Aftercut') == SURFACE_VERSION:
             return mat
-        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('three-incisions-1', 'source-edge-1', 'refracted-edge-1', 'refracted-edge-2', 'source-lamella-1', 'source-lamella-2', 'fluted-scar-1','rift-facets-2','slow-reference-edge-1','slow-reference-edge-2','three-incisions-2','reference-spine-1','travelling-spine-2','brushed-spine-3','reference-diagonals-5', VERSION):
+        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('three-incisions-1', 'source-edge-1', 'refracted-edge-1', 'refracted-edge-2', 'source-lamella-1', 'source-lamella-2', 'fluted-scar-1','rift-facets-2','slow-reference-edge-1','slow-reference-edge-2','three-incisions-2','reference-spine-1','travelling-spine-2','brushed-spine-3','brushed-spine-4','painted-spine-5','reference-diagonals-5', VERSION):
             raise RuntimeError('已有未识别的斩痕材质 '+path)
         edit.delete_all_material_expressions(mat)
     else:
@@ -82,7 +74,7 @@ def scar_material(directory):
     uv = edit.create_material_expression(mat,ue.MaterialExpressionTextureCoordinate,-900,0)
     color = edit.create_material_expression(mat,ue.MaterialExpressionParticleColor,-600,380)
     node = edit.create_material_expression(mat,ue.MaterialExpressionCustom,-250,0)
-    configure_native_custom(ue,node,['UV',*textures,'Life','Progress','Reverse','FacetNormal','View'],SHADE,'CMOT_Float3','源纹理切面与刃口',
+    configure_native_custom(ue,node,['UV',*textures,'Life','Progress','Reverse','FacetNormal','View','Brush','BrushIndex'],SHADE,'CMOT_Float3','源纹理切面与刃口',
                             native_sync=lambda _,call:call(),additional_outputs=[('Coverage','CMOT_Float1')])
     def connect(src,pin,dst,field):
         if not edit.connect_material_expressions(src,pin,dst,field):
@@ -105,6 +97,10 @@ def scar_material(directory):
         connect(sample,'RGBA',node,key)
     for y,kind,slot in [(350,ue.MaterialExpressionPixelNormalWS,'FacetNormal'),(490,ue.MaterialExpressionCameraVectorWS,'View')]:
         connect(edit.create_material_expression(mat,kind,-450,y),'',node,slot)
+    brush = edit.create_material_expression(mat,ue.MaterialExpressionTextureObjectParameter,-680,640)
+    brush.set_editor_properties(dict(parameter_name='Brush',texture=cut_brush(directory),sampler_type=ue.MaterialSamplerType.SAMPLERTYPE_MASKS))
+    connect(brush,'',node,'Brush')
+    connect(color,'B',node,'BrushIndex')
     connect(color,'A',node,'Life')
     connect(color,'R',node,'Progress')
     connect(color,'G',node,'Reverse')

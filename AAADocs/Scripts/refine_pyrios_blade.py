@@ -359,6 +359,26 @@ def animate_opening_marks(system):
     return True
 
 
+def bind_cut_brushes(system):
+    tag = 'Pyrios.AftercutBrush'
+    if EDITOR.get_metadata_tag(system,tag)=='three-strokes-1':
+        return False
+    renderers=LIB.authoring_get_renderer_identities(system,SCARS).renderers
+    faces=[]
+    for entry in renderers:
+        data=LIB.authoring_get_renderer_data(system,SCARS,entry.renderer_index)
+        require(data.succeeded,data.error)
+        if 'M_Pyrios_Aftercut.M_Pyrios_Aftercut' in data.property_values:
+            faces.append(entry.renderer_index)
+    require(len(faces)==1,'未找到唯一的三连切面渲染器')
+    # 用 B 通道选原画的行，R/G/A 仍分别是显影、方向和退光；折射读取原粒子色。
+    work=[assign('ParticleUpdateScript',emitter=SCARS,CutBrushColor=('LinearColor',
+          'float4(Particles.Color.rg,Particles.UniqueID*.5,Particles.Color.a)'))]
+    bind_animated_shape(system,SCARS,work,faces,dict(ColorBinding='CutBrushColor'))
+    EDITOR.set_metadata_tag(system,tag,'three-strokes-1')
+    return True
+
+
 def finish(system):
     state=LIB.compile_authoring_batch(system)
     if not state.native_ready or not state.system_valid:
@@ -418,7 +438,7 @@ def build():
                 if previous in existing:
                     require(EDITOR.get_metadata_tag(system,STAMP) in ('weapon-bevel-v3','weapon-filament-v4',SYSTEM_VERSION),'三段刀带来源不符 '+system.get_name())
                     tool('NiagaraToolsets.NiagaraToolset_System.RemoveEmitter',emitterRef={'system':ref(system),'emitterName':previous})
-            for tag in ('Pyrios.BladeVolume','Pyrios.BladeTrailTaper','Pyrios.AftercutTravel','Pyrios.AftercutRefraction','Pyrios.CutLight','Pyrios.GroundBlueSweep'):
+            for tag in ('Pyrios.BladeVolume','Pyrios.BladeTrailTaper','Pyrios.AftercutTravel','Pyrios.AftercutRefraction','Pyrios.CutLight','Pyrios.GroundBlueSweep','Pyrios.AftercutBrush'):
                 EDITOR.set_metadata_tag(system,tag,'')
             add_live_blade(system, variants['Cross'], 0.84, combo_finisher=True)
             add_opening_marks(system, DAWN, cut_surface, tool, target, assign, module, weapon_frame)
@@ -429,7 +449,8 @@ def build():
         travel = '_Unit00_' in system.get_name() and animate_opening_marks(system)
         light = '_Unit00_' in system.get_name() and add_cut_light(system,tool,assign)
         wash = '_Unit00_' in system.get_name() and ground_sweep(system,DAWN,SCARS,tool,target,assign)
-        if wash or light or travel or volume or extended or weapon_added or ground_or_sweep or styled:
+        brush = '_Unit00_' in system.get_name() and bind_cut_brushes(system)
+        if brush or wash or light or travel or volume or extended or weapon_added or ground_or_sweep or styled:
             finish(system)
     # 兼容仍引用暖金笔触的资产。特殊技的逐层材质由 style_actions 配置。
     material(warm=True)
