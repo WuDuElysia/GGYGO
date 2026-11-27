@@ -1,5 +1,6 @@
 """佩洛伊斯普攻原包刀面。每个材质实例对应各自的网格顶点流、纹理与原程序变体。"""
 import json
+from operator import eq
 
 import unreal as ue
 
@@ -122,50 +123,134 @@ FACE_MATERIALS = {
 }
 
 
-def blade_face_material(source):
-    name = FACE_MATERIALS.get(source.get_name())
-    if not name:
-        return source
+def configure_slash_material(source, name, *, textures=None, vectors=None, scalars=None):
     directory = '/Game/Characters/Player/Pyrios/FX/Dawn'
     editor = ue.EditorAssetLibrary
     edit = ue.MaterialEditingLibrary
     path = directory + '/' + name
     instance = ue.load_asset(path) if editor.does_asset_exist(path) else None
     if instance and (not isinstance(instance, ue.MaterialInstanceConstant) or instance.parent != source):
-        raise RuntimeError('刀腹材质与原高光来源不同 ' + path)
-    if not instance:
+        raise RuntimeError('刀光材质来源不符 ' + path)
+    created = instance is None
+    if created:
         instance = ue.AssetToolsHelpers.get_asset_tools().create_asset(
             name, directory, ue.MaterialInstanceConstant, ue.MaterialInstanceConstantFactoryNew())
         if not instance:
-            raise RuntimeError('创建刀腹材质失败 ' + path)
+            raise RuntimeError('创建刀光材质失败 ' + path)
         edit.set_material_instance_parent(instance, source)
+
+    def apply(getter, setter, parameters, equals):
+        changed = False
+        for key, value in (parameters or {}).items():
+            if equals(getter(instance, key), value):
+                continue
+            setter(instance, key, value)
+            if not equals(getter(instance, key), value):
+                raise RuntimeError(f'{path} 材质参数回读不符 {key}')
+            changed = True
+        return changed
+
+    dirty = apply(edit.get_material_instance_texture_parameter_value,
+                  edit.set_material_instance_texture_parameter_value, textures, eq)
+    dirty |= apply(edit.get_material_instance_vector_parameter_value,
+                   edit.set_material_instance_vector_parameter_value, vectors, eq)
+    dirty |= apply(edit.get_material_instance_scalar_parameter_value,
+                   edit.set_material_instance_scalar_parameter_value, scalars, lambda a, b: abs(a - b) < .0001)
+    if (created or dirty) and not editor.save_loaded_asset(instance, False):
+        raise RuntimeError('刀光材质保存失败 ' + path)
+    return instance
+
+
+def opening_edge_material(source):
+    """在首刀原刃缘材质的发光输出上增加短促峰值。针线、明暗和溶解仍由原图提供。"""
+    from zzz_fx_material_ue import configure_native_custom
+    editor = ue.EditorAssetLibrary
+    edit = ue.MaterialEditingLibrary
+    directory = '/Game/Characters/Player/Pyrios/FX/Dawn/'
+    master_path = directory + 'M_Pyrios_OpeningEdge'
+    instance_path = directory + 'MI_Pyrios_OpeningEdge'
+    mat = (ue.load_asset(master_path) if editor.does_asset_exist(master_path)
+           else editor.duplicate_asset(source.parent.get_path_name(), master_path))
+    if not isinstance(mat, ue.Material):
+        raise RuntimeError('首刀原刃缘着色图复制失败')
+    prop = ue.MaterialProperty.MP_EMISSIVE_COLOR
+    node = edit.get_material_property_input_node(mat, prop)
+    if not node:
+        raise RuntimeError('首刀原刃缘缺少自发光输出')
+    # 不改变原笔纹的不透明度，只让原本明亮的刃脊进入相机的 HDR 泛光。
+    code = """
+float luma = dot(max(Edge, 0), float3(.2126, .7152, .0722));
+float shoulder = smoothstep(.005, .15, Age) * (1 - smoothstep(.52, .90, Age));
+float crest = luma * smoothstep(.06, 1.3, luma);
+return Edge + crest * shoulder * float3(11, 17, 30);
+"""
+    origin = editor.get_metadata_tag(mat, 'OpeningEdgeSource')
+    dirty = False
+    if origin != source.parent.get_path_name():
+        if origin:
+            raise RuntimeError('首刀刃缘着色图来源变更')
+        pin = edit.get_material_property_input_node_output_name(mat, prop)
+        age = edit.create_material_expression(mat, ue.MaterialExpressionParticleRelativeTime, 480, 280)
+        pulse = edit.create_material_expression(mat, ue.MaterialExpressionCustom, 830, 120)
+        configure_native_custom(ue, pulse, ['Edge', 'Age'], code, 'CMOT_Float3', '首刀峰值刃光',
+                                native_sync=lambda _, fn: fn())
+        if not (edit.connect_material_expressions(node, pin, pulse, 'Edge')
+                and edit.connect_material_expressions(age, '', pulse, 'Age')
+                and edit.connect_material_property(pulse, '', prop)):
+            raise RuntimeError('首刀刃光表达式接线失败')
+        editor.set_metadata_tag(mat, 'OpeningEdgeSource', source.parent.get_path_name())
+        dirty = True
+    elif not isinstance(node, ue.MaterialExpressionCustom) or node.get_editor_property('description') != '首刀峰值刃光':
+        raise RuntimeError('首刀刃缘发光节点与制作配置不符')
+    elif node.get_editor_property('code') != code:
+        node.set_editor_property('code', code)
+        dirty = True
+    if dirty:
+        if edit.recompile_material(mat):
+            raise RuntimeError('首刀刃光着色图编译失败')
+        if not editor.save_loaded_asset(mat, False):
+            raise RuntimeError('首刀刃光着色图保存失败')
+
+    instance = (ue.load_asset(instance_path) if editor.does_asset_exist(instance_path)
+                else editor.duplicate_asset(source.get_path_name(), instance_path))
+    if not isinstance(instance, ue.MaterialInstanceConstant):
+        raise RuntimeError('首刀原刃缘实例复制失败')
+    if instance.parent == source.parent:
+        edit.set_material_instance_parent(instance, mat)
+        if not editor.save_loaded_asset(instance, False):
+            raise RuntimeError('首刀刃缘实例保存失败')
+    if instance.parent != mat:
+        raise RuntimeError('首刀刃缘实例来源不符')
+    return instance
+
+
+def slash_material(system_name, emitter, source):
+    opening = system_name == 'NS_Pyrios_Normal01_MainComposition_2a7c90937cab'
+    if opening and emitter == 'M00_root_Trail_rot_light_edge':
+        return opening_edge_material(source)
+    if opening and emitter == 'M00_root_Trail_rot_bloom':
+        # 沿用原时序和溶解图。展宽径向采样的亮肩，用低饱和 HDR 光供场景泛光取样。
+        return configure_slash_material(
+            source, 'MI_Pyrios_OpeningBloom',
+            vectors={'_MainTex_ST': ue.LinearColor(1.3, .78, -.05, .11),
+                     '_MultiplyParticleColor': ue.LinearColor(18, 23, 34, 1)},
+            scalars={'_PowerRGB': 1.65, '_PowerAlpha': 1.78})
+
+    name = FACE_MATERIALS.get(source.get_name())
+    if not name:
+        return source
     brush = ue.load_asset('/Game/Characters/Shared/FX/ZZZ/Textures/Eff_MeleeTrail_239_4f346e732ad4')
     if not isinstance(brush, ue.Texture2D):
         raise RuntimeError('缺少刀腹分叉笔纹 239')
-    # 扩展沿弧长的取样区间，刀腹使用原烟纹、粒子颜色与溶解时序，刃缘由独立原层绘制。
-    mask_uv = ue.LinearColor(.64, 1.05, .13, .016)
-    tint = ue.LinearColor(.59, 2.9, 13.0, 1.0)
-    fade = .68 * edit.get_material_instance_scalar_parameter_value(source, '_AlphaFade')
-
-    def matches_brush():
-        return (edit.get_material_instance_texture_parameter_value(instance, '_MaskTex') == brush
-                and edit.get_material_instance_vector_parameter_value(instance, '_MaskTex_ST') == mask_uv
-                and edit.get_material_instance_vector_parameter_value(instance, '_MultiplyParticleColor') == tint
-                and abs(edit.get_material_instance_scalar_parameter_value(instance, '_AlphaFade') - fade) < .0001
-                and abs(edit.get_material_instance_scalar_parameter_value(instance, '_PowerAlpha') - .95) < .0001)
-
-    if matches_brush():
-        return instance
-    edit.set_material_instance_texture_parameter_value(instance, '_MaskTex', brush)
-    edit.set_material_instance_vector_parameter_value(instance, '_MaskTex_ST', mask_uv)
-    edit.set_material_instance_vector_parameter_value(instance, '_MultiplyParticleColor', tint)
-    edit.set_material_instance_scalar_parameter_value(instance, '_PowerAlpha', .95)
-    edit.set_material_instance_scalar_parameter_value(instance, '_AlphaFade', fade)
-    if not matches_brush():
-        raise RuntimeError('刀腹材质参数回读不符 ' + path)
-    if not editor.save_loaded_asset(instance, False):
-        raise RuntimeError('刀腹材质保存失败 ' + path)
-    return instance
+    fade = ue.MaterialEditingLibrary.get_material_instance_scalar_parameter_value(source, '_AlphaFade')
+    brush_uv = ue.LinearColor(.88, 1.05, .035, .016) if opening else ue.LinearColor(.64, 1.05, .13, .016)
+    face_tint = ue.LinearColor(.95, 2.7, 7.6, 1) if opening else ue.LinearColor(.59, 2.9, 13, 1)
+    return configure_slash_material(
+        source, 'MI_Pyrios_OpeningFace' if opening else name,
+        textures={'_MaskTex': brush},
+        vectors={'_MaskTex_ST': brush_uv,
+                 '_MultiplyParticleColor': face_tint},
+        scalars={'_PowerAlpha': 1.12 if opening else .95, '_AlphaFade': fade * (.66 if opening else .68)})
 
 
 def restore_source_surfaces(system):
@@ -195,7 +280,7 @@ def restore_source_surfaces(system):
         if not isinstance(material, ue.MaterialInstanceConstant) or not material.parent or not material.parent.get_name().startswith('M_ZZZFX_ProjectConfigured_'):
             raise RuntimeError(f'{emitter} 缺少原程序移植材质 {asset}')
         changed = align_mesh_origin(data, system.get_name()) or changed
-        path = blade_face_material(material).get_path_name()
+        path = slash_material(system.get_name(), emitter, material).get_path_name()
         if props.get('bIsEnabled', True) and props.get('bOverrideMaterials') and slots[0].get('explicitMat', {}).get('refPath') == path:
             continue
         update = dict(bIsEnabled=True, bOverrideMaterials=True, OverrideMaterials=[dict(ExplicitMat=path)])
