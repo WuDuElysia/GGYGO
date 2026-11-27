@@ -1,4 +1,4 @@
-"""佩洛伊斯普通攻击刃光。沿正式 Montage FX 窗口直接采样当前角色的武器骨。"""
+"""佩洛伊斯普通攻击刃光。正式 Montage 窗口驱动定形月牙、上挑轨迹与空间切口。"""
 import json
 import sys
 from pathlib import Path
@@ -6,6 +6,7 @@ import unreal as ue
 
 PROJECT = Path(ue.Paths.convert_relative_path_to_full(ue.Paths.project_dir()))
 sys.path.insert(0, str(PROJECT / 'AAADocs/Scripts'))
+from pyrios_authored_arc import opening, ground_sweep
 from pyrios_normal03_finisher import refine_normal03
 from pyrios_multicut_marks import SCARS, VERSION as CUT_VERSION, add_cut_light, add_opening_marks, extend_space_cuts, refraction_material, scar_material
 from pyrios_prism_material import build_prism_materials
@@ -319,11 +320,7 @@ def apply_blade_volume(system, emitter, field):
                 blade_indices.append(entry.renderer_index)
     require(len(blade_indices)==len(field_indices)==1,'武器刀面和折射应各有一个闭合 Ribbon：'+system.get_name())
     # 新采样保留全刃，旧采样的刀根向该帧刀尖收拢。原始中心与宽度仍供外弦和闪点读取。
-    # 横斩扫过后，光弧沿该帧的刃向向外扩开。当前刀尖上的新采样没有偏移。
     center = 'Particles.Position - Particles.RibbonFacing * (.5*(Particles.RibbonWidth-Particles.TrailWidth))'
-    if system.get_name() == SYSTEMS[0][0]:
-        # 光弧在横扫面内外展；竖直分量稍向刀柄高度收拢，手腕回摆不会掀起整圈余光。
-        center += ' - float3(Particles.RibbonFacing.xy,-.31*Particles.RibbonFacing.z) * Particles.RibbonWidth * .79 * saturate(Particles.NormalizedAge/.42)'
     work = [assign('ParticleSpawnScript',emitter=emitter,
                    TrailCenter=('Position','Particles.Position'),TrailWidth=('Float','Particles.RibbonWidth')),
             assign('ParticleUpdateScript',emitter=emitter,
@@ -379,6 +376,17 @@ def build():
     for (name,end), style in zip(SYSTEMS, ('Draw','Crescent')):
         system=ue.load_asset(SKILL+name)
         require(system is not None,'缺正式普攻系统 '+name)
+        if style=='Draw':
+            installed=opening(system,DAWN,tool,assign,module)
+            old={row.emitter_name for row in LIB.authoring_get_system_summary(system).emitters}
+            if EMITTER in old:
+                require(EDITOR.get_metadata_tag(system,STAMP) in ('live-v1','live-v2','live-v3','live-v4','live-v5','prism-v1','prism-v2','weapon-bevel-v3','weapon-filament-v4','weapon-filament-v5',SYSTEM_VERSION),'首刀旧发射器来源不明')
+                tool('NiagaraToolsets.NiagaraToolset_System.RemoveEmitter',emitterRef={'system':ref(system),'emitterName':EMITTER})
+                installed=True
+            styled=style_existing(system,variants[style],True)
+            if installed or styled:
+                finish(system)
+            continue
         if EDITOR.get_metadata_tag(system,STAMP)==SYSTEM_VERSION:
             if apply_blade_volume(system,EMITTER,field):
                 finish(system)
@@ -410,7 +418,7 @@ def build():
                 if previous in existing:
                     require(EDITOR.get_metadata_tag(system,STAMP) in ('weapon-bevel-v3','weapon-filament-v4',SYSTEM_VERSION),'三段刀带来源不符 '+system.get_name())
                     tool('NiagaraToolsets.NiagaraToolset_System.RemoveEmitter',emitterRef={'system':ref(system),'emitterName':previous})
-            for tag in ('Pyrios.BladeVolume','Pyrios.BladeTrailTaper','Pyrios.AftercutTravel','Pyrios.AftercutRefraction','Pyrios.CutLight'):
+            for tag in ('Pyrios.BladeVolume','Pyrios.BladeTrailTaper','Pyrios.AftercutTravel','Pyrios.AftercutRefraction','Pyrios.CutLight','Pyrios.GroundBlueSweep'):
                 EDITOR.set_metadata_tag(system,tag,'')
             add_live_blade(system, variants['Cross'], 0.84, combo_finisher=True)
             add_opening_marks(system, DAWN, cut_surface, tool, target, assign, module, weapon_frame)
@@ -420,7 +428,8 @@ def build():
         volume = '_Unit00_' in system.get_name() and apply_blade_volume(system,FINISHER_BLADE,field)
         travel = '_Unit00_' in system.get_name() and animate_opening_marks(system)
         light = '_Unit00_' in system.get_name() and add_cut_light(system,tool,assign)
-        if light or travel or volume or extended or weapon_added or ground_or_sweep or styled:
+        wash = '_Unit00_' in system.get_name() and ground_sweep(system,DAWN,SCARS,tool,target,assign)
+        if wash or light or travel or volume or extended or weapon_added or ground_or_sweep or styled:
             finish(system)
     # 兼容仍引用暖金笔触的资产。特殊技的逐层材质由 style_actions 配置。
     material(warm=True)
