@@ -102,7 +102,8 @@ def align_mesh_origin(data, system_name):
     space = ue.NiagaraMeshPivotOffsetSpace.WORLD
     # 原刀面的原点在弧端。按角色自己的平面校准整道横斩与上挑的落点。
     if system_name.startswith('NS_Pyrios_Normal01_'):
-        target = ue.Vector(-151, 80, 0)
+        # 加上粒子中心后，弧心位于剑尖横扫圆心 (6, 38, 49) 厘米附近。
+        target = ue.Vector(31, -17, -77)
         space = ue.NiagaraMeshPivotOffsetSpace.LOCAL
     elif system_name.startswith('NS_Pyrios_Normal02_'):
         target = ue.Vector(-246, -248, -280)
