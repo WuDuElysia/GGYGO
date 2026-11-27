@@ -251,7 +251,7 @@ def style_existing(system, mat, live):
                 changed=True
     return changed
 
-def apply_blade_volume(system, emitter, field):
+def add_refraction_shell(system, emitter, field):
     """刀身与折射共用世界空间武器采样、分刀 ID 和寿命。波面围在刃腹外侧。"""
     tag='Pyrios.BladeVolume'
     if EDITOR.get_metadata_tag(system,tag)=='wake-1':
@@ -286,6 +286,72 @@ def apply_blade_volume(system, emitter, field):
         EDITOR.set_metadata_tag(system,tag,'wake-1')
         return True
     raise RuntimeError('当前武器的闭合刃面缺失 '+system.get_name())
+
+
+def bind_animated_shape(system, emitter, work, indices, bindings):
+    result = tool('GGYGOEditor.GGYGONiagaraCompileLibrary.ApplyAuthoringStackBatch', system=ref(system), workItems=work)
+    require(result.get('bApplied'), result.get('error','刀痕粒子栈制作失败'))
+    props = {key:NiagaraBuilder.attribute_binding('Particles.'+value) for key,value in bindings.items()}
+    for index in indices:
+        result = LIB.authoring_set_renderer_data(system,emitter,index,json.dumps(props))
+        require(result.succeeded,result.error)
+
+
+def apply_blade_volume(system, emitter, field):
+    installed = add_refraction_shell(system,emitter,field)
+    tag = 'Pyrios.BladeTrailTaper'
+    if EDITOR.get_metadata_tag(system,tag)=='tip-anchored-1':
+        return installed
+    blade_indices, field_indices = [], []
+    for entry in LIB.authoring_get_renderer_identities(system,emitter).renderers:
+        if entry.renderer_class.endswith('NiagaraRibbonRendererProperties'):
+            rd = LIB.authoring_get_renderer_data(system,emitter,entry.renderer_index)
+            require(rd.succeeded,rd.error)
+            props = json.loads(rd.property_values)
+            surface = str(props.get('Material',''))
+            if props.get('bCustomShapeClosed') and field.get_path_name() in surface:
+                field_indices.append(entry.renderer_index)
+            elif props.get('bCustomShapeClosed') and any(name in surface for name in
+                    ('MI_Pyrios_Prism_Draw.','MI_Pyrios_Prism_Crescent.','MI_Pyrios_Prism_Cross.')):
+                blade_indices.append(entry.renderer_index)
+    require(len(blade_indices)==len(field_indices)==1,'武器刀面和折射应各有一个闭合 Ribbon：'+system.get_name())
+    # 新采样保留全刃，旧采样的刀根向该帧刀尖收拢。原始中心与宽度仍供外弦和闪点读取。
+    work = [assign('ParticleSpawnScript',emitter=emitter,
+                   TrailCenter=('Position','Particles.Position'),TrailWidth=('Float','Particles.RibbonWidth')),
+            assign('ParticleUpdateScript',emitter=emitter,
+                   TrailRetraction=('Float','saturate((Particles.NormalizedAge-.075)/.795)')),
+            assign('ParticleUpdateScript',emitter=emitter,
+                   TrailWidth=('Float','Particles.RibbonWidth * (1.0 - .95*Particles.TrailRetraction*Particles.TrailRetraction*(3.0-2.0*Particles.TrailRetraction))')),
+            assign('ParticleUpdateScript',emitter=emitter,
+                   TrailCenter=('Position','Particles.Position - Particles.RibbonFacing * (.5*(Particles.RibbonWidth-Particles.TrailWidth))'))]
+    bind_animated_shape(system,emitter,work,blade_indices+field_indices,dict(PositionBinding='TrailCenter', RibbonWidthBinding='TrailWidth'))
+    EDITOR.set_metadata_tag(system,tag,'tip-anchored-1')
+    return True
+
+
+def animate_opening_marks(system):
+    tag = 'Pyrios.AftercutTravel'
+    if EDITOR.get_metadata_tag(system,tag)=='entry-to-tip-1':
+        return False
+    renderers = LIB.authoring_get_renderer_identities(system,SCARS).renderers
+    require(len(renderers)==2 and all(r.renderer_class.endswith('NiagaraMeshRendererProperties') for r in renderers),
+            '三道斩痕的刀面与折射网格缺失：'+system.get_name())
+    rd = LIB.authoring_get_renderer_data(system,SCARS,renderers[0].renderer_index)
+    require(rd.succeeded,rd.error)
+    length_scale = json.loads(rd.property_values)['Meshes'][0]['scale']['x']
+    # 原始切面中心和朝向保持锁定。推进两端时固定入刀点，再让刀腹和折射面一起收窄。
+    work = [assign('ParticleSpawnScript',emitter=SCARS,
+                   CutDrawCenter=('Position','Particles.Position'),CutDrawScale=('Vector','float3(0,0,0)')),
+            assign('ParticleUpdateScript',emitter=SCARS,
+                   CutReach=('Float','1.0-.86*pow(1.0-saturate((Particles.NormalizedAge-.06)/.31),2)'),
+                   CutGirth=('Float','lerp(1.0,.085,saturate((Particles.NormalizedAge-.34)/.58))')),
+            assign('ParticleUpdateScript',emitter=SCARS,
+                   CutDrawScale=('Vector','Particles.Scale * float3(Particles.CutReach,Particles.CutGirth,sqrt(Particles.CutGirth))'),
+                   CutDrawCenter=('Position',f'Particles.Position - Particles.CutDirection * ((Particles.CutReverse ? -1.0 : 1.0) * {50.0*length_scale:.6f} * Particles.Scale.x * (1.0-Particles.CutReach))'))]
+    bind_animated_shape(system,SCARS,work,[r.renderer_index for r in renderers],
+                        dict(PositionBinding='CutDrawCenter',ScaleBinding='CutDrawScale'))
+    EDITOR.set_metadata_tag(system,tag,'entry-to-tip-1')
+    return True
 
 
 def finish(system):
@@ -340,7 +406,8 @@ def build():
             weapon_added = True
         extended = '_Unit00_' in system.get_name() and extend_space_cuts(system, DAWN)
         volume = '_Unit00_' in system.get_name() and apply_blade_volume(system,FINISHER_BLADE,field)
-        if volume or extended or weapon_added or ground_or_sweep or styled:
+        travel = '_Unit00_' in system.get_name() and animate_opening_marks(system)
+        if travel or volume or extended or weapon_added or ground_or_sweep or styled:
             finish(system)
     # 兼容仍引用暖金笔触的资产。特殊技的逐层材质由 style_actions 配置。
     material(warm=True)
