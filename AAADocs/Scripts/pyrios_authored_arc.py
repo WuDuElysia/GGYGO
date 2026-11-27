@@ -11,7 +11,7 @@ EDITOR = ue.EditorAssetLibrary
 LIB = ue.GGYGONiagaraCompileLibrary
 ARC = 'Pyrios_OpeningCrescent'
 ARC_VERSION = 'horizontal-crescent-4'
-ARC_SURFACE_VERSION = 'brushed-crescent-11'
+ARC_SURFACE_VERSION = 'brushed-crescent-12'
 WASH_VERSION = 'brushed-reflection-10'
 TAG = 'Pyrios.AuthoredSlash'
 
@@ -73,8 +73,19 @@ float pigment=.16+.84*sqrt(saturate(feather));
 light*=1-face*strength*(.77-.20*grain);
 light+=strength*(body*float3(.019,.083,.58)+face*lip*pigment*float3(.15,.63,1.80)
     +strand*pigment*float3(.085,.39,1.32)+body*feather*float3(.035,.25,.76));
+// 用 237 的分叉端在刀腹扣出一道暗纹。暗纹从亮头后方起笔，尖梢在弧中段收尽。
+float strokeU=saturate((behind+.045)/.53);
+float strokeV=(depth-.08-.16*strokeU+.15*curl)*3.75+.10;
+float2 strokeUV=clamp(float2(.12+.80*strokeU,strokeV),.012,.98);
+float carve=Texture2DSample(FlowMask,FlowMaskSampler,strokeUV).r;
+float bank=Texture2DSample(FlowMask,FlowMaskSampler,float2(strokeUV.x,clamp(strokeUV.y+.115,.012,.98))).r;
+float carved=face*(1-smoothstep(.39,.60,run))*smoothstep(.02,.12,strokeV)
+    *(1-smoothstep(.83,.99,strokeV))*smoothstep(.16,.80,carve);
+float coloredEdge=face*saturate((carve-bank)*2.15)*strokeEnd;
+light*=1-.86*carved;
+light+=strength*coloredEdge*float3(.12,.72,1.65);
 float opacity=core*(.63+.30*wake)+shoulder*(.22+.73*lead)+halo*(.67*wake+.42*lead);
-Coverage=envelope*soft*saturate(opacity+strength*face*(.26+.56*shape*pigment));
+Coverage=envelope*soft*saturate(opacity+strength*face*(.26+.56*shape*pigment)+.71*carved);
 return envelope*soft*light;
 """
 
