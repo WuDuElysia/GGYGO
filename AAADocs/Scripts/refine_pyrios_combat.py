@@ -157,6 +157,7 @@ SKILL_SURFACES = {
 }
 
 def style_actions(only_skills=False):
+    from pyrios_blade_reach import fit_blade_meshes
     mats={} if only_skills else {name:material(name,code) for name,code in [('Blade',BLADE),('Glint',GLINT),('Slipstream',WAKE)]}
     count=0
     for path in systems():
@@ -213,6 +214,11 @@ def style_actions(only_skills=False):
                 if dest not in read:
                     raise RuntimeError('材质未绑定 '+name)
                 changed+=1
+        if is_skill and fit_blade_meshes(system):
+            ready = LIB.compile_authoring_batch(system)
+            if not ready.native_ready or not ready.system_valid:
+                raise RuntimeError('技能刀光编译失败 ' + path)
+            changed += 1
         if changed:
             if not ASSETS.save_loaded_asset(system,False):
                 raise RuntimeError('Niagara 保存失败 '+path)

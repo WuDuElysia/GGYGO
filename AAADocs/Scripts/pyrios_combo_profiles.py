@@ -2,8 +2,18 @@
 import json
 import unreal as ue
 
+from pyrios_blade_reach import update_slash_inputs
 from pyrios_source_slashes import LIB, SOURCE_FIELDS, SOURCE_SURFACES
 from zzz_fx_niagara_ue import NiagaraBuilder, NS
+
+
+# 在角色的局部空间调整横斩的俯仰，使放大的亮弧仍横穿出刀方向。
+def first_blade_rotation():
+    q = 'Particles.SourceSlashOrientation'
+    axis = 'float3(-0.115176,0.189798,0.159831)'
+    w = '0.961857'
+    return (f'normalize(float4({w}*{q}.xyz+{q}.w*{axis}+cross({axis},{q}.xyz),'
+            f'{w}*{q}.w-dot({axis},{q}.xyz)))')
 
 
 # 半径只收在宽雾和直射白光上。地面裂纹、岩块与电弧继续使用原范围。
@@ -32,11 +42,20 @@ def delay_uppercut(system, emitter, tool):
 def apply_combo_profile(system, tool, assign):
     key = system.get_name()
     tag = 'Pyrios.ComboPoseProfile'
-    if ue.EditorAssetLibrary.get_metadata_tag(system, tag) == 'film-combo-1':
-        return False
     first = key.startswith('NS_Pyrios_Normal01_')
     second = key.startswith('NS_Pyrios_Normal02_')
     source = {*SOURCE_SURFACES.get(key, {}), *SOURCE_FIELDS.get(key, ())}
+    stamp = 'film-combo-2' if first else 'film-combo-1'
+    previous = ue.EditorAssetLibrary.get_metadata_tag(system, tag)
+    if previous == stamp:
+        return False
+    if first and previous == 'film-combo-1':
+        for emitter in sorted(source):
+            for stage in ('ParticleSpawnScript', 'ParticleUpdateScript'):
+                script = dict(system={'refPath': system.get_path_name()}, emitterName=emitter, scriptName=stage)
+                update_slash_inputs(tool, script, {'Particles.FilmBladeRotation': first_blade_rotation()})
+        ue.EditorAssetLibrary.set_metadata_tag(system, tag, stamp)
+        return True
     work, changes = [], []
     for entry in LIB.authoring_get_system_summary(system).emitters:
         name = entry.emitter_name
@@ -53,9 +72,7 @@ def apply_combo_profile(system, tool, assign):
                 bindings['PositionBinding'] = 'FilmBladeCenter'
             if first:
                 # 在已校正的横斩之上压低斩面倾角；保留原网格内部随时间的旋转。
-                q = 'Particles.SourceSlashOrientation'
-                axis = 'float3(-0.14936,0.07048,0.16824)'
-                values['FilmBladeRotation'] = ('Quat', f'normalize(float4(.971814*{q}.xyz+{q}.w*{axis}+cross({axis},{q}.xyz),.971814*{q}.w-dot({axis},{q}.xyz)))')
+                values['FilmBladeRotation'] = ('Quat', first_blade_rotation())
                 bindings['MeshOrientationBinding'] = 'FilmBladeRotation'
             elif second:
                 delay_uppercut(system, name, tool)
@@ -85,5 +102,5 @@ def apply_combo_profile(system, tool, assign):
         update = LIB.authoring_set_renderer_data(system, name, index, json.dumps(props))
         if not update.succeeded:
             raise RuntimeError(update.error)
-    ue.EditorAssetLibrary.set_metadata_tag(system, tag, 'film-combo-1')
+    ue.EditorAssetLibrary.set_metadata_tag(system, tag, stamp)
     return True

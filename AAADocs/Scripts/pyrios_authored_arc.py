@@ -5,6 +5,8 @@ from math import cos, pi, sin
 
 import unreal as ue
 
+from pyrios_blade_reach import GROUND_SIZE
+
 from zzz_fx_material_ue import configure_native_custom
 from zzz_fx_niagara_ue import EMPTY_EMITTER, NiagaraBuilder
 
@@ -325,7 +327,7 @@ def ground_sweep(system,directory,emitter,tool,target,assign):
           assign(pu,emitter=emitter,WashTwist=('Float','.5*atan2(dot(cross(Particles.WashBasis,Particles.CutDirection),-Particles.WashNormal),dot(Particles.WashBasis,Particles.CutDirection)+.000001) + (Particles.UniqueID==0 ? -.48 : (Particles.UniqueID==1 ? .14 : -.10))')),
           assign(pu,emitter=emitter,WashSpin=('Vector','-Particles.WashNormal*sin(Particles.WashTwist)')),
           assign(pu,emitter=emitter,WashRotation=('Quat','float4(cos(Particles.WashTwist)*Particles.WashDown.xyz+Particles.WashDown.w*Particles.WashSpin+cross(Particles.WashSpin,Particles.WashDown.xyz),cos(Particles.WashTwist)*Particles.WashDown.w-dot(Particles.WashSpin,Particles.WashDown.xyz))')),
-          assign(pu,emitter=emitter,WashSize=('Vector','float3(13,Particles.CutLength*2.1,154)'),
+          assign(pu,emitter=emitter,WashSize=('Vector',GROUND_SIZE),
                  WashColor=('LinearColor','float4(Particles.NormalizedAge,Particles.CutReverse ? 1.0 : 0.0,Particles.Color.a,1)'))]
     apply_stack(system,tool,work)
     renderer=LIB.authoring_add_renderer(system,emitter,ue.NiagaraDecalRendererProperties)

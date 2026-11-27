@@ -91,20 +91,81 @@ SOURCE_FIELDS = {
 }
 
 
-def align_mesh_origin(data):
+def align_mesh_origin(data, system_name):
     renderer = ue.find_object(None, data.renderer_path)
     slots = list(renderer.get_editor_property('meshes'))
     if len(slots) != 1:
         raise RuntimeError('原刀光应只有一份网格 ' + data.renderer_path)
     slot = slots[0]
     target = ue.Vector(0, 0, -66)
-    if slot.pivot_offset == target and slot.pivot_offset_space == ue.NiagaraMeshPivotOffsetSpace.WORLD:
+    space = ue.NiagaraMeshPivotOffsetSpace.WORLD
+    # 原刀面的原点在弧端。按角色自己的平面校准整道横斩与上挑的落点。
+    if system_name.startswith('NS_Pyrios_Normal01_'):
+        target = ue.Vector(-151, 80, 0)
+        space = ue.NiagaraMeshPivotOffsetSpace.LOCAL
+    elif system_name.startswith('NS_Pyrios_Normal02_'):
+        target = ue.Vector(-246, -248, -280)
+        space = ue.NiagaraMeshPivotOffsetSpace.LOCAL
+    if slot.pivot_offset == target and slot.pivot_offset_space == space:
         return False
     slot.pivot_offset = target
-    slot.pivot_offset_space = ue.NiagaraMeshPivotOffsetSpace.WORLD
+    slot.pivot_offset_space = space
     renderer.modify()
     renderer.set_editor_property('meshes', slots)
     return True
+
+
+# 这两份原高光实例使用同一套弧形网格与烟纹。项目实例只重配刃腹遮罩和色阶。
+FACE_MATERIALS = {
+    'MI_Eff_Objects_LKJ_GUID6cfcb6781f63a704fb97670a8c8a781a_8aeb989a7f97': 'MI_Pyrios_SlashFace',
+    'MI_Eff_Objects_LKJ_GUID6cfcb6781f63a704fb97670a8c8a781a_c0b36f669f7d': 'MI_Pyrios_UppercutFace',
+}
+
+
+def blade_face_material(source):
+    name = FACE_MATERIALS.get(source.get_name())
+    if not name:
+        return source
+    directory = '/Game/Characters/Player/Pyrios/FX/Dawn'
+    editor = ue.EditorAssetLibrary
+    edit = ue.MaterialEditingLibrary
+    path = directory + '/' + name
+    instance = ue.load_asset(path) if editor.does_asset_exist(path) else None
+    if instance and (not isinstance(instance, ue.MaterialInstanceConstant) or instance.parent != source):
+        raise RuntimeError('刀腹材质与原高光来源不同 ' + path)
+    if not instance:
+        instance = ue.AssetToolsHelpers.get_asset_tools().create_asset(
+            name, directory, ue.MaterialInstanceConstant, ue.MaterialInstanceConstantFactoryNew())
+        if not instance:
+            raise RuntimeError('创建刀腹材质失败 ' + path)
+        edit.set_material_instance_parent(instance, source)
+    brush = ue.load_asset('/Game/Characters/Shared/FX/ZZZ/Textures/Eff_MeleeTrail_239_4f346e732ad4')
+    if not isinstance(brush, ue.Texture2D):
+        raise RuntimeError('缺少刀腹分叉笔纹 239')
+    # 扩展沿弧长的取样区间，刀腹使用原烟纹、粒子颜色与溶解时序，刃缘由独立原层绘制。
+    mask_uv = ue.LinearColor(.64, 1.05, .13, .016)
+    tint = ue.LinearColor(.59, 2.9, 13.0, 1.0)
+    fade = .68 * edit.get_material_instance_scalar_parameter_value(source, '_AlphaFade')
+
+    def matches_brush():
+        return (edit.get_material_instance_texture_parameter_value(instance, '_MaskTex') == brush
+                and edit.get_material_instance_vector_parameter_value(instance, '_MaskTex_ST') == mask_uv
+                and edit.get_material_instance_vector_parameter_value(instance, '_MultiplyParticleColor') == tint
+                and abs(edit.get_material_instance_scalar_parameter_value(instance, '_AlphaFade') - fade) < .0001
+                and abs(edit.get_material_instance_scalar_parameter_value(instance, '_PowerAlpha') - .95) < .0001)
+
+    if matches_brush():
+        return instance
+    edit.set_material_instance_texture_parameter_value(instance, '_MaskTex', brush)
+    edit.set_material_instance_vector_parameter_value(instance, '_MaskTex_ST', mask_uv)
+    edit.set_material_instance_vector_parameter_value(instance, '_MultiplyParticleColor', tint)
+    edit.set_material_instance_scalar_parameter_value(instance, '_PowerAlpha', .95)
+    edit.set_material_instance_scalar_parameter_value(instance, '_AlphaFade', fade)
+    if not matches_brush():
+        raise RuntimeError('刀腹材质参数回读不符 ' + path)
+    if not editor.save_loaded_asset(instance, False):
+        raise RuntimeError('刀腹材质保存失败 ' + path)
+    return instance
 
 
 def restore_source_surfaces(system):
@@ -133,8 +194,8 @@ def restore_source_surfaces(system):
         material = ue.load_asset(MAT_DIR + asset)
         if not isinstance(material, ue.MaterialInstanceConstant) or not material.parent or not material.parent.get_name().startswith('M_ZZZFX_ProjectConfigured_'):
             raise RuntimeError(f'{emitter} 缺少原程序移植材质 {asset}')
-        changed = align_mesh_origin(data) or changed
-        path = material.get_path_name()
+        changed = align_mesh_origin(data, system.get_name()) or changed
+        path = blade_face_material(material).get_path_name()
         if props.get('bIsEnabled', True) and props.get('bOverrideMaterials') and slots[0].get('explicitMat', {}).get('refPath') == path:
             continue
         update = dict(bIsEnabled=True, bOverrideMaterials=True, OverrideMaterials=[dict(ExplicitMat=path)])
@@ -146,7 +207,7 @@ def restore_source_surfaces(system):
         data = LIB.authoring_get_renderer_data(system, emitter, 0)
         if not data.succeeded or not data.renderer_class.endswith('.GGYGOSignedFieldMeshRendererProperties'):
             raise RuntimeError(f'{emitter} 缺少原折射网格')
-        changed = align_mesh_origin(data) or changed
+        changed = align_mesh_origin(data, system.get_name()) or changed
     return changed
 
 

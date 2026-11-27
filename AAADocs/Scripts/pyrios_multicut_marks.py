@@ -4,6 +4,8 @@ from math import sin, pi
 
 import unreal as ue
 
+from pyrios_blade_reach import CUT_LENGTH
+
 from pyrios_authored_arc import cut_brush
 from zzz_fx_material_ue import configure_native_custom
 from zzz_fx_niagara_ue import EMPTY_EMITTER, NiagaraBuilder
@@ -203,7 +205,7 @@ float3 PlaneAxis = BoneD + 2*cross(BR.xyz,cross(BR.xyz,BoneD)+BR.w*BoneD);
         CutLockNow=('Bool','!Particles.CutFixed && Particles.HasContact && Particles.Age >= .021 && length((Particles.Contact-Particles.CutStart).xy)>4')),
         assign(pu,emitter=SCARS,
         CutDirection=('Vector','normalize(float3(Particles.SlashPlane.xy,Particles.UniqueID==0 ? -.32 : (Particles.UniqueID==1 ? -.22 : .035)))'),
-        CutLength=('Float','Particles.UniqueID==0 ? 378.0 : (Particles.UniqueID==1 ? 350.0 : 290.0)')),
+        CutLength=('Float',CUT_LENGTH)),
         assign(pu,emitter=SCARS,
         Position=('Position','Particles.CutLockNow ? Particles.CutStart + (Particles.Contact-Particles.CutStart)*.52 : Particles.Position'),
         Scale=('Vector','Particles.CutLockNow ? float3(Particles.CutLength,Particles.UniqueID==1 ? 32.0 : 27.0,18.0)*.01 : Particles.Scale'),
