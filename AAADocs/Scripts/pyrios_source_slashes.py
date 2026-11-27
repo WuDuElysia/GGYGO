@@ -7,6 +7,8 @@ import unreal as ue
 # 来自 Normal01 的组合制作记录和 Normal03 的分段制作记录。相同图纹在不同发射器上可能使用不同实例。
 SOURCE_SURFACES = {
     'NS_Pyrios_Normal01_MainComposition_2a7c90937cab': {
+        'M00_root_Trail_rot_Smoke_trail': 'MI_Eff_Objects_LKJ_GUID51a5af1cfffef0d489da7ac1b74b428c_b7a74746a1e8',
+        'M00_root_Trail_rot_Smoke_Head': 'MI_Eff_Objects_Gl_GUID4bd39bb17c59bab4e9f27c417bc4501f_208dfeb79592',
         'M00_root_Trail_rot_HighLight': 'MI_Eff_Objects_LKJ_GUID6cfcb6781f63a704fb97670a8c8a781a_8aeb989a7f97',
         'M00_root_Trail_rot_light_edge': 'MI_Eff_Objects_LKJ_GUID93bbcefa9a0c9544d80a4a5a1b9c3fd6_586ffa00867e',
         'M00_root_Trail_rot_bloom': 'MI_Eff_Objects_LKJ_GUID3213633a82fc1934fa9f6f457be2eae4_304124c40135',
@@ -32,27 +34,60 @@ SOURCE_SURFACES = {
         'M08_root_Particle_System_UEFX': 'MI_Eff_Objects_XL_GUID87945e2760e662744ba655930eabbc3a_b78f841766cc',
     },
     'NS_Pyrios_Normal03_Phased_Pyrios_Normal03_MainComposition_07644e9c2bf4_Unit03_0365aeadd570': {
+        'M11_root_Trail_rot_bloom__1__UEFX': 'MI_Eff_Objects_UndefinedName_GUID90c46d939d3c4434ba0c8d322e734a2c_20a9e85070c7',
+        'M11_root_Trail_rot_andi__6__UEFX': 'MI_Eff_Objects_UndefinedName_GUID71e6170c5ebb4d9468388e16bfc2a407_e6a0c8ab5274',
+        'M11_root_Trail_rot_HighLight__3__UEFX': 'MI_Eff_Objects_UndefinedName_GUID5af9bc1e1bd42ac4ea2ade719947412f_feabd6aba987',
+        'M11_root_Trail_rot_An_HighLight__4__UEFX': 'MI_Eff_Objects_UndefinedName_GUIDc4df72a78a3101e418284d5bb109c107_4439f7e1a7d4',
+        'M11_root_Trail_rot_light_edge__3__UEFX': 'MI_Eff_Objects_UndefinedName_GUID3912249a10b128841b128c5a6ca8defd_c8a810b8733b',
+        'M11_root_Trail_rot_bloom__3__UEFX': 'MI_Eff_Objects_UndefinedName_GUID7d418d14c985a7f4194dad15012b3829_300ac69d850a',
+        'M11_root_Trail_rot_Shining__5__UEFX': 'MI_Eff_Objects_UndefinedName_GUID7c982a2c37c2b974ab645f1157c56e90_460999c61cda',
+        'M11_root_Trail_rot_Smoke_Head__3__UEFX': 'MI_Eff_Objects_UndefinedName_GUID4013aef9cd100d247a5e070cd257965b_5eb784bd05c2',
+        'M12_root_Trail_rot_HighLight_UEFX': 'MI_Eff_Objects_LKJ_GUID6cfcb6781f63a704fb97670a8c8a781a_8aeb989a7f97',
+        'M12_root_Trail_rot_light_edge_UEFX': 'MI_Eff_Objects_LKJ_GUIDbd4b9c9095695f3458b9d6f8811d7613_43b46a12069d',
+        'M12_root_Trail_rot_Smoke_trail_UEFX': 'MI_Eff_Objects_LKJ_GUID9e5143ba33a0998419daffdc21fc1339_17c6b46c9f88',
+        'M12_root_Trail_rot_Smoke_Head_UEFX': 'MI_Eff_Objects_LKJ_GUID4fa86ebb41e59ea4ca07004f9cba7bcc_8b48724d50f8',
+        'M12_root_Trail_rot_bloom_UEFX': 'MI_Eff_Objects_LKJ_GUID5a767948216a05b4bafacc3ab7701c34_bad8fa16266d',
+        'M12_root_Trail_rot_Shining_UEFX': 'MI_Eff_Objects_LKJ_GUID0fc076df02e44b3489db13c3449b6f06_242e08331d10',
         'M09_root_andi_main_UEFX': 'MI_Eff_Objects_XL_GUID84886ddf1656e7b4a8c4a627b062d419_47ed8ebd0716',
         'M09_root_andi_main_HighLight_main_UEFX': 'MI_Eff_Objects_XL_GUID026b93635b2abf040adcb14604738e95_d7fde01298a8',
         'M09_root_andi_main_light_edge_UEFX': 'MI_Eff_Objects_XL_GUID4dc381e6df997c94ea265bc63ae1790f_0ea38604c054',
         'M09_root_andi_main_line_UEFX': 'MI_Eff_Objects_XL_GUIDa880635ae7874d24cbd32fdad4278593_841e7f4fee78',
         'M09_root_andi_main_bloom_UEFX': 'MI_Eff_Objects_XL_GUID250fc1a9ac56ec24a934f415085358c9_26f84020d82c',
     },
+    'NS_Pyrios_Normal02_MainComposition_d7bd1888f9a7': {
+        'M00_root_Trail_rot_HighLight': 'MI_Eff_Objects_LKJ_GUID6cfcb6781f63a704fb97670a8c8a781a_c0b36f669f7d',
+        'M00_root_Trail_rot_light_edge': 'MI_Eff_Objects_LKJ_GUID93bbcefa9a0c9544d80a4a5a1b9c3fd6_9577471f949d',
+        'M00_root_Trail_rot_Smoke_trail': 'MI_Eff_Objects_LKJ_GUID51a5af1cfffef0d489da7ac1b74b428c_7c4e9c023e49',
+        'M00_root_Trail_rot_Smoke_Head': 'MI_Eff_Objects_Gl_GUID4bd39bb17c59bab4e9f27c417bc4501f_9d50e08c9d8e',
+        'M00_root_Trail_rot_bloom': 'MI_Eff_Objects_LKJ_GUID3213633a82fc1934fa9f6f457be2eae4_7a47e3b6b719',
+        'M00_root_Trail_rot_Shining': 'MI_Eff_Objects_LKJ_GUID5b0312e87ded4644ca3051a1169e3fef_16d89723bc62',
+    },
+    'NS_Pyrios_Normal03_Phased_Pyrios_Normal03_MainComposition_07644e9c2bf4_Unit04_a811afd462b6': {
+        'M14_root_Trail_rot_HighLight_UEFX': 'MI_Eff_Objects_LKJ_GUID6cfcb6781f63a704fb97670a8c8a781a_8aeb989a7f97',
+        'M14_root_Trail_rot_light_edge_UEFX': 'MI_Eff_Objects_LKJ_GUIDbd4b9c9095695f3458b9d6f8811d7613_31828544eb3b',
+        'M14_root_Trail_rot_Smoke_trail_UEFX': 'MI_Eff_Objects_LKJ_GUID9e5143ba33a0998419daffdc21fc1339_17c6b46c9f88',
+        'M14_root_Trail_rot_Smoke_Head_UEFX': 'MI_Eff_Objects_LKJ_GUID4fa86ebb41e59ea4ca07004f9cba7bcc_8b48724d50f8',
+        'M14_root_Trail_rot_bloom_UEFX': 'MI_Eff_Objects_LKJ_GUID5a767948216a05b4bafacc3ab7701c34_bad8fa16266d',
+        'M14_root_Trail_rot_Shining_UEFX': 'MI_Eff_Objects_LKJ_GUID0fc076df02e44b3489db13c3449b6f06_242e08331d10',
+    },
 }
 
 LIB = ue.GGYGONiagaraCompileLibrary
 MAT_DIR = '/Game/Characters/Shared/FX/ZZZ/MaterialInstances/'
+SWEEP_MESH = '/Game/Characters/Shared/FX/ZZZ/Meshes/Cylinder005_efa096b130c7.Cylinder005_efa096b130c7'
 BLADE_MESH = '/Game/Characters/Shared/FX/ZZZ/Meshes/FXMD_DAO_001_ced427b6fbbf.FXMD_DAO_001_ced427b6fbbf'
 
 
 # 正式 FX 挂在骨架 root。测试场实测首刀 root 离地 66 cm，项目把刀弧绘制原点下移到脚底高度。
 # 同一招的色层和折射场共同平移，原材质与粒子轨迹继续使用原局部坐标。
 SOURCE_FIELDS = {
+    'NS_Pyrios_Normal02_MainComposition_d7bd1888f9a7': ('M00_root_Trail_rot_Main_Distor',),
+    'NS_Pyrios_Normal03_Phased_Pyrios_Normal03_MainComposition_07644e9c2bf4_Unit04_a811afd462b6': ('M14_root_Trail_rot_Main_Distor_UEFX',),
     'NS_Pyrios_Normal01_MainComposition_2a7c90937cab': ('M00_root_Trail_rot_Main_Distor',),
     'NS_Pyrios_Normal03_Phased_Pyrios_Normal03_MainComposition_07644e9c2bf4_Unit00_84b02fe541b2':
         ('M00_root_andi_main_Distor_UEFX', 'M04_root_Trail_rot_Main_Distor_UEFX'),
     'NS_Pyrios_Normal03_Phased_Pyrios_Normal03_MainComposition_07644e9c2bf4_Unit03_0365aeadd570':
-        ('M09_root_andi_main_Distor_UEFX',),
+        ('M09_root_andi_main_Distor_UEFX', 'M11_root_Trail_rot_Main_Distor__2__UEFX', 'M12_root_Trail_rot_Main_Distor_UEFX'),
 }
 
 
@@ -90,7 +125,8 @@ def restore_source_surfaces(system):
         props = json.loads(data.property_values)
         meshes = [entry.get('mesh', {}).get('refPath') for entry in props.get('Meshes', [])]
         slots = props.get('OverrideMaterials', [])
-        if meshes != [BLADE_MESH] or len(slots) != 1:
+        expected_mesh = SWEEP_MESH if emitter.startswith('M11_root_Trail_rot_') else BLADE_MESH
+        if meshes != [expected_mesh] or len(slots) != 1:
             raise RuntimeError(f'{emitter} 的刀面或材质槽与原配置不符')
         if slots[0].get('userParamBinding', {}).get('parameter', {}).get('name', 'None') != 'None':
             raise RuntimeError(f'{emitter} 的材质由运行时参数覆盖')
@@ -114,8 +150,8 @@ def restore_source_surfaces(system):
     return changed
 
 
-def disable_replaced_surface(system, emitter, material_name):
-    """只关闭被替换的项目刀面，保留同发射器上的折射、光源和地面层。"""
+def set_project_surface_enabled(system, emitter, material_name, enabled):
+    """只切换指定材质的网格绘制，保留同发射器上的折射、光源和地面层。"""
     ids = LIB.authoring_get_renderer_identities(system, emitter)
     if not ids.succeeded:
         raise RuntimeError(ids.error)
@@ -130,13 +166,17 @@ def disable_replaced_surface(system, emitter, material_name):
         if not any(slot.get('explicitMat', {}).get('refPath', '').endswith('.' + material_name)
                    for slot in props.get('OverrideMaterials', [])):
             continue
-        if not props.get('bIsEnabled', True):
+        if props.get('bIsEnabled', True) == enabled:
             return False
-        result = LIB.authoring_set_renderer_data(system, emitter, index, json.dumps(dict(bIsEnabled=False)))
+        result = LIB.authoring_set_renderer_data(system, emitter, index, json.dumps(dict(bIsEnabled=enabled)))
         if not result.succeeded:
             raise RuntimeError(result.error)
         return True
     raise RuntimeError(f'{emitter} 找不到待替换的 {material_name}')
+
+def disable_replaced_surface(system, emitter, material_name):
+    return set_project_surface_enabled(system, emitter, material_name, False)
+
 
 def align_slash_directions(system, tool, assign):
     """按本机原片的斩向校正原网格朝向。局部 Y 是角色前向，局部 Z 是竖直。"""
@@ -145,14 +185,17 @@ def align_slash_directions(system, tool, assign):
     key = system.get_name()
     layers = [*SOURCE_SURFACES.get(key, {}), *SOURCE_FIELDS.get(key, ())]
     stamp = 'Pyrios.SourceSlashDirection'
-    if ue.EditorAssetLibrary.get_metadata_tag(system, stamp) == 'native-film-1':
+    # 旧版已制作首刀亮面与空间斩。新增的首刀烟纹需要与原亮面共用同一朝向。
+    if ue.EditorAssetLibrary.get_metadata_tag(system, stamp) == 'native-film-2':
         return False
+    if ue.EditorAssetLibrary.get_metadata_tag(system, stamp) == 'native-film-1':
+        layers = [n for n in layers if key.startswith('NS_Pyrios_Normal01_') and n.endswith(('Smoke_trail', 'Smoke_Head'))]
     work = []
     emitters = []
     for emitter in layers:
         if key.startswith('NS_Pyrios_Normal01_'):
             axis, angle = 'z', 180
-        elif emitter.startswith('M00_'):
+        elif key.startswith('NS_Pyrios_Normal03_') and emitter.startswith('M00_'):
             axis, angle = 'y', -28
         elif emitter.startswith('M04_'):
             axis, angle = 'y', -38
@@ -180,5 +223,5 @@ def align_slash_directions(system, tool, assign):
         result = LIB.authoring_set_renderer_data(system, emitter, 0, json.dumps({'MeshOrientationBinding':binding}))
         if not result.succeeded:
             raise RuntimeError(result.error)
-    ue.EditorAssetLibrary.set_metadata_tag(system, stamp, 'native-film-1')
+    ue.EditorAssetLibrary.set_metadata_tag(system, stamp, 'native-film-2')
     return True

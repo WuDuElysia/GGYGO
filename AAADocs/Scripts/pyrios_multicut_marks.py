@@ -11,7 +11,7 @@ from zzz_fx_niagara_ue import EMPTY_EMITTER, NiagaraBuilder
 
 SCARS = 'Pyrios_AftercutMarks'
 VERSION = 'reference-diagonals-ground-7'
-SURFACE_VERSION = 'painted-spine-6'
+SURFACE_VERSION = 'etched-ridge-7'
 # Normal03 的 03/09_MeleeTrail 原 andi_main 刀面，以及三次 MeleeTrail 共用的 light_edge 与高光遮罩。
 TEXTURES = {'Face': 'Eff_MeleeTrail_239_4f346e732ad4', 'Edge': 'Eff_MeleeTrail_089_LYX_01_2d474876c2a0',
             'Highlight': 'Eff_MeleeTrail_116_YZ_06_f2c948b7ce36'}
@@ -47,9 +47,17 @@ color += rim*(.22+.78*wake)*(.33+.67*wall)*(.71+.29*gloss)*float3(.045,.36,1.42)
 color += edgeLip*(.12+.88*wake)*float3(.12,.66,2.15);
 color += (edgeLip+.27*rim)*head*(.55+.45*grazing)*float3(4.9,6.7,8.8);
 color += head*back*(1-gouge)*float3(.36,.82,1.65);
-// 暗槽有覆盖率，背光的一面保留刀厚；白脊仅随掠光短暂出现。
-Coverage = cut*saturate(smoothstep(.065,.66,mass)*(.85+.14*life)+rim*.72);
-return cut*color;
+// 原弧面提供刃腹。世界空间的切口只补一条带刻纹的脊线，入刀和出刃处自然收尖。
+float taper = saturate(4.0*u*(1.0-u));
+float spineDist = abs(UV.y-.5-.038*(profile-.5)-.023*(gouge-.5));
+float spine = exp2(-pow(spineDist/(.024+.08*taper),2));
+float shoulder = exp2(-pow(spineDist/(.06+.14*taper),2));
+float grain = .38+.62*saturate(.65*profile+.35*gloss);
+float ridge = spine*grain*(.62+.38*wall);
+float glint = ridge*head*(.52+.48*grazing);
+Coverage = cut*taper*saturate(.89*spine+.30*shoulder*mass+.12*rim);
+return cut*taper*(color*(.40*shoulder+.31*spine)
+    +ridge*float3(.13,.52,2.65)+glint*float3(2.55,3.45,4.4));
 """
 
 
@@ -61,7 +69,7 @@ def scar_material(directory):
         mat = ue.load_asset(path)
         if editor.get_metadata_tag(mat,'Pyrios.Aftercut') == SURFACE_VERSION:
             return mat
-        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('three-incisions-1', 'source-edge-1', 'refracted-edge-1', 'refracted-edge-2', 'source-lamella-1', 'source-lamella-2', 'fluted-scar-1','rift-facets-2','slow-reference-edge-1','slow-reference-edge-2','three-incisions-2','reference-spine-1','travelling-spine-2','brushed-spine-3','brushed-spine-4','painted-spine-5','reference-diagonals-5', VERSION):
+        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('painted-spine-6', 'three-incisions-1', 'source-edge-1', 'refracted-edge-1', 'refracted-edge-2', 'source-lamella-1', 'source-lamella-2', 'fluted-scar-1','rift-facets-2','slow-reference-edge-1','slow-reference-edge-2','three-incisions-2','reference-spine-1','travelling-spine-2','brushed-spine-3','brushed-spine-4','painted-spine-5','reference-diagonals-5', VERSION):
             raise RuntimeError('已有未识别的斩痕材质 '+path)
         edit.delete_all_material_expressions(mat)
     else:

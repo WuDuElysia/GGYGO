@@ -13,7 +13,7 @@ LIB = ue.GGYGONiagaraCompileLibrary
 ARC = 'Pyrios_OpeningCrescent'
 ARC_VERSION = 'horizontal-crescent-4'
 ARC_SURFACE_VERSION = 'pearl-crescent-16'
-WASH_VERSION = 'fanned-reflection-12'
+WASH_VERSION = 'scored-reflection-13'
 TAG = 'Pyrios.AuthoredSlash'
 
 # 时间沿整张弧面推进。白晕在挥刀前半拍变宽，后半拍只剩远侧的一段亮弦。
@@ -74,7 +74,7 @@ WASH_SHADE = """
 float u=Clock.g>.5 ? 1-UV.y : UV.y;
 float y=2*UV.x-1;
 float t=saturate(Clock.r);
-float front=lerp(.315,.784,smoothstep(.03,.78,t));
+float front=lerp(.42,.91,smoothstep(.02,.74,t));
 float behind=front-u;
 float end=smoothstep(0,.07,u)*(1-smoothstep(.91,1,u));
 float textureFlow=saturate(Ink.r);
@@ -95,6 +95,11 @@ float forkBrush=Texture2DSample(FlowMask,FlowMaskSampler,float2(clamp(.20+1.21*l
 float bristle=Texture2DSample(FlowMask,FlowMaskSampler,float2(clamp(.61+.94*lag,.10,.91),clamp(.48+1.64*bank+.12*textureFlow,.02,.98))).r;
 float pearl=head*(.72*mainLine+.25*haze)*(.24+.88*sqrt(saturate(bristle)));
 float glaze=Texture2DSample(FlowMask,FlowMaskSampler,float2(clamp(.35+.92*lag,.05,.97),clamp(.49+1.39*(bank+forkGap),.02,.98))).r;
+// 亮头扫过后保留两条沿切向延伸的蓝色刃纹，纹理控制断续和收尖。
+float tail=smoothstep(-.015,.085,behind)*(1-smoothstep(.44,.88,lag));
+float sliver=exp2(-pow((bank+.13*lag-.035)/(.030+.035*lag),2));
+float echo=exp2(-pow((bank+forkGap*.74)/(.024+.018*lag),2));
+float scored=tail*(sliver*(.34+.76*forkBrush)+echo*(.12+.57*bristle));
 float thread=wake*(mainLine*(.27+1.10*forkBrush)+sideLine*split*(.18+.93*glaze))*brush;
 float veil=(.49*head+.79*wake)*haze*(.45+.69*sqrt(saturate(forkBrush)));
 // 亮头掠过之后，低位散射向切口侧后方张开，地面中央仍透得出原笔触。
@@ -106,9 +111,9 @@ float2 plumeUV=clamp(float2(.27+.96*lag,.53+bank*.84+lag*.25),.015,.985);
 float plume=Texture2DSample(FlowMask,FlowMaskSampler,plumeUV).r;
 float scatter=crossFalloff*(.65*spill+.68*wake)*(.38+.42*sqrt(saturate(plume))+.20*forkBrush);
 float edgeFade=1-smoothstep(.88,.998,abs(y));
-Coverage=fade*edgeFade*saturate(.73*pearl+.65*thread+.50*veil+.71*scatter);
+Coverage=fade*edgeFade*saturate(.60*pearl+.83*thread+.58*veil+.71*scatter+.89*scored);
 Tint=float3(.011,.026,.102);
-return fade*edgeFade*(pearl*float3(1.40,2.15,4.6)+thread*float3(.075,.34,3.05)
+return fade*edgeFade*(pearl*float3(.93,1.55,3.36)+scored*float3(.10,.46,4.25)+thread*float3(.055,.30,3.60)
     +veil*float3(.024,.12,1.47)+scatter*float3(.069,.32,1.79));
 
 """

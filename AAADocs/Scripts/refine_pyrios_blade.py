@@ -7,7 +7,8 @@ import unreal as ue
 PROJECT = Path(ue.Paths.convert_relative_path_to_full(ue.Paths.project_dir()))
 sys.path.insert(0, str(PROJECT / 'AAADocs/Scripts'))
 from pyrios_authored_arc import ARC, ground_sweep
-from pyrios_source_slashes import SOURCE_SURFACES, align_slash_directions, disable_replaced_surface, restore_source_surfaces
+from pyrios_combo_profiles import apply_combo_profile
+from pyrios_source_slashes import SOURCE_SURFACES, align_slash_directions, disable_replaced_surface, restore_source_surfaces, set_project_surface_enabled
 from pyrios_normal03_finisher import refine_normal03
 from pyrios_multicut_marks import SCARS, VERSION as CUT_VERSION, add_cut_light, add_opening_marks, extend_space_cuts, refraction_material, scar_material
 from pyrios_prism_material import build_prism_materials
@@ -400,6 +401,7 @@ def build():
         if style=='Draw':
             installed=restore_source_surfaces(system)
             installed=align_slash_directions(system,tool,assign) or installed
+            installed=apply_combo_profile(system,tool,assign) or installed
             old={row.emitter_name for row in LIB.authoring_get_system_summary(system).emitters}
             if ARC in old:
                 installed = disable_replaced_surface(system, ARC, 'M_Pyrios_OpeningCrescent') or installed
@@ -411,8 +413,11 @@ def build():
             if installed or styled:
                 finish(system)
             continue
+        # 第二刀的原弧面垂直挑起，剑身拖尾只负责近刃运动。
+        restored = restore_source_surfaces(system)
+        restored = apply_combo_profile(system,tool,assign) or restored
         if EDITOR.get_metadata_tag(system,STAMP)==SYSTEM_VERSION:
-            if apply_blade_volume(system,EMITTER,field):
+            if apply_blade_volume(system,EMITTER,field) or restored:
                 finish(system)
             continue
         existing = [entry.emitter_name for entry in LIB.authoring_get_system_summary(system).emitters]
@@ -456,8 +461,9 @@ def build():
         brush = '_Unit00_' in system.get_name() and bind_cut_brushes(system)
         restored = restore_source_surfaces(system)
         restored = align_slash_directions(system,tool,assign) or restored
+        restored = apply_combo_profile(system,tool,assign) or restored
         if '_Unit00_' in system.get_name():
-            restored = disable_replaced_surface(system, SCARS, 'M_Pyrios_Aftercut') or restored
+            restored = set_project_surface_enabled(system, SCARS, 'M_Pyrios_Aftercut', True) or restored
         if restored or brush or wash or light or travel or volume or extended or weapon_added or ground_or_sweep or styled:
             finish(system)
     # 兼容仍引用暖金笔触的资产。特殊技的逐层材质由 style_actions 配置。

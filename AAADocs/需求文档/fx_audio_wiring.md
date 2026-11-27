@@ -90,15 +90,19 @@
 
 ## 2026-11-25 战斗表现与急转
 
-5.9 副本的首刀由原 Montage FX 窗口驱动原包四层刀面。第二刀上挑沿实时武器骨采样，刀根取 Ctr_Weapon_A_02，刀尖取 Ctr_Weapon_B_05 对应的 LOD0 最外端刃面顶点。上挑从发射器 0.134 秒起采样，采样保留 0.166 秒。各段沿 Montage 原窗口结束。前两段关闭漂出的锥形烟团。第二段另外关闭模糊烟、自由散点、碎块和重复的代理拖尾，接地投影与签名扭曲场各自保留。特殊技和强化特殊技的刀面、亮边、雾与闪光按各层原材质实例绑定。实战对照看了[佩洛伊斯演示第 2 P，1 分 04 秒起](https://www.bilibili.com/video/BV1sGEy6mEKe/?p=2&t=64)。五个既有命中 Cue 使用独立接触星屑并保留命中音效。两份闪避资产是候选表现，独立闪避输入仍待玩法确定。
+5.9 副本的首刀由原 Montage FX 窗口驱动原包刀面。第二刀的宽弧使用原网格和逐层材质，近刃细线沿实时武器骨采样，刀根取 Ctr_Weapon_A_02，刀尖取 Ctr_Weapon_B_05 对应的 LOD0 最外端刃面顶点。上挑从发射器 0.134 秒起采样，采样保留 0.166 秒。各段沿 Montage 原窗口结束。前两段关闭漂出的锥形烟团。第二段关闭自由散点、碎块和重复的代理拖尾，随刀弧运动的两层烟纹由原材质绘制，接地投影与签名扭曲场各自保留。特殊技和强化特殊技的刀面、亮边、雾与闪光按各层原材质实例绑定。实战对照看了[佩洛伊斯演示第 2 P，1 分 04 秒起](https://www.bilibili.com/video/BV1sGEy6mEKe/?p=2&t=64)。五个既有命中 Cue 使用独立接触星屑并保留命中音效。两份闪避资产是候选表现，独立闪避输入仍待玩法确定。
 
 5.9 副本用正式攻击键在 D3D12 PIE 打完三段，各命中一次，动作自然收尾，记录到音效播放，FX 组件正常释放。先前版本在二段挥刀至 0.088 秒时，将 Niagara 最新刀带两端与同帧角色刀柄、LOD0 蒙皮刀尖对照，两端误差均小于 0.01 厘米。侧面实拍可见外侧亮线和内层笔触，原先飞出画面的蓝灰烟团已移除。[二段慢放](../../Saved/Codex/PyriosBladeReview/Pyrios_Normal02.webp) · [三连日志](../../Saved/Codex/PyriosBladeReview/side.log) · [特殊技日志](../../Saved/Codex/PyriosBladeReview/play.log)
 
 上挑与第三段收刀的刀根和刀尖按武器实际姿态采样。闭合刀带在靠近刀尖处有不对称的厚截面。原烟纹 125 和遮罩 237 组织刀面明暗，089 提出冷色刃线，116 控制掠光。刃面法线决定棱线和凹槽的亮暗。武器刀带与折射共用位置采样。斩痕外围用原 Distor 层 098 和 244 做局部屏幕折射，波峰沿切面向外传播，随后回吸。第三段砸地沿用实际撞点与地面法向，原裂纹纹理 198 叠在地面裂缝上，碎石与断板从同一撞点展开。
 
-普通攻击第一段的高光、刃缘、白晕和闪光各使用对应的原材质实例。第三段三次斩击的 17 层刀面和独立的 03_08 光晕使用各自的原程序材质。四个着色层和第三段各刀保留原网格、贴图、粒子顶点输入及内部寿命。项目手绘月牙和三道手绘切面的颜色渲染器已关闭；同发射器的折射、光源和地表扫光继续运行。[正式普攻逐层材质](../Scripts/pyrios_source_slashes.py)
+第二刀的宽弧与折射一起推迟 58 毫秒起笔，原武器细线保留自己的采样窗口。第三段在 0.40 秒的转身横扫、0.53 秒的起跳、0.75 秒的下劈分别启用相应刀面。砸地时收窄大面积白光，保留地面裂纹与岩块的扩散范围。地表扫光由原流纹分出两条收尖的蓝色细脊。动作时间来自本机录像和项目 Montage 的姿态对齐。[普攻姿态与接地亮部](../Scripts/pyrios_combo_profiles.py)
 
-本机《绝区零》实录与 UE 5.9 改前、改后对照中，第一刀已能向角色左侧绕出长白弧，弧面仍比原版倾斜。第三段恢复原材质的明暗和颜色分层，斜斩的亮边与地面反光仍未完全对齐。高度和各刀朝向是项目侧按角色实测和录像配置的。正式攻击输入的 D3D12 单机空挥零命中、打靶三次命中，两场均观测到 22 层产生粒子、三段自然结束、特效组件释放。整体 90% 还原仍待验。联机与 Cook 未复测。[本机原版与两版 UE 同机位慢放](../../Saved/Codex/PyriosMotionMatch/佩洛伊斯原程序接入_同机位慢放.mp4) · [同机位画面](../../Saved/Codex/PyriosMotionMatch/佩洛伊斯原程序接入_同机位.jpg) · [制作与编译](../../Saved/Codex/PyriosBladeReview/source_direction.log) · [空挥](../../Saved/Codex/PyriosBladeReview/directed_program_studio.log) · [打靶](../../Saved/Codex/PyriosBladeReview/directed_program_hit.log)
+2026-11-27 的实拍对照覆盖三段出手、第三段空中转身、下劈和落地余波。首刀横向展开，第二刀宽弧在上挑中出现，第三段的横扫与下劈之间有连续的颜色变化。空间斩仍有宽亮带遮住细刃，落地闪光的面积也比原片大，整体相似度仍待验。D3D12 单机使用正式攻击输入，空挥零命中，打靶三段各命中一次，两场自然收招并释放 FX。空挥场沿用打靶断言，命中项为否。联机与 Cook 本次未运行。对照中 UE 两版使用同一镜位，原版录像按动作节点对齐。[三段完整慢放](../../Saved/Codex/PyriosMotionMatch/佩洛伊斯_完整三段普攻对比.mp4) · [关键帧](../../Saved/Codex/PyriosMotionMatch/佩洛伊斯_三段关键帧.jpg) · [空挥实拍](../../Saved/Codex/PyriosBladeReview/combo_ridge_final.log) · [打靶实拍](../../Saved/Codex/PyriosBladeReview/combo_ridge_hit.log) · [Niagara 编译](../../Saved/Codex/PyriosBladeReview/complete_combo_profiles.log) · [空间斩刃脊制作](../../Saved/Codex/PyriosBladeReview/complete_slash_ridge.log)
+
+普通攻击前两段的高光、刃缘、白晕、闪光、烟头和烟尾各使用对应的原材质实例。第三段三次斩击的 17 层刀面和独立的 03_08 光晕使用各自的原程序材质。这些着色层保留原网格、贴图、粒子顶点输入及内部寿命。首刀的项目手绘月牙已关闭。第三段的三道空间切口在世界空间锁定，窄脊上的流纹与亮点沿各自入刀方向展开，两端收尖。原刀面负责刃腹，同发射器上的折射、光源与地表扫光各自保留。[正式普攻逐层材质](../Scripts/pyrios_source_slashes.py)
+
+本机《绝区零》实录与 UE 5.9 改前、改后对照中，第一刀已能向角色左侧绕出长白弧，弧面仍比原版倾斜。第三段恢复原材质的明暗和颜色分层，斜斩的亮边与地面反光仍未完全对齐。高度和各刀朝向是项目侧按角色实测和录像配置的。正式攻击输入的 D3D12 单机空挥零命中、打靶三次命中，此前两场均观测到当时已接入的 22 层产生粒子、三段自然结束、特效组件释放。整体 90% 还原仍待验。联机与 Cook 未复测。[本机原版与两版 UE 同机位慢放](../../Saved/Codex/PyriosMotionMatch/佩洛伊斯原程序接入_同机位慢放.mp4) · [同机位画面](../../Saved/Codex/PyriosMotionMatch/佩洛伊斯原程序接入_同机位.jpg) · [制作与编译](../../Saved/Codex/PyriosBladeReview/source_direction.log) · [空挥](../../Saved/Codex/PyriosBladeReview/directed_program_studio.log) · [打靶](../../Saved/Codex/PyriosBladeReview/directed_program_hit.log)
 
 本地从绝区零 3.3.0 佩洛伊斯的七个战斗 Prefab 读取粒子、渲染器、材质及纹理。原版实录 8.57–8.85 秒可见三道长痕交错，近处地面随之扭曲。挂点、斩向和招式触发时点依录像配置。原包首刀的四份材质都引用 Particles_Dissolve_CustomColor_Mask，其中一层用 Eff_Noise_228 作主纹、Eff_MeleeTrail_116_YZ_03 作遮罩、Eff_Noise_086 作扰动；另一个材质引用 Distortion UVMove。Normal03_08 已导出与材质本地关键字相符的 TransparentHalfRes 顶点和像素程序。原版当帧实际 Pass、全局关键字、动态参数和上层逐招调用时序仍待确认。UE 主刀面使用原程序移植材质。03_08 的 TransparentHalfRes 在 UE 当前视图全分辨率合成，原版半分辨率合成链尚未复现。特殊技和强化特殊技已恢复 34 个渲染槽各自的材质，两招在独立 D3D12 PIE 临时授予后通过输入触发，分别命中 3 次、5 次，收招后 FX 正常释放。[原版动作演示](https://www.bilibili.com/video/BV1sGEy6mEKe/?p=2&t=64) · [本地原包读取日志](../../Saved/Codex/PyriosSourceReview/live.log) · [技能运行日志](../../Saved/Codex/PyriosBladeReview/volume_special.log)
 
