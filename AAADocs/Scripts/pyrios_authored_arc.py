@@ -12,8 +12,8 @@ EDITOR = ue.EditorAssetLibrary
 LIB = ue.GGYGONiagaraCompileLibrary
 ARC = 'Pyrios_OpeningCrescent'
 ARC_VERSION = 'horizontal-crescent-4'
-ARC_SURFACE_VERSION = 'painted-crescent-14'
-WASH_VERSION = 'brushed-reflection-10'
+ARC_SURFACE_VERSION = 'pearl-crescent-16'
+WASH_VERSION = 'fanned-reflection-12'
 TAG = 'Pyrios.AuthoredSlash'
 
 # 时间沿整张弧面推进。白晕在挥刀前半拍变宽，后半拍只剩远侧的一段亮弦。
@@ -54,9 +54,17 @@ float hotSpine = lip+.16*bevel;
 color += pulse*(hotSpine*float3(9.8,10.9,11.7)+body*float3(.21,.37,.68))*(1-.72*groove);
 color += lip*(.17+.83*wake)*float3(.75,1.62,3.35);
 color += halo*float3(.026,.098,2.10)+pulse*halo*float3(.42,.56,.83);
+// 峰值处的乳白散光向弧外铺开；用刀腹及暗槽的遮罩给笔纹让出空间。
+float peakTime = smoothstep(.11,.23,t)*(1-smoothstep(.375,.535,t));
+float nearHead = exp2(-2.0*pow((lag-.026)/(lag<.026 ? .073 : .158),2));
+float offset = v-(.655+.033*sin(6.28*u));
+float scatter = exp2(-1.55*pow((offset-.032)/(offset>0 ? .285 : .23),2));
+float clearFace = 1-saturate(.82*body+.85*groove+.24*bevel);
+float pearlMist = peakTime*nearHead*scatter*(.055+.945*clearFace);
+color += pearlMist*float3(.20,.29,.64);
 float extent = smoothstep(.003,.043,u)*(1-smoothstep(.956,.998,u));
 float fringe = smoothstep(.005,.095,UV.y)*(1-smoothstep(.865,.995,UV.y));
-Coverage = fade*extent*fringe*saturate(smoothstep(.06,.75,body)*lerp(.79,.97,faceAge)+bevel*.83+halo*.40);
+Coverage = fade*extent*fringe*saturate(smoothstep(.06,.75,body)*lerp(.79,.97,faceAge)+bevel*.83+halo*.40+pearlMist*.17);
 return fade*extent*fringe*color;
 """
 
@@ -66,7 +74,7 @@ WASH_SHADE = """
 float u=Clock.g>.5 ? 1-UV.y : UV.y;
 float y=2*UV.x-1;
 float t=saturate(Clock.r);
-float front=lerp(.235,.83,smoothstep(.03,.78,t));
+float front=lerp(.315,.784,smoothstep(.03,.78,t));
 float behind=front-u;
 float end=smoothstep(0,.07,u)*(1-smoothstep(.91,1,u));
 float textureFlow=saturate(Ink.r);
@@ -76,9 +84,9 @@ float lag=max(0,behind);
 float head=exp2(-pow(behind/(behind<0 ? .042 : .123),2));
 float wake=smoothstep(-.022,.045,behind)*exp2(-2.5*lag);
 float forkGap=.11+.76*lag+.035*sin(13*u+2*textureFlow);
-float mainLine=exp2(-pow(bank/(.14+.09*head+.045*lag),2));
-float sideLine=exp2(-pow((bank+forkGap)/(.11+.11*lag),2));
-float haze=exp2(-pow(bank/(.37+.26*lag),2));
+float mainLine=exp2(-pow(bank/(.17+.12*head+.066*lag),2));
+float sideLine=exp2(-pow((bank+forkGap)/(.14+.16*lag),2));
+float haze=exp2(-pow(bank/(.48+.28*lag),2));
 float brush=.48+.52*textureFlow;
 float fade=Clock.b*end*(1-smoothstep(.74,1,t))*smoothstep(.01,.08,t);
 float split=.66+.34*sin(14*u+2.4*textureFlow+3*bank);
@@ -89,9 +97,20 @@ float pearl=head*(.72*mainLine+.25*haze)*(.24+.88*sqrt(saturate(bristle)));
 float glaze=Texture2DSample(FlowMask,FlowMaskSampler,float2(clamp(.35+.92*lag,.05,.97),clamp(.49+1.39*(bank+forkGap),.02,.98))).r;
 float thread=wake*(mainLine*(.27+1.10*forkBrush)+sideLine*split*(.18+.93*glaze))*brush;
 float veil=(.49*head+.79*wake)*haze*(.45+.69*sqrt(saturate(forkBrush)));
-Coverage=fade*saturate(.80*pearl+.71*thread+.51*veil);
+// 亮头掠过之后，低位散射向切口侧后方张开，地面中央仍透得出原笔触。
+float fanAxis=bank+.12+.33*lag;
+float fanRadius=lerp(.48,.84,smoothstep(.015,.38,lag));
+float crossFalloff=exp2(-pow(fanAxis/fanRadius,2))*(1-smoothstep(.79,.995,abs(y)));
+float spill=exp2(-pow(behind/(behind<0 ? .088 : .29),2));
+float2 plumeUV=clamp(float2(.27+.96*lag,.53+bank*.84+lag*.25),.015,.985);
+float plume=Texture2DSample(FlowMask,FlowMaskSampler,plumeUV).r;
+float scatter=crossFalloff*(.65*spill+.68*wake)*(.38+.42*sqrt(saturate(plume))+.20*forkBrush);
+float edgeFade=1-smoothstep(.88,.998,abs(y));
+Coverage=fade*edgeFade*saturate(.73*pearl+.65*thread+.50*veil+.71*scatter);
 Tint=float3(.011,.026,.102);
-return fade*(pearl*float3(1.54,2.3,5.2)+thread*float3(.085,.37,3.45)+veil*float3(.017,.083,1.64));
+return fade*edgeFade*(pearl*float3(1.40,2.15,4.6)+thread*float3(.075,.34,3.05)
+    +veil*float3(.024,.12,1.47)+scatter*float3(.069,.32,1.79));
+
 """
 
 

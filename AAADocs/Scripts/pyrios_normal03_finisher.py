@@ -4,6 +4,7 @@ from pathlib import Path
 
 import unreal as ue
 
+from pyrios_source_slashes import SOURCE_SURFACES
 from pyrios_impact_slabs import broken_slabs, cut_rock_material
 from zzz_fx_material_ue import configure_native_custom
 from zzz_fx_niagara_ue import NiagaraBuilder
@@ -250,7 +251,7 @@ def refine_normal03(system, directory, tool, target, assign, weapon_frame):
     has_fracture = EDITOR.get_metadata_tag(system, STAMP) == VERSION
     changed = False
     for name in names:
-        if name.startswith(SWEEPS) and disable_baked_sweep(system, name, ('NiagaraMeshRendererProperties',)):
+        if name not in SOURCE_SURFACES.get(system.get_name(), {}) and name.startswith(SWEEPS) and disable_baked_sweep(system, name, ('NiagaraMeshRendererProperties',)):
             changed = True
         if name.startswith('M05_root_') or (name.startswith(('M02_','M06_','M07_')) and 'LinePoint' in name):
             if disable_baked_sweep(system, name, ('NiagaraMeshRendererProperties','NiagaraSpriteRendererProperties','NiagaraRibbonRendererProperties')):

@@ -6,7 +6,8 @@ import unreal as ue
 
 PROJECT = Path(ue.Paths.convert_relative_path_to_full(ue.Paths.project_dir()))
 sys.path.insert(0, str(PROJECT / 'AAADocs/Scripts'))
-from pyrios_authored_arc import opening, ground_sweep
+from pyrios_authored_arc import ARC, ground_sweep
+from pyrios_source_slashes import SOURCE_SURFACES, align_slash_directions, disable_replaced_surface, restore_source_surfaces
 from pyrios_normal03_finisher import refine_normal03
 from pyrios_multicut_marks import SCARS, VERSION as CUT_VERSION, add_cut_light, add_opening_marks, extend_space_cuts, refraction_material, scar_material
 from pyrios_prism_material import build_prism_materials
@@ -231,7 +232,7 @@ def style_existing(system, mat, live):
     changed=False
     for em in LIB.authoring_get_system_summary(system).emitters:
         name=em.emitter_name
-        if name in (EMITTER, FINISHER_BLADE, SCARS):
+        if name in (EMITTER, FINISHER_BLADE, SCARS) or name in SOURCE_SURFACES.get(system.get_name(), {}):
             continue
         # 固定的可见刀弧由活刃带替代。签名场仍由原动作场配置验证并消费。
         suppress=live and (name.startswith('M00_root_Trail_rot_') or name in SECONDARY_CUT or name in AIRBORNE_SMOKE)
@@ -397,8 +398,11 @@ def build():
         system=ue.load_asset(SKILL+name)
         require(system is not None,'缺正式普攻系统 '+name)
         if style=='Draw':
-            installed=opening(system,DAWN,tool,assign,module)
+            installed=restore_source_surfaces(system)
+            installed=align_slash_directions(system,tool,assign) or installed
             old={row.emitter_name for row in LIB.authoring_get_system_summary(system).emitters}
+            if ARC in old:
+                installed = disable_replaced_surface(system, ARC, 'M_Pyrios_OpeningCrescent') or installed
             if EMITTER in old:
                 require(EDITOR.get_metadata_tag(system,STAMP) in ('live-v1','live-v2','live-v3','live-v4','live-v5','prism-v1','prism-v2','weapon-bevel-v3','weapon-filament-v4','weapon-filament-v5',SYSTEM_VERSION),'首刀旧发射器来源不明')
                 tool('NiagaraToolsets.NiagaraToolset_System.RemoveEmitter',emitterRef={'system':ref(system),'emitterName':EMITTER})
@@ -450,7 +454,11 @@ def build():
         light = '_Unit00_' in system.get_name() and add_cut_light(system,tool,assign)
         wash = '_Unit00_' in system.get_name() and ground_sweep(system,DAWN,SCARS,tool,target,assign)
         brush = '_Unit00_' in system.get_name() and bind_cut_brushes(system)
-        if brush or wash or light or travel or volume or extended or weapon_added or ground_or_sweep or styled:
+        restored = restore_source_surfaces(system)
+        restored = align_slash_directions(system,tool,assign) or restored
+        if '_Unit00_' in system.get_name():
+            restored = disable_replaced_surface(system, SCARS, 'M_Pyrios_Aftercut') or restored
+        if restored or brush or wash or light or travel or volume or extended or weapon_added or ground_or_sweep or styled:
             finish(system)
     # 兼容仍引用暖金笔触的资产。特殊技的逐层材质由 style_actions 配置。
     material(warm=True)

@@ -69,6 +69,9 @@ def material(name, code):
     return mat
 
 def classify(system,name):
+    from pyrios_source_slashes import SOURCE_SURFACES
+    if name in SOURCE_SURFACES.get(system.rsplit('/', 1)[-1], {}):
+        return None
     key=name.lower()
     if 'Evade_' in system:
         if 'world_root' in key or 'smoke_trail' in key or 'smoke_an' in key:
