@@ -177,12 +177,13 @@ def opening_edge_material(source):
     node = edit.get_material_property_input_node(mat, prop)
     if not node:
         raise RuntimeError('首刀原刃缘缺少自发光输出')
-    # 不改变原笔纹的不透明度，只让原本明亮的刃脊进入相机的 HDR 泛光。
+    # 白芯沿用原刃纹。峰值多出的能量以蓝光为主，经过相机泛光与色调映射后，
+    # 白、浅青、蓝晕依次展开，尾段随原粒子退去。
     code = """
 float luma = dot(max(Edge, 0), float3(.2126, .7152, .0722));
-float shoulder = smoothstep(.005, .15, Age) * (1 - smoothstep(.52, .90, Age));
-float crest = luma * smoothstep(.06, 1.3, luma);
-return Edge + crest * shoulder * float3(11, 17, 30);
+float pulse = smoothstep(.005, .17, Age) * (1 - smoothstep(.46, .93, Age));
+float crest = luma * smoothstep(.04, 1.1, luma);
+return Edge + crest * pulse * float3(.55, 6.5, 172.0);
 """
     origin = editor.get_metadata_tag(mat, 'OpeningEdgeSource')
     dirty = False
@@ -221,20 +222,29 @@ return Edge + crest * shoulder * float3(11, 17, 30);
             raise RuntimeError('首刀刃缘实例保存失败')
     if instance.parent != mat:
         raise RuntimeError('首刀刃缘实例来源不符')
-    return instance
+    # 固定原贴图上沿，向刃腹多铺一层浅青过渡；保留原高亮色阶给远处蓝晕供光。
+    return configure_slash_material(
+        mat, instance.get_name(), vectors={'_MainTex_ST': ue.LinearColor(1.1, 1.28, -.15, -.28)},
+        scalars={'_PowerRGB': edit.get_material_instance_scalar_parameter_value(source, '_PowerRGB'),
+                 '_PowerAlpha': 3.46})
 
 
 def slash_material(system_name, emitter, source):
     opening = system_name == 'NS_Pyrios_Normal01_MainComposition_2a7c90937cab'
     if opening and emitter == 'M00_root_Trail_rot_light_edge':
         return opening_edge_material(source)
+    if opening and emitter == 'M00_root_Trail_rot_Shining':
+        # 内侧的细闪用原噪声和刀纹显影，降低它的白峰，避免在收笔处叠成硬白片。
+        return configure_slash_material(
+            source, 'MI_Pyrios_OpeningGlint', vectors={'_MultiplyParticleColor': ue.LinearColor(13, 21, 37, 1)},
+            scalars={'_AlphaFade': .67, '_PowerRGB': .91})
     if opening and emitter == 'M00_root_Trail_rot_bloom':
-        # 沿用原时序和溶解图。展宽径向采样的亮肩，用低饱和 HDR 光供场景泛光取样。
+        # 沿用原时序和溶解图。展宽径向采样，让外层蓝光向刃面两侧逐渐衰减。
         return configure_slash_material(
             source, 'MI_Pyrios_OpeningBloom',
             vectors={'_MainTex_ST': ue.LinearColor(1.3, .78, -.05, .11),
-                     '_MultiplyParticleColor': ue.LinearColor(18, 23, 34, 1)},
-            scalars={'_PowerRGB': 1.65, '_PowerAlpha': 1.78})
+                     '_MultiplyParticleColor': ue.LinearColor(2.5, 8.5, 43, 1)},
+            scalars={'_PowerRGB': 1.45, '_PowerAlpha': 1.5})
 
     name = FACE_MATERIALS.get(source.get_name())
     if not name:
