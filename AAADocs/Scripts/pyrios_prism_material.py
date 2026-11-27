@@ -6,7 +6,7 @@ import unreal as ue
 from zzz_fx_material_ue import configure_native_custom
 
 
-PRISM_VERSION = 'slow-reference-crescent-2'
+PRISM_VERSION = 'reference-filament-3'
 
 
 # 同一套 UV 跟随实际挥刀曲面。分色由笔触控制，延迟外弦由粒子寿命控制。
@@ -65,37 +65,37 @@ else if (Tier > 2.5)
 }
 if (Tier < 3.5)
 {
-    // 原包 Smoke_trail 使用 125 的烟纹乘 237 的遮罩；亮边与高光各有自己的纹理。
+    // 慢放中外弦是连续的蓝白亮丝。烟纹调制弦内侧的靛蓝透光面，不切断外弦。
     float3 N = normalize(SurfaceNormal);
     float3 V = normalize(ViewVector);
-    float face = saturate(.5 + .5*dot(N,float3(-.48,.28,.82)));
-    float fresnel = pow(1-saturate(abs(dot(N,V))),2.3);
-    float body = sqrt(saturate(Smoke.r*SmokeMask.r));
-    float edge = sqrt(saturate(max(SourceEdge.r,max(SourceEdge.g,SourceEdge.b))));
-    // 两组刻槽由原烟纹与镶纹错开。暗槽保留在刃腹，掠过的窄高光随视角变换。
-    float crossUV = v+.14*(Smoke.r-SmokeMask.r)+.045*(Ink.g-.5);
-    float flute = abs(frac(crossUV*3.35 + .31*u + .28*Ink.b)-.5);
-    float silver = 1-smoothstep(.012,.075+fwidth(flute),flute);
-    float cavity = smoothstep(.06,.24,flute);
-    float active = smoothstep(.05,.42,body+.45*Ink.a);
-    float glint = pow(saturate(dot(reflect(-V,N),normalize(float3(-.51,.41,.76)))),6);
-    float shimmer = smoothstep(.45,.88,1-abs(u-(.18+.71*fade)))*(.18+.82*face);
-    float3 metal = lerp(float3(.025,.017,.105),float3(.18,.32,.84),face*cavity);
-    float3 silverTint = lerp(float3(.28,.54,1.55),float3(.95,1.5,2.45),shimmer);
-    float3 rimTint = SourceEdge.rgb/max(.001,max(SourceEdge.r,max(SourceEdge.g,SourceEdge.b)));
-    // 新采样的刀尖先亮。刀身按原烟纹变透，旧采样在同一条武器轨迹上留下窄弧。
-    float tip = smoothstep(.65,.97,v);
-    float head = smoothstep(.52,.95,fade);
-    float mass = active*(.28+.55*head)*(.42+.58*body);
-    float lip = exp2(-220*(1-v)*(1-v))*(.57+.43*edge);
-    float back = exp2(-115*(v-.83)*(v-.83))*(.65+.35*body);
-    opacity = saturate(mass*(.55+.27*cavity) + lip*.94 + head*edge*.20 + back*.76);
-    rgb = mass*(metal*.60 + silver*silverTint*(.19+.45*shimmer) + glint*float3(.18,.25,.67));
-    rgb += lip*lerp(float3(.13,.34,1.4),float3(1.95,2.8,4.5),head)
-        + tip*head*edge*(.25*rimTint+float3(.27,.52,1.05))
-        + mass*fresnel*SourceHighlight.r*float3(.18,.27,.84)
-        + back*lerp(float3(.016,.034,.24),float3(.052,.13,.53),face);
-    envelope = sqrt(fade);
+    float smoked = saturate(Smoke.r*SmokeMask.r);
+    float face = saturate(.5+.5*dot(N,normalize(float3(-.48,.28,.82))));
+    float head = pow(fade,3.8);
+    float crest = v-.77;
+    float aa = max(fwidth(crest),.001);
+    float width = lerp(.014,.046,head);
+    float filament = 1-smoothstep(width,width+aa+.023,abs(crest));
+    float hotArc = exp2(-65*crest*crest);
+    float blueHalo = exp2(-15*crest*crest);
+    float inside = smoothstep(.025,.36,v)*(1-smoothstep(.66,.83,v));
+    float ridge = saturate(max(SourceEdge.r,max(SourceEdge.g,SourceEdge.b)));
+    float facet = pow(saturate(1-abs(dot(N,V))),2);
+    float vein = SourceHighlight.r * (.25+.75*smoked);
+    float body = inside * (.33+.67*head) * (.58+.28*smoked+.14*Ink.g);
+    float thread = lerp(.55,1.0,ridge) * filament;
+    float3 cobalt = float3(.018,.070,.83);
+    float3 ice = lerp(float3(.085,.24,1.60),float3(3.3,4.3,7.9),head);
+    opacity = saturate(body*.74 + blueHalo*(.33+.18*head) + hotArc*.46 + thread*.58);
+    rgb = body * (lerp(float3(.008,.018,.095),cobalt*.47,face)+vein*float3(.06,.14,.42));
+    rgb += blueHalo*float3(.018,.048,.62)*(.33+.67*head)
+         + hotArc*lerp(cobalt,float3(.12,.32,2.6),head) + thread*ice;
+    rgb += inside*facet*vein*float3(.08,.19,.66);
+    // 亮弦两端收成一点，蓝晕在几何边缘前消失。长弧的端面不会留下平切白块。
+    float along = min(smoothstep(0,.105,u),1-smoothstep(.855,1,u));
+    float halfSpan = lerp(.022,1.0,sqrt(along));
+    float distanceFromEdge = crest < 0 ? -crest/.77 : crest/.23;
+    float feather = 1-smoothstep(.45*halfSpan,halfSpan,distanceFromEdge);
+    envelope = smoothstep(.035,.57,fade) * feather * smoothstep(0,.13,along);
 }
 Coverage = saturate(opacity * envelope);
 return rgb * envelope;

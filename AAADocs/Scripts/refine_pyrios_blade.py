@@ -7,7 +7,7 @@ import unreal as ue
 PROJECT = Path(ue.Paths.convert_relative_path_to_full(ue.Paths.project_dir()))
 sys.path.insert(0, str(PROJECT / 'AAADocs/Scripts'))
 from pyrios_normal03_finisher import refine_normal03
-from pyrios_multicut_marks import SCARS, VERSION as CUT_VERSION, add_opening_marks, extend_space_cuts, refraction_material, scar_material
+from pyrios_multicut_marks import SCARS, VERSION as CUT_VERSION, add_cut_light, add_opening_marks, extend_space_cuts, refraction_material, scar_material
 from pyrios_prism_material import build_prism_materials
 from zzz_fx_material_ue import configure_native_custom
 from zzz_fx_niagara_ue import NiagaraBuilder, TYPES, EMPTY_EMITTER
@@ -20,7 +20,7 @@ SKILL = '/Game/Characters/Player/Pyrios/FX/Skill/'
 EMITTER = 'Emberglow_LiveBlade'
 STAMP = 'Pyrios.EmberglowBrush'
 VERSION = 'live-v1'
-SYSTEM_VERSION = 'weapon-bevel-v3'
+SYSTEM_VERSION = 'weapon-filament-v6'
 FINISHER_BLADE = 'Pyrios_FinalSweep'
 SYSTEMS = (
     ('NS_Pyrios_Normal01_MainComposition_2a7c90937cab', 0.23),
@@ -106,9 +106,10 @@ def assign(script, *, emitter=EMITTER, **rows):
 
 def blade_section():
     # X 从刀根到刀尖，Y 在扫掠面法向上。纹理 V 在正反面回走，外沿纹理咬合。
-    profile = [(-.50,0),(-.39,-.038),(-.09,-.105),(.25,-.080),(.45,-.029),
-               (.50,0),(.45,.051),(.20,.119),(-.09,.157),(-.39,.050)]
-    return [dict(Position=dict(X=x,Y=y), TextureV=x+.5) for x,y in profile]
+    # 把光量集中在刀锋外三分之一。V=.77 的白色亮脊准确压在刀尖，刃外是柔和的蓝晕。
+    profile = [(0,0),(.18,-.012),(.52,-.029),(.77,-.013),(1,0),
+               (.77,.019),(.52,.047),(.18,.018)]
+    return [dict(Position=dict(X=.5+(v-.77)*.48,Y=y),TextureV=v) for v,y in profile]
 
 
 def weapon_frame():
@@ -167,14 +168,16 @@ float phase = Emitter.Age;
         outputs.append(target('BladeStroke','ID'))
     ps,pu,eu='ParticleSpawnScript','ParticleUpdateScript','EmitterUpdateScript'
     num=NiagaraBuilder.num
-    lifetime = '0.18' if combo_finisher else '0.14'
+    lifetime = '0.18' if combo_finisher else '0.107'
     if accents:
-        lifetime = '0.205'
+        lifetime = '0.166'
+    # 第二次挥刀先绕到角色另一侧蓄势。只在正式上挑时生成轨迹采样。
+    first_sample = .134 if accents else (.40 if combo_finisher else .060)
     work=[module(eu,'/Niagara/Modules/Emitter/EmitterState',emitter=emitter,**{
         'Life Cycle Mode':NiagaraBuilder.enum('/Niagara/Enums/ENiagaraEmitterLifeCycleMode.ENiagaraEmitterLifeCycleMode','NewEnumerator1','Self'),
         'Loop Behavior':NiagaraBuilder.enum('/Niagara/Enums/ENiagara_EmitterStateOptions.ENiagara_EmitterStateOptions','NewEnumerator1','Once'),
         'Loop Duration':num('Float',end)}),
-        module(eu,'/Niagara/Modules/Emitter/SpawnPerFrame',emitter=emitter,**{'Spawn Count':num('Int32',1)}),
+        module(eu,'/Niagara/Modules/Emitter/SpawnPerFrame',emitter=emitter,**{'Spawn Count':NiagaraBuilder.hlsl(f'Emitter.Age >= {first_sample} ? 1 : 0')}),
         assign(ps,emitter=emitter,Lifetime=('Float',lifetime),Color=('LinearColor','float4(1,1,1,1)')),
         dict(kind='ParticleRead',emitterName=emitter,scriptName=ps,interfaceTemplate=ref(di),
              outputTargets=outputs,
@@ -188,8 +191,8 @@ float phase = Emitter.Age;
         for script, expansion in [(ps, '0.35'), (pu, '(0.35 + 0.18 * saturate((Particles.NormalizedAge - 0.05) / 0.8))')]:
             work.append(assign(script, emitter=emitter, PrismEchoPosition=('Position',echo_position+expansion),
                                PrismEchoWidth=('Float','Particles.RibbonWidth * 0.115')))
-        # 只选挥刀约 0.11 秒时的一个轨迹采样，让折光留在对应的外刃上。
-        work.append(assign(ps,emitter=emitter, PrismFlareTag=('Int','Emitter.Age >= 0.11 && (Emitter.Age - Engine.DeltaTime) < 0.11 ? 1 : 0'),
+        # 只选挥刀约 0.19 秒时的一个轨迹采样，让折光留在对应的外刃上。
+        work.append(assign(ps,emitter=emitter, PrismFlareTag=('Int','Emitter.Age >= 0.19 && (Emitter.Age - Engine.DeltaTime) < 0.19 ? 1 : 0'),
                            PrismFlarePosition=('Position','Particles.Position - Particles.RibbonFacing * Particles.RibbonWidth * 0.31'),
                            PrismFlareSize=('Vector2','float2(75,75)')))
     res=tool('GGYGOEditor.GGYGONiagaraCompileLibrary.ApplyAuthoringStackBatch',system=ref(system),workItems=work)
@@ -275,7 +278,7 @@ def add_refraction_shell(system, emitter, field):
         configure(index,dict(Shape='Custom'))
         for vertex in profile:
             vertex['Position']['Y'] *= 1.55
-            vertex['Position']['X'] *= 1.22
+            vertex['Position']['X'] = .5 + (vertex['Position']['X']-.5)*1.34
         bind=NiagaraBuilder.attribute_binding
         configure(index,dict(Shape='Custom',CustomVertices=profile,bCustomShapeClosed=True,Material=field.get_path_name(),
                 FacingMode='CustomSideVector',MaxNumRibbons=6 if emitter==FINISHER_BLADE else 1,bUseGPUInit=False,
@@ -316,6 +319,11 @@ def apply_blade_volume(system, emitter, field):
                 blade_indices.append(entry.renderer_index)
     require(len(blade_indices)==len(field_indices)==1,'武器刀面和折射应各有一个闭合 Ribbon：'+system.get_name())
     # 新采样保留全刃，旧采样的刀根向该帧刀尖收拢。原始中心与宽度仍供外弦和闪点读取。
+    # 横斩扫过后，光弧沿该帧的刃向向外扩开。当前刀尖上的新采样没有偏移。
+    center = 'Particles.Position - Particles.RibbonFacing * (.5*(Particles.RibbonWidth-Particles.TrailWidth))'
+    if system.get_name() == SYSTEMS[0][0]:
+        # 光弧在横扫面内外展；竖直分量稍向刀柄高度收拢，手腕回摆不会掀起整圈余光。
+        center += ' - float3(Particles.RibbonFacing.xy,-.31*Particles.RibbonFacing.z) * Particles.RibbonWidth * .79 * saturate(Particles.NormalizedAge/.42)'
     work = [assign('ParticleSpawnScript',emitter=emitter,
                    TrailCenter=('Position','Particles.Position'),TrailWidth=('Float','Particles.RibbonWidth')),
             assign('ParticleUpdateScript',emitter=emitter,
@@ -323,7 +331,7 @@ def apply_blade_volume(system, emitter, field):
             assign('ParticleUpdateScript',emitter=emitter,
                    TrailWidth=('Float','Particles.RibbonWidth * (1.0 - .95*Particles.TrailRetraction*Particles.TrailRetraction*(3.0-2.0*Particles.TrailRetraction))')),
             assign('ParticleUpdateScript',emitter=emitter,
-                   TrailCenter=('Position','Particles.Position - Particles.RibbonFacing * (.5*(Particles.RibbonWidth-Particles.TrailWidth))'))]
+                   TrailCenter=('Position',center))]
     bind_animated_shape(system,emitter,work,blade_indices+field_indices,dict(PositionBinding='TrailCenter', RibbonWidthBinding='TrailWidth'))
     EDITOR.set_metadata_tag(system,tag,'tip-anchored-1')
     return True
@@ -377,8 +385,10 @@ def build():
             continue
         existing = [entry.emitter_name for entry in LIB.authoring_get_system_summary(system).emitters]
         if EMITTER in existing:
-            require(EDITOR.get_metadata_tag(system,STAMP) in ('live-v1','live-v2','live-v3','live-v4','live-v5','prism-v1','prism-v2'), '已有同名刀带且来源不明')
+            require(EDITOR.get_metadata_tag(system,STAMP) in ('live-v1','live-v2','live-v3','live-v4','live-v5','prism-v1','prism-v2','weapon-bevel-v3','weapon-filament-v4','weapon-filament-v5'), '已有同名刀带且来源不明')
             tool('NiagaraToolsets.NiagaraToolset_System.RemoveEmitter',emitterRef={'system':ref(system),'emitterName':EMITTER})
+        EDITOR.set_metadata_tag(system,'Pyrios.BladeVolume','')
+        EDITOR.set_metadata_tag(system,'Pyrios.BladeTrailTaper','')
         add_live_blade(system, variants[style], end, variants if style == 'Crescent' else None)
         style_existing(system, variants[style], True)
         apply_blade_volume(system,EMITTER,field)
@@ -396,10 +406,12 @@ def build():
         weapon_added = False
         if '_Unit00_' in system.get_name() and EDITOR.get_metadata_tag(system,'Pyrios.Normal03MultiCut') != CUT_VERSION:
             existing = {entry.emitter_name for entry in LIB.authoring_get_system_summary(system).emitters}
-            for previous in ('Pyrios_FinisherBlade', EMITTER):
+            for previous in ('Pyrios_FinisherBlade', EMITTER, FINISHER_BLADE, SCARS):
                 if previous in existing:
-                    require(EDITOR.get_metadata_tag(system,STAMP)==SYSTEM_VERSION,'三段刀带来源不符 '+system.get_name())
+                    require(EDITOR.get_metadata_tag(system,STAMP) in ('weapon-bevel-v3','weapon-filament-v4',SYSTEM_VERSION),'三段刀带来源不符 '+system.get_name())
                     tool('NiagaraToolsets.NiagaraToolset_System.RemoveEmitter',emitterRef={'system':ref(system),'emitterName':previous})
+            for tag in ('Pyrios.BladeVolume','Pyrios.BladeTrailTaper','Pyrios.AftercutTravel','Pyrios.AftercutRefraction','Pyrios.CutLight'):
+                EDITOR.set_metadata_tag(system,tag,'')
             add_live_blade(system, variants['Cross'], 0.84, combo_finisher=True)
             add_opening_marks(system, DAWN, cut_surface, tool, target, assign, module, weapon_frame)
             EDITOR.set_metadata_tag(system,'Pyrios.Normal03MultiCut',CUT_VERSION)
@@ -407,7 +419,8 @@ def build():
         extended = '_Unit00_' in system.get_name() and extend_space_cuts(system, DAWN)
         volume = '_Unit00_' in system.get_name() and apply_blade_volume(system,FINISHER_BLADE,field)
         travel = '_Unit00_' in system.get_name() and animate_opening_marks(system)
-        if travel or volume or extended or weapon_added or ground_or_sweep or styled:
+        light = '_Unit00_' in system.get_name() and add_cut_light(system,tool,assign)
+        if light or travel or volume or extended or weapon_added or ground_or_sweep or styled:
             finish(system)
     # 兼容仍引用暖金笔触的资产。特殊技的逐层材质由 style_actions 配置。
     material(warm=True)

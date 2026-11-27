@@ -9,8 +9,8 @@ from zzz_fx_niagara_ue import EMPTY_EMITTER, NiagaraBuilder
 
 
 SCARS = 'Pyrios_AftercutMarks'
-VERSION = 'three-incisions-2'
-SURFACE_VERSION = 'slow-reference-edge-2'
+VERSION = 'reference-diagonals-5'
+SURFACE_VERSION = 'reference-spine-1'
 # Normal03 的 03/09_MeleeTrail 原 andi_main 刀面，以及三次 MeleeTrail 共用的 light_edge 与高光遮罩。
 TEXTURES = {'Face': 'Eff_MeleeTrail_239_4f346e732ad4', 'Edge': 'Eff_MeleeTrail_089_LYX_01_2d474876c2a0',
             'Highlight': 'Eff_MeleeTrail_116_YZ_06_f2c948b7ce36'}
@@ -25,44 +25,30 @@ float ridge = saturate(max(Edge.r,max(Edge.g,Edge.b)));
 float gleam = saturate(Highlight.r);
 float tipFade = smoothstep(0,.055,u)*(1-smoothstep(.966,1,u));
 float ageFade = saturate(Life);
-float body = smoothstep(.04,.82,profile)*(.10+.17*gleam);
-float lip = sqrt(ridge)*(.55+.45*ageFade);
-float flash = gleam*smoothstep(-.10,.17,v)*(1-smoothstep(.22,.87,v));
-// 迎刃面明亮、背刃面压暗，两者在浅色场地上仍能读出斩痕的厚度。
-float shadow = profile*(1-smoothstep(.54,.97,abs(v)))*lerp(.42,1,smoothstep(-.22,.44,-v));
-float bevel = (1-smoothstep(.018,.185,abs(v+.11-.17*gleam)))*profile;
+// 原片中的切口只有一条主亮脊；对侧保留蓝色折面和暗部，避免两条平行线。
 float3 N = normalize(FacetNormal);
 float3 V = normalize(View);
 float faceLight = saturate(.5+.5*dot(N,normalize(float3(-.48,.28,.82))));
-float sheen = pow(saturate(dot(reflect(-V,N),normalize(float3(-.56,.31,.76)))),5);
-float grain = frac(v*2.35+.30*u+.55*(profile-gleam));
-float incision = (1-smoothstep(.025,.115+fwidth(grain),abs(grain-.50)))*profile;
-// 暗腔占据真实切面的中央。两侧折唇错开，视角改变时背壁沿刀宽错动。
-float parallax = .13 * dot(reflect(-V,N),normalize(float3(.42,.64,-.35)));
-float seam = v - (.14*(profile-.5) + .075*sin(12*u + 1.8*gleam) + parallax);
-float throat = 1-smoothstep(.14,.38,abs(seam));
-float iceLip = 1-smoothstep(.025,.12+fwidth(seam),abs(seam-.35));
-float farLip = 1-smoothstep(.018,.095+fwidth(seam),abs(seam+.31));
-float cover = saturate(body + lip*.76 + flash*.32 + shadow*.68 + bevel*.49 + incision*.39);
-float3 haze = lerp(float3(.11,.12,.55),float3(.37,.55,1.25),saturate(.52+.48*v));
-float3 rim = lerp(float3(1.35,1.53,2.45), Edge.rgb/max(.001,ridge)*2.4,.35);
-// 新刀的亮点沿出刃方向走；旧刀腹先退，窄边在下一刀经过时仍可读。
-float pulseTravel = saturate(.72*saturate(Progress)+.28*(1-ageFade));
-float pulse = exp2(-40*(travel-pulseTravel)*(travel-pulseTravel));
-float wake = smoothstep(.08,.9,ageFade) * (.28+.72*pulse);
-float visibility = reveal*tipFade*ageFade;
-float cutIn = reveal*tipFade*smoothstep(.06,.76,ageFade);
-float edgeHold = reveal*tipFade*sqrt(ageFade);
-Coverage = saturate(max(visibility*cover*(.36+.64*wake),
-    cutIn*throat*(.93+.06*wake) + edgeHold*(.80*iceLip+.66*farLip)));
-float3 folded = lerp(float3(.015,.010,.071),float3(.12,.22,.76),faceLight);
-float3 outer = body*haze+shadow*folded+bevel*float3(.58,.84,2.05)
-    +incision*(.28+.76*faceLight)*lerp(float3(.18,.27,1.08),float3(1.36,1.56,2.45),sheen)
-    +lip*rim+flash*float3(.65,.78,1.25);
-float3 walls = lerp(float3(.005,.009,.058),float3(.026,.053,.26),faceLight)*(.35+.65*profile);
-float3 inner = iceLip*(.34+.76*gleam)*lerp(float3(.15,.46,1.65),float3(2.3,3.0,4.6),pulse)
-    + farLip*(.14+.65*profile)*lerp(float3(.10,.17,.66),float3(.38,.36,.94),sheen);
-return visibility*outer*(.28+.72*wake)*(1-.86*throat) + cutIn*walls*throat + edgeHold*inner;
+float facet = saturate(1-abs(dot(N,V)));
+float axis = v-.10*(profile-.5)-.07*(gleam-.5);
+float aa = max(fwidth(axis),.001);
+float spine = 1-smoothstep(.058,.11+aa,abs(axis-.13));
+float blueFold = exp2(-9*(axis+.08)*(axis+.08));
+float trough = (1-smoothstep(.20,.69,abs(axis+.28)))*(.42+.58*profile);
+float back = exp2(-42*(axis+.56)*(axis+.56))*profile;
+float pulseAt = saturate(.75*Progress+.25*(1-ageFade));
+float pulse = exp2(-22*(travel-pulseAt)*(travel-pulseAt));
+float lift = smoothstep(.035,.88,ageFade);
+float ice = spine*(.71+.29*ridge)*(.58+.42*pulse);
+float mass = blueFold*(.42+.58*profile)*(.44+.56*lift);
+float edgeLife = reveal*tipFade*sqrt(ageFade);
+float3 walls = lerp(float3(.007,.012,.072),float3(.047,.095,.39),faceLight);
+float3 color = trough*walls + mass*float3(.035,.13,1.13)
+             + back*(.20+.28*facet)*float3(.13,.27,1.05)
+             + mass*gleam*facet*float3(.09,.18,.64)
+             + ice*lerp(float3(.25,.55,2.0),float3(3.4,4.8,7.4),lift*(.52+.48*pulse));
+Coverage = edgeLife*saturate(ice*.89+mass*.45+trough*.56+back*.18);
+return edgeLife*color;
 """
 
 
@@ -74,7 +60,7 @@ def scar_material(directory):
         mat = ue.load_asset(path)
         if editor.get_metadata_tag(mat,'Pyrios.Aftercut') == SURFACE_VERSION:
             return mat
-        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('three-incisions-1', 'source-edge-1', 'refracted-edge-1', 'refracted-edge-2', 'source-lamella-1', 'source-lamella-2', 'fluted-scar-1','rift-facets-2','slow-reference-edge-1', VERSION):
+        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('three-incisions-1', 'source-edge-1', 'refracted-edge-1', 'refracted-edge-2', 'source-lamella-1', 'source-lamella-2', 'fluted-scar-1','rift-facets-2','slow-reference-edge-1','slow-reference-edge-2','three-incisions-2', VERSION):
             raise RuntimeError('已有未识别的斩痕材质 '+path)
         edit.delete_all_material_expressions(mat)
     else:
@@ -203,7 +189,7 @@ float3 PlaneAxis = BoneD + 2*cross(BR.xyz,cross(BR.xyz,BoneD)+BR.w*BoneD);
     work.extend([assign(pu,emitter=SCARS,
         CutLockNow=('Bool','!Particles.CutFixed && Particles.HasContact && Particles.Age >= .021 && length((Particles.Contact-Particles.CutStart).xy)>4')),
         assign(pu,emitter=SCARS,
-        CutDirection=('Vector','normalize(float3(Particles.SlashPlane.xy,Particles.UniqueID==0 ? .06 : (Particles.UniqueID==1 ? -.73 : 1.95)))'),
+        CutDirection=('Vector','normalize(float3(Particles.SlashPlane.xy,Particles.UniqueID==0 ? -.115 : (Particles.UniqueID==1 ? .04 : .225)))'),
         CutLength=('Float','Particles.UniqueID==0 ? 378.0 : (Particles.UniqueID==1 ? 350.0 : 290.0)')),
         assign(pu,emitter=SCARS,
         Position=('Position','Particles.CutLockNow ? Particles.CutStart + (Particles.Contact-Particles.CutStart)*.52 : Particles.Position'),
@@ -267,6 +253,41 @@ def extend_space_cuts(system, directory):
     return True
 
 
+def add_cut_light(system, tool, assign):
+    """让场地实际接收斩痕掠过的蓝光，每道切口只产生一盏短命粒子灯。"""
+    editor, lib = ue.EditorAssetLibrary, ue.GGYGONiagaraCompileLibrary
+    tag = 'Pyrios.CutLight'
+    if editor.get_metadata_tag(system,tag)=='passing-glint-1':
+        return False
+    travel = '(Particles.CutReverse ? -1.0 : 1.0) * Particles.CutLength * .47 * (2.0*saturate(Particles.NormalizedAge/.58)-1.0)'
+    work = [assign('ParticleUpdateScript',emitter=SCARS,
+        CutLightOrigin=('Position',f'Particles.CutDrawCenter + Particles.CutDirection * ({travel})'),
+        CutLightTint=('LinearColor','float4(.22,.59,2.8,Particles.Color.a*(1.0-Particles.NormalizedAge)*(1.0-Particles.NormalizedAge))'),
+        CutLightRadius=('Float','Particles.CutFixed ? 270.0 : 0.0'),
+        CutLightExponent=('Float','3.0 + Particles.NormalizedAge'))]
+    applied = tool('GGYGOEditor.GGYGONiagaraCompileLibrary.ApplyAuthoringStackBatch',
+                   system={'refPath':system.get_path_name()},workItems=work)
+    if not applied.get('bApplied'):
+        raise RuntimeError(applied.get('error','空间斩受光位置制作失败'))
+    light = lib.authoring_add_renderer(system,SCARS,ue.load_class(None,'/Script/Niagara.NiagaraLightRendererProperties'))
+    if not light.succeeded:
+        raise RuntimeError(light.error)
+    mode = lib.authoring_set_renderer_data(system,SCARS,light.renderer_index,json.dumps({'bUseInverseSquaredFalloff':False}))
+    if not mode.succeeded:
+        raise RuntimeError(mode.error)
+    bind = NiagaraBuilder.attribute_binding
+    props = dict(PositionBinding=bind('Particles.CutLightOrigin'),RadiusBinding=bind('Particles.CutLightRadius'),
+                 ColorBinding=bind('Particles.CutLightTint'),LightRenderingEnabledBinding=bind('Particles.CutFixed'),
+                 RendererVisibilityTagBinding=bind(None),LightExponentBinding=bind('Particles.CutLightExponent'),
+                 bAlphaScalesBrightness=True,bAffectsTranslucency=False,bAllowMegaLights=False,
+                 DefaultExponent=3.5,SpecularScale=1.4,DiffuseScale=.85)
+    result=lib.authoring_set_renderer_data(system,SCARS,light.renderer_index,json.dumps(props))
+    if not result.succeeded:
+        raise RuntimeError(result.error)
+    editor.set_metadata_tag(system,tag,'passing-glint-1')
+    return True
+
+
 def refraction_material(directory):
     """用原 Distor 层的扰动与遮罩，按刀线在视口的实际方向偏移背景采样。"""
     editor, edit = ue.EditorAssetLibrary, ue.MaterialEditingLibrary
@@ -275,9 +296,9 @@ def refraction_material(directory):
     if editor.does_asset_exist(path):
         material = ue.load_asset(path)
         stamp = editor.get_metadata_tag(material, 'Pyrios.AftercutRefraction')
-        if stamp == 'travelling-wave-1':
+        if stamp == 'reference-local-wave-2':
             return material
-        if stamp not in ('cut-field-1','cut-field-2'):
+        if stamp not in ('cut-field-1','cut-field-2','travelling-wave-1'):
             raise RuntimeError('已有未识别的空间斩折射材质 '+path)
         edit.delete_all_material_expressions(material)
     else:
@@ -315,8 +336,8 @@ float trailing = exp2(-130*(distanceToFront+.22)*(distanceToFront+.22));
 float displacement = (outward-.73*trailing)*s/(.075+across);
 float curl = (Noise.r-.42)*sin(3.14159*travel);
 float2 tangent = float2(-normal.y,normal.x);
-Offset = (normal*displacement+tangent*(.16*curl*outward))*field*(Size.y*.037/max(Size,float2(1,1)));
-Haze = field*(.047+.19*outward+.052*trailing);
+Offset = (normal*displacement+tangent*(.16*curl*outward))*field*(Size.y*.013/max(Size,float2(1,1)));
+Haze = field*(.018+.10*outward+.028*trailing);
 return lerp(float3(.05,.08,.32),float3(.28,.53,1.15),outward);
 
 """
@@ -344,7 +365,7 @@ return lerp(float3(.05,.08,.32),float3(.28,.53,1.15),outward);
     errors=edit.recompile_material(material)
     if errors:
         raise RuntimeError('空间斩折射材质编译失败 '+str(errors))
-    editor.set_metadata_tag(material,'Pyrios.AftercutRefraction','travelling-wave-1')
+    editor.set_metadata_tag(material,'Pyrios.AftercutRefraction','reference-local-wave-2')
     if not editor.save_loaded_asset(material,False):
         raise RuntimeError('空间斩折射材质保存失败')
     return material
