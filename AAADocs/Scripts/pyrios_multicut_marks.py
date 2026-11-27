@@ -9,8 +9,8 @@ from zzz_fx_niagara_ue import EMPTY_EMITTER, NiagaraBuilder
 
 
 SCARS = 'Pyrios_AftercutMarks'
-VERSION = 'reference-diagonals-ground-6'
-SURFACE_VERSION = 'reference-spine-1'
+VERSION = 'reference-diagonals-ground-7'
+SURFACE_VERSION = 'brushed-spine-4'
 # Normal03 的 03/09_MeleeTrail 原 andi_main 刀面，以及三次 MeleeTrail 共用的 light_edge 与高光遮罩。
 TEXTURES = {'Face': 'Eff_MeleeTrail_239_4f346e732ad4', 'Edge': 'Eff_MeleeTrail_089_LYX_01_2d474876c2a0',
             'Highlight': 'Eff_MeleeTrail_116_YZ_06_f2c948b7ce36'}
@@ -36,18 +36,27 @@ float spine = 1-smoothstep(.058,.11+aa,abs(axis-.13));
 float blueFold = exp2(-9*(axis+.08)*(axis+.08));
 float trough = (1-smoothstep(.20,.69,abs(axis+.28)))*(.42+.58*profile);
 float back = exp2(-42*(axis+.56)*(axis+.56))*profile;
-float pulseAt = saturate(.75*Progress+.25*(1-ageFade));
-float pulse = exp2(-22*(travel-pulseAt)*(travel-pulseAt));
+// 切口显影后，白色刃肩继续向出刃端掠过。背侧保留原纹理的冷色刻痕。
+float pulseAt = saturate(.56*Progress+.36*(1-ageFade));
+float distanceToPulse=travel-pulseAt;
+float pulse = exp2(-pow(distanceToPulse/(distanceToPulse>0 ? .074 : .15),2));
 float lift = smoothstep(.035,.88,ageFade);
-float ice = spine*(.71+.29*ridge)*(.58+.42*pulse);
+float ice = spine*(.71+.29*ridge)*(.56+.44*pulse);
 float mass = blueFold*(.42+.58*profile)*(.44+.56*lift);
 float edgeLife = reveal*tipFade*sqrt(ageFade);
 float3 walls = lerp(float3(.007,.012,.072),float3(.047,.095,.39),faceLight);
 float3 color = trough*walls + mass*float3(.035,.13,1.13)
              + back*(.20+.28*facet)*float3(.13,.27,1.05)
              + mass*gleam*facet*float3(.09,.18,.64)
-             + ice*lerp(float3(.25,.55,2.0),float3(3.4,4.8,7.4),lift*(.52+.48*pulse));
-Coverage = edgeLife*saturate(ice*.89+mass*.45+trough*.56+back*.18);
+             + ice*(float3(.093,.26,1.67)+pulse*lift*float3(4.8,6.1,9.2));
+// 239 原图内有分层的刃面和锯齿形收笔，以灰阶分出两道错位的亮肩和暗槽。
+float etch=smoothstep(.045,.48,profile)*(1-smoothstep(.66,.96,profile));
+float bladeSide=smoothstep(.012,.14,-axis)*(1-smoothstep(.65,1,-axis));
+float flute=exp2(-pow((axis+.18+.29*profile)/(.054+aa),2));
+float inset=exp2(-pow((axis+.36+.29*profile)/(.075+aa),2));
+color*=1-.78*bladeSide*inset;
+color+=bladeSide*(.35+.65*lift)*(etch*float3(.04,.22,.65)+flute*(.16+.84*profile)*(.29+.71*max(pulse,gleam))*float3(.17,.68,2.1));
+Coverage = edgeLife*saturate(ice*.89+mass*.45+trough*.56+back*.18+bladeSide*(.35*etch+.53*inset+.34*flute));
 return edgeLife*color;
 """
 
@@ -60,7 +69,7 @@ def scar_material(directory):
         mat = ue.load_asset(path)
         if editor.get_metadata_tag(mat,'Pyrios.Aftercut') == SURFACE_VERSION:
             return mat
-        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('three-incisions-1', 'source-edge-1', 'refracted-edge-1', 'refracted-edge-2', 'source-lamella-1', 'source-lamella-2', 'fluted-scar-1','rift-facets-2','slow-reference-edge-1','slow-reference-edge-2','three-incisions-2','reference-diagonals-5', VERSION):
+        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('three-incisions-1', 'source-edge-1', 'refracted-edge-1', 'refracted-edge-2', 'source-lamella-1', 'source-lamella-2', 'fluted-scar-1','rift-facets-2','slow-reference-edge-1','slow-reference-edge-2','three-incisions-2','reference-spine-1','travelling-spine-2','brushed-spine-3','reference-diagonals-5', VERSION):
             raise RuntimeError('已有未识别的斩痕材质 '+path)
         edit.delete_all_material_expressions(mat)
     else:
@@ -189,7 +198,7 @@ float3 PlaneAxis = BoneD + 2*cross(BR.xyz,cross(BR.xyz,BoneD)+BR.w*BoneD);
     work.extend([assign(pu,emitter=SCARS,
         CutLockNow=('Bool','!Particles.CutFixed && Particles.HasContact && Particles.Age >= .021 && length((Particles.Contact-Particles.CutStart).xy)>4')),
         assign(pu,emitter=SCARS,
-        CutDirection=('Vector','normalize(float3(Particles.SlashPlane.xy,Particles.UniqueID==0 ? -.115 : (Particles.UniqueID==1 ? .04 : .225)))'),
+        CutDirection=('Vector','normalize(float3(Particles.SlashPlane.xy,Particles.UniqueID==0 ? -.32 : (Particles.UniqueID==1 ? -.22 : .035)))'),
         CutLength=('Float','Particles.UniqueID==0 ? 378.0 : (Particles.UniqueID==1 ? 350.0 : 290.0)')),
         assign(pu,emitter=SCARS,
         Position=('Position','Particles.CutLockNow ? Particles.CutStart + (Particles.Contact-Particles.CutStart)*.52 : Particles.Position'),

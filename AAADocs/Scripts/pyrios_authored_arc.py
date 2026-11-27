@@ -11,8 +11,8 @@ EDITOR = ue.EditorAssetLibrary
 LIB = ue.GGYGONiagaraCompileLibrary
 ARC = 'Pyrios_OpeningCrescent'
 ARC_VERSION = 'horizontal-crescent-4'
-ARC_SURFACE_VERSION = 'pearl-and-afterglow-5'
-WASH_VERSION = 'surface-sweep-4'
+ARC_SURFACE_VERSION = 'brushed-crescent-11'
+WASH_VERSION = 'brushed-reflection-10'
 TAG = 'Pyrios.AuthoredSlash'
 
 # 时间沿整张弧面推进。白晕在挥刀前半拍变宽，后半拍只剩远侧的一段亮弦。
@@ -20,51 +20,96 @@ ARC_SHADE = """
 float u=saturate(UV.x);
 float v=UV.y;
 float t=saturate(Clock.r);
-float head=smoothstep(0.0,.29,t);
-// 远侧先熄，留下进刀一侧的一段切线，从角色身前划过。
-head=min(head,1-.48*smoothstep(.34,.84,t));
-float tail=smoothstep(.31,.90,t)*.22;
-float along=smoothstep(tail-.09,tail+.035,u)*(1-smoothstep(head-.04,head+.035,u));
-float peak=smoothstep(.045,.24,t)*(1-smoothstep(.28,.50,t));
-float local=exp2(-27*(u-.21)*(u-.21));
-float bright=peak*(.035+.965*local);
-float taper=pow(saturate(sin(3.14159*u)),.42);
-float d=(v-.63)/max(.09,.3+.7*taper);
-float tailWidth=lerp(1,.43,smoothstep(.38,.72,t));
-d/=tailWidth;
-float aa=max(fwidth(d),.002);
-float core=1-smoothstep(.013+bright*.026,.027+bright*.035+aa,abs(d));
-float hot=exp2(-d*d/(.003+.015*bright));
-float pearl=exp2(-d*d/(.018+.055*bright));
-float azure=exp2(-d*d/(.049+.065*bright));
-float vein=saturate(Ink.r);
-float life=along*smoothstep(0,.045,t)*(1-smoothstep(.74,1,t));
-float soft=smoothstep(0,.16,v)*(1-smoothstep(.84,1,v));
-float3 light=core*lerp(float3(.48,.95,3.6),float3(6.8,7.8,11.0),bright)+hot*lerp(float3(.22,.65,3.9),float3(9,10,13),bright);
-light+=pearl*(.24+2.7*bright)*float3(.21,.54,2.8)+azure*(.35+.4*vein)*float3(.011,.047,1.48);
-Coverage=life*soft*saturate(core+hot*.85+pearl*(.44+.46*bright)+azure*.62);
-float residual=smoothstep(.36,.61,t);
-return life*soft*(light*(1+2.6*residual)+pearl*residual*float3(.32,.35,2.7));
+// 亮锋从月牙的收口一侧扫向出刀一侧。刃面已亮过的部分分别留下细边和更长的蓝晕。
+float advance=smoothstep(.205,.405,t);
+float retire=smoothstep(.41,.76,t);
+float peakAt=.95-.73*advance+.095*retire;
+float behind=u-peakAt;
+float reveal=smoothstep(-.085,-.015,behind)*smoothstep(.045,.16,t);
+float edgeEnd=smoothstep(.0,.048,u)*(1-smoothstep(.955,1,u));
+float tailLoss=smoothstep(.38,.66,t);
+float tailEnd=1-smoothstep(.91-.55*tailLoss,1.0-.45*tailLoss,u);
+float envelope=reveal*edgeEnd*tailEnd*(1-smoothstep(.77,1,t));
+float lead=exp2(-pow(behind/(behind<0 ? .050 : .132),2));
+float after=exp2(-max(0,behind)*lerp(2.15,4.5,retire));
+float earlyBlue=1-smoothstep(.38,.545,t);
+float wake=after*(.63+.37*earlyBlue);
+float grain=saturate(Ink.r);
+float taper=sqrt(saturate(sin(3.14159*u)));
+float width=(.36+.64*taper)*lerp(1,.50,retire);
+float d=(v-.63)/width;
+float aa=max(fwidth(d),.0015);
+float core=1-smoothstep(.013+.015*lead,.024+.021*lead+aa,abs(d));
+float shoulder=exp2(-pow(d/(.029+.092*lead+.025*after),2));
+float halo=exp2(-pow(d/(.13+.20*lead),2));
+float inner=exp2(-pow((d+.14)/.16,2))*grain*lead;
+float soft=smoothstep(0,.14,v)*(1-smoothstep(.85,1,v));
+// 细边可以贯穿刚展开的月牙；只有掠过的这一小段具有宽白芯。
+float white=lead*(1-.68*retire);
+float filament=.16+.94*wake+.54*earlyBlue+.64*retire*after;
+float3 light=core*(filament*float3(2.3,3.55,6.0)+white*float3(8.2,8.4,10.8));
+light+=shoulder*(wake*float3(.26,.50,2.02)+white*float3(2.7,3.9,8.1));
+light+=halo*(.56*wake+1.03*lead)*float3(.018,.074,2.55)+inner*float3(.23,.45,1.21);
+// 116 的透明通道保存的是带缺口的笔锋。两次取样的透明边界错开，笔尖与白锋一同移动。
+float depth=-d;
+float face=smoothstep(.005,.05,depth)*(1-smoothstep(.47,.60,depth));
+float run=saturate(max(0,behind));
+float nibX=clamp(.91-.86*run-.045*retire,.06,.94);
+float2 brushUV=float2(clamp(.48+.85*run,.09,.94),clamp(.16+2.19*depth+.13*run,.015,.975));
+float feather=Texture2DSample(FlowMask,FlowMaskSampler,brushUV).r;
+float curl=.09*(grain-.35)+.105*(feather-.38);
+float2 nibUV=float2(nibX,clamp(.07+1.89*depth+curl,.012,.985));
+float shape=Texture2DSample(Nib,NibSampler,nibUV).a;
+float inset=Texture2DSample(Nib,NibSampler,float2(clamp(nibX-.085,.05,.92),clamp(nibUV.y+.11,.012,.985))).a;
+float softNib=Texture2DSample(Nib,NibSampler,float2(nibX,clamp(nibUV.y+.045,.012,.985))).a;
+float lip=saturate((.54*shape+.46*softNib-inset)*1.40);
+float body=face*shape;
+float splitY=depth-.115-.14*(1-run)+.30*curl;
+float innerNib=Texture2DSample(Nib,NibSampler,float2(clamp(nibX-.12,.05,.90),clamp(.08+3.35*splitY,.012,.985))).a;
+float strand=face*smoothstep(.005,.048,splitY)*innerNib;
+float strokeEnd=1-smoothstep(.19,.63,run);
+float strength=(.14+.86*max(lead,wake))*strokeEnd*(1-.66*retire);
+float pigment=.16+.84*sqrt(saturate(feather));
+light*=1-face*strength*(.77-.20*grain);
+light+=strength*(body*float3(.019,.083,.58)+face*lip*pigment*float3(.15,.63,1.80)
+    +strand*pigment*float3(.085,.39,1.32)+body*feather*float3(.035,.25,.76));
+float opacity=core*(.63+.30*wake)+shoulder*(.22+.73*lead)+halo*(.67*wake+.42*lead);
+Coverage=envelope*soft*saturate(opacity+strength*face*(.26+.56*shape*pigment));
+return envelope*soft*light;
 """
 
 # 地面反光是一抹宽而断续的蓝色，中心的白光沿切口横扫，两端先后熄灭。
 WASH_SHADE = """
-float u=Clock.g>.5 ? 1-UV.x : UV.x;
-float y=2*UV.y-1;
+// UE 投影贴花的 UV 顺序为局部 Z、Y，切口长度在局部 Y 上。
+float u=Clock.g>.5 ? 1-UV.y : UV.y;
+float y=2*UV.x-1;
 float t=saturate(Clock.r);
-float front=smoothstep(0,.62,t);
-float passed=front-u;
-float end=smoothstep(0,.11,u)*(1-smoothstep(.82,1,u));
-float trail=smoothstep(-.17,.035,passed)*exp2(-3.5*max(0,passed));
-float bank=y-(.085*sin(6.28*u+.65)+.09*(Ink.r-.5));
-float body=exp2(-3.8*bank*bank);
-float streak=exp2(-28*bank*bank)*(.45+.55*Ink.r);
-float echo=exp2(-42*(bank+.51-.34*u)*(bank+.51-.34*u))*(.24+.76*Ink.r);
-float flare=exp2(-26*passed*passed-7*bank*bank);
-float fade=Clock.b*end*(1-smoothstep(.75,1,t))*smoothstep(0,.05,t);
-Coverage=saturate(body*trail*.75+(streak+.35*echo)*trail*.32+flare*.62)*fade;
-Tint=float3(.026,.048,.133);
-return body*float3(.014,.052,.48)+(streak+.36*echo)*float3(.035,.16,1.34)+flare*float3(1.08,2.0,6.8)+body*trail*float3(.015,.026,.45);
+float front=lerp(.235,.83,smoothstep(.03,.78,t));
+float behind=front-u;
+float end=smoothstep(0,.07,u)*(1-smoothstep(.91,1,u));
+float textureFlow=saturate(Ink.r);
+float bank=y-.095*sin(6.28*u+.65)-.08*(textureFlow-.5);
+// 白芯只占亮头中央；后方的长蓝光分成中脊和向外散开的暗蓝侧纹。
+float lag=max(0,behind);
+float head=exp2(-pow(behind/(behind<0 ? .042 : .123),2));
+float wake=smoothstep(-.022,.045,behind)*exp2(-2.5*lag);
+float forkGap=.11+.76*lag+.035*sin(13*u+2*textureFlow);
+float mainLine=exp2(-pow(bank/(.14+.09*head+.045*lag),2));
+float sideLine=exp2(-pow((bank+forkGap)/(.11+.11*lag),2));
+float haze=exp2(-pow(bank/(.37+.26*lag),2));
+float brush=.48+.52*textureFlow;
+float fade=Clock.b*end*(1-smoothstep(.74,1,t))*smoothstep(.01,.08,t);
+float split=.66+.34*sin(14*u+2.4*textureFlow+3*bank);
+// 原分叉笔触沿地面长轴摊开，远端的两条细纹错开收尖。
+float forkBrush=Texture2DSample(FlowMask,FlowMaskSampler,float2(clamp(.20+1.21*lag,.04,.96),clamp(.49+1.48*bank,.02,.98))).r;
+float bristle=Texture2DSample(FlowMask,FlowMaskSampler,float2(clamp(.61+.94*lag,.10,.91),clamp(.48+1.64*bank+.12*textureFlow,.02,.98))).r;
+float pearl=head*(.72*mainLine+.25*haze)*(.24+.88*sqrt(saturate(bristle)));
+float glaze=Texture2DSample(FlowMask,FlowMaskSampler,float2(clamp(.35+.92*lag,.05,.97),clamp(.49+1.39*(bank+forkGap),.02,.98))).r;
+float thread=wake*(mainLine*(.27+1.10*forkBrush)+sideLine*split*(.18+.93*glaze))*brush;
+float veil=(.49*head+.79*wake)*haze*(.45+.69*sqrt(saturate(forkBrush)));
+Coverage=fade*saturate(.80*pearl+.71*thread+.51*veil);
+Tint=float3(.011,.026,.102);
+return fade*(pearl*float3(1.54,2.3,5.2)+thread*float3(.085,.37,3.45)+veil*float3(.017,.083,1.64));
 """
 
 
@@ -94,10 +139,21 @@ def surface(directory, ground):
         raise RuntimeError('缺少原刀面流纹')
     ink=edit.create_material_expression(mat,ue.MaterialExpressionTextureSample,-540,260)
     ink.set_editor_properties(dict(texture=tex,sampler_type=ue.MaterialSamplerType.SAMPLERTYPE_COLOR))
+    inputs=[(uv,'','UV'),(clock,'' if ground else 'RGBA','Clock'),(ink,'RGB','Ink')]
+    textures={'FlowMask':'Eff_MeleeTrail_237_148ae2cbe983'}
+    if not ground:
+        textures['Nib']='Eff_MeleeTrail_116_YZ_03_8a06449ff0e4'
+    for i,(slot,asset) in enumerate(textures.items()):
+        texture=ue.load_asset('/Game/Characters/Shared/FX/ZZZ/Textures/'+asset)
+        if not isinstance(texture,ue.Texture2D):
+            raise RuntimeError('缺少刀纹 '+asset)
+        obj=edit.create_material_expression(mat,ue.MaterialExpressionTextureObjectParameter,-560,450+i*200)
+        obj.set_editor_properties(dict(parameter_name=slot,texture=texture,sampler_type=ue.MaterialSamplerType.SAMPLERTYPE_COLOR))
+        inputs.append((obj,'',slot))
     code=edit.create_material_expression(mat,ue.MaterialExpressionCustom,-220,0)
-    configure_native_custom(ue,code,['UV','Clock','Ink'],WASH_SHADE if ground else ARC_SHADE,'CMOT_Float3',
-        '横扫的地面余光' if ground else '月牙亮峰和退弦',native_sync=lambda _,fn:fn(),additional_outputs=[('Coverage','CMOT_Float1')]+([('Tint','CMOT_Float3')] if ground else []))
-    for node,pin,slot in [(uv,'','UV'),(clock,'RGBA' if not ground else '','Clock'),(ink,'RGB','Ink')]:
+    configure_native_custom(ue,code,[slot for _,_,slot in inputs],WASH_SHADE if ground else ARC_SHADE,'CMOT_Float3',
+        '切口落地的分叉蓝纹' if ground else '沿月牙展开的笔锋与退弦',native_sync=lambda _,fn:fn(),additional_outputs=[('Coverage','CMOT_Float1')]+([('Tint','CMOT_Float3')] if ground else []))
+    for node,pin,slot in inputs:
         if not edit.connect_material_expressions(node,pin,code,slot):
             raise RuntimeError('刀光输入缺失 '+slot)
     for pin,slot in [('',ue.MaterialProperty.MP_EMISSIVE_COLOR),('Coverage',ue.MaterialProperty.MP_OPACITY)]:
@@ -211,7 +267,7 @@ float3 start=Particles.Position+float3(0,0,24);
 
 def ground_sweep(system,directory,emitter,tool,target,assign):
     mat=surface(directory,True)
-    if EDITOR.get_metadata_tag(system,'Pyrios.GroundBlueSweep')=='fanned-ground-2':
+    if EDITOR.get_metadata_tag(system,'Pyrios.GroundBlueSweep')=='fanned-ground-3':
         return False
     di=ue.new_object(ue.load_class(None,'/Script/Niagara.NiagaraDataInterfaceCollisionQuery'))
     ps,pu='ParticleSpawnScript','ParticleUpdateScript'
@@ -227,7 +283,7 @@ def ground_sweep(system,directory,emitter,tool,target,assign):
           assign(pu,emitter=emitter,WashLocked=('Bool','Particles.WashHasGround && Particles.CutFixed'),
                  WashDown=('Quat','normalize(float4(0,Particles.WashNormal.z,-Particles.WashNormal.y,max(.0001,1.0-Particles.WashNormal.x)))')),
           assign(pu,emitter=emitter,WashBasis=('Vector','float3(0,1,0)+2*cross(Particles.WashDown.xyz,cross(Particles.WashDown.xyz,float3(0,1,0))+Particles.WashDown.w*float3(0,1,0))')),
-          assign(pu,emitter=emitter,WashTwist=('Float','.5*atan2(dot(cross(Particles.WashBasis,Particles.CutDirection),-Particles.WashNormal),dot(Particles.WashBasis,Particles.CutDirection)+.000001) + (Particles.UniqueID==0 ? -.63 : (Particles.UniqueID==1 ? -.31 : .06))')),
+          assign(pu,emitter=emitter,WashTwist=('Float','.5*atan2(dot(cross(Particles.WashBasis,Particles.CutDirection),-Particles.WashNormal),dot(Particles.WashBasis,Particles.CutDirection)+.000001) + (Particles.UniqueID==0 ? -.48 : (Particles.UniqueID==1 ? .14 : -.10))')),
           assign(pu,emitter=emitter,WashSpin=('Vector','-Particles.WashNormal*sin(Particles.WashTwist)')),
           assign(pu,emitter=emitter,WashRotation=('Quat','float4(cos(Particles.WashTwist)*Particles.WashDown.xyz+Particles.WashDown.w*Particles.WashSpin+cross(Particles.WashSpin,Particles.WashDown.xyz),cos(Particles.WashTwist)*Particles.WashDown.w-dot(Particles.WashSpin,Particles.WashDown.xyz))')),
           assign(pu,emitter=emitter,WashSize=('Vector','float3(13,Particles.CutLength*2.1,154)'),
@@ -241,5 +297,5 @@ def ground_sweep(system,directory,emitter,tool,target,assign):
               DecalOrientationBinding=bind('Particles.WashRotation'),DecalSizeBinding=bind('Particles.WashSize'),
               DecalColorBinding=bind('Particles.WashColor'),DecalVisibleBinding=bind('Particles.WashLocked'),
               DecalSortOrderBinding=bind('Particles.WashOrder'),DecalScreenSizeFade=0.0))
-    EDITOR.set_metadata_tag(system,'Pyrios.GroundBlueSweep','fanned-ground-2')
+    EDITOR.set_metadata_tag(system,'Pyrios.GroundBlueSweep','fanned-ground-3')
     return True
