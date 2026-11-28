@@ -1,7 +1,7 @@
 """佩洛伊斯刀光可见范围。倍率作用于刀面网格自身的展开轴。"""
 import unreal as ue
 
-from pyrios_source_slashes import FACE_MATERIALS, LIB, SOURCE_FIELDS, SOURCE_SURFACES
+from pyrios_source_slashes import FACE_MATERIALS, LIB, OPENING_VOLUME, SOURCE_FIELDS, SOURCE_SURFACES
 from zzz_fx_niagara_ue import NiagaraBuilder, NS
 
 
@@ -97,6 +97,8 @@ def fit_blade_meshes(system):
                 raise RuntimeError('攻击刀面缺少唯一网格 ' + name)
             slot = slots[0]
             mesh_name = slot.mesh.get_name().rsplit('_', 1)[0]
+            if slot.mesh.get_path_name().split('.')[0] == OPENING_VOLUME:
+                mesh_name = 'FXMD_DAO_001'
             axes = MESH_AXES.get(mesh_name)
             if axes is None:
                 raise RuntimeError(f'{key}/{name} 的网格缺少展开轴配置 {mesh_name}')
