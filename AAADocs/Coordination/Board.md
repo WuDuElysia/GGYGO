@@ -10,7 +10,7 @@
 
 | 需求 | 负责人 | 状态 | 需求记录 |
 | --- | --- | --- | --- |
-| Pyrios 战斗特效与急转返修 | Codex | 首刀弧面已按剑锋轨迹收紧。D3D12 俯视同机位及战斗视角已实拍，连续空挥三段自然收招。 | [制作与验证](../需求文档/fx_audio_wiring.md) · [实现提交](https://github.com/WuDuElysia/GGYGO/commit/8487d72) |
+| Pyrios 战斗特效与急转返修 | Codex | 首刀白芯沿剑锋扫过，蓝紫尾纹渐细透光。D3D12 双机位实拍完成，三连空挥自然收招。 | [制作与验证](../需求文档/fx_audio_wiring.md) · [首刀质感提交](https://github.com/WuDuElysia/GGYGO/commit/683a59a) |
 | UE 5.9 副本迁移 | System 原会话（Codex） | UE 5.9 的两个桌面入口已恢复。GGYGO 快捷方式直达工程，月坑环站已进入 PIE，原引擎快捷方式可打开项目浏览器。[启动修复](https://github.com/WuDuElysia/GGYGO/commit/e625fd4)。V8 普通启动返修已核收并推送（[修复提交](https://github.com/WuDuElysia/GGYGO/commit/fdf1e76)）：两份 Target 升 V8、59 个测试编译输入保留，Editor 构建与普通启动实拍通过，自有 UE 已退出。原迁移已完成并推送父子 codex/ue59-migration 分支：编译、资产、玩家／换人、Kevin 完整战斗与死亡清理、最小联机通过，统筹实拍核收和 GameFeature 差分评审通过。可用副本 F:/ue_project/GGYGO_UE59；原 5.8 工程保留。启动诊断／运行告警及 Cook、设备、性能、完整网络、非空受管 GF 未验范围保持，无在途。[迁移提交](https://github.com/WuDuElysia/GGYGO/commit/22566e2) | [ue59_migration](../需求文档/ue59_migration.md) |
 | 普攻第一段主弧与冷首击 | Kiro | 已完成：共享网格角点错位重导入后主弧连续可见；未预热首击等资源就绪后出刀，FX 同帧可见（[主弧证据](../../.agents/tasks/requirements-closeout/evidence/I01.md)、[冷首击证据](../../.agents/tasks/requirements-closeout/evidence/I02.md)） | [normal01_first_strike](../需求文档/normal01_first_strike.md) |
 | 普攻连段生产冒烟与活尾 | Codex（待统筹指定） | 需用户：攻击接续点之前的按下要不要存起来留到下一段？A 接受现状并改 spec 措辞，B 另立需求接回预输入。冒烟 22／24 通过，2 例按约定保留失败（[证据](../../.agents/tasks/requirements-closeout/evidence/I08.md)） | [normal01_first_strike](../需求文档/normal01_first_strike.md) |
