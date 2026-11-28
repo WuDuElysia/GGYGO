@@ -194,9 +194,14 @@ def opening_edge_material(source):
     # 白、浅青、蓝晕依次展开，尾段随原粒子退去。
     code = """
 float luma = dot(max(Edge, 0), float3(.2126, .7152, .0722));
-float pulse = smoothstep(.005, .17, Age) * (1 - smoothstep(.46, .93, Age));
+float pulse = smoothstep(.025, .21, Age) * (1 - smoothstep(.37, .76, Age));
+// 原刃纹使用 UV0。实机挥剑阶段剑尖对应 U 约 .06 至 .10，尾迹沿 U 增长。
+float u = Parameters.TexCoords[0].x;
+float behind = max(0, u - .085);
+float along = exp2(-7.0 * behind);
 float crest = luma * smoothstep(.04, 1.1, luma);
-return Edge + crest * pulse * float3(165.0, 580.0, 3200.0);
+return Edge * (.18 + .82 * along)
+     + crest * pulse * (along * float3(320, 450, 1600) + (1 - along) * float3(1.3, 3.5, 50));
 """
     origin = editor.get_metadata_tag(mat, 'OpeningEdgeSource')
     dirty = False
@@ -242,8 +247,99 @@ return Edge + crest * pulse * float3(165.0, 580.0, 3200.0);
                  '_PowerAlpha': 3.46})
 
 
+def opening_wake_material(source, layer):
+    """保留原烟纹的显隐与网格 UV，用随剑散开的透光笔触绘制首刀尾迹。"""
+    from zzz_fx_material_ue import configure_native_custom
+    editor = ue.EditorAssetLibrary
+    edit = ue.MaterialEditingLibrary
+    folder = '/Game/Characters/Player/Pyrios/FX/Dawn/'
+    path = folder + 'M_Pyrios_OpeningWake' + layer
+    instance_path = folder + 'MI_Pyrios_OpeningWake' + layer
+    tag = 'Pyrios.WakeSource'
+    mat = ue.load_asset(path) if editor.does_asset_exist(path) else None
+    if mat and editor.get_metadata_tag(mat, tag) != source.parent.get_path_name():
+        raise RuntimeError('首刀尾迹材质来源不符 ' + path)
+    # V 从外锋向内。锋后两束细气纹逐步分离，中间能透出场景。
+    # 原程序继续决定图形覆盖范围，两处峰值之间只留下很淡的冷色。
+    code = """
+float u = UV.x;
+float v = UV.y;
+float age = saturate(Age);
+float spread = smoothstep(.09, .86, age);
+float drift = .045 * sin(6.283 * (u - age * .25));
+float2 brushUV = saturate(float2(.14 + .70 * u - .10 * age, v + drift));
+float brush = Texture2DSample(Brush, BrushSampler, brushUV).r;
+float y = v + drift + .042 * (brush - .5);
+float width = max(.012, fwidth(y));
+float front = .16 + .06 * spread;
+float rear = front + .08 + .19 * spread + .05 * sin(6.283 * u);
+float crest = exp2(-pow((y - front) / (width + .012), 2));
+float filament = exp2(-pow((y - rear) / (width + .017), 2));
+float mist = exp2(-pow((y - .31) / .28, 2));
+float sourceLight = saturate(dot(max(SourceRGB, 0), float3(.213, .715, .072)));
+float bristle = smoothstep(.04 + .24 * spread, .81, brush);
+float release = 1 - smoothstep(.28, .97, age);
+float behind = max(0, u - .085);
+float lead = exp2(-5.5 * behind);
+float thread = exp2(-pow((behind - .27 + .085 * age) / .16, 2));
+return (crest * float3(.11, .20, 1.0) * (.12 + .88 * lead)
+      + filament * float3(.050, .063, .74) * thread)
+     * (.08 + .92 * bristle) * release
+     + mist * float3(.018, .022, .26) * (.08 + .73 * bristle + .19 * sourceLight)
+     * lead * release * release;
+"""
+    prop = ue.MaterialProperty.MP_EMISSIVE_COLOR
+    if not mat:
+        mat = editor.duplicate_asset(source.parent.get_path_name(), path)
+        if not isinstance(mat, ue.Material):
+            raise RuntimeError('无法派生首刀烟纹材质 ' + path)
+        original = edit.get_material_property_input_node(mat, prop)
+        if not original or not edit.get_material_property_input_node(mat, ue.MaterialProperty.MP_OPACITY):
+            raise RuntimeError('原烟纹缺少发光或透明度输出 ' + path)
+        pin = edit.get_material_property_input_node_output_name(mat, prop)
+        tex = ue.load_asset('/Game/Characters/Shared/FX/ZZZ/Textures/Eff_MeleeTrail_237_148ae2cbe983')
+        if not isinstance(tex, ue.Texture2D):
+            raise RuntimeError('缺少首刀分叉尾纹 237')
+        mat.set_editor_property('blend_mode', ue.BlendMode.BLEND_ADDITIVE)
+        uv = edit.create_material_expression(mat, ue.MaterialExpressionTextureCoordinate, 370, 420)
+        age = edit.create_material_expression(mat, ue.MaterialExpressionParticleRelativeTime, 370, 560)
+        brush = edit.create_material_expression(mat, ue.MaterialExpressionTextureObject, 370, 710)
+        brush.set_editor_properties(dict(texture=tex, sampler_type=ue.MaterialSamplerType.SAMPLERTYPE_COLOR))
+        node = edit.create_material_expression(mat, ue.MaterialExpressionCustom, 850, 240)
+        inputs = [(original, pin, 'SourceRGB'), (uv, '', 'UV'), (age, '', 'Age'), (brush, '', 'Brush')]
+        configure_native_custom(ue, node, [slot for _, _, slot in inputs], code, 'CMOT_Float3',
+                                '随刃散开的气纹', native_sync=lambda _, fn: fn())
+        for src, output, slot in inputs:
+            if not edit.connect_material_expressions(src, output, node, slot):
+                raise RuntimeError('首刀尾纹输入接线失败 ' + slot)
+        if not edit.connect_material_property(node, '', prop):
+            raise RuntimeError('首刀尾纹输出接线失败')
+        editor.set_metadata_tag(mat, tag, source.parent.get_path_name())
+        dirty = True
+    else:
+        node = edit.get_material_property_input_node(mat, prop)
+        if not isinstance(node, ue.MaterialExpressionCustom) or node.get_editor_property('description') != '随刃散开的气纹':
+            raise RuntimeError('首刀尾纹发光节点不符 ' + path)
+        dirty = node.get_editor_property('code') != code
+        if dirty:
+            node.set_editor_property('code', code)
+    if dirty and (edit.recompile_material(mat) or not editor.save_loaded_asset(mat, False)):
+        raise RuntimeError('首刀尾纹编译或保存失败 ' + path)
+    instance = (ue.load_asset(instance_path) if editor.does_asset_exist(instance_path)
+                else editor.duplicate_asset(source.get_path_name(), instance_path))
+    if not isinstance(instance, ue.MaterialInstanceConstant) or instance.parent not in (source.parent, mat):
+        raise RuntimeError('首刀尾纹实例来源不符 ' + instance_path)
+    if instance.parent != mat:
+        edit.set_material_instance_parent(instance, mat)
+        if not editor.save_loaded_asset(instance, False):
+            raise RuntimeError('首刀尾纹实例保存失败 ' + instance_path)
+    return instance
+
+
 def slash_material(system_name, emitter, source):
     opening = system_name == 'NS_Pyrios_Normal01_MainComposition_2a7c90937cab'
+    if opening and emitter in ('M00_root_Trail_rot_Smoke_Head', 'M00_root_Trail_rot_Smoke_trail'):
+        return opening_wake_material(source, 'Head' if emitter.endswith('_Head') else 'Trail')
     if opening and emitter == 'M00_root_Trail_rot_light_edge':
         return opening_edge_material(source)
     if opening and emitter == 'M00_root_Trail_rot_Shining':
@@ -256,8 +352,8 @@ def slash_material(system_name, emitter, source):
         return configure_slash_material(
             source, 'MI_Pyrios_OpeningBloom',
             vectors={'_MainTex_ST': ue.LinearColor(1.3, .56, -.05, .22),
-                     '_MultiplyParticleColor': ue.LinearColor(4.2, 18, 110, 1)},
-            scalars={'_PowerRGB': 1.34, '_PowerAlpha': 1.14, '_AlphaFade': .38})
+                     '_MultiplyParticleColor': ue.LinearColor(7.0, 12.0, 78.0, 1)},
+            scalars={'_PowerRGB': 1.34, '_PowerAlpha': 1.28, '_AlphaFade': .29})
 
     if '_bloom' in emitter:
         edit = ue.MaterialEditingLibrary
@@ -274,18 +370,19 @@ def slash_material(system_name, emitter, source):
     name = FACE_MATERIALS.get(source.get_name())
     if not name:
         return source
-    brush = ue.load_asset('/Game/Characters/Shared/FX/ZZZ/Textures/Eff_MeleeTrail_239_4f346e732ad4')
+    texture = 'Eff_MeleeTrail_237_148ae2cbe983' if opening else 'Eff_MeleeTrail_239_4f346e732ad4'
+    brush = ue.load_asset('/Game/Characters/Shared/FX/ZZZ/Textures/' + texture)
     if not isinstance(brush, ue.Texture2D):
-        raise RuntimeError('缺少刀腹分叉笔纹 239')
+        raise RuntimeError('缺少刀腹笔纹 ' + texture)
     fade = ue.MaterialEditingLibrary.get_material_instance_scalar_parameter_value(source, '_AlphaFade')
     brush_uv = ue.LinearColor(.88, 1.05, .035, .016) if opening else ue.LinearColor(.64, 1.05, .13, .016)
-    face_tint = ue.LinearColor(.95, 2.7, 7.6, 1) if opening else ue.LinearColor(.59, 2.9, 13, 1)
+    face_tint = ue.LinearColor(.95, 1.55, 5.4, 1) if opening else ue.LinearColor(.59, 2.9, 13, 1)
     return configure_slash_material(
         source, 'MI_Pyrios_OpeningFace' if opening else name,
         textures={'_MaskTex': brush},
         vectors={'_MaskTex_ST': brush_uv,
                  '_MultiplyParticleColor': face_tint},
-        scalars={'_PowerAlpha': 1.12 if opening else .95, '_AlphaFade': fade * (.66 if opening else .68)})
+        scalars={'_PowerAlpha': 1.12 if opening else .95, '_AlphaFade': fade * (.36 if opening else .68)})
 
 
 def restore_source_surfaces(system):
