@@ -201,7 +201,7 @@ float behind = max(0, u - .085);
 float along = exp2(-7.0 * behind);
 float crest = luma * smoothstep(.04, 1.1, luma);
 return Edge * (.18 + .82 * along)
-     + crest * pulse * (along * float3(320, 450, 1600) + (1 - along) * float3(1.3, 3.5, 50));
+     + crest * pulse * (along * float3(110, 124, 760) + (1 - along) * float3(.7, 1.1, 23));
 """
     origin = editor.get_metadata_tag(mat, 'OpeningEdgeSource')
     dirty = False
@@ -247,78 +247,19 @@ return Edge * (.18 + .82 * along)
                  '_PowerAlpha': 3.46})
 
 
-OPENING_VOLUME = '/Game/Characters/Player/Pyrios/FX/Dawn/SM_Pyrios_OpeningSlashVolume'
-
-
-def opening_volume_mesh(source):
-    """保留原 XY、顶点色和纹理流，只沿挥刀平面法向展开封闭截面。"""
-    from math import pi, sin
-    editor = ue.EditorAssetLibrary
-    query = ue.GeometryScript_MeshQueries
-    existing = ue.load_asset(OPENING_VOLUME) if editor.does_asset_exist(OPENING_VOLUME) else None
-    if existing:
-        if not isinstance(existing, ue.StaticMesh) or editor.get_metadata_tag(existing, 'Pyrios.VolumeSource') != source.get_path_name():
-            raise RuntimeError('首刀截面网格来源不符')
-        return existing
-    mesh = ue.DynamicMesh()
-    lod = ue.GeometryScriptMeshReadLOD(lod_type=ue.GeometryScriptLODType.SOURCE_MODEL, lod_index=0)
-    _, result = ue.GeometryScript_AssetUtils.copy_mesh_from_static_mesh_v2(
-        source, mesh, ue.GeometryScriptCopyMeshFromAssetOptions(), lod, False)
-    if result != ue.GeometryScriptOutcomePins.SUCCESS:
-        raise RuntimeError('无法读取首刀原网格')
-    profile = {}
-    for tri in range(mesh.get_triangle_count()):
-        valid, *corners = query.get_triangle_positions(mesh, tri)
-        *coords, mapped = query.get_triangle_u_vs(mesh, 0, tri)
-        if not valid or not mapped:
-            raise RuntimeError('首刀原弧缺少三角形或 UV')
-        for point, uv in zip(corners, coords):
-            # V=0 为最外锋。刃腹前窄后宽，上脊与下腹不对称；两端逐渐归尖。
-            u = min(1.0, max(0.0, uv.x))
-            v = min(1.0, max(0.0, uv.y))
-            taper = min(1.0, u / .10, (1.0 - u) / .34)
-            taper *= 2.0 - taper
-            ridge = (sin(pi * v) ** .60) * ((1.0 - v) ** 1.9)
-            profile[point.x, point.y] = (point.z, .14 + 36.0 * ridge * taper)
-    ue.GeometryScript_MeshModeling.apply_mesh_linear_extrude_faces(
-        mesh, ue.GeometryScriptMeshLinearExtrudeOptions(distance=40.0, direction=ue.Vector(0, 0, -1)),
-        ue.GeometryScriptMeshSelection())
-    if not query.get_is_closed_mesh(mesh):
-        raise RuntimeError('首刀的上下刃面未闭合')
-    for vertex in range(query.get_vertex_count(mesh)):
-        point, valid = query.get_vertex_position(mesh, vertex)
-        if not valid:
-            raise RuntimeError('封闭刃面缺少顶点')
-        z, height = profile[point.x, point.y]
-        side = -.75 if point.z < z - 20 else 1.0
-        point.z = z + side * height
-        ue.GeometryScript_MeshEdits.set_vertex_position(mesh, vertex, point, True)
-    options = ue.GeometryScriptCreateNewStaticMeshAssetOptions(
-        enable_recompute_normals=True, enable_recompute_tangents=True, enable_nanite=False, enable_collision=False)
-    asset, result = ue.GeometryScript_NewAssetUtils.create_new_static_mesh_asset_from_mesh(mesh, OPENING_VOLUME, options)
-    if result != ue.GeometryScriptOutcomePins.SUCCESS:
-        raise RuntimeError('首刀截面网格创建失败')
-    editor.set_metadata_tag(asset, 'Pyrios.VolumeSource', source.get_path_name())
-    if not editor.save_loaded_asset(asset, False):
-        raise RuntimeError('首刀截面网格保存失败')
-    return asset
-
-
-def set_volume_opacity(mat):
-    """从斜面看，透过的剑气随视线穿过截面的长度由薄到厚。"""
+def set_wake_opacity(mat):
+    """保留原烟纹遮罩，在锋线经过时短暂透出连续光芯。"""
     from zzz_fx_material_ue import configure_native_custom
     edit = ue.MaterialEditingLibrary
     prop = ue.MaterialProperty.MP_OPACITY
     original = edit.get_material_property_input_node(mat, prop)
     label = '首刀透光截面'
     code = """
-float u = UV.x, v = UV.y;
-float3 n = normalize(Parameters.TangentToWorld[2]);
-float chord = saturate(abs(dot(n, Parameters.CameraVector)));
-float sweep = smoothstep(.011, .080, u) * (1 - smoothstep(.34, .77, u));
-float life = smoothstep(.003, .075, Age) * (1 - smoothstep(.43, .94, Age));
-float interior = exp2(-9 * v * v) * smoothstep(.008, .63, chord);
-return saturate(.48 * Mask + .74 * interior * sweep * life);
+float u = UV.x;
+float tail = smoothstep(.57, .97, u);
+float wind = smoothstep(.002, .072, Age) * (1 - smoothstep(.43, .96, Age));
+float gate = smoothstep(.004, .045, u) * (1 - tail);
+return saturate((.55 + .45 * saturate(Mask)) * gate * wind);
 """
     if isinstance(original, ue.MaterialExpressionCustom) and original.get_editor_property('description') == label:
         if original.get_editor_property('code') == code:
@@ -338,6 +279,44 @@ return saturate(.48 * Mask + .74 * interior * sweep * life);
             raise RuntimeError('首刀截面透明度接线失败 ' + slot)
     if not edit.connect_material_property(node, '', prop):
         raise RuntimeError('首刀截面透明度缺少输出')
+    return True
+
+
+def set_halo_spread(mat, edit):
+    """仅让泛光层朝视口横向散开。原 UV 的亮锋位置偏移为零。"""
+    from zzz_fx_material_ue import configure_native_custom
+    prop = ue.MaterialProperty.MP_WORLD_POSITION_OFFSET
+    node = edit.get_material_property_input_node(mat, prop)
+    label = '首刀蓝紫光晕展开'
+    code = """
+// 取原弧 V≈0.09 的截线作为光心。UV.y 只承载相对光心的横向距离。
+float3 position = Parameters.PreSkinnedPosition;
+float2 radial = normalize(position.xy);
+float3 origin = float3(radial * 141., 2.);
+float3x3 localToWorld = (float3x3)GetInstanceToWorldDF(Parameters).M;
+float3 tangent = normalize(mul(float3(-radial.y, radial.x, 0), localToWorld));
+float3 across = cross(ResolvedView.ViewForward, tangent);
+float3 centerOffset = mul(origin - position, localToWorld);
+return OriginalOffset + centerOffset + (UV.y - .5) * 94. * across * rsqrt(max(.10, dot(across, across)));
+"""
+    if isinstance(node, ue.MaterialExpressionCustom) and node.get_editor_property('description') == label:
+        if node.get_editor_property('code') == code:
+            return False
+        node.set_editor_property('code', code)
+        return True
+    if node:
+        original = node
+        pin = edit.get_material_property_input_node_output_name(mat, prop)
+    else:
+        original = edit.create_material_expression(mat, ue.MaterialExpressionConstant3Vector, 330, 1460)
+        pin = ''
+    uv = edit.create_material_expression(mat, ue.MaterialExpressionTextureCoordinate, 330, 1260)
+    node = edit.create_material_expression(mat, ue.MaterialExpressionCustom, 850, 1260)
+    configure_native_custom(ue, node, ['UV', 'OriginalOffset'], code, 'CMOT_Float3', label, native_sync=lambda _, fn: fn())
+    if not (edit.connect_material_expressions(uv, '', node, 'UV')
+            and edit.connect_material_expressions(original, pin, node, 'OriginalOffset')
+            and edit.connect_material_property(node, '', prop)):
+        raise RuntimeError('首刀光晕展开未接入材质')
     return True
 
 
@@ -376,22 +355,44 @@ float release = 1 - smoothstep(.28, .97, age);
 float behind = max(0, u - .085);
 float lead = exp2(-5.5 * behind);
 float thread = exp2(-pow((behind - .27 + .085 * age) / .16, 2));
-float3 volume = 0;
 """
     if layer == 'Trail':
-        # 两个刃面共享原笔纹，法线随弧面转动，斜侧面能同时看见上脊与下腹。
+        # 原录里迎刃有一小段白芯；蓝紫色沿弧线和刃背向外散开，剑气扫过后能透出角色。
         code += """
-float3 n = normalize(Parameters.TangentToWorld[2]);
-float up = saturate(.5 + .5 * n.z);
-float flank = 1.0 - abs(n.z);
-float inside = exp2(-8.0 * max(0,y-.035)*max(0,y-.035));
-float chord = saturate(abs(dot(n, Parameters.CameraVector)));
-float span = smoothstep(.002,.073,u) * (1.0-smoothstep(.46,.90,u));
-float energy = span * release * (.30 + .70*lead) * (.42+.58*bristle);
-float3 facet = lerp(float3(.023,.018,.21),float3(.20,.43,1.35),up);
-volume = energy * inside * (.24 + .76*chord) * (facet + flank*float3(.08,.20,.80));"""
-    code += """
-return volume + (crest * float3(.11, .20, 1.0) * (.12 + .88 * lead)
+float peakU = .115 + .17 * age;
+float distU = u - peakU;
+float focus = exp2(-pow(distU / (distU < 0 ? .11 : .24), 2));
+float stroke = exp2(-2.8 * max(0, distU));
+float ridgeV = .092 + .023 * (brush - .5) + .017 * sin(6.283 * (u + .35 * age));
+float dv = v - ridgeV;
+float aa = max(.004, .48 * fwidth(dv));
+float coreWidth = .015 + .025 * focus;
+float core = exp2(-pow(dv / (aa + coreWidth), 2)) * coreWidth / (aa + coreWidth);
+float band = exp2(-pow(dv / (.082 + .016 * focus), 2));
+float veil = exp2(-max(0, dv) * 9.5 - max(0, -dv) * 23);
+float ink = lerp(.63, 1.12, bristle);
+float peak = 1 - smoothstep(.27, .72, age);
+float3 ember = float3(6.8, 8.4, 13.2) * core * (.08 + 2.7 * focus * peak);
+float3 blue = band * float3(.20, .42, 5.4) + veil * float3(.055, .085, 1.05);
+return (ember + blue * (.29 + .95 * focus) * ink) * stroke * release
+     + filament * thread * bristle * float3(.15, .09, 1.5) * release;
+"""
+    elif layer == 'Halo':
+        # 只画锋线附近的散射。中心、近晕和远晕用不同衰减，边界在载体以内退净。
+        code += """
+float d = abs(v - .5) * 2;
+float nearGlow = exp2(-48 * d * d);
+float outerGlow = exp2(-10 * d * d) * (1 - smoothstep(.78, 1, d));
+float peakU = .115 + .17 * age;
+float focus = exp2(-pow((u - peakU) / .23, 2));
+float hot = (1 - smoothstep(.28, .78, age)) * focus;
+float stroke = exp2(-3.4 * max(0,u-peakU)) * smoothstep(.003,.082,u);
+float3 glow = float3(.065,.15,1.85) * nearGlow + float3(.024,.043,.36) * outerGlow;
+return glow * (.27 + 1.35 * hot) * stroke * release * (.86 + .14 * brush);
+"""
+    else:
+        code += """
+return (crest * float3(.11, .20, 1.0) * (.12 + .88 * lead)
       + filament * float3(.050, .063, .74) * thread)
      * (.08 + .92 * bristle) * release
      + mist * float3(.018, .022, .26) * (.08 + .73 * bristle + .19 * sourceLight)
@@ -432,10 +433,12 @@ return volume + (crest * float3(.11, .20, 1.0) * (.12 + .88 * lead)
         dirty = node.get_editor_property('code') != code
         if dirty:
             node.set_editor_property('code', code)
-    if layer == 'Trail':
-        dirty = set_volume_opacity(mat) or dirty
-        if mat.get_editor_property('two_sided'):
-            mat.set_editor_property('two_sided', False)
+    if layer == 'Halo':
+        dirty = set_halo_spread(mat, edit) or dirty
+    if layer in ('Trail', 'Halo'):
+        dirty = set_wake_opacity(mat) or dirty
+        if not mat.get_editor_property('two_sided'):
+            mat.set_editor_property('two_sided', True)
             dirty = True
     if dirty and (edit.recompile_material(mat) or not editor.save_loaded_asset(mat, False)):
         raise RuntimeError('首刀尾纹编译或保存失败 ' + path)
@@ -462,12 +465,7 @@ def slash_material(system_name, emitter, source):
             source, 'MI_Pyrios_OpeningGlint', vectors={'_MultiplyParticleColor': ue.LinearColor(13, 21, 37, 1)},
             scalars={'_AlphaFade': .67, '_PowerRGB': .91})
     if opening and emitter == 'M00_root_Trail_rot_bloom':
-        # 白芯和刃纹由独立刀面绘制。仅展宽软遮罩并提高光晕层的自发光。
-        return configure_slash_material(
-            source, 'MI_Pyrios_OpeningBloom',
-            vectors={'_MainTex_ST': ue.LinearColor(1.3, .56, -.05, .22),
-                     '_MultiplyParticleColor': ue.LinearColor(7.0, 12.0, 78.0, 1)},
-            scalars={'_PowerRGB': 1.34, '_PowerAlpha': 1.28, '_AlphaFade': .29})
+        return opening_wake_material(source, 'Halo')
 
     if '_bloom' in emitter:
         edit = ue.MaterialEditingLibrary
@@ -518,12 +516,11 @@ def restore_source_surfaces(system):
         meshes = [entry.get('mesh', {}).get('refPath') for entry in props.get('Meshes', [])]
         slots = props.get('OverrideMaterials', [])
         expected_mesh = SWEEP_MESH if emitter.startswith('M11_root_Trail_rot_') else BLADE_MESH
-        volume = (system.get_name() == 'NS_Pyrios_Normal01_MainComposition_2a7c90937cab'
+        opening_trail = (system.get_name() == 'NS_Pyrios_Normal01_MainComposition_2a7c90937cab'
                   and emitter == 'M00_root_Trail_rot_Smoke_trail')
-        allowed_meshes = [expected_mesh]
-        if volume:
-            allowed_meshes.append(OPENING_VOLUME + '.' + OPENING_VOLUME.rsplit('/', 1)[-1])
-        if len(meshes) != 1 or meshes[0] not in allowed_meshes or len(slots) != 1:
+        legacy = '/Game/Characters/Player/Pyrios/FX/Dawn/SM_Pyrios_OpeningSlashVolume.SM_Pyrios_OpeningSlashVolume'
+        replace_shell = opening_trail and meshes == [legacy]
+        if (meshes != [expected_mesh] and not replace_shell) or len(slots) != 1:
             raise RuntimeError(f'{emitter} 的刀面或材质槽与原配置不符')
         if slots[0].get('userParamBinding', {}).get('parameter', {}).get('name', 'None') != 'None':
             raise RuntimeError(f'{emitter} 的材质由运行时参数覆盖')
@@ -531,15 +528,16 @@ def restore_source_surfaces(system):
         if not isinstance(material, ue.MaterialInstanceConstant) or not material.parent or not material.parent.get_name().startswith('M_ZZZFX_ProjectConfigured_'):
             raise RuntimeError(f'{emitter} 缺少原程序移植材质 {asset}')
         changed = align_mesh_origin(data, system.get_name(), emitter) or changed
-        if volume:
-            mesh = opening_volume_mesh(ue.load_asset(expected_mesh))
-            if meshes != [mesh.get_path_name()]:
-                obj = ue.find_object(None, data.renderer_path)
-                obj.modify()
-                mesh_slot = obj.get_editor_property('meshes')[0]
-                mesh_slot.mesh = mesh
-                obj.set_editor_property('meshes', [mesh_slot])
-                changed = True
+        if replace_shell:
+            mesh = ue.load_asset(expected_mesh)
+            if not isinstance(mesh, ue.StaticMesh):
+                raise RuntimeError('首刀缺少原弧面 ' + expected_mesh)
+            renderer = ue.find_object(None, data.renderer_path)
+            renderer.modify()
+            mesh_slot = renderer.get_editor_property('meshes')[0]
+            mesh_slot.mesh = mesh
+            renderer.set_editor_property('meshes', [mesh_slot])
+            changed = True
         path = slash_material(system.get_name(), emitter, material).get_path_name()
         if props.get('bIsEnabled', True) and props.get('bOverrideMaterials') and slots[0].get('explicitMat', {}).get('refPath') == path:
             continue
