@@ -196,7 +196,7 @@ def opening_edge_material(source):
 float luma = dot(max(Edge, 0), float3(.2126, .7152, .0722));
 float pulse = smoothstep(.005, .17, Age) * (1 - smoothstep(.46, .93, Age));
 float crest = luma * smoothstep(.04, 1.1, luma);
-return Edge + crest * pulse * float3(.85, 11.0, 245.0);
+return Edge + crest * pulse * float3(165.0, 580.0, 3200.0);
 """
     origin = editor.get_metadata_tag(mat, 'OpeningEdgeSource')
     dirty = False
@@ -255,9 +255,9 @@ def slash_material(system_name, emitter, source):
         # 白芯和刃纹由独立刀面绘制。仅展宽软遮罩并提高光晕层的自发光。
         return configure_slash_material(
             source, 'MI_Pyrios_OpeningBloom',
-            vectors={'_MainTex_ST': ue.LinearColor(1.3, .70, -.05, .15),
-                     '_MultiplyParticleColor': ue.LinearColor(4.2, 14, 70, 1)},
-            scalars={'_PowerRGB': 1.34, '_PowerAlpha': 1.38})
+            vectors={'_MainTex_ST': ue.LinearColor(1.3, .56, -.05, .22),
+                     '_MultiplyParticleColor': ue.LinearColor(4.2, 18, 110, 1)},
+            scalars={'_PowerRGB': 1.34, '_PowerAlpha': 1.14, '_AlphaFade': .38})
 
     if '_bloom' in emitter:
         edit = ue.MaterialEditingLibrary

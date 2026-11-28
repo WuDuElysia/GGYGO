@@ -104,6 +104,9 @@ def fit_blade_meshes(system):
             # 原刀面沿 UV 的刃脊有起伏。只把刃腹高光层的厚度展开，外缘与切尖仍在原平面。
             if mesh_name == 'FXMD_DAO_001' and source.get(name) in FACE_MATERIALS:
                 target.z = 2.85 if combo == 'Normal01' else 2.4
+            # 首刀横扫时刀面近乎侧对镜头，软光沿网格起伏展开，白芯和刀纹仍在原刃面。
+            if combo == 'Normal01' and name == 'M00_root_Trail_rot_bloom':
+                target.z = 3.25
             if all(abs(a-b) < .0001 for a, b in zip(slot.scale.to_tuple(), target.to_tuple())):
                 continue
             obj.modify()
