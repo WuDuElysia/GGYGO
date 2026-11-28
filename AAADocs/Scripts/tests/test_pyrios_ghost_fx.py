@@ -3,7 +3,7 @@
 
 只读既有准确源；Native/MCP 用受限假宿主记录调用，不操作用户 UE。
 """
-import ast
+from itertools import islice
 import copy
 import hashlib
 import json
@@ -30,10 +30,22 @@ PREFAB = SOURCES / (G.SOURCE_NAME + ".fx.json")
 DEPENDENCY = SOURCES / (G.SOURCE_NAME + ".deps.v2.json")
 
 
-class FakeMcp:
+class FakeSystem:
+    def __init__(self, path):
+        self.path = path
+
+    def get_path_name(self):
+        return self.path
+
+
+class FakeMcp(G.NativeToolsets):
     """保留真实调用请求/结果形状，仅模拟必要原生读回，不连接工具。"""
     def __init__(self):
+        super().__init__(SimpleNamespace(ToolsetRegistry=object(), collect_garbage=lambda: None,
+            GGYGONiagaraCompileLibrary=SimpleNamespace(apply_stack_batch=self.tool),
+            NiagaraSystem=FakeSystem, load_object=lambda _, path: FakeSystem(path) if path == self.system_path else None))
         self.calls = []
+        self.variables = []
         self.emitters = {}
         self.system_data = {}
         self.system_path = None
@@ -46,12 +58,49 @@ class FakeMcp:
         name = full_name.rsplit(".", 1)[-1]
         self.calls.append((name, copy.deepcopy(args)))
         result = None
-        if name == "CreateNiagaraSystem":
+        if name.startswith("Authoring"):
+            emitter = args.get("emitterName", "")
+            state = dict(bSucceeded=True, error="", systemPath=self.system_path, bTransactionClosed=True,
+                         emitterName=emitter, emitterHandleId=emitter, propertyValues="{}")
+            if name == "AuthoringGetSystemSummary":
+                state["emitters"] = [{"emitterName": "Fountain"}]
+            elif name == "AuthoringAddEmitter":
+                self.emitters[emitter] = []
+            elif name == "AuthoringAddRenderer":
+                index = len(self.emitters[emitter])
+                self.emitters[emitter].append({})
+                state.update(rendererIndex=index, rendererClass=args["rendererClass"]["refPath"],
+                             rendererPath=self.system_path + ":Renderer" + str(index))
+            elif name == "AuthoringSetRendererData":
+                index = args["rendererIndex"]
+                self.emitters[emitter][index] = json.loads(args["propertyValues"])
+                state["rendererIndex"] = index
+            elif name == "AuthoringGetRendererData":
+                index = args["rendererIndex"]
+                state.update(rendererIndex=index, propertyValues=self.renderer_data(emitter, index))
+            elif name == "AuthoringGetRendererIdentities":
+                state["renderers"] = [{"rendererIndex": i, "rendererClass": "/Script/Niagara.NiagaraMeshRendererProperties"}
+                                      for i in range(len(self.emitters[emitter]))]
+            elif name != "AuthoringSetEmitterData":
+                raise AssertionError(name)
+            result = state
+        elif name == "GetUserVariables":
+            result = {"userVariables": self.variables}
+        elif name == "AddUserVariables":
+            self.variables.extend(args["variablesToAdd"])
+        elif name == "ApplyStackBatch":
+            modules = [dict(index=i, moduleName="Assignment_" + str(i), nodeGuid="00000000-0000-0000-0000-%012x" % (i+1),
+                            target=row["name"], typePath=row["type"]["classStructOrEnum"]["refPath"],
+                            hlslExpression=row["hlslExpression"]) for i, row in enumerate(args["assignments"])]
+            result = dict(bApplied=True, error="", systemPath=self.system_path, emitterName=args["emitterName"],
+                          scriptName=args["scriptName"], bViewModelReleased=True, bTransactionClosed=True,
+                          bReadyForGarbageCollection=True, modules=modules)
+        elif name == "ReadSystemCompileDiagnostics":
+            result = dict(bSucceeded=True, systemPath=self.system_path, error="",
+                          compileState={"bIsCompiling": False, "bIsStale": False, "scripts": [],
+                                        "bHasErrors": False, "aggregateStatus": "UpToDate"})
+        elif name == "CreateNiagaraSystem":
             self.system_path = args["assetPath"] + "/" + args["assetName"] + "." + args["assetName"]
-        elif name == "GetSystemSummary":
-            result = {"emitters": [{"emitterName": "Fountain"}]}
-        elif name == "AddEmitter":
-            self.emitters[args["emitterName"]] = []
         elif name == "SetSystemData":
             self.system_data.update(json.loads(args["systemData"]["propertyValues"]))
         elif name == "GetSystemData":
@@ -61,38 +110,26 @@ class FakeMcp:
             result = {"propertyValues": json.dumps(data)}
         elif name == "AddModule":
             result = {"moduleName": args["moduleAsset"]["refPath"].rsplit("/", 1)[-1]}
-        elif name == "AddSetParametersModule":
-            result = {"moduleName": "Set_" + str(len(self.calls))}
-        elif name == "AddRenderer":
-            renderers = self.emitters[args["newRendererLocation"]["emitterName"]]
-            result = {"rendererIndex": len(renderers)}
-            renderers.append({})
-        elif name == "SetRendererData":
-            ref = args["renderer"]
-            self.emitters[ref["emitterName"]][ref["rendererIndex"]] = json.loads(args["rendererData"]["propertyValues"])
-        elif name == "GetEmitterTopology":
-            renderers = self.emitters[args["emitterRef"]["emitterName"]]
-            result = {"renderers": [{"rendererIndex": i,
-                "rendererClass": {"refPath": "/Script/Niagara.NiagaraMeshRendererProperties"}} for i in range(len(renderers))]}
         elif name == "GetRendererData":
             ref = args["rendererRef"]
-            data = copy.deepcopy(self.emitters[ref["emitterName"]][ref["rendererIndex"]])
-            data.setdefault("bIsEnabled", True)
-            for binding in N.EmitterMeshBuilder.BINDINGS:
-                data[binding]["bBindingExistsOnSource"] = not self.corrupt_binding
-                data[binding]["bIsCachedParticleValue"] = False
-            if self.corrupt_renderer:
-                data["SourceMode"] = "Particles"
-            result = {"propertyValues": json.dumps(data)}
+            result = {"propertyValues": self.renderer_data(ref["emitterName"], ref["rendererIndex"])}
         elif name == "ForceCompile":
             result = {"bForceCompileRequested": self.force_compile, "error": ""}
         elif name == "ReadSystemState":
             result = {"systemPath": self.system_path, "error": "", "bCompilationPending": False,
                       "bVMAttributesEqual": True, "bSystemValid": True, "bNativeReady": True}
-        elif name == "GetSystemCompileState":
-            result = {"bIsCompiling": False, "bIsStale": False, "scripts": [],
-                      "bHasErrors": False, "aggregateStatus": "UpToDate"}
+        elif name not in {"RemoveEmitter", "SetStackInputData"}:
+            raise AssertionError("未模拟的 Niagara 工具 " + name)
         return {"returnValue": result}
+
+    def renderer_data(self, emitter, index):
+        data = copy.deepcopy(self.emitters[emitter][index])
+        data.setdefault("bIsEnabled", True)
+        for binding in (*N.EmitterMeshBuilder.BINDINGS, "DynamicMaterialBinding"):
+            data[binding].update(bBindingExistsOnSource=not self.corrupt_binding, bIsCachedParticleValue=False)
+        if self.corrupt_renderer:
+            data["SourceMode"] = "Particles"
+        return json.dumps(data)
 
 
 class FakeSession:
@@ -132,9 +169,11 @@ class FakeReadMcp(FakeMcp):
             self.summary["emitters"].append({"emitterName": name, "bEnabled": True, "simTarget": "CPUSim"})
             self.emitters[name] = [N.EmitterMeshBuilder.renderer_properties(name, r) for r in spec["renderers"]]
             modules = []
-            for index, (parameter, kind, expression) in enumerate(spec["emitter_spawn"]):
+            updates = []
+            for index, (parameter, kind, expression) in enumerate(spec["emitter_spawn"] + spec["emitter_update"]):
                 module = "Assignment_" + str(index)
-                modules.append({"moduleName": module, "enabled": True, "bIsSetParametersModule": True,
+                group = modules if index < len(spec["emitter_spawn"]) else updates
+                group.append({"moduleName": module, "enabled": True, "bIsSetParametersModule": True,
                     "inputs": [{"name": parameter, "type": {"classStructOrEnum": {"refPath": N.TYPES[kind]}},
                                 "bIsDynamic": False}]})
                 self.module_values[(name, module)] = {"moduleName": module, "inputs": [{"name": parameter,
@@ -149,7 +188,7 @@ class FakeReadMcp(FakeMcp):
                 "emitterSpawnScript": {"scriptName": "EmitterSpawnScript", "modules": modules},
                 "emitterUpdateScript": {"scriptName": "EmitterUpdateScript", "modules": [{
                     "moduleName": "EmitterState", "enabled": True, "bIsSetParametersModule": False,
-                    "moduleScript": {"refPath": "/Niagara/Modules/Emitter/EmitterState.EmitterState"}, "inputs": state_inputs}]},
+                    "moduleScript": {"refPath": "/Niagara/Modules/Emitter/EmitterState.EmitterState"}, "inputs": state_inputs}, *updates]},
                 "particleSpawnScript": {"scriptName": "ParticleSpawnScript", "modules": []},
                 "particleUpdateScript": {"scriptName": "ParticleUpdateScript", "modules": []},
                 "renderers": [{"rendererIndex": i, "rendererClass": {
@@ -179,8 +218,8 @@ class FakeReadMcp(FakeMcp):
             result = self.module_values[(ref["emitterName"], ref["moduleName"])]
         elif name == "ReadSystemState":
             result = self.native_state
-        elif name == "GetSystemCompileState":
-            result = self.compile_state
+        elif name == "ReadSystemCompileDiagnostics":
+            result = dict(bSucceeded=True, error="", systemPath=self.system_path, compileState=self.compile_state)
         else:
             return super().tool(full_name, **args)
         self.calls.append((name, copy.deepcopy(args)))
@@ -347,16 +386,41 @@ class GhostTests(unittest.TestCase):
         return N.EmitterMeshBuilder(session).build_system(self.plan["system"], self.plan["specs"],
                                                         fixed_bounds=self.plan["fixed_bounds"])
 
+    def test_ghost_sampler_reads_independent_axes_from_mapped_header(self):
+        deps = G.read(DEPENDENCY)
+        entry = deps["-7386911108408904686"]
+        settings = G.read(G.IA.texture_settings_source(entry))
+        self.assertNotIn("m_WrapV", settings["m_TextureSettings"])
+        for pid, expected in zip(G.TEXTURE_PIDS, ("TA_Wrap", "TA_Wrap", "TA_Clamp")):
+            row = self.plan["imports"]["entries"][pid]
+            self.assertEqual((row["properties"]["AddressX"], row["properties"]["AddressY"]), (expected, expected))
+            self.assertEqual(Path(row["sampler_source"]["path"]), Path(deps[pid]["rawFile"]))
+
+        # 复用该版本头布局，仅改变独立的 V 槽，防止 U/V 恰好相同掩盖错误。
+        with tempfile.TemporaryDirectory() as directory:
+            raw = bytearray(Path(entry["rawFile"]).read_bytes())
+            name_end = 4 + ((len(entry["name"].encode()) + 3) & ~3)
+            raw[name_end + 64:name_end + 68] = (2).to_bytes(4, "little")
+            path = Path(directory) / "asymmetric.dat"
+            path.write_bytes(raw)
+            mapped = dict(entry, rawFile=str(path), rawSha256=G.sha(path))
+            G.IA.complete_streamed_texture_sampler(mapped, settings)
+            props = G.IA.texture_properties(settings)
+            self.assertEqual((props["AddressX"], props["AddressY"]), ("TA_Clamp", "TA_Mirror"))
+            path.write_bytes(raw[:-4])
+            with self.assertRaisesRegex(ValueError, "原头长度"):
+                G.IA.complete_streamed_texture_sampler(mapped, G.read(G.IA.texture_settings_source(entry)))
+
     def test_original_duplicate_slots_are_four_physical_renderers(self):
         p = self.plan
         self.assertEqual([(m["slot"], m["submesh"], m["pid"]) for m in p["source_contract"]["materials"]],
-                         [(0, 0, MP.MATERIAL_PID), (1, 0, MP.MATERIAL_PID)])
+                         [(0, 0, MP.GHOST), (1, 0, MP.GHOST)])
         session = FakeSession([p["system"]])
         self.emitter_build(session)
         actual = session.m.emitters["GhostMesh"]
         self.assertEqual(len(actual), 4)
         self.assertEqual([r["SortOrderHint"] for r in actual], [0, 1, 2, 3])
-        binding = p["material_plan"]["bindings"][MP.MATERIAL_PID]
+        binding = p["material_plan"]["bindings"][MP.GHOST]
         self.assertEqual([r["OverrideMaterials"][0]["ExplicitMat"].split(".")[0] for r in actual],
                          [binding["outline"], binding["surface"], binding["outline"], binding["surface"]])
         self.assertTrue(all(len(r["Meshes"]) == len(r["OverrideMaterials"]) == 1 and r["SourceMode"] == "Emitter" for r in actual))
@@ -367,7 +431,7 @@ class GhostTests(unittest.TestCase):
         calls = session.m.calls
         modules = [a["moduleAsset"]["refPath"] for n, a in calls if n == "AddModule"]
         self.assertEqual(modules, ["/Niagara/Modules/Emitter/EmitterState.EmitterState"])
-        parameters = [p["variable"]["name"] for n, a in calls if n == "AddSetParametersModule" for p in a["parameters"]]
+        parameters = [p["name"] for n, a in calls if n == "ApplyStackBatch" for p in a["assignments"]]
         self.assertTrue(parameters and all(n.startswith("Emitter.") for n in parameters))
         inputs = [a["stackInputRef"]["inputNameStack"][0] for n, a in calls if n == "SetStackInputData"]
         self.assertNotIn("Loop Duration", inputs)
@@ -475,15 +539,24 @@ class GhostTests(unittest.TestCase):
         self.assertEqual(set(material["textures"]), set(G.TEXTURE_PIDS))
         specs = material["materials"]
         self.assertTrue(all(m["properties"]["BlendMode"] == "BLEND_Masked" and m["properties"]["bUsedWithNiagaraMeshParticles"] for m in specs))
-        self.assertEqual(specs[0]["shader"]["coverage"], specs[1]["shader"]["coverage"])
+        for spec in specs:
+            self.assertIn("CoverageOut", spec["shader"]["outputs"])
+            self.assertIn("CoverageOut=Coverage;", spec["shader"]["code"])
+            self.assertEqual(spec["properties"]["OpacityMaskClipValue"], .5)
+            self.assertFalse(spec["properties"]["bDisableDepthTest"])
+        self.assertEqual(specs[0]["source_render_state"], specs[1]["source_render_state"])
         self.assertGreater(max(specs[0]["params"]["_ScreenColor"]["value"]), 1)
-        self.assertEqual(specs[1]["shader"]["face_mask"], "back_faces_only")
+        self.assertEqual(specs[1]["face_mask"], "back")
         self.assertFalse(material["equivalence"]["source_runtime_certified"])
-        self.assertEqual(material["equivalence"]["source_outputs"], ["SV_Target0", "SV_Target1", "SV_Target2", "SV_Target3"])
+        program = specs[0]["shader"]["source"]
+        with Path(program["path"]).open(encoding="utf-8-sig") as shader:
+            header = list(islice(shader, program["line_start"] - 1, program["line_start"] + 145))
+        self.assertEqual([line.strip() for line in header if line.strip().startswith("dcl_output ")],
+                         ["dcl_output o%d.xyzw" % i for i in range(4)])
 
     def test_dynamic_source_inputs_are_not_public_ue_tuning(self):
         for name in ("_EntityInfo", "_DitherEffectAlpha", "Fade", "RootTRS", "Age", "Stop"):
-            with self.subTest(name=name), self.assertRaisesRegex(ValueError, "禁止"):
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, "完整Nap配置"):
                 G.make_plan(PREFAB, DEPENDENCY, revision="test", ue_parameters={name: 0})
 
     def test_cli_rejects_legacy_source_and_has_no_apply_mode(self):
@@ -498,18 +571,28 @@ class GhostTests(unittest.TestCase):
         self.assertEqual(refused.returncode, 2)
         self.assertIn(b"unrecognized arguments", refused.stderr)
 
-    def test_existing_niagara_paths_unchanged_except_optional_save_gate(self):
-        baseline = ROOT / "Saved/Codex/PyriosGhostResourceTools_20261010_R1/baseline/zzz_fx_niagara_ue.py"
-        old = ast.parse(baseline.read_text(encoding="utf-8-sig"))
-        new = ast.parse(Path(N.__file__).read_text(encoding="utf-8-sig"))
-        new.body = [n for n in new.body if not isinstance(n, ast.ClassDef) or n.name != "EmitterMeshBuilder"]
-        builder = next(n for n in new.body if isinstance(n, ast.ClassDef) and n.name == "NiagaraBuilder")
-        finish = next(n for n in builder.body if isinstance(n, ast.FunctionDef) and n.name == "finish_compile")
-        finish.args.args.pop()
-        finish.args.defaults.pop()
-        finish.body = [n for n in finish.body if not isinstance(n, ast.If) or not isinstance(n.test, ast.Compare)
-                       or not isinstance(n.test.left, ast.Name) or n.test.left.id != "before_save"]
-        self.assertEqual(ast.dump(new, include_attributes=False), ast.dump(old, include_attributes=False))
+    def test_shared_compile_saves_owned_system_only_after_optional_check(self):
+        path = self.plan["system"]
+        for gate in ("absent", "accept", "reject"):
+            with self.subTest(gate=gate):
+                session = FakeSession([path])
+                builder = N.NiagaraBuilder(session, unreal=session.m.native)
+                session.created_asset(path)
+                session.m.system_path = path + "." + path.rsplit("/", 1)[1]
+                builder.sref = {"refPath": session.m.system_path}
+                def check():
+                    self.assertFalse(session.saved)
+                    self.assertIn("ReadSystemState", [name for name, _ in session.m.calls])
+                    if gate == "reject":
+                        raise ValueError("拒绝保存")
+                if gate == "reject":
+                    with self.assertRaisesRegex(ValueError, "拒绝保存"):
+                        builder.finish_compile(path, before_save=check)
+                    self.assertFalse(session.saved)
+                else:
+                    kwargs = {"before_save": check} if gate == "accept" else {}
+                    builder.finish_compile(path, **kwargs)
+                    self.assertEqual(session.saved, {path})
 
 
 class MeshSourceTests(unittest.TestCase):

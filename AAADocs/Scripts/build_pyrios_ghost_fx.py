@@ -55,6 +55,15 @@ class NativeToolsets:
             raise ValueError("残影原生构建需要标准 Editor 的公开 ToolsetRegistry")
         self.native, self.pending = unreal, None
 
+    def run_native_sync(self, label, operation):
+        if self.pending is not None:
+            raise RuntimeError("原生工具尚未完成：" + label)
+        return operation()
+
+    def is_niagara_authoring_batch_active(self):
+        # 此宿主逐次同步提交，不会打开 Niagara 组装批次。
+        return False
+
     def tool(self, tool_identifier, /, **arguments):
         if self.pending is not None:
             raise RuntimeError("残影上一次原生工具仍由本 session 持有；不重试或叠加调用")
@@ -79,7 +88,7 @@ class ReadOnlyToolsets:
     TOOLS = {NS + name for name in (
         "GetSystemSummary", "GetSystemData", "GetEmitterTopology", "GetEmitterData",
         "GetModuleInputValues", "GetRendererData", "GetSystemCompileState")}
-    TOOLS |= {COMPILE + "ReadSystemState", AS + "exists",
+    TOOLS |= {COMPILE + "ReadSystemState", COMPILE + "ReadSystemCompileDiagnostics", AS + "exists",
               "EditorToolset.EditorAppToolset.IsPIERunning"}
 
     def __init__(self, client):

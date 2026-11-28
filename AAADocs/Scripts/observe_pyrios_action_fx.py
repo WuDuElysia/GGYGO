@@ -333,7 +333,7 @@ class Run:
                         raise RuntimeError("原 GA 观察未能安装")
                     s["observers"].append(obs)
                     s["observed_steps"].add(index)
-                if section == "Main" and (s["name"] != "Combo" or index > 0):
+                if section == "Main":
                     for threshold in CAPTURE_TIMES:
                         key = (index, threshold)
                         if position >= threshold and key not in s["captures"]:
@@ -462,13 +462,12 @@ class Run:
         s = self.s
         final = s.get("action_observation", {})
         expected_steps = set(range(self.last_combo_step + 1)) if s["name"] == "Combo" else {0}
-        expected_hits = set(range(1, self.last_combo_step + 1)) if s["name"] == "Combo" else {0}
         s["checks"] = {
             "montage_steps_observed": s["observed_steps"] == expected_steps,
             "natural_end": final.get("natural_completion_history_complete", False),
             "not_cancelled": final.get("original_ga_full_exit_completed", False)
                              and not final.get("original_exit_cancelled", True),
-            "hit_steps": expected_hits <= {hit["step"] for hit in s["hits"] if hit["new"] < hit["old"]},
+            "hit_steps": expected_steps <= {hit["step"] for hit in s["hits"] if hit["new"] < hit["old"]},
             "fx_components_observed": bool(s["niagara"]),
             "audio_components_observed": bool(s["audio"]),
             "screenshots_written": bool(s["images"]) and all(i.get("verified") for i in s["images"]),

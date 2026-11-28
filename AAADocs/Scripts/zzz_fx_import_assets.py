@@ -11,6 +11,7 @@ import re
 import json
 import math
 import sys
+import struct
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -58,6 +59,49 @@ def texture_settings_source(entry):
             raise ValueError("Conflicting or invalid texture settings sources for PathID " + str(entry.get("pathID")))
         return metadata
     return source_file(entry, ".json")
+
+
+def complete_streamed_texture_sampler(entry, settings):
+    """2019.4.40f1 的旧 JSON 导出器只写出 U。按该版本 Windows 流式 Texture2D 的原头读取各轴。"""
+    source = settings.get("sourceMetadata", {})
+    sampler = settings["m_TextureSettings"]
+    if ("m_WrapV" in sampler or not entry.get("rawFile")
+            or source.get("version") != [2019, 4, 40, 1, 2] or source.get("platform") != 19):
+        return None
+    if any(source.get(key) != entry[key] for key in ("block", "cab", "pathID", "type")):
+        raise ValueError("纹理导出身份与原头映射不符")
+    raw_path = Path(entry["rawFile"])
+    name = entry["name"].encode("utf8")
+    stream = settings["m_StreamData"]
+    archive = stream["path"].encode("utf8")
+    # 两个对齐字符串之间依次是图像布局、GLTextureSettings 和流描述。
+    image_layout = struct.Struct("<i?3x5i4?i?3x2i")
+    sampling = struct.Struct("<iifiii")
+    stream_layout = struct.Struct("<iiiIII")
+    name_end = 4 + ((len(name) + 3) & ~3)
+    stream_start = name_end + image_layout.size + sampling.size
+    expected_size = stream_start + stream_layout.size + 4 + ((len(archive) + 3) & ~3)
+    if raw_path.stat().st_size != expected_size:
+        raise ValueError("不支持的流式 Texture2D 原头长度")
+    raw = raw_path.read_bytes()
+    if (raw[:4 + len(name)] != struct.pack("<i", len(name)) + name
+            or hashlib.sha256(raw).hexdigest() != entry["rawSha256"].lower()):
+        raise ValueError("纹理原头与依赖映射不符")
+    layout = image_layout.unpack_from(raw, name_end)
+    _, color_space, inline_size, _, offset, size = stream_layout.unpack_from(raw, stream_start)
+    path_start = stream_start + stream_layout.size
+    if (layout[2:4] != (settings["m_Width"], settings["m_Height"])
+            or layout[5:7] != (settings["m_TextureFormat"], settings["m_MipCount"])
+            or layout[-2:] != (1, 2) or color_space != settings["m_ColorSpace"] or inline_size
+            or (offset, size) != (stream["offset"], stream["size"])
+            or raw[path_start:path_start + 4 + len(archive)] != struct.pack("<i", len(archive)) + archive):
+        raise ValueError("流式纹理原头与导出元数据不符")
+    keys = ("m_FilterMode", "m_Aniso", "m_MipBias", "m_WrapMode", "m_WrapV", "m_WrapW")
+    original = dict(zip(keys, sampling.unpack_from(raw, name_end + image_layout.size)))
+    if any(key in sampler and sampler[key] != value for key, value in original.items()):
+        raise ValueError("纹理原头与导出采样设置冲突")
+    sampler.update(original)
+    return {"path": str(raw_path.resolve()), "size": len(raw), "sha256": entry["rawSha256"].lower()}
 
 
 def texture_properties(settings, *, unity_version=None):
@@ -120,6 +164,7 @@ def plan_imports(deps_paths, revision="", selected_pids=None, mesh_sources=None)
                 half_texture = settings.get("m_TextureFormat") == 17
                 source = source_file(entry, ".exr" if half_texture else ".png")
                 try:
+                    sampler_source = complete_streamed_texture_sampler(entry, settings)
                     props = texture_properties(settings, unity_version=entry.get("unityVersion"))
                 except (ValueError, KeyError) as error:
                     raise ValueError("TexturePID=%s Source=%s: %s" % (pid, settings_path, error)) from error
@@ -140,7 +185,8 @@ def plan_imports(deps_paths, revision="", selected_pids=None, mesh_sources=None)
                 settings_source = {"path": str(settings_path.resolve()), "size": len(settings_raw),
                                    "sha256": hashlib.sha256(settings_raw).hexdigest()}
                 texture_contract = {"source_mip_count": settings["m_MipCount"],
-                    "source_unity_version": entry.get("unityVersion"),
+                    "source_unity_version": (settings["sourceMetadata"].get("unityVersion") if sampler_source
+                                             else entry.get("unityVersion")),
                     "wrap_layout": "NativeIndependentUV" if "m_WrapV" in settings["m_TextureSettings"] else "DeclaredPre2017SharedWrap",
                     "source_texture_settings": settings["m_TextureSettings"],
                     "w_axis": "PreservedSourceSettingUnusedByTexture2D",
@@ -191,6 +237,8 @@ def plan_imports(deps_paths, revision="", selected_pids=None, mesh_sources=None)
                     "name": name, "directory": directory, "properties": props, "type": entry["type"]}
             if settings_source is not None:
                 item.update(settings_source=settings_source, source_texture_contract=texture_contract)
+                if sampler_source is not None:
+                    item["sampler_source"] = sampler_source
             if mesh_source is not None:
                 item.update(source_mesh_json=mesh_source, source_geometry_contract={"mesh": {
                     "pid": pid, "source_json": mesh_source["path"], "vertex_count": mesh_data["m_VertexCount"]}},
@@ -270,8 +318,9 @@ def _validate_import_sources(plan):
             data = Path(mesh_source["path"]).read_bytes()
             if len(data) != mesh_source["size"] or hashlib.sha256(data).hexdigest() != mesh_source["sha256"]:
                 raise ValueError("FX source TBN JSON changed after planning: " + mesh_source["path"])
-        settings_source = item.get("settings_source")
-        if settings_source is not None:
+        for settings_source in (item.get("settings_source"), item.get("sampler_source")):
+            if settings_source is None:
+                continue
             data = Path(settings_source["path"]).read_bytes()
             if len(data) != settings_source["size"] or hashlib.sha256(data).hexdigest() != settings_source["sha256"]:
                 raise ValueError("FX texture settings changed after planning: " + settings_source["path"])

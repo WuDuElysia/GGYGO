@@ -159,9 +159,8 @@ class NiagaraBuilder:
             raise RuntimeError("不能保活本批创建的准确Niagara System：" + path)
         self.authored_system = system
 
-    def configure_wpo_bounds(self, specs):
-        radii = [renderer.get("additional_wpo_bounds_radius_cm", 0.0) for spec in specs
-                 for renderer in [spec["renderer"], *spec.get("additional_renderers", [])]]
+    def configure_wpo_bounds(self, renderers):
+        radii = [renderer.get("additional_wpo_bounds_radius_cm", 0.0) for renderer in renderers]
         if any(type(radius) not in (int, float) or not math.isfinite(radius) or radius < 0.0 for radius in radii):
             raise ValueError("WPO世界空间包围半径必须是有限非负厘米值")
         radius = max(radii, default=0.0)
@@ -2161,7 +2160,8 @@ class NiagaraBuilder:
                         self._verify_authoring_compilation_settings(self._author_tool(
                             COMPILE+"ConfigureAuthoringCompilation", system=self.sref,
                             bUseRapidIterationParameters=True)["returnValue"])
-                        wpo_radius = self.configure_wpo_bounds(specs)
+                        wpo_radius = self.configure_wpo_bounds(renderer for spec in specs
+                            for renderer in (spec["renderer"], *spec.get("additional_renderers", [])))
                         for e in self.ns("GetSystemSummary", system=self.sref)["emitters"]:
                             self.ns("RemoveEmitter", emitterToRemove=self.loc(e["emitterName"]))
                         if any(spec.get("source_mode") == "Emitter" for spec in specs):
@@ -2436,6 +2436,7 @@ class EmitterMeshBuilder(NiagaraBuilder):
             super().__init__(session, unreal=session.m.native)
         else:
             self.session = None
+            self.authored_system = None
             self.m = mcp
 
     @classmethod
@@ -2643,7 +2644,7 @@ class EmitterMeshBuilder(NiagaraBuilder):
         self.session.created_asset(path)
         self.sref = {"refPath": path + "." + asset_name}
         self._hold_authored_system(path)
-        wpo_radius = self.configure_wpo_bounds(specs)
+        wpo_radius = self.configure_wpo_bounds(renderer for spec in specs for renderer in spec["renderers"])
         for emitter in self.ns("GetSystemSummary", system=self.sref)["emitters"]:
             self.ns("RemoveEmitter", emitterToRemove=self.loc(emitter["emitterName"]))
         # 原生 Emitter Mesh 不创建粒子 bounds calculator；必须提供真实固定范围。
