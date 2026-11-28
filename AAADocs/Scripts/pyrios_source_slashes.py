@@ -196,7 +196,7 @@ def opening_edge_material(source):
 float luma = dot(max(Edge, 0), float3(.2126, .7152, .0722));
 float pulse = smoothstep(.005, .17, Age) * (1 - smoothstep(.46, .93, Age));
 float crest = luma * smoothstep(.04, 1.1, luma);
-return Edge + crest * pulse * float3(.55, 6.5, 172.0);
+return Edge + crest * pulse * float3(.85, 11.0, 245.0);
 """
     origin = editor.get_metadata_tag(mat, 'OpeningEdgeSource')
     dirty = False
@@ -252,12 +252,24 @@ def slash_material(system_name, emitter, source):
             source, 'MI_Pyrios_OpeningGlint', vectors={'_MultiplyParticleColor': ue.LinearColor(13, 21, 37, 1)},
             scalars={'_AlphaFade': .67, '_PowerRGB': .91})
     if opening and emitter == 'M00_root_Trail_rot_bloom':
-        # 沿用原时序和溶解图。展宽径向采样，让外层蓝光向刃面两侧逐渐衰减。
+        # 白芯和刃纹由独立刀面绘制。仅展宽软遮罩并提高光晕层的自发光。
         return configure_slash_material(
             source, 'MI_Pyrios_OpeningBloom',
-            vectors={'_MainTex_ST': ue.LinearColor(1.3, .78, -.05, .11),
-                     '_MultiplyParticleColor': ue.LinearColor(2.5, 8.5, 43, 1)},
-            scalars={'_PowerRGB': 1.45, '_PowerAlpha': 1.5})
+            vectors={'_MainTex_ST': ue.LinearColor(1.3, .70, -.05, .15),
+                     '_MultiplyParticleColor': ue.LinearColor(4.2, 14, 70, 1)},
+            scalars={'_PowerRGB': 1.34, '_PowerAlpha': 1.38})
+
+    if '_bloom' in emitter:
+        edit = ue.MaterialEditingLibrary
+        tint = edit.get_material_instance_vector_parameter_value(source, '_MultiplyParticleColor')
+        falloff = edit.get_material_instance_scalar_parameter_value(source, '_PowerAlpha')
+        # 上挑、空间斩和下劈各自继承原图纹、透明度与粒子寿命，峰值沿各自的刀弧展开。
+        uv = edit.get_material_instance_vector_parameter_value(source, '_MainTex_ST')
+        return configure_slash_material(
+            source, 'MI_Pyrios_ComboBloom_' + source.get_name().rsplit('_', 1)[-1],
+            vectors={'_MultiplyParticleColor': ue.LinearColor(tint.r * 1.7, tint.g * 1.95, tint.b * 1.8, tint.a),
+                     '_MainTex_ST': ue.LinearColor(uv.r, uv.g * .88, uv.b, uv.a + uv.g * .06)},
+            scalars={'_PowerAlpha': falloff * .84})
 
     name = FACE_MATERIALS.get(source.get_name())
     if not name:

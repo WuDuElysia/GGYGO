@@ -13,7 +13,7 @@ from zzz_fx_niagara_ue import EMPTY_EMITTER, NiagaraBuilder
 
 SCARS = 'Pyrios_AftercutMarks'
 VERSION = 'reference-diagonals-ground-7'
-SURFACE_VERSION = 'etched-ridge-7'
+SURFACE_VERSION = 'etched-ridge-8'
 # Normal03 的 03/09_MeleeTrail 原 andi_main 刀面，以及三次 MeleeTrail 共用的 light_edge 与高光遮罩。
 TEXTURES = {'Face': 'Eff_MeleeTrail_239_4f346e732ad4', 'Edge': 'Eff_MeleeTrail_089_LYX_01_2d474876c2a0',
             'Highlight': 'Eff_MeleeTrail_116_YZ_06_f2c948b7ce36'}
@@ -58,7 +58,9 @@ float grain = .38+.62*saturate(.65*profile+.35*gloss);
 float ridge = spine*grain*(.62+.38*wall);
 float glint = ridge*head*(.52+.48*grazing);
 Coverage = cut*taper*saturate(.89*spine+.30*shoulder*mass+.12*rim);
-return cut*taper*(color*(.40*shoulder+.31*spine)
+// 光晕随笔锋掠过，刃心仍保留刻纹和暗槽。
+float halo = max(shoulder-spine,0)*grain*(.35+.65*head);
+return cut*taper*(halo*float3(.16,.68,2.8)+color*(.40*shoulder+.31*spine)
     +ridge*float3(.13,.52,2.65)+glint*float3(2.55,3.45,4.4));
 """
 
@@ -71,7 +73,7 @@ def scar_material(directory):
         mat = ue.load_asset(path)
         if editor.get_metadata_tag(mat,'Pyrios.Aftercut') == SURFACE_VERSION:
             return mat
-        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('painted-spine-6', 'three-incisions-1', 'source-edge-1', 'refracted-edge-1', 'refracted-edge-2', 'source-lamella-1', 'source-lamella-2', 'fluted-scar-1','rift-facets-2','slow-reference-edge-1','slow-reference-edge-2','three-incisions-2','reference-spine-1','travelling-spine-2','brushed-spine-3','brushed-spine-4','painted-spine-5','reference-diagonals-5', VERSION):
+        if editor.get_metadata_tag(mat,'Pyrios.Aftercut') not in ('etched-ridge-7', 'painted-spine-6', 'three-incisions-1', 'source-edge-1', 'refracted-edge-1', 'refracted-edge-2', 'source-lamella-1', 'source-lamella-2', 'fluted-scar-1','rift-facets-2','slow-reference-edge-1','slow-reference-edge-2','three-incisions-2','reference-spine-1','travelling-spine-2','brushed-spine-3','brushed-spine-4','painted-spine-5','reference-diagonals-5', VERSION):
             raise RuntimeError('已有未识别的斩痕材质 '+path)
         edit.delete_all_material_expressions(mat)
     else:
