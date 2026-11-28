@@ -230,16 +230,29 @@ float phase = Emitter.Age;
         result = LIB.authoring_set_renderer_data(system, emitter, sprite.renderer_index, json.dumps(props))
         require(result.succeeded, result.error)
 
+def system_emitters(system):
+    summary = LIB.authoring_get_system_summary(system)
+    if not summary.succeeded:
+        raise RuntimeError(f'{system.get_path_name()} 查询发射器失败：{summary.error}')
+    return summary.emitters
+
+
 def style_existing(system, mat, live):
     changed=False
-    for em in LIB.authoring_get_system_summary(system).emitters:
+    for em in system_emitters(system):
         name=em.emitter_name
         if name in (EMITTER, FINISHER_BLADE, SCARS) or name in SOURCE_SURFACES.get(system.get_name(), {}):
             continue
         # 固定的可见刀弧由活刃带替代。签名场仍由原动作场配置验证并消费。
         suppress=live and (name.startswith('M00_root_Trail_rot_') or name in SECONDARY_CUT or name in AIRBORNE_SMOKE)
-        for renderer in LIB.authoring_get_renderer_identities(system,name).renderers:
-            old=json.loads(LIB.authoring_get_renderer_data(system,name,renderer.renderer_index).property_values)
+        identities = LIB.authoring_get_renderer_identities(system, name)
+        if not identities.succeeded:
+            raise RuntimeError(f'{system.get_path_name()} / {name} 查询渲染器失败：{identities.error}')
+        for renderer in identities.renderers:
+            data = LIB.authoring_get_renderer_data(system, name, renderer.renderer_index)
+            if not data.succeeded:
+                raise RuntimeError(f'{system.get_path_name()} / {name}[{renderer.renderer_index}] 读取渲染器失败：{data.error}')
+            old = json.loads(data.property_values)
             update={}
             if live and 'SignedField' in renderer.renderer_class:
                 if name == 'M00_root_Trail_rot_Main_Distor' and old.get('bIsEnabled') is False:
@@ -404,7 +417,7 @@ def build():
             installed=align_slash_directions(system,tool,assign) or installed
             installed=apply_combo_profile(system,tool,assign) or installed
             installed=fit_blade_meshes(system) or installed
-            old={row.emitter_name for row in LIB.authoring_get_system_summary(system).emitters}
+            old={row.emitter_name for row in system_emitters(system)}
             if ARC in old:
                 installed = disable_replaced_surface(system, ARC, 'M_Pyrios_OpeningCrescent') or installed
             if EMITTER in old:
@@ -424,7 +437,7 @@ def build():
             if apply_blade_volume(system,EMITTER,field) or restored:
                 finish(system)
             continue
-        existing = [entry.emitter_name for entry in LIB.authoring_get_system_summary(system).emitters]
+        existing = [entry.emitter_name for entry in system_emitters(system)]
         if EMITTER in existing:
             require(EDITOR.get_metadata_tag(system,STAMP) in ('live-v1','live-v2','live-v3','live-v4','live-v5','prism-v1','prism-v2','weapon-bevel-v3','weapon-filament-v4','weapon-filament-v5'), '已有同名刀带且来源不明')
             tool('NiagaraToolsets.NiagaraToolset_System.RemoveEmitter',emitterRef={'system':ref(system),'emitterName':EMITTER})
@@ -446,7 +459,7 @@ def build():
         ground_or_sweep = refine_normal03(system, DAWN, tool, target, assign, weapon_frame)
         weapon_added = False
         if '_Unit00_' in system.get_name() and EDITOR.get_metadata_tag(system,'Pyrios.Normal03MultiCut') != CUT_VERSION:
-            existing = {entry.emitter_name for entry in LIB.authoring_get_system_summary(system).emitters}
+            existing = {entry.emitter_name for entry in system_emitters(system)}
             for previous in ('Pyrios_FinisherBlade', EMITTER, FINISHER_BLADE, SCARS):
                 if previous in existing:
                     require(EDITOR.get_metadata_tag(system,STAMP) in ('weapon-bevel-v3','weapon-filament-v4',SYSTEM_VERSION),'三段刀带来源不符 '+system.get_name())

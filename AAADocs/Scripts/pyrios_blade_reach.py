@@ -88,10 +88,9 @@ def fit_blade_meshes(system):
         for identity in identities.renderers:
             if not identity.renderer_class.endswith(('NiagaraMeshRendererProperties', 'GGYGOSignedFieldMeshRendererProperties')):
                 continue
-            data = LIB.authoring_get_renderer_data(system, name, identity.renderer_index)
-            if not data.succeeded:
-                raise RuntimeError(data.error)
-            obj = ue.find_object(None, data.renderer_path)
+            obj = ue.find_object(None, identity.renderer_path)
+            if not obj:
+                raise RuntimeError(f'{key}/{name} 找不到渲染器 {identity.renderer_path}')
             slots = list(obj.get_editor_property('meshes'))
             if len(slots) != 1 or not slots[0].mesh:
                 raise RuntimeError('攻击刀面缺少唯一网格 ' + name)

@@ -136,6 +136,27 @@ FACE_MATERIALS = {
 }
 
 
+def save_authored_material(asset, changed):
+    """只有制作改动或上次提交失败的材质需要写盘；等值的内存参数不能证明保存成功。"""
+    editor = ue.EditorAssetLibrary
+    retry_tag = 'Pyrios.MaterialWriteFailed'
+    pending = editor.get_metadata_tag(asset, retry_tag) == '1'
+    if not changed and not pending:
+        return
+    try:
+        if isinstance(asset, ue.Material):
+            errors = ue.MaterialEditingLibrary.recompile_material(asset)
+            if errors:
+                raise RuntimeError(f'{asset.get_path_name()} 编译失败\n' + '\n'.join(errors))
+        if pending:
+            editor.remove_metadata_tag(asset, retry_tag)
+        if not editor.save_loaded_asset(asset, False):
+            raise RuntimeError('刀光材质保存失败 ' + asset.get_path_name())
+    except Exception:
+        editor.set_metadata_tag(asset, retry_tag, '1')
+        raise
+
+
 def configure_slash_material(source, name, *, textures=None, vectors=None, scalars=None):
     directory = '/Game/Characters/Player/Pyrios/FX/Dawn'
     editor = ue.EditorAssetLibrary
@@ -169,8 +190,7 @@ def configure_slash_material(source, name, *, textures=None, vectors=None, scala
                    edit.set_material_instance_vector_parameter_value, vectors, eq)
     dirty |= apply(edit.get_material_instance_scalar_parameter_value,
                    edit.set_material_instance_scalar_parameter_value, scalars, lambda a, b: abs(a - b) < .0001)
-    if (created or dirty) and not editor.save_loaded_asset(instance, False):
-        raise RuntimeError('刀光材质保存失败 ' + path)
+    save_authored_material(instance, created or dirty)
     return instance
 
 
@@ -224,22 +244,18 @@ return Edge * (.18 + .82 * along)
     elif node.get_editor_property('code') != code:
         node.set_editor_property('code', code)
         dirty = True
-    if dirty:
-        if edit.recompile_material(mat):
-            raise RuntimeError('首刀刃光着色图编译失败')
-        if not editor.save_loaded_asset(mat, False):
-            raise RuntimeError('首刀刃光着色图保存失败')
+    save_authored_material(mat, dirty)
 
     instance = (ue.load_asset(instance_path) if editor.does_asset_exist(instance_path)
                 else editor.duplicate_asset(source.get_path_name(), instance_path))
     if not isinstance(instance, ue.MaterialInstanceConstant):
         raise RuntimeError('首刀原刃缘实例复制失败')
-    if instance.parent == source.parent:
+    parent_changed = instance.parent == source.parent
+    if parent_changed:
         edit.set_material_instance_parent(instance, mat)
-        if not editor.save_loaded_asset(instance, False):
-            raise RuntimeError('首刀刃缘实例保存失败')
     if instance.parent != mat:
         raise RuntimeError('首刀刃缘实例来源不符')
+    save_authored_material(instance, parent_changed)
     # 固定原贴图上沿，向刃腹多铺一层浅青过渡；保留原高亮色阶给远处蓝晕供光。
     return configure_slash_material(
         mat, instance.get_name(), vectors={'_MainTex_ST': ue.LinearColor(1.1, 1.28, -.15, -.28)},
@@ -440,16 +456,15 @@ return (crest * float3(.11, .20, 1.0) * (.12 + .88 * lead)
         if not mat.get_editor_property('two_sided'):
             mat.set_editor_property('two_sided', True)
             dirty = True
-    if dirty and (edit.recompile_material(mat) or not editor.save_loaded_asset(mat, False)):
-        raise RuntimeError('首刀尾纹编译或保存失败 ' + path)
+    save_authored_material(mat, dirty)
     instance = (ue.load_asset(instance_path) if editor.does_asset_exist(instance_path)
                 else editor.duplicate_asset(source.get_path_name(), instance_path))
     if not isinstance(instance, ue.MaterialInstanceConstant) or instance.parent not in (source.parent, mat):
         raise RuntimeError('首刀尾纹实例来源不符 ' + instance_path)
-    if instance.parent != mat:
+    parent_changed = instance.parent != mat
+    if parent_changed:
         edit.set_material_instance_parent(instance, mat)
-        if not editor.save_loaded_asset(instance, False):
-            raise RuntimeError('首刀尾纹实例保存失败 ' + instance_path)
+    save_authored_material(instance, parent_changed)
     return instance
 
 
