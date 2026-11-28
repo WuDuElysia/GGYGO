@@ -10,10 +10,10 @@ from zzz_fx_niagara_ue import NiagaraBuilder, NS
 # 首刀剑尖在角色局部空间扫过的平面和朝向，由实机慢放采样。
 # 时间从刀面爆发开始，以角度补偿原刀面网格自身的旋转。所有描边、烟和折射一起转。
 FIRST_BURST = .083
-# 近侧刀弧用余弦缓入缓出，峰值抬高 76 cm 掠过肩前。所有刀纹、软光和折射共用同一位移。
-FIRST_CENTER = ('Particles.Position + float3(-28,54,2 + 19'
-                ' * (1 - cos(3.141593 * saturate((Particles.Age-.001)/.017)))'
-                ' * (1 + cos(3.141593 * saturate((Particles.Age-.033)/.025))))')
+# 弧心取自横斩剑尖轨迹的拟合平面。剑尖在出刀、横扫和收刀时离弧心约 150、200、230 cm。
+FIRST_CENTER = 'Particles.Position + float3(-28,54,2)'
+FIRST_SCALE = ('Particles.Scale * (.70 + .13*saturate((Particles.Age-.005)/.015)'
+               ' + .16*saturate((Particles.Age-.045)/.025))')
 FIRST_SWING = (
     (0, 120), (.009, 137), (.018, 171), (.030, 230), (.037, 279),
     (.054, 414), (.062, 468), (.065, 480), (.087, 497), (.112, 506),
@@ -80,16 +80,16 @@ def apply_combo_profile(system, tool, assign):
     first = key.startswith('NS_Pyrios_Normal01_')
     second = key.startswith('NS_Pyrios_Normal02_')
     source = {*SOURCE_SURFACES.get(key, {}), *SOURCE_FIELDS.get(key, ())}
-    stamp = 'film-combo-4' if first else 'film-combo-1'
+    stamp = 'film-combo-5' if first else 'film-combo-1'
     previous = ue.EditorAssetLibrary.get_metadata_tag(system, tag)
     if previous == stamp:
         return False
-    if first and previous in ('film-combo-1', 'film-combo-2', 'film-combo-3'):
-        targets = {'Particles.FilmBladeCenter': FIRST_CENTER}
-        if previous != 'film-combo-3':
+    if first and previous in ('film-combo-1', 'film-combo-2', 'film-combo-3', 'film-combo-4'):
+        targets = {'Particles.FilmBladeCenter': FIRST_CENTER, 'Particles.FilmBladeScale': FIRST_SCALE}
+        if previous in ('film-combo-1', 'film-combo-2'):
             targets['Particles.FilmBladeRotation'] = first_blade_rotation()
         for emitter in sorted(source):
-            if previous != 'film-combo-3':
+            if previous in ('film-combo-1', 'film-combo-2'):
                 set_slash_burst(system, emitter, tool, FIRST_BURST)
             for stage in ('ParticleSpawnScript', 'ParticleUpdateScript'):
                 script = dict(system={'refPath': system.get_path_name()}, emitterName=emitter, scriptName=stage)
@@ -103,8 +103,10 @@ def apply_combo_profile(system, tool, assign):
         bindings = {}
         if name in source and (first or second or name.startswith('M14_root_Trail_rot_')):
             # 使用发射器原局部空间，所有色层和折射场共用同一尺寸和起点。
-            scale = 1.48 if first else 1.40 if second else 1.23
-            values['FilmBladeScale'] = ('Vector', f'Particles.Scale * {scale}')
+            scale = 'Particles.Scale * 1.40' if second else 'Particles.Scale * 1.23'
+            if first:
+                scale = FIRST_SCALE
+            values['FilmBladeScale'] = ('Vector', scale)
             bindings['ScaleBinding'] = 'FilmBladeScale'
             if first or second:
                 center = FIRST_CENTER if first else 'Particles.Position + float3(0,18,-42)'
